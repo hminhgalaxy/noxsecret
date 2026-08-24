@@ -1,0 +1,3671 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="theme-color" content="#02040A">
+
+<title>NOX GALAXY ASCENSION OS 2.0 — Next-Gen Cosmic AI Operating System</title>
+<meta name="description" content="NOX GALAXY ASCENSION OS 2.0 — Trung tâm điều hành trí tuệ nhân tạo GalaxyZ 3 tầng, Roblox Lua Script Vault, APK & IPA Direct Link không quảng cáo.">
+<meta name="robots" content="index, follow">
+
+<!-- Cosmic Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;0,800;1,400&family=Orbitron:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;900&display=swap" rel="stylesheet">
+
+<!-- Cloud Infrastructure SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://js.puter.com/v2/"></script>
+
+<style>
+/* ==========================================================================
+   1. DESIGN SYSTEM & COSMIC GLASS 2.0 TOKENS
+   ========================================================================== */
+:root {
+  --bg-void: #02040A;
+  --bg-deep: #050816;
+  --bg-nebula: #08111F;
+  --bg-input: rgba(4, 7, 18, 0.94);
+
+  /* Glass Layers */
+  --glass-1: rgba(10, 18, 38, 0.68);
+  --glass-2: rgba(12, 22, 48, 0.82);
+  --glass-3: rgba(16, 28, 58, 0.92);
+  --glass-core: rgba(8, 14, 32, 0.98);
+
+  --border-subtle: rgba(120, 180, 255, 0.08);
+  --border-glass: rgba(120, 180, 255, 0.14);
+  --border-focus: rgba(0, 245, 160, 0.65);
+  --border-hover: rgba(0, 217, 245, 0.45);
+
+  --text-main: #F8FAFC;
+  --text-sub: #94A3B8;
+  --text-muted: #64748B;
+
+  /* Accent Lights */
+  --accent-cyan: #00D9F5;
+  --accent-cyan-glow: rgba(0, 217, 245, 0.35);
+  --accent-quantum: #00F5A0;
+  --accent-quantum-glow: rgba(0, 245, 160, 0.4);
+  --accent-cosmic: #A855F7;
+  --accent-cosmic-glow: rgba(168, 85, 247, 0.35);
+  --accent-violet: #6366F1;
+  --accent-amber: #F59E0B;
+  --accent-danger: #FF2A5F;
+  --accent-danger-bg: rgba(255, 42, 95, 0.12);
+  --accent-danger-glow: rgba(255, 42, 95, 0.4);
+  --dev-color: #FF2A85;
+
+  /* AI Models */
+  --model-25-color: #A855F7;
+  --model-31-color: #00D9F5;
+  --model-34-color: #FF2A85;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --ease-cosmic: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  background-color: var(--bg-void);
+  color: var(--text-main);
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--bg-void);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: calc(76px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(14px, env(safe-area-inset-left, 0px));
+  padding-right: max(14px, env(safe-area-inset-right, 0px));
+  position: relative;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+}
+
+button { cursor: pointer; user-select: none; }
+a { text-decoration: none; color: inherit; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-void); }
+::-webkit-scrollbar-thumb { background: rgba(0, 217, 245, 0.25); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-quantum); }
+
+/* ==========================================================================
+   2. SVG ICONS & UNIFIED BUTTON SYSTEM
+   ========================================================================== */
+.nox-icon {
+  width: 18px;
+  height: 18px;
+  aspect-ratio: 1 / 1;
+  stroke-width: 2.2;
+  stroke: currentColor;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.btn {
+  height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.22s var(--ease-cosmic);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-quantum));
+  color: #02040A;
+  box-shadow: 0 0 16px var(--accent-cyan-glow);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 24px var(--accent-cyan-glow); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.22); }
+.btn-ghost { background: transparent; color: var(--text-sub); }
+.btn-ghost:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+.btn-danger {
+  background: var(--accent-danger-bg);
+  border: 1px solid rgba(255, 42, 95, 0.3);
+  color: var(--accent-danger);
+}
+.btn-danger:hover { background: var(--accent-danger); color: #FFF; box-shadow: 0 0 15px var(--accent-danger-glow); }
+.btn-icon {
+  width: 38px;
+  height: 38px;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   3. BACKGROUND ENGINE & AMBIENT AURORA
+   ========================================================================== */
+#cosmic-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+.cosmic-nebula-aurora {
+  position: fixed;
+  top: -140px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1100px, 100vw);
+  height: 520px;
+  background: radial-gradient(circle, rgba(0, 217, 245, 0.12) 0%, rgba(168, 85, 247, 0.08) 45%, rgba(99, 102, 241, 0.04) 70%, transparent 85%);
+  filter: blur(95px);
+  pointer-events: none;
+  z-index: 1;
+}
+.cosmic-planet-silhouette {
+  position: fixed;
+  bottom: -190px;
+  right: -110px;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 32%, rgba(168, 85, 247, 0.18), rgba(6, 12, 30, 0.85) 60%, var(--bg-void) 90%);
+  box-shadow: inset -10px -10px 40px rgba(0, 217, 245, 0.15), 0 0 50px rgba(168, 85, 247, 0.1);
+  pointer-events: none;
+  z-index: 1;
+}
+#quantum-cursor-glow {
+  position: fixed;
+  top: 0; left: 0;
+  width: 380px; height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 217, 245, 0.06) 0%, rgba(168, 85, 247, 0.03) 40%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+@media (pointer: coarse) { #quantum-cursor-glow { display: none !important; } }
+
+/* ==========================================================================
+   4. QUANTUM BOOT SCREEN 2.0 (PARALLEL MULTI-STAGE)
+   ========================================================================== */
+#quantum-boot-screen {
+  position: fixed;
+  inset: 0;
+  background: #020308;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-6);
+  transition: opacity 0.75s var(--ease-cosmic), transform 0.75s var(--ease-cosmic);
+}
+#quantum-boot-screen.is-loaded {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.boot-orbital-core {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+.boot-ring-outer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px dashed rgba(0, 245, 160, 0.4);
+  animation: bootSpin 8s linear infinite;
+}
+.boot-ring-inner {
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-cyan);
+  border-bottom-color: var(--accent-cosmic);
+  animation: bootSpinReverse 3s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  box-shadow: 0 0 25px var(--accent-cyan-glow);
+}
+.boot-logo-node {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #FFF, var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@keyframes bootSpin { 100% { transform: rotate(360deg); } }
+@keyframes bootSpinReverse { 100% { transform: rotate(-360deg); } }
+
+.boot-progress-bar-wrap {
+  width: min(340px, 82vw);
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+  position: relative;
+}
+.boot-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-quantum));
+  box-shadow: 0 0 14px var(--accent-quantum-glow);
+  transition: width 0.35s ease;
+}
+.boot-stage-badge {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+  margin-bottom: var(--space-1);
+  letter-spacing: 1.5px;
+}
+.boot-log-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  letter-spacing: 1px;
+  min-height: 22px;
+  text-align: center;
+}
+.boot-error-actions {
+  display: none;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* ==========================================================================
+   5. FULL-SCREEN COSMIC MAINTENANCE EXPERIENCE
+   ========================================================================== */
+#nox-maintenance-screen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, #070d24 0%, #02040a 80%);
+  z-index: 90000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: calc(30px + env(safe-area-inset-top, 0px)) var(--space-4) calc(30px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  backdrop-filter: blur(30px);
+}
+#nox-maintenance-screen.is-active { display: flex; }
+
+.maint-container {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-5);
+  margin: auto 0;
+}
+
+/* 3D Cosmic Pseudo Energy Core */
+.maint-core-orb-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto;
+}
+.maint-core-sphere {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FFF, var(--accent-cyan) 45%, var(--accent-violet) 80%, #02040A 100%);
+  box-shadow: 0 0 35px var(--accent-cyan-glow), 0 0 70px rgba(168, 85, 247, 0.4);
+  animation: corePulseEnergy 2.4s infinite ease-in-out;
+}
+.maint-orbital-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+}
+.maint-orbital-ring-1 {
+  width: 120px; height: 120px;
+  border-top-color: var(--accent-cyan);
+  border-bottom-color: var(--accent-quantum);
+  animation: spinClockwise 5s linear infinite;
+  box-shadow: 0 0 15px rgba(0, 217, 245, 0.2);
+}
+.maint-orbital-ring-2 {
+  width: 160px; height: 160px;
+  border-left-color: var(--accent-cosmic);
+  border-right-color: var(--dev-color);
+  animation: spinCounter 7s linear infinite;
+  transform: rotate(45deg);
+}
+.maint-orbital-ring-3 {
+  width: 190px; height: 190px;
+  border: 1px dashed rgba(0, 245, 160, 0.3);
+  animation: spinClockwise 12s linear infinite;
+}
+
+@keyframes corePulseEnergy {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px var(--accent-cyan)); }
+  50% { transform: scale(1.14); filter: drop-shadow(0 0 35px var(--accent-quantum)); }
+}
+@keyframes spinClockwise { 100% { transform: rotate(360deg); } }
+@keyframes spinCounter { 100% { transform: rotate(-360deg); } }
+
+.maint-badge-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 42, 95, 0.12);
+  border: 1px solid rgba(255, 42, 95, 0.35);
+  color: var(--accent-danger);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+.maint-headline {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.4rem, 4.5vw, 2.4rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #FFF 10%, var(--accent-cyan) 60%, var(--accent-cosmic) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.25;
+}
+.maint-desc {
+  max-width: 620px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-sub);
+}
+
+/* Timezone-safe Countdown Grid */
+.maint-countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 580px;
+  margin: var(--space-2) auto;
+}
+.countdown-box {
+  background: var(--glass-2);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(16px);
+}
+.countdown-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.4rem, 3.8vw, 2rem);
+  font-weight: 900;
+  color: var(--accent-cyan);
+}
+.countdown-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+/* Upgrade Roadmap System */
+.maint-roadmap-card {
+  width: 100%;
+  max-width: 680px;
+  background: var(--glass-1);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: left;
+}
+.roadmap-head {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.82rem;
+  color: var(--accent-quantum);
+  font-weight: 800;
+  margin-bottom: var(--space-3);
+  letter-spacing: 1.5px;
+  display: flex;
+  justify-content: space-between;
+}
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-2);
+}
+.roadmap-item {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.roadmap-item.is-done { color: var(--accent-quantum); border-color: rgba(0, 245, 160, 0.25); }
+.roadmap-item.is-active { color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(0, 217, 245, 0.08); font-weight: 800; }
+.roadmap-item.is-pending { color: var(--text-muted); }
+
+/* Dev Bypass Area */
+.maint-dev-trigger-dock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* Dev Mode Top Floating Indicator Badge */
+#dev-mode-floating-badge {
+  position: fixed;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  left: max(14px, env(safe-area-inset-left, 0px));
+  background: var(--dev-color);
+  color: #FFF;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 0 18px rgba(255, 42, 133, 0.45);
+  display: none;
+  align-items: center;
+  gap: 8px;
+  z-index: 99999;
+}
+
+/* ==========================================================================
+   6. TOP NAVIGATION & OS HUD
+   ========================================================================== */
+.os-container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.top-nav {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 28px);
+  max-width: 1240px;
+  height: 58px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--glass-2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 217, 245, 0.08);
+  z-index: 1000;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.top-nav:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 217, 245, 0.15);
+}
+
+.brand-node {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+}
+.quantum-orbital-orb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--accent-quantum), var(--accent-cyan) 50%, var(--accent-violet) 90%);
+  box-shadow: 0 0 16px var(--accent-cyan-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+}
+.brand-text-wrap { display: flex; flex-direction: column; }
+.brand-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  background: linear-gradient(135deg, #FFF 10%, var(--accent-cyan) 60%, var(--accent-quantum) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.brand-edition {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--accent-quantum);
+  letter-spacing: 1px;
+}
+
+.nav-actions-deck {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.status-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent-quantum);
+  background: rgba(0, 245, 160, 0.08);
+  border: 1px solid rgba(0, 245, 160, 0.25);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+.quantum-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-quantum);
+  box-shadow: 0 0 8px var(--accent-quantum);
+  animation: pulseDotLive 1.6s infinite;
+}
+@keyframes pulseDotLive { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.7); } }
+
+/* Telemetry HUD Bar */
+.telemetry-deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--glass-1);
+  border: 1px solid var(--border-glass);
+  backdrop-filter: blur(18px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.76rem;
+  color: var(--text-sub);
+}
+.hud-cell { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); cursor: pointer; }
+.hud-highlight { color: var(--accent-cyan); font-weight: 700; }
+.hud-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   7. HERO CONSOLE & VAULT WORKSPACE
+   ========================================================================== */
+.hero-quantum-console {
+  width: 100%;
+  margin-bottom: var(--space-6);
+  padding: var(--space-6);
+  background: var(--glass-2);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(24px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  position: relative;
+  overflow: hidden;
+}
+.hero-quantum-console::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan) 30%, var(--accent-quantum) 70%, transparent);
+}
+.hero-cosmic-h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #FFFFFF 15%, var(--accent-cyan) 60%, var(--accent-cosmic) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  word-break: break-word;
+}
+.hero-desc { font-size: 0.92rem; color: var(--text-sub); font-weight: 500; }
+
+.system-announcement-panel {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.announcement-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: var(--space-2);
+}
+.announcement-title-tag {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: 'Orbitron', sans-serif;
+}
+.terminal-typewriter-box {
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--text-sub);
+  font-family: 'JetBrains Mono', monospace;
+  word-break: break-word;
+}
+.quantum-terminal-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background-color: var(--accent-cyan);
+  margin-left: 4px;
+  animation: cursorBlink 0.8s infinite;
+  vertical-align: middle;
+}
+@keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Search & Categories */
+.search-filter-deck {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  background: var(--glass-1);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  backdrop-filter: blur(20px);
+}
+.search-field-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 var(--space-4);
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-field-input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 14px var(--accent-cyan-glow);
+}
+.category-tab-row {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+.category-tab-row::-webkit-scrollbar { display: none; }
+.category-chip {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.category-chip:hover { color: var(--text-main); border-color: rgba(255, 255, 255, 0.22); }
+.category-chip.is-active {
+  color: #02040A;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-quantum));
+  border-color: transparent;
+  box-shadow: 0 0 14px var(--accent-cyan-glow);
+}
+
+/* Vault Feed Cards Grid */
+.vault-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: var(--space-4);
+  width: 100%;
+}
+.vault-item-card {
+  background: var(--glass-1);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  backdrop-filter: blur(16px);
+  transition: transform 0.25s var(--ease-cosmic), border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+  position: relative;
+}
+.vault-item-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 16px var(--accent-cyan-glow);
+}
+.card-top-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+.card-category-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  background: rgba(0, 217, 245, 0.08);
+  border: 1px solid rgba(0, 217, 245, 0.25);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+.card-title-text {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.card-preview-thumb {
+  width: 100%;
+  height: 150px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--border-glass);
+  cursor: pointer;
+}
+.card-preview-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s var(--ease-cosmic); }
+.card-preview-thumb:hover .card-preview-img { transform: scale(1.04); }
+.card-lua-code-block {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #6EE7B7;
+  word-break: break-all;
+  max-height: 90px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+.card-actions-dock { margin-top: auto; display: flex; flex-direction: column; gap: var(--space-2); }
+.card-actions-dock .btn-primary, .card-actions-dock .btn-secondary { width: 100%; }
+
+/* ==========================================================================
+   8. MODALS & AI OS INTERFACES (MOBILE-FIRST SAFE)
+   ========================================================================== */
+.cosmic-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+  background: rgba(2, 4, 10, 0.88);
+  backdrop-filter: blur(24px);
+  opacity: 0;
+  transition: opacity 0.28s var(--ease-cosmic);
+}
+.cosmic-modal-overlay.is-active { display: flex; opacity: 1; }
+
+.cosmic-modal-window {
+  width: clamp(320px, 94vw, 780px);
+  height: min(88dvh, 800px);
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-core);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 24px rgba(0, 217, 245, 0.1);
+  transform: scale(0.96) translateY(16px);
+  transition: transform 0.3s var(--ease-cosmic);
+  overflow: hidden;
+}
+.cosmic-modal-overlay.is-active .cosmic-modal-window { transform: scale(1) translateY(0); }
+
+.modal-deck-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-glass);
+  background: rgba(8, 14, 32, 0.95);
+}
+.modal-deck-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.94rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--accent-cyan);
+}
+
+/* AI Model Tier Selector Deck */
+.ai-model-selector-deck {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(4, 8, 20, 0.85);
+  border-bottom: 1px solid var(--border-glass);
+}
+@media (max-width: 640px) {
+  .ai-model-selector-deck { grid-template-columns: 1fr; max-height: 190px; overflow-y: auto; }
+}
+
+.ai-tier-card {
+  padding: 8px var(--space-3);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: all 0.2s ease;
+}
+.ai-tier-card:hover { border-color: rgba(0, 217, 245, 0.35); }
+.ai-tier-card.is-active[data-model="2.5"] {
+  background: rgba(168, 85, 247, 0.14);
+  border-color: var(--model-25-color);
+  box-shadow: 0 0 14px var(--accent-cosmic-glow);
+}
+.ai-tier-card.is-active[data-model="3.1"] {
+  background: rgba(0, 217, 245, 0.14);
+  border-color: var(--model-31-color);
+  box-shadow: 0 0 14px var(--accent-cyan-glow);
+}
+.ai-tier-card.is-active[data-model="3.4"] {
+  background: rgba(255, 42, 133, 0.14);
+  border-color: var(--model-34-color);
+  box-shadow: 0 0 14px var(--accent-danger-glow);
+}
+.ai-tier-name { font-size: 0.8rem; font-weight: 800; color: var(--text-main); }
+.ai-tier-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent-cyan); font-weight: 700; }
+.ai-tier-desc { font-size: 0.7rem; color: var(--text-sub); }
+
+.chat-board-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bg-void);
+}
+.msg-row-block {
+  display: flex;
+  flex-direction: column;
+  max-width: 90%;
+  animation: msgFadeSlide 0.25s var(--ease-cosmic);
+}
+@keyframes msgFadeSlide { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.msg-row-block.type-user { align-self: flex-end; align-items: flex-end; }
+.msg-row-block.type-other { align-self: flex-start; align-items: flex-start; }
+.msg-meta-tag { display: flex; align-items: center; gap: var(--space-1); margin-bottom: 4px; font-size: 0.74rem; color: var(--text-sub); }
+.msg-meta-tag.sys { color: var(--accent-quantum); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.msg-bubble-glass {
+  padding: 11px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.msg-row-block.type-user .msg-bubble-glass {
+  background: linear-gradient(135deg, rgba(0, 217, 245, 0.22), rgba(99, 102, 241, 0.22));
+  border: 1px solid rgba(0, 217, 245, 0.35);
+  color: #F1F5F9;
+  border-bottom-right-radius: 2px;
+}
+.msg-row-block.type-other .msg-bubble-glass {
+  background: var(--glass-core);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+  border-bottom-left-radius: 2px;
+}
+
+.chat-input-deck {
+  background: rgba(8, 14, 32, 0.95);
+  border-top: 1px solid var(--border-glass);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.input-interactive-row { display: flex; align-items: flex-end; gap: var(--space-2); }
+.chat-textarea-field {
+  flex: 1;
+  min-height: 42px;
+  height: 42px;
+  max-height: 110px;
+  padding: 10px var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  resize: none;
+  overflow-y: auto;
+}
+.chat-textarea-field:focus { border-color: var(--accent-cyan); }
+
+/* AI Quantum Reasoning Orb */
+.ai-thinking-orb-dock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 12px;
+}
+.ai-orbit-spin-orb {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-orb-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-cyan);
+  border-bottom-color: var(--accent-quantum);
+  animation: bootSpin 1.4s linear infinite;
+}
+.ai-orb-core {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan);
+}
+.ai-status-pulse-txt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   9. COMMAND DRAWER & DEV CENTER
+   ========================================================================== */
+.drawer-backdrop-glass {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 4, 10, 0.78);
+  backdrop-filter: blur(14px);
+  z-index: 20000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.drawer-backdrop-glass.is-open { opacity: 1; pointer-events: auto; }
+
+.drawer-command-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(380px, 86vw);
+  background: var(--glass-core);
+  border-left: 1px solid var(--border-glass);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.85);
+  transform: translateX(100%);
+  transition: transform 0.32s var(--ease-cosmic);
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--space-6) + env(safe-area-inset-top, 0px)) var(--space-5) var(--space-6);
+  overflow-y: auto;
+  gap: var(--space-5);
+  z-index: 20001;
+}
+.drawer-backdrop-glass.is-open .drawer-command-panel { transform: translateX(0); }
+
+.drawer-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: var(--space-3);
+}
+.drawer-heading-text { font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 800; color: var(--accent-cyan); }
+.drawer-category-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.drawer-subheading-tag { font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.drawer-nav-item-btn {
+  width: 100%;
+  padding: 11px var(--space-3);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+.drawer-nav-item-btn:hover {
+  background: rgba(0, 217, 245, 0.12);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  transform: translateX(4px);
+}
+
+/* Dev Center Tabs & Modules */
+.dev-control-tabs {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: rgba(4, 8, 20, 0.9);
+  border-bottom: 1px solid var(--border-glass);
+  overflow-x: auto;
+}
+.dev-tab-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  white-space: nowrap;
+}
+.dev-tab-btn.is-active { color: #FFF; background: var(--dev-color); border-color: var(--dev-color); }
+.dev-tab-pane { display: none; flex-direction: column; gap: var(--space-3); padding: var(--space-4); overflow-y: auto; }
+.dev-tab-pane.is-active { display: flex; }
+
+.dev-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--space-2); }
+.dev-stat-card {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dev-stat-val { font-size: 1.15rem; font-weight: 800; color: var(--accent-cyan); font-family: 'Orbitron', sans-serif; }
+.dev-stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+
+/* Flag Toggles */
+.flag-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px var(--space-3);
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+}
+
+/* Command Palette (Ctrl+K) */
+#command-palette-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 4, 10, 0.82);
+  backdrop-filter: blur(20px);
+  z-index: 40000;
+  display: none;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 80px 16px 20px;
+}
+#command-palette-modal.is-active { display: flex; }
+.palette-window {
+  width: 100%;
+  max-width: 560px;
+  background: var(--glass-core);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 217, 245, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.palette-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 var(--space-4);
+  background: var(--bg-input);
+  border-bottom: 1px solid var(--border-glass);
+  font-size: 0.92rem;
+  color: var(--text-main);
+}
+.palette-results { max-height: 300px; overflow-y: auto; padding: var(--space-2); display: flex; flex-direction: column; gap: 2px; }
+.palette-item {
+  padding: 9px var(--space-3);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.palette-item:hover, .palette-item.is-selected { background: rgba(0, 217, 245, 0.15); color: var(--accent-cyan); }
+
+/* System Lightbox & Toasts */
+#image-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 50000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-4);
+  cursor: zoom-out;
+}
+#image-lightbox.active { display: flex; }
+#image-lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: var(--radius-md); box-shadow: 0 0 35px rgba(0, 217, 245, 0.25); }
+
+#toast-banner {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  z-index: 60000;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 12px var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(8, 14, 32, 0.94);
+  border: 1px solid var(--accent-cyan);
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.85rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 16px var(--accent-cyan-glow);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s var(--ease-cosmic);
+  pointer-events: none;
+}
+#toast-banner.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+
+.auth-curtain-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+  background: rgba(4, 7, 18, 0.97);
+  backdrop-filter: blur(20px);
+  text-align: center;
+  padding: var(--space-6);
+}
+.auth-curtain-overlay.is-hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Quantum Boot Screen 2.0 -->
+<div id="quantum-boot-screen" role="dialog" aria-modal="true" aria-label="Khởi động hệ điều hành NOX">
+  <div class="boot-orbital-core">
+    <div class="boot-ring-outer"></div>
+    <div class="boot-ring-inner"></div>
+    <span class="boot-logo-node">NOX 2.0</span>
+  </div>
+  <div class="boot-stage-badge" id="boot-stage-badge">STAGE 01 / 10</div>
+  <div class="boot-progress-bar-wrap">
+    <div class="boot-progress-fill" id="boot-progress-bar"></div>
+  </div>
+  <div class="boot-log-text" id="boot-log-message">INITIALIZING QUANTUM RUNTIME...</div>
+  <div class="boot-error-actions" id="boot-error-actions">
+    <button class="btn btn-secondary" onclick="SystemBootstrapper.boot()">THỬ LẠI</button>
+    <button class="btn btn-primary" onclick="SystemBootstrapper.bypassBoot()">TIẾP TỤC OFFLINE</button>
+  </div>
+</div>
+
+<!-- Full-Screen Cosmic Maintenance Experience -->
+<div id="nox-maintenance-screen" role="region" aria-label="Bảo trì hệ thống NOX">
+  <div class="maint-container">
+    <div class="maint-core-orb-container">
+      <div class="maint-orbital-ring maint-orbital-ring-1"></div>
+      <div class="maint-orbital-ring maint-orbital-ring-2"></div>
+      <div class="maint-orbital-ring maint-orbital-ring-3"></div>
+      <div class="maint-core-sphere"></div>
+    </div>
+
+    <div class="maint-badge-offline">
+      <span class="quantum-pulse-dot" style="background:var(--accent-danger); box-shadow:0 0 8px var(--accent-danger);"></span>
+      <span>TEMPORARILY OFFLINE</span>
+    </div>
+
+    <h1 class="maint-headline">NOX GALAXY ASCENSION OS 2.0<br><span style="font-size:0.75em; color:var(--accent-cyan);">SYSTEM UPGRADE IN PROGRESS</span></h1>
+    
+    <p class="maint-desc">
+      Hệ thống đang được nâng cấp toàn diện lên kiến trúc Quantum Ascension OS 2.0. Toàn bộ AI Matrix, Roblox Script Vault và cơ sở dữ liệu phân tán đang được tái cấu trúc để đem lại hiệu năng vượt trội.
+    </p>
+
+    <!-- Timezone-Safe Countdown to 25/12/2026 23:59:59 (Asia/Ho_Chi_Minh) -->
+    <div class="maint-countdown-grid">
+      <div class="countdown-box"><span class="countdown-val" id="cnt-days">--</span><span class="countdown-lbl">DAYS</span></div>
+      <div class="countdown-box"><span class="countdown-val" id="cnt-hours">--</span><span class="countdown-lbl">HOURS</span></div>
+      <div class="countdown-box"><span class="countdown-val" id="cnt-mins">--</span><span class="countdown-lbl">MINUTES</span></div>
+      <div class="countdown-box"><span class="countdown-val" id="cnt-secs">--</span><span class="countdown-lbl">SECONDS</span></div>
+    </div>
+
+    <!-- Upgrade Roadmap -->
+    <div class="maint-roadmap-card">
+      <div class="roadmap-head">
+        <span>ASCENSION UPGRADE ROADMAP</span>
+        <span style="color:var(--accent-cyan);" id="maint-current-phase-lbl">PHASE 03 / 07</span>
+      </div>
+      <div class="roadmap-grid">
+        <div class="roadmap-item is-done">✓ CORE RECONSTRUCTION</div>
+        <div class="roadmap-item is-done">✓ GALAXY UI 2.0</div>
+        <div class="roadmap-item is-active">◉ AI MATRIX UPGRADE</div>
+        <div class="roadmap-item is-pending">○ SECURITY HARDENING</div>
+        <div class="roadmap-item is-pending">○ PERFORMANCE OPTIMIZE</div>
+        <div class="roadmap-item is-pending">○ FINAL SYSTEM TEST</div>
+        <div class="roadmap-item is-pending">○ ASCENSION RELEASE</div>
+      </div>
+    </div>
+
+    <!-- Dev Bypass Controls -->
+    <div class="maint-dev-trigger-dock">
+      <button class="btn btn-secondary" style="border-color:rgba(255,42,133,0.4); color:var(--dev-color);" onclick="MaintenanceAccessEngine.promptDevBypass()">
+        ⚙ ENTER DEV MODE (BYPASS)
+      </button>
+      <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;">ADMIN & DEVELOPER AUTHORIZED ACCESS ONLY</div>
+    </div>
+  </div>
+</div>
+
+<!-- Dev Mode Active Floating Banner -->
+<div id="dev-mode-floating-badge">
+  <span>⚙ DEV MODE: BYPASS ACTIVE</span>
+  <button class="btn btn-ghost" style="height:22px; padding:0 6px; color:#FFF; font-size:0.65rem;" onclick="MaintenanceAccessEngine.exitDevMode()">THOÁT</button>
+</div>
+
+<!-- Multi-layer Cosmic Background Canvas -->
+<canvas id="cosmic-canvas"></canvas>
+<div class="cosmic-nebula-aurora"></div>
+<div class="cosmic-planet-silhouette"></div>
+<div id="quantum-cursor-glow"></div>
+
+<!-- Top Navigation -->
+<header class="top-nav">
+  <div class="brand-node" onclick="EasterEngine.triggerCorePulse()" title="NOX OS Ascension Core">
+    <div class="quantum-orbital-orb">
+      <svg class="nox-icon" style="width:16px; height:16px; color:#02040A;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+    </div>
+    <div class="brand-text-wrap">
+      <span class="brand-title">NOX GALAXY</span>
+      <span class="brand-edition">ASCENSION OS 2.0</span>
+    </div>
+  </div>
+
+  <div class="nav-actions-deck">
+    <div class="status-badge-live" onclick="openUI('modal-system-diag')" title="Xem chẩn đoán hệ thống">
+      <span class="quantum-pulse-dot"></span>
+      <span id="ui-nav-status">CONNECTING</span>
+    </div>
+
+    <button class="btn btn-secondary btn-icon" onclick="CommandPalette.open()" title="Command Palette (Ctrl + K)">
+      <svg class="nox-icon" viewBox="0 0 24 24"><path d="m21 21-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z"/></svg>
+    </button>
+
+    <button class="btn btn-secondary btn-icon" onclick="LangEngine.toggle()" title="Đổi ngôn ngữ">
+      <span id="txt-lang-badge" style="font-size:0.75rem; font-weight:800;">VN</span>
+    </button>
+
+    <button class="btn btn-primary" onclick="toggleMenu()" id="btn-main-menu">
+      <svg class="nox-icon" viewBox="0 0 24 24"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      <span id="txt-menu-btn">MENU</span>
+    </button>
+  </div>
+</header>
+
+<!-- Command Drawer (Sidebar OS Hub) -->
+<div class="drawer-backdrop-glass" id="nav-drawer-backdrop" onclick="if(event.target===this)toggleMenu()">
+  <nav class="drawer-command-panel" id="nav-drawer" aria-label="Menu điều hướng hệ thống">
+    <div class="drawer-head-row">
+      <div class="drawer-heading-text" id="txt-drawer-title">COMMAND DECK</div>
+      <button class="btn btn-ghost btn-icon" onclick="toggleMenu()">✕</button>
+    </div>
+
+    <div class="drawer-category-group">
+      <div class="drawer-subheading-tag">ĐỒ HỌA VŨ TRỤ</div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px;">
+        <button class="btn btn-secondary" style="height:32px; font-size:0.7rem; padding:0;" onclick="GraphicsEngine.setPreset('LOW')">LOW</button>
+        <button class="btn btn-secondary" style="height:32px; font-size:0.7rem; padding:0;" onclick="GraphicsEngine.setPreset('MED')">MED</button>
+        <button class="btn btn-secondary" style="height:32px; font-size:0.7rem; padding:0;" onclick="GraphicsEngine.setPreset('HIGH')">HIGH</button>
+        <button class="btn btn-primary" style="height:32px; font-size:0.7rem; padding:0;" onclick="GraphicsEngine.setPreset('ULTRA')">ULTRA</button>
+      </div>
+    </div>
+
+    <div class="drawer-category-group">
+      <div class="drawer-subheading-tag" id="txt-menu-ai-group">AI TRỢ LÝ & TRÒ CHUYỆN</div>
+      <button class="drawer-nav-item-btn" onclick="RestrictedAction.checkAndOpen('modal-noxgpt')">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <svg class="nox-icon" style="color:var(--accent-cyan);" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          NOX AI (GALAXYZ 2.0)
+        </span>
+        <svg class="nox-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="drawer-nav-item-btn" onclick="RestrictedAction.checkAndOpen('modal-noxchat')">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <svg class="nox-icon" style="color:var(--accent-quantum);" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          GLOBAL CHAT
+        </span>
+        <svg class="nox-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-category-group">
+      <div class="drawer-subheading-tag" id="txt-menu-auth-group">TÀI KHOẢN HỆ THỐNG</div>
+      <div id="drawer-google-login-wrap" style="width:100%; display:flex; justify-content:center; overflow:hidden;"></div>
+      <button class="drawer-nav-item-btn" id="drawer-btn-guest" onclick="AuthEngine.guestLogin()">
+        <span style="display:flex; align-items:center; gap:8px;">
+          <svg class="nox-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span id="txt-menu-guest-btn">ĐĂNG NHẬP KHÁCH</span>
+        </span>
+      </button>
+      <button class="drawer-nav-item-btn" id="drawer-btn-logout" onclick="AuthEngine.triggerLogout()" style="display:none; color:var(--accent-danger); border-color:rgba(255, 42, 95, 0.3);">
+        <span id="txt-menu-logout-btn">ĐĂNG XUẤT</span>
+      </button>
+    </div>
+
+    <!-- Developer Control Center Entry -->
+    <div class="drawer-category-group" id="dev-menu-editor-group" style="display:none;">
+      <div class="drawer-subheading-tag" style="color:var(--dev-color);">[DEV] CONTROL CENTER</div>
+      <button class="drawer-nav-item-btn" style="border-color:var(--dev-color); color:var(--dev-color);" onclick="openUI('modal-dev-control'); DevCenter.init();">
+        <span>⚙ DEV CONTROL CENTER 2.0</span>
+      </button>
+    </div>
+
+    <div class="drawer-category-group">
+      <div class="drawer-subheading-tag" id="txt-menu-community-group">CỘNG ĐỒNG</div>
+      <div id="dynamic-menu-links" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <a href="https://zalo.me/g/db0epbye4robazncg2jc" target="_blank" rel="noopener noreferrer" class="drawer-nav-item-btn">
+        <span style="color:#0068FF;">NHÓM ZALO NOX</span>
+        ↗
+      </a>
+      <a href="https://discord.gg/kRCKkw63s" target="_blank" rel="noopener noreferrer" class="drawer-nav-item-btn">
+        <span style="color:#5865F2;">DISCORD SERVER</span>
+        ↗
+      </a>
+    </div>
+  </nav>
+</div>
+
+<!-- Main Application Workspace -->
+<main class="os-container">
+  <!-- Telemetry HUD Bar -->
+  <div class="telemetry-deck">
+    <div class="hud-cell" onclick="openUI('modal-system-diag')">
+      <span>QUANTUM CORE:</span>
+      <span class="hud-highlight" id="hud-core-state">ONLINE</span>
+    </div>
+    <div class="hud-cell">
+      <span>CLOCK:</span>
+      <span id="hud-live-clock" class="hud-highlight">--:--:--</span>
+      <select class="hud-select" id="hud-tz-select" onchange="TimeEngine.changeTz(this.value)" aria-label="Múi giờ">
+        <option value="Asia/Ho_Chi_Minh">VN</option>
+        <option value="Asia/Tokyo">Tokyo</option>
+        <option value="UTC">UTC</option>
+        <option value="America/New_York">NY</option>
+      </select>
+    </div>
+    <div class="hud-cell" onclick="openUI('modal-system-diag')">
+      <span>PING:</span>
+      <span id="hud-ping" class="hud-highlight">18ms</span>
+    </div>
+    <div class="hud-cell" onclick="RestrictedAction.checkAndOpen('modal-noxgpt')">
+      <span>AI MATRIX:</span>
+      <span class="hud-highlight" id="hud-ai-model-active">GALAXYZ 3.4</span>
+    </div>
+  </div>
+
+  <!-- Hero Console -->
+  <section class="hero-quantum-console">
+    <div class="hero-meta-block">
+      <h1 class="hero-cosmic-h1" id="ui-title-text">NOX GALAXY ASCENSION OS</h1>
+      <p class="hero-desc">COSMIC QUANTUM AI & SCRIPT OPERATING SYSTEM</p>
+    </div>
+
+    <div class="system-announcement-panel">
+      <div class="announcement-head">
+        <div class="announcement-title-tag" id="ui-notice-title">
+          <svg class="nox-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span id="txt-notice-heading">THÔNG BÁO HỆ THỐNG</span>
+        </div>
+        <button class="btn btn-secondary" style="height:32px; font-size:0.75rem; padding:0 12px;" id="btn-notice-toggle" onclick="NoticeTypewriter.toggle()">
+          <span id="txt-notice-btn">NỘI DUNG</span>
+        </button>
+      </div>
+      <div class="terminal-typewriter-box" id="ui-notice-text-zone">
+        Nhấn vào nút <strong>NỘI DUNG</strong> phía trên để xem chi tiết thông báo...
+      </div>
+    </div>
+  </section>
+
+  <!-- Search & Category Filters -->
+  <section class="search-filter-deck">
+    <input class="search-field-input" id="input-search" placeholder="🔍 Tìm kiếm Script, Tool, Bypass Link..." oninput="UtilsEngine.execSearch(this.value)">
+
+    <div class="category-tab-row">
+      <button class="category-chip is-active" onclick="UtilsEngine.switchTab('pane-link', this)">
+        <span id="tab-txt-links">LINKS BYPASS</span>
+      </button>
+      <button class="category-chip" onclick="UtilsEngine.switchTab('pane-script', this)">
+        <span id="tab-txt-scripts">SCRIPTS LUA</span>
+      </button>
+      <button class="category-chip" onclick="UtilsEngine.switchTab('pane-apk', this)">
+        <span id="tab-txt-apk">FILE APK</span>
+      </button>
+      <button class="category-chip" onclick="UtilsEngine.switchTab('pane-ios', this)">
+        <span id="tab-txt-ios">IPA / IOS</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Feed Grid -->
+  <section class="vault-cards-grid" id="main-feed-container"></section>
+</main>
+
+<!-- Modal: NOX AI 3-Tier Terminal 2.0 -->
+<div class="cosmic-modal-overlay" id="modal-noxgpt" onclick="if(event.target===this)closeUI('modal-noxgpt')">
+  <div class="cosmic-modal-window">
+    <div class="modal-deck-head">
+      <div class="modal-deck-title">
+        <svg class="nox-icon" style="color:var(--accent-cyan);" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span id="gpt-active-model-title">GALAXYZ 3.4 PRO (HIGH)</span>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-secondary" style="height:32px; font-size:0.75rem; padding:0 8px;" onclick="AIRouter.clearChat()" title="Xóa lịch sử">XÓA</button>
+        <button class="btn btn-ghost btn-icon" onclick="closeUI('modal-noxgpt')">✕</button>
+      </div>
+    </div>
+
+    <!-- 3-Tier Model Bar -->
+    <div class="ai-model-selector-deck">
+      <div class="ai-tier-card" id="tier-card-25" data-model="2.5" onclick="AIRouter.switchModel('2.5')">
+        <span class="ai-tier-name">GalaxyZ-2.5</span>
+        <span class="ai-tier-badge" style="color:var(--model-25-color);">⚡ FAST CASUAL</span>
+        <span class="ai-tier-desc">Không giới hạn • Tốc độ cao</span>
+      </div>
+      <div class="ai-tier-card" id="tier-card-31" data-model="3.1" onclick="AIRouter.switchModel('3.1')">
+        <span class="ai-tier-name">GalaxyZ-3.1 Pro</span>
+        <span class="ai-tier-badge" style="color:var(--model-31-color);" id="quota-badge-31">◈ 60 / 60 (5H)</span>
+        <span class="ai-tier-desc">Reasoning & Coding • Cần Google</span>
+      </div>
+      <div class="ai-tier-card is-active" id="tier-card-34" data-model="3.4" onclick="AIRouter.switchModel('3.4')">
+        <span class="ai-tier-name">GalaxyZ-3.4 Pro</span>
+        <span class="ai-tier-badge" style="color:var(--model-34-color);" id="quota-badge-34">★ 20 / 20 (5H)</span>
+        <span class="ai-tier-desc">High Reasoning • Cần Google</span>
+      </div>
+    </div>
+
+    <div id="gpt-fallback-container" style="display:none; padding:10px; background:var(--bg-input); border:1px dashed var(--accent-danger); margin:10px; border-radius:var(--radius-sm);">
+      <div style="font-size:0.8rem; font-weight:800; color:var(--accent-danger); margin-bottom:6px;">CẦN CẬP NHẬT API KEY</div>
+      <input type="text" id="gpt-new-api-key" placeholder="Nhập API Key mới..." style="width:100%; padding:8px; background:var(--bg-void); border:1px solid var(--border-glass); margin-bottom:6px;">
+      <button class="btn btn-primary" style="width:100%; background:var(--accent-danger); color:#FFF; height:34px;" onclick="AIRouter.validateAndSaveConfig()">LƯU VÀ THỬ LẠI</button>
+    </div>
+
+    <div class="chat-board-scroll" id="noxgpt-board"></div>
+
+    <div class="chat-input-deck">
+      <div id="gpt-preview-zone" style="display:none; align-items:center; gap:8px;">
+        <img src="" id="gpt-preview-img" style="width:32px; height:32px; border-radius:4px; object-fit:cover;" alt="AI input image">
+        <div onclick="AIRouter.removeImage()" style="cursor:pointer; color:var(--accent-danger); font-weight:bold; font-size:0.8rem;">✕ Xóa ảnh</div>
+      </div>
+      <div class="input-interactive-row">
+        <label for="gpt-img-upload" class="btn btn-secondary btn-icon" title="Tải ảnh" style="flex-shrink:0;">
+          <svg class="nox-icon" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        </label>
+        <input type="file" id="gpt-img-upload" accept="image/*" style="display:none;" onchange="ImageProcessor.handleSelect(this, 'gpt')">
+        <textarea id="noxgpt-field" class="chat-textarea-field" placeholder="Hỏi GalaxyZ..." oninput="autoResizeTextarea(this)" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); AIRouter.submit(); }"></textarea>
+        <button class="btn btn-primary btn-icon" id="btn-gpt-send" onclick="AIRouter.handleSendOrStop()" style="flex-shrink:0;" aria-label="Gửi hoặc dừng AI">
+          <svg class="nox-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Cosmic Global Chatroom -->
+<div class="cosmic-modal-overlay" id="modal-noxchat" onclick="if(event.target===this)closeUI('modal-noxchat')">
+  <div class="cosmic-modal-window" style="position: relative;">
+    <div class="auth-curtain-overlay" id="auth-guard">
+      <h2 style="font-size:1.3rem; font-weight:800; font-family:'Orbitron', sans-serif;">GLOBAL CHATROOM</h2>
+      <p style="color:var(--text-sub); font-size:0.8rem;" id="txt-auth-desc">Đăng nhập để giao lưu cùng cộng đồng NOX.</p>
+      <div id="google-login-mount"></div>
+      <div style="color:var(--text-muted); font-size:0.75rem;">— HOẶC —</div>
+      <button class="btn btn-secondary" onclick="AuthEngine.guestLogin()">ĐĂNG NHẬP KHÁCH</button>
+    </div>
+
+    <div class="modal-deck-head">
+      <div class="modal-deck-title">
+        <svg class="nox-icon" style="color:var(--accent-quantum);" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        COSMIC CHAT HUB
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-secondary" style="height:32px; font-size:0.75rem; padding:0 10px;" onclick="openUI('modal-script-vault'); ChatEngine.loadVaultScripts();">📦 KHO SCRIPT</button>
+        <button class="btn btn-ghost btn-icon" onclick="closeUI('modal-noxchat')">✕</button>
+      </div>
+    </div>
+
+    <div class="chat-board-scroll" id="noxchat-board">
+      <div class="msg-row-block type-other">
+        <div class="msg-meta-tag sys">Hệ Thống</div>
+        <div class="msg-bubble-glass">⚡ Đã kết nối Firebase Realtime Database.</div>
+      </div>
+    </div>
+
+    <div class="chat-input-deck">
+      <div id="chat-preview-zone" style="display:none; align-items:center; gap:8px;">
+        <img src="" id="chat-preview-img" style="width:32px; height:32px; border-radius:4px; object-fit:cover;" alt="Chat image attachment">
+        <div onclick="ChatEngine.removeImage()" style="cursor:pointer; color:var(--accent-danger); font-size:0.8rem;">✕ Xóa ảnh</div>
+      </div>
+      <div class="input-interactive-row">
+        <button class="btn btn-secondary btn-icon" title="Chia sẻ Script" onclick="openUI('modal-script-share')" style="flex-shrink:0;">
+          <svg class="nox-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </button>
+        <label for="chat-img-upload" class="btn btn-secondary btn-icon" title="Gửi ảnh" style="flex-shrink:0;">
+          <svg class="nox-icon" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        </label>
+        <input type="file" id="chat-img-upload" accept="image/*" style="display:none;" onchange="ImageProcessor.handleSelect(this, 'chat')">
+        <textarea id="noxchat-field" class="chat-textarea-field" placeholder="Nhập tin nhắn..." oninput="autoResizeTextarea(this)" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); ChatEngine.sendMsg(); }"></textarea>
+        <button class="btn btn-primary btn-icon" onclick="ChatEngine.sendMsg()" style="flex-shrink:0;">
+          <svg class="nox-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Script Share -->
+<div class="cosmic-modal-overlay" id="modal-script-share" onclick="if(event.target===this)closeUI('modal-script-share')">
+  <div class="cosmic-modal-window" style="max-width: 480px; height: auto;">
+    <div class="modal-deck-head">
+      <div class="modal-deck-title">Chia sẻ Script</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeUI('modal-script-share')">✕</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding:var(--space-4);">
+      <input type="text" id="share-title" placeholder="Tên Script (VD: Speed Hub X)..." class="search-field-input">
+      <input type="text" id="share-image" placeholder="URL hình ảnh Banner (tùy chọn)..." class="search-field-input">
+      <textarea id="share-code" placeholder="Dán mã Script Lua vào đây..." class="chat-textarea-field" style="height:120px; font-family:'JetBrains Mono', monospace; font-size:0.8rem;"></textarea>
+      <button class="btn btn-primary" onclick="ChatEngine.sendScript()">ĐĂNG LÊN KHO SCRIPT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Script Vault -->
+<div class="cosmic-modal-overlay" id="modal-script-vault" onclick="if(event.target===this)closeUI('modal-script-vault')">
+  <div class="cosmic-modal-window">
+    <div class="modal-deck-head">
+      <div class="modal-deck-title">Kho Script Đóng Góp</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeUI('modal-script-vault')">✕</button>
+    </div>
+    <div class="chat-board-scroll" id="vault-board"></div>
+  </div>
+</div>
+
+<!-- Modal: System Diagnostics -->
+<div class="cosmic-modal-overlay" id="modal-system-diag" onclick="if(event.target===this)closeUI('modal-system-diag')">
+  <div class="cosmic-modal-window" style="max-width: 600px; height: auto; max-height: 85dvh;">
+    <div class="modal-deck-head">
+      <div class="modal-deck-title">
+        <svg class="nox-icon" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        NOX SYSTEM DIAGNOSTICS
+      </div>
+      <button class="btn btn-ghost btn-icon" onclick="closeUI('modal-system-diag')">✕</button>
+    </div>
+    <div style="padding:var(--space-4); display:flex; flex-direction:column; gap:var(--space-3); overflow-y:auto;">
+      <div class="dev-stat-grid" id="diag-results-grid">
+        <div class="dev-stat-card"><span class="dev-stat-val" id="diag-fps">60 FPS</span><span class="dev-stat-label">DISPLAY RENDER</span></div>
+        <div class="dev-stat-card"><span class="dev-stat-val" id="diag-viewport">-- x --</span><span class="dev-stat-label">VIEWPORT</span></div>
+        <div class="dev-stat-card"><span class="dev-stat-val" id="diag-fb-status" style="color:var(--accent-quantum);">ONLINE</span><span class="dev-stat-label">FIREBASE DB</span></div>
+        <div class="dev-stat-card"><span class="dev-stat-val" id="diag-app-ver">2.0.0</span><span class="dev-stat-label">NOX VERSION</span></div>
+      </div>
+      <div style="background:var(--bg-input); border:1px solid var(--border-glass); border-radius:var(--radius-sm); padding:var(--space-3); font-family:'JetBrains Mono', monospace; font-size:0.78rem; display:flex; flex-direction:column; gap:4px;">
+        <div><strong>BROWSER:</strong> <span id="diag-browser-ua" style="color:var(--text-sub);">--</span></div>
+        <div><strong>INTEGRITY HEALTH:</strong> <span id="diag-integrity" style="color:var(--accent-quantum);">100% HEALTHY</span></div>
+        <div><strong>GRAPHICS PRESET:</strong> <span id="diag-graphics" style="color:var(--accent-cyan);">ULTRA</span></div>
+      </div>
+      <button class="btn btn-primary" onclick="SystemDiagnosticsEngine.runFullCheck()">CHẠY CHẨN ĐOÁN LẠI</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: NOX DEV Control Center 2.0 -->
+<div class="cosmic-modal-overlay" id="modal-dev-control" onclick="if(event.target===this)closeUI('modal-dev-control')">
+  <div class="cosmic-modal-window" style="max-width: 860px;">
+    <div class="modal-deck-head">
+      <div class="modal-deck-title" style="color:var(--dev-color);">
+        <svg class="nox-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        NOX DEV CONTROL CENTER 2.0
+      </div>
+      <button class="btn btn-ghost btn-icon" onclick="closeUI('modal-dev-control')">✕</button>
+    </div>
+
+    <!-- Dev Navigation Tabs -->
+    <div class="dev-control-tabs">
+      <button class="dev-tab-btn is-active" onclick="DevCenter.switchTab('dev-tab-overview', this)">OVERVIEW</button>
+      <button class="dev-tab-btn" onclick="DevCenter.switchTab('dev-tab-users', this)">USERS</button>
+      <button class="dev-tab-btn" onclick="DevCenter.switchTab('dev-tab-flags', this)">FEATURE FLAGS</button>
+      <button class="dev-tab-btn" onclick="DevCenter.switchTab('dev-tab-maint', this)">MAINTENANCE</button>
+      <button class="dev-tab-btn" onclick="DevCenter.switchTab('dev-tab-config', this)">CONFIG</button>
+      <button class="dev-tab-btn" onclick="DevCenter.switchTab('dev-tab-utils', this)">SCRIPTS & UTILS</button>
+      <button class="dev-tab-btn" onclick="DevCenter.switchTab('dev-tab-logs', this)">LOGS</button>
+    </div>
+
+    <!-- Tab 1: Overview -->
+    <div class="dev-tab-pane is-active" id="dev-tab-overview">
+      <div class="dev-stat-grid">
+        <div class="dev-stat-card"><span class="dev-stat-val" id="dev-stat-users">0</span><span class="dev-stat-label">TOTAL USERS</span></div>
+        <div class="dev-stat-card"><span class="dev-stat-val" id="dev-stat-requests">0</span><span class="dev-stat-label">AI REQUESTS</span></div>
+        <div class="dev-stat-card"><span class="dev-stat-val" id="dev-stat-db" style="color:var(--accent-quantum);">CONNECTED</span><span class="dev-stat-label">DATABASE</span></div>
+        <div class="dev-stat-card"><span class="dev-stat-val" id="dev-stat-router" style="color:var(--accent-cyan);">ONLINE</span><span class="dev-stat-label">AI ROUTER</span></div>
+      </div>
+      <div style="font-size:0.8rem; color:var(--text-sub); margin-top:var(--space-2);" id="dev-integrity-alert-zone"></div>
+    </div>
+
+    <!-- Tab 2: User Management -->
+    <div class="dev-tab-pane" id="dev-tab-users">
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="dev-user-search-input" placeholder="Tìm user theo tên / email..." class="search-field-input" style="height:38px;" oninput="DevCenter.renderUsers()">
+        <select id="dev-user-filter-role" class="search-field-input" style="height:38px; width:140px;" onchange="DevCenter.renderUsers()">
+          <option value="ALL">Tất cả</option>
+          <option value="NOX">Google User</option>
+          <option value="GUEST">Guest</option>
+        </select>
+      </div>
+      <div id="dev-users-list-box" style="display:flex; flex-direction:column; gap:8px; max-height:380px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Tab 3: Feature Flags -->
+    <div class="dev-tab-pane" id="dev-tab-flags">
+      <div class="flag-toggle-row">
+        <span>AI Matrix Router</span>
+        <button class="btn btn-secondary" id="flag-btn-ai" onclick="FeatureFlagEngine.toggle('AI_ENABLED')">ON</button>
+      </div>
+      <div class="flag-toggle-row">
+        <span>Global Chatroom</span>
+        <button class="btn btn-secondary" id="flag-btn-chat" onclick="FeatureFlagEngine.toggle('CHAT_ENABLED')">ON</button>
+      </div>
+      <div class="flag-toggle-row">
+        <span>Roblox Script Vault</span>
+        <button class="btn btn-secondary" id="flag-btn-vault" onclick="FeatureFlagEngine.toggle('VAULT_ENABLED')">ON</button>
+      </div>
+      <div class="flag-toggle-row">
+        <span>Cosmic Canvas Animation</span>
+        <button class="btn btn-secondary" id="flag-btn-canvas" onclick="FeatureFlagEngine.toggle('COSMIC_EFFECTS')">ON</button>
+      </div>
+    </div>
+
+    <!-- Tab 4: Maintenance Engine Controls -->
+    <div class="dev-tab-pane" id="dev-tab-maint">
+      <div class="flag-toggle-row">
+        <span>Force Public Maintenance Mode</span>
+        <button class="btn btn-danger" id="dev-maint-toggle-btn" onclick="MaintenanceEngine.toggleDevOverride()">ACTIVE</button>
+      </div>
+      <input type="text" id="dev-maint-msg" placeholder="Thông điệp bảo trì..." class="search-field-input" value="Hệ thống đang được bảo trì và nâng cấp lớn.">
+      <input type="text" id="dev-maint-end" placeholder="Thời gian kết thúc ISO..." class="search-field-input" value="2026-12-25T23:59:59+07:00">
+      <button class="btn btn-primary" style="background:var(--dev-color); color:#FFF;" onclick="MaintenanceEngine.saveConfigFromDev()">LƯU CẤU HÌNH BẢO TRÌ</button>
+    </div>
+
+    <!-- Tab 5: Web Config -->
+    <div class="dev-tab-pane" id="dev-tab-config">
+      <input type="text" id="dev-conf-title" placeholder="Tiêu đề web..." class="search-field-input">
+      <input type="text" id="dev-conf-version" placeholder="Phiên bản..." class="search-field-input">
+      <input type="text" id="dev-conf-noticetitle" placeholder="Tiêu đề thông báo..." class="search-field-input">
+      <textarea id="dev-conf-noticetext" placeholder="Nội dung thông báo..." class="chat-textarea-field" style="height:80px; resize:none;"></textarea>
+      <button class="btn btn-primary" style="background:var(--dev-color); color:#FFF;" onclick="ConfigEngine.saveConfig()">CẬP NHẬT HỆ THỐNG</button>
+    </div>
+
+    <!-- Tab 6: Utils & Scripts CRUD -->
+    <div class="dev-tab-pane" id="dev-tab-utils">
+      <div id="dev-panel-heading" style="font-weight:800; font-size:0.9rem; color:var(--accent-cyan);">[DEV] THÊM / SỬA TIỆN ÍCH</div>
+      <input type="hidden" id="dev-edit-key" value="">
+      <select id="dev-util-type" class="search-field-input">
+        <option value="pane-link">Link</option>
+        <option value="pane-script">Script</option>
+        <option value="pane-apk">APK</option>
+        <option value="pane-ios">iOS</option>
+      </select>
+      <input type="text" id="dev-util-title" placeholder="Tên tiện ích..." class="search-field-input">
+      <input type="text" id="dev-util-image" placeholder="URL Banner / Thumbnail..." class="search-field-input">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <label for="dev-file-img" class="btn btn-secondary" style="cursor:pointer; height:34px; font-size:0.75rem;">📁 TẢI ẢNH</label>
+        <input type="file" id="dev-file-img" accept="image/*" style="display:none;" onchange="UtilsEngine.handleDevImage(this)">
+        <span id="dev-file-name" style="font-size:0.75rem; color:var(--text-sub);">Chưa chọn ảnh</span>
+      </div>
+      <textarea id="dev-util-content" placeholder="Link URL hoặc Mã Script..." class="chat-textarea-field" style="height:90px;"></textarea>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary" style="flex:1; background:var(--dev-color); color:#FFF;" onclick="UtilsEngine.triggerSave()" id="dev-submit-btn">ĐĂNG TẢI</button>
+        <button class="btn btn-secondary" onclick="UtilsEngine.cancelEdit()" id="dev-cancel-btn" style="display:none; flex:1;">HỦY</button>
+      </div>
+    </div>
+
+    <!-- Tab 7: AI & System Logs -->
+    <div class="dev-tab-pane" id="dev-tab-logs">
+      <div id="dev-ai-logs-board" style="font-family:'JetBrains Mono', monospace; font-size:0.78rem; display:flex; flex-direction:column; gap:6px; max-height:360px; overflow-y:auto;">
+        <div style="color:var(--text-muted);">Chưa có log mới.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Command Palette Modal (Ctrl + K) -->
+<div id="command-palette-modal" onclick="if(event.target===this)CommandPalette.close()">
+  <div class="palette-window">
+    <input type="text" id="palette-search-box" class="palette-input" placeholder="Nhập lệnh hoặc tìm kiếm (VD: AI, Script, Chat, Dev)..." oninput="CommandPalette.filter(this.value)">
+    <div class="palette-results" id="palette-results-list"></div>
+  </div>
+</div>
+
+<!-- Modal: Confirm Action -->
+<div class="cosmic-modal-overlay" id="confirm-modal">
+  <div class="vault-item-card" style="max-width:380px; width:100%; text-align:center; padding:24px; background:var(--glass-core);">
+    <div style="color:var(--accent-danger); font-weight:800; margin-bottom:16px;" id="confirm-msg-text">BẠN CÓ CHẮC CHẮN?</div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-danger" style="flex:1;" onclick="ConfirmUI.ok()">XÁC NHẬN</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="ConfirmUI.no()">HỦY</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox & Toast Banner -->
+<div id="image-lightbox" onclick="this.classList.remove('active')">
+  <img src="" id="lightbox-img" alt="Enlarged Preview">
+</div>
+
+<div id="toast-banner">
+  <svg class="nox-icon" style="color:var(--accent-cyan);" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+  <span id="toast-msg-text">SYSTEM READY</span>
+</div>
+
+<script>
+"use strict";
+
+/* ==========================================================================
+   DOM UTILITIES & SYSTEM CONSTANTS
+   ========================================================================== */
+var NOX_VERSION = "2.0.0-ASCENSION";
+var BUILD_ID = "NOX-20260824-QOS";
+var ADMIN_EMAIL = "hminhgalaxy@gmail.com";
+var IS_ADMIN = false;
+
+var DOM = {
+  get: function(id) { return document.getElementById(id); },
+  queryAll: function(sel) { return document.querySelectorAll(sel); }
+};
+
+function autoResizeTextarea(el) {
+  if(!el) return;
+  el.style.height = '42px';
+  var newHeight = el.scrollHeight;
+  if (newHeight > 110) newHeight = 110;
+  el.style.height = newHeight + 'px';
+}
+
+function openLightbox(src) {
+  var box = DOM.get('image-lightbox');
+  var img = DOM.get('lightbox-img');
+  if(!box || !img || !src) return;
+  img.src = src;
+  box.classList.add('active');
+}
+
+/* ==========================================================================
+   UI INTEGRITY ENGINE
+   ========================================================================== */
+var UIIntegrityEngine = {
+  errors: [],
+  requiredIds: [
+    'quantum-boot-screen', 'nox-maintenance-screen', 'nav-drawer-backdrop',
+    'nav-drawer', 'main-feed-container', 'modal-noxgpt', 'modal-noxchat',
+    'modal-dev-control', 'command-palette-modal', 'toast-banner'
+  ],
+  check: function() {
+    this.errors = [];
+    var self = this;
+    this.requiredIds.forEach(function(id) {
+      if(!DOM.get(id)) self.errors.push("Missing DOM element: #" + id);
+    });
+    return {
+      healthy: this.errors.length === 0,
+      errors: this.errors
+    };
+  }
+};
+
+/* ==========================================================================
+   ERROR BOUNDARY & RECOVERY ENGINE
+   ========================================================================== */
+var SystemRecoveryEngine = {
+  init: function() {
+    window.onerror = function(msg, url, line, col, err) {
+      console.warn("[NOX Recovery Boundary Captured]:", msg, err);
+      DevCenter.logAiRequest("[JS-ERR] " + msg, 0, false);
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+      console.warn("[NOX Unhandled Rejection]:", event.reason);
+    });
+  }
+};
+SystemRecoveryEngine.init();
+
+/* ==========================================================================
+   FEATURE FLAG ENGINE
+   ========================================================================== */
+var FeatureFlagEngine = {
+  flags: {
+    AI_ENABLED: true,
+    CHAT_ENABLED: true,
+    VAULT_ENABLED: true,
+    COSMIC_EFFECTS: true
+  },
+  toggle: function(flagKey) {
+    if(!IS_ADMIN) return;
+    this.flags[flagKey] = !this.flags[flagKey];
+    var btn = DOM.get('flag-btn-' + flagKey.toLowerCase().replace('_enabled',''));
+    if(btn) btn.innerText = this.flags[flagKey] ? "ON" : "OFF";
+    NotificationEngine.show("Feature " + flagKey + " is now " + (this.flags[flagKey] ? "ON" : "OFF"), "SYSTEM");
+  }
+};
+
+/* ==========================================================================
+   NOTIFICATION ENGINE (TOAST QUEUE)
+   ========================================================================== */
+var NotificationEngine = {
+  queue: [],
+  isShowing: false,
+  show: function(msg, level) {
+    this.queue.push({ msg: msg, level: level || "INFO" });
+    if(!this.isShowing) this.processNext();
+  },
+  processNext: function() {
+    if(this.queue.length === 0) { this.isShowing = false; return; }
+    this.isShowing = true;
+    var item = this.queue.shift();
+    var t = DOM.get('toast-banner');
+    var txt = DOM.get('toast-msg-text');
+    if(!t || !txt) { this.isShowing = false; return; }
+    txt.innerText = item.msg;
+    t.classList.add('show');
+    setTimeout(function() {
+      t.classList.remove('show');
+      setTimeout(function() { NotificationEngine.processNext(); }, 250);
+    }, 3200);
+  }
+};
+function showToast(msg) { NotificationEngine.show(msg, "INFO"); }
+
+/* ==========================================================================
+   MAINTENANCE & DEV ACCESS ENGINE
+   ========================================================================== */
+var MaintenanceEngine = {
+  enabled: true,
+  startAt: new Date("2026-08-24T00:00:00+07:00").getTime(),
+  endAt: new Date("2026-12-25T23:59:59+07:00").getTime(),
+  timer: null,
+  isDevBypassed: false,
+
+  isMaintenanceActive: function() {
+    if(this.isDevBypassed) return false;
+    var now = Date.now();
+    return this.enabled && (now >= this.startAt && now <= this.endAt);
+  },
+
+  init: function() {
+    this.startCountdown();
+    this.checkAndApply();
+  },
+
+  checkAndApply: function() {
+    var screen = DOM.get('nox-maintenance-screen');
+    if(!screen) return;
+    if(this.isMaintenanceActive()) {
+      screen.classList.add('is-active');
+    } else {
+      screen.classList.remove('is-active');
+    }
+  },
+
+  startCountdown: function() {
+    var self = this;
+    if(this.timer) clearInterval(this.timer);
+    var tick = function() {
+      var now = Date.now();
+      var diff = self.endAt - now;
+
+      if(diff <= 0) {
+        self.enabled = false;
+        self.checkAndApply();
+        clearInterval(self.timer);
+        return;
+      }
+
+      var d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      var h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      var m = Math.floor((diff / (1000 * 60)) % 60);
+      var s = Math.floor((diff / 1000) % 60);
+
+      var elD = DOM.get('cnt-days');
+      var elH = DOM.get('cnt-hours');
+      var elM = DOM.get('cnt-mins');
+      var elS = DOM.get('cnt-secs');
+
+      if(elD) elD.innerText = (d < 10 ? '0' : '') + d;
+      if(elH) elH.innerText = (h < 10 ? '0' : '') + h;
+      if(elM) elM.innerText = (m < 10 ? '0' : '') + m;
+      if(elS) elS.innerText = (s < 10 ? '0' : '') + s;
+    };
+    tick();
+    this.timer = setInterval(tick, 1000);
+  },
+
+  toggleDevOverride: function() {
+    if(!IS_ADMIN) return;
+    this.enabled = !this.enabled;
+    var btn = DOM.get('dev-maint-toggle-btn');
+    if(btn) btn.innerText = this.enabled ? "ACTIVE" : "DISABLED";
+    this.checkAndApply();
+  },
+
+  saveConfigFromDev: function() {
+    if(!IS_ADMIN) return;
+    var endStr = DOM.get('dev-maint-end').value.trim();
+    if(endStr) this.endAt = new Date(endStr).getTime();
+    NotificationEngine.show("Đã cập nhật cấu hình bảo trì.", "SUCCESS");
+    this.startCountdown();
+  }
+};
+
+var MaintenanceAccessEngine = {
+  promptDevBypass: function() {
+    var pass = prompt("NHẬP MÃ BẢO MẬT DEVELOPER (Xác thực Backend Access):");
+    if(!pass) return;
+    if(pass === "noxdev2026" || pass === "admin") {
+      MaintenanceEngine.isDevBypassed = true;
+      IS_ADMIN = true;
+      DOM.get('dev-menu-editor-group').style.display = 'flex';
+      DOM.get('dev-mode-floating-badge').style.display = 'inline-flex';
+      MaintenanceEngine.checkAndApply();
+      NotificationEngine.show("DEVELOPER ACCESS VERIFIED. MAINTENANCE BYPASSED.", "SYSTEM");
+    } else {
+      alert("Xác thực không thành công! Quyền truy cập bị từ chối.");
+    }
+  },
+  exitDevMode: function() {
+    MaintenanceEngine.isDevBypassed = false;
+    DOM.get('dev-mode-floating-badge').style.display = 'none';
+    MaintenanceEngine.checkAndApply();
+    NotificationEngine.show("Đã thoát chế độ Developer.", "INFO");
+  }
+};
+
+/* ==========================================================================
+   QUANTUM BOOT ENGINE 2.0 (PARALLEL MULTI-STAGE MACHINE)
+   ========================================================================== */
+var SystemBootstrapper = {
+  stages: [
+    { name: "STAGE 01 / 10", msg: "INITIALIZING QUANTUM RUNTIME...", pct: 10 },
+    { name: "STAGE 02 / 10", msg: "LOADING COSMIC GRAPHICS ENGINE 2.0...", pct: 20 },
+    { name: "STAGE 03 / 10", msg: "INITIALIZING GALAXYZ AI MATRIX...", pct: 30 },
+    { name: "STAGE 04 / 10", msg: "CONNECTING FIREBASE REALTIME DB...", pct: 45 },
+    { name: "STAGE 05 / 10", msg: "RESTORING AUTHENTICATION SESSION...", pct: 60 },
+    { name: "STAGE 06 / 10", msg: "LOADING COSMIC SYSTEM CONFIGURATION...", pct: 70 },
+    { name: "STAGE 07 / 10", msg: "SYNCING ROBLOX SCRIPT VAULT FEED...", pct: 80 },
+    { name: "STAGE 08 / 10", msg: "VERIFYING SYSTEM INTEGRITY...", pct: 90 },
+    { name: "STAGE 09 / 10", msg: "OPTIMIZING QUANTUM INTERFACE...", pct: 95 },
+    { name: "STAGE 10 / 10", msg: "ASCENSION SYSTEM READY", pct: 100 }
+  ],
+  minBootDuration: 4200,
+
+  setStage: function(index) {
+    var stage = this.stages[index];
+    if(!stage) return;
+    var badge = DOM.get('boot-stage-badge');
+    var bar = DOM.get('boot-progress-bar');
+    var log = DOM.get('boot-log-message');
+    if(badge) badge.innerText = stage.name;
+    if(bar) bar.style.width = stage.pct + '%';
+    if(log) log.innerText = stage.msg;
+  },
+
+  boot: async function() {
+    var self = this;
+    var startTime = Date.now();
+    var actBox = DOM.get('boot-error-actions');
+    if(actBox) actBox.style.display = 'none';
+
+    this.setStage(0);
+
+    // Run parallel boot tasks
+    var taskPromise = (async function() {
+      GraphicsEngine.init();
+      CosmicCanvasEngine.init();
+      LangEngine.init();
+      TimeEngine.init();
+      AIRouter.init();
+      MaintenanceEngine.init();
+
+      self.setStage(3);
+      try {
+        await Promise.race([
+          ChatEngine.initFirebaseAsync(),
+          new Promise(function(_, reject) { setTimeout(function() { reject(new Error("Firebase Timeout")); }, 4000); })
+        ]);
+      } catch(err) {
+        console.warn("Degraded Firebase state:", err);
+      }
+
+      self.setStage(5);
+      AuthEngine.initGoogleIdentity();
+      await AuthEngine.restoreSavedSession();
+
+      self.setStage(7);
+      UtilsEngine.init();
+      ConfigEngine.init();
+
+      var integrity = UIIntegrityEngine.check();
+      if(!integrity.healthy) {
+        console.warn("Integrity Warnings:", integrity.errors);
+      }
+    })();
+
+    // Animate stages smoothly over minBootDuration
+    var stageIndex = 0;
+    var interval = setInterval(function() {
+      if(stageIndex < self.stages.length - 2) {
+        stageIndex++;
+        self.setStage(stageIndex);
+      }
+    }, Math.floor(self.minBootDuration / self.stages.length));
+
+    try {
+      await taskPromise;
+      var elapsed = Date.now() - startTime;
+      var remaining = Math.max(0, self.minBootDuration - elapsed);
+
+      setTimeout(function() {
+        clearInterval(interval);
+        self.setStage(self.stages.length - 1);
+        DOM.get('ui-nav-status').innerText = "ONLINE";
+
+        setTimeout(function() {
+          var scr = DOM.get('quantum-boot-screen');
+          if(scr) scr.classList.add('is-loaded');
+        }, 500);
+      }, remaining);
+
+    } catch (err) {
+      clearInterval(interval);
+      console.error("Boot failure:", err);
+      self.setStage(0);
+      DOM.get('boot-log-message').innerText = "KHỞI ĐỘNG SUY GIẢM — SẴN SÀNG OFFLINE";
+      if(actBox) actBox.style.display = 'inline-flex';
+    }
+  },
+
+  bypassBoot: function() {
+    var scr = DOM.get('quantum-boot-screen');
+    if(scr) scr.classList.add('is-loaded');
+    DOM.get('ui-nav-status').innerText = "OFFLINE";
+    NotificationEngine.show("Đang hoạt động ở chế độ Offline.", "WARNING");
+  }
+};
+
+/* ==========================================================================
+   GRAPHICS PRESET ENGINE 2.0
+   ========================================================================== */
+var GraphicsEngine = {
+  currentPreset: 'ULTRA',
+  setPreset: function(level) {
+    this.currentPreset = level;
+    localStorage.setItem('nox_graphics_preset', level);
+    CosmicCanvasEngine.resize();
+    NotificationEngine.show("Đồ họa: " + level + " Mode", "INFO");
+  },
+  init: function() {
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var isMobile = window.innerWidth < 768;
+    var saved = localStorage.getItem('nox_graphics_preset');
+
+    if(saved) {
+      this.currentPreset = saved;
+    } else if(prefersReduced || isMobile) {
+      this.currentPreset = 'MED';
+    }
+  }
+};
+
+/* ==========================================================================
+   MULTI-LAYER COSMIC CANVAS ENGINE 2.0
+   ========================================================================== */
+var CosmicCanvasEngine = {
+  canvas: null, ctx: null, stars: [], shootingStars: [], numStars: 120,
+  width: window.innerWidth, height: window.innerHeight, animId: null, isOverdrive: false,
+
+  init: function() {
+    this.canvas = DOM.get('cosmic-canvas');
+    if(!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+
+    var self = this;
+    window.addEventListener('resize', function() { self.resize(); });
+    this.createStars();
+    this.loop();
+    this.scheduleShootingStar();
+
+    var glow = DOM.get('quantum-cursor-glow');
+    if(glow) {
+      window.addEventListener('mousemove', function(e) {
+        glow.style.transform = 'translate(' + (e.clientX - 190) + 'px, ' + (e.clientY - 190) + 'px)';
+      });
+    }
+
+    document.addEventListener('visibilitychange', function() {
+      if(document.hidden) cancelAnimationFrame(self.animId);
+      else self.loop();
+    });
+  },
+
+  resize: function() {
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+    if(this.canvas) {
+      this.canvas.width = this.width;
+      this.canvas.height = this.height;
+    }
+    var preset = GraphicsEngine.currentPreset;
+    if(preset === 'LOW') this.numStars = 25;
+    else if(preset === 'MED') this.numStars = this.width < 768 ? 40 : 70;
+    else if(preset === 'HIGH') this.numStars = this.width < 768 ? 60 : 110;
+    else this.numStars = this.width < 768 ? 80 : 160;
+
+    this.createStars();
+  },
+
+  createStars: function() {
+    this.stars = [];
+    for(var i = 0; i < this.numStars; i++) {
+      this.stars.push({
+        x: Math.random() * this.width,
+        y: Math.random() * this.height,
+        size: Math.random() * 1.6 + 0.3,
+        alpha: Math.random() * 0.8 + 0.2,
+        speed: Math.random() * 0.28 + 0.05,
+        color: (Math.random() > 0.6) ? '#00D9F5' : ((Math.random() > 0.45) ? '#A855F7' : '#FFFFFF')
+      });
+    }
+  },
+
+  scheduleShootingStar: function() {
+    if(GraphicsEngine.currentPreset === 'LOW') return;
+    var nextDelay = Math.random() * 10000 + 8000;
+    var self = this;
+    setTimeout(function() {
+      self.spawnShootingStar();
+      self.scheduleShootingStar();
+    }, nextDelay);
+  },
+
+  spawnShootingStar: function() {
+    this.shootingStars.push({
+      x: Math.random() * this.width * 0.8,
+      y: Math.random() * (this.height * 0.4),
+      length: Math.random() * 80 + 40,
+      speed: Math.random() * 7 + 9,
+      alpha: 1,
+      angle: Math.PI / 4
+    });
+  },
+
+  loop: function() {
+    if(!CosmicCanvasEngine.ctx) return;
+    CosmicCanvasEngine.ctx.clearRect(0, 0, CosmicCanvasEngine.width, CosmicCanvasEngine.height);
+
+    for(var i = 0; i < CosmicCanvasEngine.stars.length; i++) {
+      var s = CosmicCanvasEngine.stars[i];
+      s.y -= (CosmicCanvasEngine.isOverdrive ? s.speed * 8 : s.speed);
+      if(s.y < 0) { s.y = CosmicCanvasEngine.height; s.x = Math.random() * CosmicCanvasEngine.width; }
+
+      CosmicCanvasEngine.ctx.fillStyle = s.color;
+      CosmicCanvasEngine.ctx.globalAlpha = s.alpha;
+      CosmicCanvasEngine.ctx.beginPath();
+      CosmicCanvasEngine.ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      CosmicCanvasEngine.ctx.fill();
+    }
+
+    for(var j = CosmicCanvasEngine.shootingStars.length - 1; j >= 0; j--) {
+      var ss = CosmicCanvasEngine.shootingStars[j];
+      ss.x += Math.cos(ss.angle) * ss.speed;
+      ss.y += Math.sin(ss.angle) * ss.speed;
+      ss.alpha -= 0.016;
+
+      if(ss.alpha <= 0) {
+        CosmicCanvasEngine.shootingStars.splice(j, 1);
+        continue;
+      }
+
+      CosmicCanvasEngine.ctx.strokeStyle = 'rgba(0, 217, 245, ' + ss.alpha + ')';
+      CosmicCanvasEngine.ctx.lineWidth = 1.6;
+      CosmicCanvasEngine.ctx.beginPath();
+      CosmicCanvasEngine.ctx.moveTo(ss.x, ss.y);
+      CosmicCanvasEngine.ctx.lineTo(ss.x - Math.cos(ss.angle) * ss.length, ss.y - Math.sin(ss.angle) * ss.length);
+      CosmicCanvasEngine.ctx.stroke();
+    }
+
+    CosmicCanvasEngine.ctx.globalAlpha = 1;
+    CosmicCanvasEngine.animId = requestAnimationFrame(CosmicCanvasEngine.loop);
+  }
+};
+
+/* ==========================================================================
+   EASTER EGG (CORE PULSE OVERDRIVE)
+   ========================================================================== */
+var EasterEngine = {
+  clickCount: 0, timer: null,
+  triggerCorePulse: function() {
+    this.clickCount++;
+    clearTimeout(this.timer);
+    this.timer = setTimeout(function() { EasterEngine.clickCount = 0; }, 2000);
+    if(this.clickCount >= 5) {
+      this.clickCount = 0;
+      CosmicCanvasEngine.isOverdrive = !CosmicCanvasEngine.isOverdrive;
+      NotificationEngine.show(CosmicCanvasEngine.isOverdrive ? "🌌 HYPERDRIVE OVERDRIVE ACTIVATED!" : "⚡ CRUISE MODE RESTORED", "SYSTEM");
+    }
+  }
+};
+
+/* ==========================================================================
+   SERVER-VALIDATED ROLLING QUOTA ENGINE (5-HOUR WINDOW)
+   ========================================================================== */
+var ServerQuotaEngine = {
+  limits: { "3.4": 20, "3.1": 60, "2.5": 9999 },
+  windowMs: 5 * 60 * 60 * 1000,
+
+  checkAndConsumeQuota: async function(userId, modelTier) {
+    if (IS_ADMIN) return { allowed: true, remaining: "UNLIMITED", isDev: true };
+    if (modelTier === "2.5") return { allowed: true, remaining: 9999 };
+    if (!userId || userId.startsWith("guest_") || userId === "guest") {
+      return { allowed: false, reason: "AUTH_REQUIRED" };
+    }
+
+    var safeKey = userId.replace(/\./g, '_dot_').replace(/@/g, '_at_');
+    var maxLimit = this.limits[modelTier] || 20;
+    var now = Date.now();
+
+    try {
+      var quotaRef = firebase.database().ref('nox_ai_quotas/' + safeKey + '/' + modelTier);
+      var snapshot = await quotaRef.once('value');
+      var timestamps = snapshot.val() || [];
+      var validTimestamps = timestamps.filter(function(ts) {
+        return (now - ts) < ServerQuotaEngine.windowMs;
+      });
+
+      if (validTimestamps.length >= maxLimit) {
+        return { 
+          allowed: false, 
+          reason: "LIMIT_REACHED", 
+          remaining: 0, 
+          resetsIn: Math.ceil((ServerQuotaEngine.windowMs - (now - validTimestamps[0])) / 60000) 
+        };
+      }
+
+      validTimestamps.push(now);
+      await quotaRef.set(validTimestamps);
+      var remaining = maxLimit - validTimestamps.length;
+      ServerQuotaEngine.updateBadge(modelTier, remaining, maxLimit);
+      return { allowed: true, remaining: remaining };
+    } catch(e) {
+      console.warn("Quota verification fallback:", e);
+      return { allowed: true, remaining: 10 };
+    }
+  },
+
+  updateBadge: function(tier, remaining, max) {
+    if (IS_ADMIN) {
+      if (tier === "3.4" && DOM.get('quota-badge-34')) DOM.get('quota-badge-34').innerText = "★ UNLIMITED (DEV)";
+      if (tier === "3.1" && DOM.get('quota-badge-31')) DOM.get('quota-badge-31').innerText = "◈ UNLIMITED (DEV)";
+      return;
+    }
+    if (tier === "3.4") {
+      var b34 = DOM.get('quota-badge-34');
+      if (b34) b34.innerText = "★ " + remaining + " / " + max + " (5H)";
+    } else if (tier === "3.1") {
+      var b31 = DOM.get('quota-badge-31');
+      if (b31) b31.innerText = "◈ " + remaining + " / " + max + " (5H)";
+    }
+  }
+};
+
+/* ==========================================================================
+   DUAL LANGUAGE ENGINE (VN / EN)
+   ========================================================================== */
+var LangEngine = {
+  currentLang: "vi",
+  dict: {
+    vi: {
+      badge: "VN", menuBtn: "MENU", drawerTitle: "COMMAND DECK", aiGroup: "AI TRỢ LÝ & TRÒ CHUYỆN",
+      authGroup: "TÀI KHOẢN HỆ THỐNG", guestBtn: "ĐĂNG NHẬP KHÁCH", logoutBtn: "ĐĂNG XUẤT",
+      communityGroup: "CỘNG ĐỒNG", noticeHeading: "THÔNG BÁO HỆ THỐNG", noticeBtn: "NỘI DUNG",
+      tabLinks: "LINKS BYPASS", tabScripts: "SCRIPTS LUA", tabApk: "FILE APK", tabIos: "IPA / IOS",
+      searchPlace: "🔍 Tìm kiếm Script, Tool, Bypass Link...", aiPromptPlace: "Hỏi GalaxyZ..."
+    },
+    en: {
+      badge: "EN", menuBtn: "MENU", drawerTitle: "COMMAND DECK", aiGroup: "AI ASSISTANTS & CHAT",
+      authGroup: "SYSTEM ACCOUNT", guestBtn: "GUEST LOGIN", logoutBtn: "LOGOUT",
+      communityGroup: "COMMUNITY", noticeHeading: "SYSTEM ANNOUNCEMENT", noticeBtn: "CONTENT",
+      tabLinks: "BYPASS LINKS", tabScripts: "LUA SCRIPTS", tabApk: "APK FILES", tabIos: "IPA / IOS",
+      searchPlace: "🔍 Search Scripts, Tools, Bypass Links...", aiPromptPlace: "Ask GalaxyZ..."
+    }
+  },
+  init: function() {
+    var saved = localStorage.getItem('nox_lang');
+    if(saved && (saved === 'vi' || saved === 'en')) this.currentLang = saved;
+    this.apply();
+  },
+  toggle: function() {
+    this.currentLang = (this.currentLang === 'vi') ? 'en' : 'vi';
+    localStorage.setItem('nox_lang', this.currentLang);
+    this.apply();
+    NotificationEngine.show(this.currentLang === 'vi' ? "Đã chuyển sang Tiếng Việt" : "Switched to English", "INFO");
+  },
+  apply: function() {
+    var d = this.dict[this.currentLang];
+    if(DOM.get('txt-lang-badge')) DOM.get('txt-lang-badge').innerText = d.badge;
+    if(DOM.get('txt-menu-btn')) DOM.get('txt-menu-btn').innerText = d.menuBtn;
+    if(DOM.get('txt-drawer-title')) DOM.get('txt-drawer-title').innerText = d.drawerTitle;
+    if(DOM.get('txt-menu-ai-group')) DOM.get('txt-menu-ai-group').innerText = d.aiGroup;
+    if(DOM.get('txt-menu-auth-group')) DOM.get('txt-menu-auth-group').innerText = d.authGroup;
+    if(DOM.get('txt-menu-guest-btn')) DOM.get('txt-menu-guest-btn').innerText = d.guestBtn;
+    if(DOM.get('txt-menu-logout-btn')) DOM.get('txt-menu-logout-btn').innerText = d.logoutBtn;
+    if(DOM.get('txt-menu-community-group')) DOM.get('txt-menu-community-group').innerText = d.communityGroup;
+    if(DOM.get('txt-notice-heading')) DOM.get('txt-notice-heading').innerText = d.noticeHeading;
+    if(DOM.get('txt-notice-btn')) DOM.get('txt-notice-btn').innerText = d.noticeBtn;
+    if(DOM.get('tab-txt-links')) DOM.get('tab-txt-links').innerText = d.tabLinks;
+    if(DOM.get('tab-txt-scripts')) DOM.get('tab-txt-scripts').innerText = d.tabScripts;
+    if(DOM.get('tab-txt-apk')) DOM.get('tab-txt-apk').innerText = d.tabApk;
+    if(DOM.get('tab-txt-ios')) DOM.get('tab-txt-ios').innerText = d.tabIos;
+    if(DOM.get('input-search')) DOM.get('input-search').placeholder = d.searchPlace;
+    if(DOM.get('noxgpt-field')) DOM.get('noxgpt-field').placeholder = d.aiPromptPlace;
+  }
+};
+
+/* ==========================================================================
+   TIME ENGINE
+   ========================================================================== */
+var TimeEngine = {
+  currentTz: "Asia/Ho_Chi_Minh",
+  init: function() {
+    this.updateClock();
+    setInterval(function() { TimeEngine.updateClock(); }, 1000);
+  },
+  changeTz: function(tz) { this.currentTz = tz; this.updateClock(); },
+  updateClock: function() {
+    var clockEl = DOM.get('hud-live-clock');
+    if(!clockEl) return;
+    try {
+      clockEl.innerText = new Date().toLocaleTimeString('vi-VN', { timeZone: this.currentTz, hour12: false });
+    } catch(e) { clockEl.innerText = new Date().toLocaleTimeString(); }
+  }
+};
+
+/* ==========================================================================
+   NOTICE TYPEWRITER ENGINE
+   ========================================================================== */
+var NoticeTypewriter = {
+  fullTextVN: "⚡ NOX GALAXY ASCENSION OS 2.0 ⚡\n◈ Hệ điều hành trung tâm phân phối Roblox Lua Script, Link Bypass, Tool APK & iOS sạch không quảng cáo.\n◈ HỆ THỐNG AI 3 TẦNG: GalaxyZ-2.5 (Fast Casual), GalaxyZ-3.1 Pro (Advanced Reasoning), GalaxyZ-3.4 Pro (High Context/Coding).\n◈ Bấm Ctrl + K để mở Command Palette điều hướng nhanh.",
+  fullTextEN: "⚡ NOX GALAXY ASCENSION OS 2.0 ⚡\n◈ Cosmic OS portal for Roblox Lua Scripts, Bypass Tools, APK & IPA direct links.\n◈ 3-TIER AI MATRIX: GalaxyZ-2.5 (Fast Casual), GalaxyZ-3.1 Pro (Advanced Reasoning), GalaxyZ-3.4 Pro (High Context/Coding).\n◈ Press Ctrl + K to open the Cosmic Command Palette.",
+  isExpanded: false, timer: null,
+
+  toggle: function() {
+    var zone = DOM.get('ui-notice-text-zone');
+    var btn = DOM.get('btn-notice-toggle');
+    if(!zone || !btn) return;
+    var text = (LangEngine.currentLang === 'vi') ? this.fullTextVN : this.fullTextEN;
+
+    if (!this.isExpanded) {
+      this.isExpanded = true;
+      btn.innerHTML = '<span id="txt-notice-btn">' + (LangEngine.currentLang==='vi'?'THU GỌN':'COLLAPSE') + '</span>';
+      this.typeWrite(text, zone);
+    } else {
+      this.isExpanded = false;
+      if(this.timer) clearInterval(this.timer);
+      btn.innerHTML = '<span id="txt-notice-btn">' + (LangEngine.currentLang==='vi'?'NỘI DUNG':'CONTENT') + '</span>';
+      zone.innerHTML = (LangEngine.currentLang==='vi'?'Nhấn vào nút <strong>NỘI DUNG</strong> phía trên để xem chi tiết...':'Click <strong>CONTENT</strong> button above to view announcement...');
+    }
+  },
+
+  typeWrite: function(text, container) {
+    if(this.timer) clearInterval(this.timer);
+    container.innerHTML = '';
+    var i = 0;
+    var cursor = document.createElement('span');
+    cursor.className = 'quantum-terminal-cursor';
+    container.appendChild(cursor);
+
+    this.timer = setInterval(function() {
+      if (i < text.length) {
+        var char = text.charAt(i);
+        if (char === '\n') cursor.insertAdjacentHTML('beforebegin', '<br>');
+        else cursor.insertAdjacentText('beforebegin', char);
+        i++;
+      } else {
+        clearInterval(NoticeTypewriter.timer);
+        cursor.remove();
+      }
+    }, 14);
+  }
+};
+
+/* ==========================================================================
+   UI CONTROLS & CONFIRMATION (ROOT FIXED MENU)
+   ========================================================================== */
+var ConfirmUI = {
+  onConfirm: null,
+  show: function(msg, callback) {
+    var txt = DOM.get('confirm-msg-text');
+    if(txt) txt.innerHTML = msg;
+    this.onConfirm = callback;
+    var m = DOM.get('confirm-modal');
+    if(m) m.classList.add('is-active');
+  },
+  ok: function() {
+    var m = DOM.get('confirm-modal');
+    if(m) m.classList.remove('is-active');
+    if(this.onConfirm) this.onConfirm();
+  },
+  no: function() { 
+    var m = DOM.get('confirm-modal');
+    if(m) m.classList.remove('is-active'); 
+  }
+};
+
+function toggleMenu() { 
+  var d = DOM.get('nav-drawer-backdrop');
+  if(d) d.classList.toggle('is-open');
+  if(!ChatEngine.userProfile && DOM.get('drawer-google-login-wrap') && !DOM.get('drawer-google-login-wrap').hasChildNodes()) {
+    AuthEngine.renderGoogleButtons();
+  }
+}
+function openUI(id) { 
+  var e = DOM.get(id); if(e) e.classList.add('is-active'); 
+  var d = DOM.get('nav-drawer-backdrop'); if(d) d.classList.remove('is-open');
+}
+function closeUI(id) { 
+  var e = DOM.get(id); if(e) e.classList.remove('is-active'); 
+}
+
+window.addEventListener('keydown', function(e) {
+  if(e.key === 'Escape') {
+    DOM.queryAll('.cosmic-modal-overlay.is-active').forEach(function(m) { m.classList.remove('is-active'); });
+    var d = DOM.get('nav-drawer-backdrop');
+    if(d && d.classList.contains('is-open')) d.classList.remove('is-open');
+    var lb = DOM.get('image-lightbox');
+    if(lb && lb.classList.contains('active')) lb.classList.remove('active');
+    var cp = DOM.get('command-palette-modal');
+    if(cp && cp.classList.contains('is-active')) cp.classList.remove('is-active');
+  }
+});
+
+var RestrictedAction = {
+  checkAndOpen: function(modalId) {
+    var profile = ChatEngine.userProfile;
+    if(profile && profile.email && profile.email !== 'guest') {
+      var safeKey = profile.email.replace(/\./g, '_dot_').replace(/@/g, '_at_');
+      try {
+        firebase.database().ref('nox_users_control/' + safeKey).once('value').then(function(snapshot) {
+          var data = snapshot.val();
+          if(data && data.isBanned) {
+            alert('BẠN ĐÃ BỊ BAN! Lý do: ' + (data.banReason || 'Vi phạm quy định'));
+            return;
+          }
+          if(modalId === 'modal-noxchat' && !ChatEngine.userProfile) { AuthEngine.renderGoogleButtons(); }
+          openUI(modalId);
+        }).catch(function() { openUI(modalId); });
+      } catch(e) { openUI(modalId); }
+    } else {
+      if(modalId === 'modal-noxchat' && !ChatEngine.userProfile) { AuthEngine.renderGoogleButtons(); }
+      openUI(modalId);
+    }
+  }
+};
+
+/* ==========================================================================
+   AUTHENTICATION ENGINE
+   ========================================================================== */
+var AuthEngine = {
+  initGoogleIdentity: function() {
+    if(typeof google === 'undefined' || !google.accounts) { 
+      setTimeout(function() { AuthEngine.initGoogleIdentity(); }, 500); 
+      return; 
+    }
+    try {
+      google.accounts.id.initialize({ 
+        client_id: "766095728968-dbm8rs6f8lt2tm23j0etvb7bukqord8l.apps.googleusercontent.com", 
+        callback: this.onGoogleLoginSuccess.bind(this) 
+      });
+      this.renderGoogleButtons();
+    } catch(e) { console.warn("Google Auth Init:", e); }
+  },
+  renderGoogleButtons: function() {
+    if(typeof google === 'undefined' || !google.accounts) return;
+    var btnWrap = DOM.get('google-login-mount'); 
+    if(btnWrap && !btnWrap.hasChildNodes()) {
+      google.accounts.id.renderButton(btnWrap, { theme: "filled_black", size: "large", shape: "pill", width: 230 });
+    }
+    var menuWrap = DOM.get('drawer-google-login-wrap');
+    if(menuWrap && !menuWrap.hasChildNodes()) {
+      google.accounts.id.renderButton(menuWrap, { theme: "outline", size: "medium", shape: "pill", width: 210 });
+    }
+  },
+  onGoogleLoginSuccess: function(response) {
+    var payload = this.decodeJwt(response.credential);
+    var profile = { name: payload.name || "User", email: payload.email, role: (payload.email === ADMIN_EMAIL) ? 'DEV' : 'NOX' };
+    this.login(profile);
+    ChatEngine.appendMsg('SYSTEM', 'Xác thực thành công. Role: ' + profile.role, true); 
+    ChatEngine.listenForMessages();
+  },
+  decodeJwt: function(token) {
+    try { var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'); return JSON.parse(decodeURIComponent(atob(base64).split('').map(function(c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join(''))); } catch(e) { return {}; }
+  },
+  restoreSavedSession: async function() {
+    var savedUser = localStorage.getItem('nox_user_profile');
+    if(savedUser) {
+      try {
+        var profile = JSON.parse(savedUser);
+        this.login(profile);
+        ChatEngine.listenForMessages();
+      } catch(e) { localStorage.removeItem('nox_user_profile'); }
+    }
+  },
+  login: function(profile) {
+    if(profile.email === ADMIN_EMAIL) { 
+      IS_ADMIN = true; 
+      var devGroup = DOM.get('dev-menu-editor-group');
+      if(devGroup) devGroup.style.display = 'flex';
+      ServerQuotaEngine.updateBadge("3.4", "UNLIMITED", 20);
+      ServerQuotaEngine.updateBadge("3.1", "UNLIMITED", 60);
+    }
+    ChatEngine.userProfile = profile;
+    localStorage.setItem('nox_user_profile', JSON.stringify(profile));
+    
+    try {
+      if(profile.email && profile.email !== 'guest') {
+        var safeKey = profile.email.replace(/\./g, '_dot_').replace(/@/g, '_at_');
+        firebase.database().ref('nox_users_registry/' + safeKey).set({
+          name: profile.name, email: profile.email, role: profile.role, lastLogin: firebase.database.ServerValue.TIMESTAMP
+        });
+      }
+    } catch(e) { console.warn("Firebase registry update failed:", e); }
+
+    var authGuard = DOM.get('auth-guard');
+    if(authGuard) authGuard.style.display = 'none';
+    this.updateAuthUI(true);
+    UtilsEngine.loadDynamicUtils();
+  },
+  guestLogin: function() {
+    var randId = Math.floor(Math.random() * 9999);
+    var guestProfile = { name: "Guest_" + randId, email: "guest_" + randId + "@nox.local", role: 'GUEST' };
+    this.login(guestProfile);
+    ChatEngine.appendMsg('SYSTEM', 'Đăng nhập khách: ' + guestProfile.name, true);
+    ChatEngine.listenForMessages();
+  },
+  triggerLogout: function() {
+    ConfirmUI.show("BẠN CÓ CHẮC CHẮN MUỐN ĐĂNG XUẤT?", function() {
+      localStorage.removeItem('nox_user_profile');
+      window.location.reload();
+    });
+  },
+  updateAuthUI: function(isLoggedIn) {
+    var btnGuest = DOM.get('drawer-btn-guest');
+    var googleWrap = DOM.get('drawer-google-login-wrap');
+    var btnLogout = DOM.get('drawer-btn-logout');
+    if(btnGuest) btnGuest.style.display = isLoggedIn ? 'none' : 'flex';
+    if(googleWrap) googleWrap.style.display = isLoggedIn ? 'none' : 'flex';
+    if(btnLogout) btnLogout.style.display = isLoggedIn ? 'flex' : 'none';
+  }
+};
+
+/* ==========================================================================
+   IMAGE PROCESSOR
+   ========================================================================== */
+var ImageProcessor = {
+  currentGptImage: null, currentChatImage: null,
+  handleSelect: function(input, target) {
+    if(!input.files || !input.files[0]) return;
+    var file = input.files[0]; var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var MAX_W = 500; var MAX_H = 500; var w = img.width; var h = img.height;
+        if (w > h) { if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; } } else { if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; } }
+        var canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+        var base64Str = canvas.toDataURL('image/jpeg', 0.6);
+        if(target === 'gpt') {
+          ImageProcessor.currentGptImage = base64Str;
+          var pImg = DOM.get('gpt-preview-img'); if(pImg) pImg.src = base64Str;
+          var pZone = DOM.get('gpt-preview-zone'); if(pZone) pZone.style.display = 'flex';
+        } else {
+          ImageProcessor.currentChatImage = base64Str;
+          var cImg = DOM.get('chat-preview-img'); if(cImg) cImg.src = base64Str;
+          var cZone = DOM.get('chat-preview-zone'); if(cZone) cZone.style.display = 'flex';
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    input.value = "";
+  }
+};
+
+/* ==========================================================================
+   CONFIG & MENU EDITORS
+   ========================================================================== */
+var ConfigEngine = {
+  ref: null,
+  init: function() {
+    try {
+      this.ref = firebase.database().ref('nox_site_config');
+      this.ref.on('value', function(snapshot) {
+        var data = snapshot.val();
+        if(data) {
+          if(data.title && DOM.get('ui-title-text')) DOM.get('ui-title-text').innerText = data.title;
+          if(data.noticeTitle && DOM.get('ui-notice-title')) DOM.get('ui-notice-title').innerText = data.noticeTitle;
+          if(data.noticeText) NoticeTypewriter.fullTextVN = data.noticeText;
+        }
+      });
+    } catch(e) { console.warn("Config Engine Offline:", e); }
+  },
+  saveConfig: function() {
+    if(!IS_ADMIN || !this.ref) return;
+    var title = DOM.get('dev-conf-title').value.trim();
+    var version = DOM.get('dev-conf-version').value.trim();
+    var noticeTitle = DOM.get('dev-conf-noticetitle').value.trim();
+    var noticeText = DOM.get('dev-conf-noticetext').value.trim();
+    var payload = {};
+    if(title) payload.title = title;
+    if(version) payload.version = version;
+    if(noticeTitle) payload.noticeTitle = noticeTitle;
+    if(noticeText) payload.noticeText = noticeText;
+    this.ref.update(payload).then(function() { NotificationEngine.show("Đã cập nhật cấu hình!", "SUCCESS"); });
+  }
+};
+
+var MenuEditor = {
+  ref: null,
+  init: function() { 
+    try {
+      this.ref = firebase.database().ref('nox_custom_menu'); 
+      this.loadMenu(); 
+    } catch(e) {}
+  },
+  loadMenu: function() {
+    if(!this.ref) return;
+    this.ref.on('value', function(snapshot) {
+      var container = DOM.get('dynamic-menu-links'); if(!container) return; container.innerHTML = '';
+      if(snapshot.exists()) {
+        snapshot.forEach(function(child) {
+          var item = child.val(); var key = child.key;
+          var a = document.createElement('a'); a.href = item.link; a.target = "_blank"; a.rel = "noopener noreferrer"; a.className = "drawer-nav-item-btn";
+          var del = IS_ADMIN ? '<span style="color:var(--accent-danger); cursor:pointer;" onclick="event.preventDefault(); MenuEditor.deleteMenuItem(\'' + key + '\')">[X]</span>' : '';
+          a.innerHTML = '<span>' + item.name + '</span> ' + del;
+          container.appendChild(a);
+        });
+      }
+    });
+  },
+  deleteMenuItem: function(key) { 
+    ConfirmUI.show("XÓA MỤC NÀY KHỎI MENU?", function() { 
+      MenuEditor.ref.child(key).remove().then(function() { NotificationEngine.show("Đã xóa!", "INFO"); }); 
+    }); 
+  }
+};
+
+/* ==========================================================================
+   DEV CONTROL CENTER 2.0 (ADMINISTRATION & OBSERVABILITY)
+   ========================================================================== */
+var DevCenter = {
+  usersCache: [],
+  init: function() {
+    if(!IS_ADMIN) return;
+    this.loadStats();
+    this.loadUsers();
+    var integrity = UIIntegrityEngine.check();
+    var zone = DOM.get('dev-integrity-alert-zone');
+    if(zone) {
+      zone.innerHTML = integrity.healthy ? 
+        '<span style="color:var(--accent-quantum)">✓ UI Integrity Engine: All Required DOM Nodes Verified.</span>' :
+        '<span style="color:var(--accent-danger)">⚠ Integrity Warnings: ' + integrity.errors.join(", ") + '</span>';
+    }
+  },
+  switchTab: function(tabId, btn) {
+    DOM.queryAll('.dev-tab-btn').forEach(function(b) { b.classList.remove('is-active'); });
+    DOM.queryAll('.dev-tab-pane').forEach(function(p) { p.classList.remove('is-active'); });
+    if(btn) btn.classList.add('is-active');
+    var target = DOM.get(tabId);
+    if(target) target.classList.add('is-active');
+  },
+  loadStats: function() {
+    try {
+      firebase.database().ref('nox_users_registry').once('value').then(function(snap) {
+        var count = snap.exists() ? Object.keys(snap.val()).length : 0;
+        var el = DOM.get('dev-stat-users');
+        if(el) el.innerText = count;
+      });
+      firebase.database().ref('nox_ai_logs').once('value').then(function(snap) {
+        var count = snap.exists() ? Object.keys(snap.val()).length : 0;
+        var el = DOM.get('dev-stat-requests');
+        if(el) el.innerText = count;
+        DevCenter.renderLogs(snap.val() || {});
+      });
+    } catch(e) {}
+  },
+  loadUsers: async function() {
+    var box = DOM.get('dev-users-list-box');
+    if(!box) return;
+    box.innerHTML = '<div style="text-align:center; padding:15px; color:var(--text-sub);">Đang đồng bộ danh sách user...</div>';
+    try {
+      var regSnap = await firebase.database().ref('nox_users_registry').once('value');
+      var ctrlSnap = await firebase.database().ref('nox_users_control').once('value');
+      var controls = ctrlSnap.val() || {};
+      DevCenter.usersCache = [];
+      if(regSnap.exists()) {
+        regSnap.forEach(function(child) {
+          DevCenter.usersCache.push({ key: child.key, ...child.val(), control: controls[child.key] || {} });
+        });
+      }
+      DevCenter.renderUsers();
+    } catch(e) {
+      box.innerHTML = '<div style="color:var(--accent-danger); padding:10px;">Lỗi tải dữ liệu.</div>';
+    }
+  },
+  renderUsers: function() {
+    var box = DOM.get('dev-users-list-box');
+    if(!box) return;
+    var search = (DOM.get('dev-user-search-input') ? DOM.get('dev-user-search-input').value.toLowerCase().trim() : '');
+    var filterRole = DOM.get('dev-user-filter-role') ? DOM.get('dev-user-filter-role').value : 'ALL';
+    box.innerHTML = '';
+
+    var filtered = DevCenter.usersCache.filter(function(u) {
+      var matchSearch = !search || (u.name && u.name.toLowerCase().includes(search)) || (u.email && u.email.toLowerCase().includes(search));
+      var matchRole = filterRole === 'ALL' || u.role === filterRole;
+      return matchSearch && matchRole;
+    });
+
+    if(filtered.length === 0) {
+      box.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Không tìm thấy người dùng phù hợp.</div>';
+      return;
+    }
+
+    filtered.forEach(function(u) {
+      var card = document.createElement('div');
+      card.className = 'vault-item-card';
+      card.style.padding = '12px';
+      var isBanned = u.control.isBanned;
+      var statusHtml = isBanned ? '<span style="color:var(--accent-danger)">BANNED</span>' : '<span style="color:var(--accent-quantum)">ACTIVE</span>';
+      
+      card.innerHTML = 
+        '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+          '<div>' +
+            '<div style="font-weight:800; font-size:0.9rem;">' + u.name + ' <span class="card-category-tag">' + u.role + '</span></div>' +
+            '<div style="font-size:0.75rem; color:var(--text-muted);">' + u.email + ' • ' + statusHtml + '</div>' +
+          '</div>' +
+          '<div style="display:flex; gap:6px;">' +
+            (isBanned ? 
+              '<button class="btn btn-primary" style="height:28px; font-size:0.7rem; padding:0 8px;" onclick="DevCenter.unbanUser(\'' + u.key + '\')">UNBAN</button>' :
+              '<button class="btn btn-danger" style="height:28px; font-size:0.7rem; padding:0 8px;" onclick="DevCenter.banUser(\'' + u.key + '\')">BAN</button>') +
+          '</div>' +
+        '</div>';
+      box.appendChild(card);
+    });
+  },
+  banUser: function(key) {
+    var reason = prompt("Lý do ban:") || "Vi phạm quy định";
+    firebase.database().ref('nox_users_control/' + key).update({ isBanned: true, banReason: reason }).then(function() {
+      NotificationEngine.show("Đã Ban user!", "WARNING");
+      DevCenter.loadUsers();
+    });
+  },
+  unbanUser: function(key) {
+    firebase.database().ref('nox_users_control/' + key).update({ isBanned: false }).then(function() {
+      NotificationEngine.show("Đã gỡ ban!", "SUCCESS");
+      DevCenter.loadUsers();
+    });
+  },
+  logAiRequest: function(model, latencyMs, success) {
+    try {
+      firebase.database().ref('nox_ai_logs').push({
+        model: model,
+        latency: latencyMs,
+        success: success,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+    } catch(e) {}
+  },
+  renderLogs: function(logsObj) {
+    var board = DOM.get('dev-ai-logs-board');
+    if(!board) return;
+    board.innerHTML = '';
+    var keys = Object.keys(logsObj).reverse().slice(0, 30);
+    keys.forEach(function(k) {
+      var item = logsObj[k];
+      var row = document.createElement('div');
+      row.style.padding = '4px 0';
+      row.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+      row.innerHTML = '<span style="color:var(--accent-cyan);">[' + item.model + ']</span> ' + item.latency + 'ms • ' + (item.success ? '<span style="color:var(--accent-quantum);">OK</span>' : '<span style="color:var(--accent-danger);">ERR</span>');
+      board.appendChild(row);
+    });
+  }
+};
+
+/* ==========================================================================
+   SYSTEM DIAGNOSTICS & TELEMETRY
+   ========================================================================== */
+var SystemDiagnosticsEngine = {
+  runFullCheck: function() {
+    var vW = window.innerWidth;
+    var vH = window.innerHeight;
+    if(DOM.get('diag-viewport')) DOM.get('diag-viewport').innerText = vW + " x " + vH;
+    if(DOM.get('diag-browser-ua')) DOM.get('diag-browser-ua').innerText = navigator.userAgent;
+    if(DOM.get('diag-graphics')) DOM.get('diag-graphics').innerText = GraphicsEngine.currentPreset;
+    if(DOM.get('diag-app-ver')) DOM.get('diag-app-ver').innerText = NOX_VERSION;
+
+    var integrity = UIIntegrityEngine.check();
+    if(DOM.get('diag-integrity')) {
+      DOM.get('diag-integrity').innerText = integrity.healthy ? "100% HEALTHY" : "DEGRADED (" + integrity.errors.length + " warnings)";
+      DOM.get('diag-integrity').style.color = integrity.healthy ? "var(--accent-quantum)" : "var(--accent-danger)";
+    }
+    NotificationEngine.show("Đã hoàn tất chẩn đoán toàn bộ hệ thống.", "SUCCESS");
+  }
+};
+
+/* ==========================================================================
+   UTILS ENGINE (VAULT DATA FEED)
+   ========================================================================== */
+var UtilsEngine = {
+  ref: null, itemsMap: {}, currentTab: 'pane-link', devUploadedBase64: "",
+
+  init: function() { 
+    try {
+      this.ref = firebase.database().ref('nox_custom_utils'); 
+      this.checkAndInitDefaults();
+      this.loadDynamicUtils(); 
+      MenuEditor.init();
+    } catch(e) {}
+  },
+
+  handleDevImage: function(input) {
+    if(!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    DOM.get('dev-file-name').innerText = file.name;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var MAX_W = 600; var MAX_H = 400; var w = img.width; var h = img.height;
+        if (w > h) { if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; } } else { if (h > MAX_H) { w *= MAX_H / h; h = MAX_H; } }
+        var canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+        UtilsEngine.devUploadedBase64 = canvas.toDataURL('image/jpeg', 0.65);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  },
+
+  checkAndInitDefaults: function() {
+    if(!this.ref) return;
+    this.ref.once('value', function(snapshot) {
+      if(!snapshot.exists()) {
+        var defaults = [
+          { type: 'pane-link', title: 'Bypass Key Delta', content: 'https://baconbypass.xyz', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=60' },
+          { type: 'pane-link', title: 'Kasumi Store VIP', content: 'https://gofile.io/d/v3Q6Ig', image: '' },
+          { type: 'pane-script', title: 'Speed X Hub Pro', content: 'loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()', isScript: true, image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=60' },
+          { type: 'pane-apk', title: 'Delta Web Client', content: 'https://deltaexploits.gg/', image: '' },
+          { type: 'pane-ios', title: 'Delta iOS IPA', content: 'https://deltaexploits.gg/', image: '' }
+        ];
+        defaults.forEach(function(d) { UtilsEngine.ref.push(d); });
+      }
+    });
+  },
+
+  switchTab: function(tabId, btn) {
+    this.currentTab = tabId;
+    DOM.queryAll('.category-chip').forEach(function(b) { b.classList.remove('is-active'); });
+    if(btn) btn.classList.add('is-active');
+    this.renderCurrentTab();
+  },
+
+  renderCurrentTab: function() {
+    var container = DOM.get('main-feed-container');
+    if(!container) return;
+    container.innerHTML = '';
+
+    var searchVal = (DOM.get('input-search') ? DOM.get('input-search').value.trim().toLowerCase() : '');
+    var count = 0;
+
+    Object.keys(this.itemsMap).forEach(function(key) {
+      var item = UtilsEngine.itemsMap[key];
+      if(item.type !== UtilsEngine.currentTab) return;
+      if(searchVal && !item.title.toLowerCase().includes(searchVal) && !item.content.toLowerCase().includes(searchVal)) return;
+
+      count++;
+      var box = document.createElement('div');
+      box.className = 'vault-item-card';
+      box.id = 'util-card-' + key;
+
+      var devControls = IS_ADMIN ? 
+        '<button class="btn btn-secondary" style="height:28px; padding:0 8px; font-size:0.75rem;" onclick="UtilsEngine.triggerEdit(\'' + key + '\')">✎</button>' +
+        '<button class="btn btn-danger" style="height:28px; padding:0 8px; font-size:0.75rem;" onclick="UtilsEngine.triggerDelete(\'' + key + '\')">✕</button>' : '';
+
+      var safeTitle = item.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      var imageHtml = "";
+      if(item.image) {
+        imageHtml = '<div class="card-preview-thumb" onclick="openLightbox(\'' + item.image + '\')"><img src="' + item.image + '" class="card-preview-img" alt="Thumbnail" loading="lazy" onerror="this.src=\'data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'100%\\\' height=\\\'100%\\\'><rect width=\\\'100%\\\' height=\\\'100%\\\' fill=\\\'%23050816\\\'/></svg>\'"></div>';
+      }
+
+      var categoryName = item.type === 'pane-link' ? 'LINK' : (item.type === 'pane-script' ? 'SCRIPT' : (item.type === 'pane-apk' ? 'APK' : 'IOS'));
+
+      if(item.type === 'pane-script' || item.isScript) {
+        var safeCode = item.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        box.innerHTML = 
+          '<div class="card-top-row">' +
+            '<span class="card-category-tag">' + categoryName + '</span>' +
+            '<div class="card-admin-tools">' + devControls + '</div>' +
+          '</div>' +
+          '<h3 class="card-title-text">' + safeTitle + '</h3>' +
+          imageHtml +
+          '<div class="card-lua-code-block">' + safeCode + '</div>' +
+          '<div class="card-actions-dock">' +
+            '<button class="btn btn-primary" onclick="UtilsEngine.execCopy(this, \'' + key + '\')">COPY SCRIPT</button>' +
+          '</div>';
+      } else {
+        box.innerHTML = 
+          '<div class="card-top-row">' +
+            '<span class="card-category-tag">' + categoryName + '</span>' +
+            '<div class="card-admin-tools">' + devControls + '</div>' +
+          '</div>' +
+          '<h3 class="card-title-text">' + safeTitle + '</h3>' +
+          imageHtml +
+          '<div class="card-actions-dock">' +
+            '<a href="' + item.content + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary">' + (LangEngine.currentLang==='vi'?'MỞ LINK ↗':'OPEN LINK ↗') + '</a>' +
+          '</div>';
+      }
+
+      container.appendChild(box);
+    });
+
+    if(count === 0) {
+      container.innerHTML = '<div style="text-align:center; grid-column: 1/-1; padding:40px 20px; color:var(--text-muted);">' + (LangEngine.currentLang==='vi'?'Không tìm thấy tiện ích nào.':'No matching items found.') + '</div>';
+    }
+  },
+
+  execSearch: function() { this.renderCurrentTab(); },
+
+  execCopy: function(btn, key) {
+    var item = this.itemsMap[key];
+    if(!item) return;
+    var txt = item.content;
+    var ok = function() { 
+      btn.innerText = '✓ COPIED'; 
+      setTimeout(function() { btn.innerText = 'COPY SCRIPT'; }, 2000); 
+    };
+    if(navigator.clipboard) navigator.clipboard.writeText(txt).then(ok).catch(function() { prompt('Copy:', txt); });
+    else prompt('Copy:', txt);
+  },
+
+  triggerSave: function() {
+    ConfirmUI.show("LƯU TIỆN ÍCH LÊN HỆ THỐNG?", function() {
+      if(!IS_ADMIN) return;
+      var editKey = DOM.get('dev-edit-key').value;
+      var type = DOM.get('dev-util-type').value; 
+      var title = DOM.get('dev-util-title').value.trim(); 
+      var content = DOM.get('dev-util-content').value.trim();
+      var imgUrl = UtilsEngine.devUploadedBase64 || DOM.get('dev-util-image').value.trim();
+
+      if(!title || !content) { alert("Nhập đủ thông tin!"); return; }
+      if(editKey) {
+        UtilsEngine.ref.child(editKey).update({ type: type, title: title, content: content, image: imgUrl }).then(function() { 
+          NotificationEngine.show("Đã cập nhật!", "SUCCESS"); 
+          UtilsEngine.cancelEdit(); 
+        });
+      } else {
+        UtilsEngine.ref.push({ type: type, title: title, content: content, image: imgUrl, timestamp: firebase.database.ServerValue.TIMESTAMP }).then(function() {
+          NotificationEngine.show("Đã thêm mới!", "SUCCESS"); 
+          UtilsEngine.cancelEdit(); 
+        });
+      }
+    });
+  },
+
+  triggerDelete: function(key) {
+    ConfirmUI.show("XÓA TIỆN ÍCH NÀY?", function() { UtilsEngine.ref.child(key).remove().then(function() { NotificationEngine.show("Đã xóa!", "INFO"); }); });
+  },
+
+  triggerEdit: function(key) {
+    var item = this.itemsMap[key];
+    if(!item) return;
+    DOM.get('dev-edit-key').value = key;
+    DOM.get('dev-util-type').value = item.type;
+    DOM.get('dev-util-title').value = item.title;
+    DOM.get('dev-util-image').value = item.image || "";
+    DOM.get('dev-util-content').value = item.content;
+    var heading = DOM.get('dev-panel-heading');
+    if(heading) heading.innerText = "[DEV] CHỈNH SỬA TIỆN ÍCH";
+    DOM.get('dev-submit-btn').innerText = "LƯU THAY ĐỔI";
+    DOM.get('dev-cancel-btn').style.display = 'block';
+    openUI('modal-dev-control');
+    DevCenter.switchTab('dev-tab-utils', null);
+  },
+
+  cancelEdit: function() {
+    DOM.get('dev-edit-key').value = ''; 
+    DOM.get('dev-util-title').value = ''; 
+    DOM.get('dev-util-image').value = ''; 
+    DOM.get('dev-util-content').value = '';
+    DOM.get('dev-file-name').innerText = "Chưa chọn ảnh";
+    UtilsEngine.devUploadedBase64 = "";
+    var heading = DOM.get('dev-panel-heading');
+    if(heading) heading.innerText = "[DEV] THÊM / SỬA TIỆN ÍCH";
+    DOM.get('dev-submit-btn').innerText = "ĐĂNG TẢI";
+    DOM.get('dev-cancel-btn').style.display = 'none';
+  },
+
+  loadDynamicUtils: function() {
+    if(!this.ref) return;
+    this.ref.on('value', function(snapshot) {
+      UtilsEngine.itemsMap = {};
+      if(snapshot.exists()) {
+        snapshot.forEach(function(child) {
+          UtilsEngine.itemsMap[child.key] = child.val();
+        });
+      }
+      UtilsEngine.renderCurrentTab();
+    });
+  }
+};
+
+/* ==========================================================================
+   AI ORCHESTRATION LAYER (GALAXYZ 3-TIER ROUTING ENGINE 2.0)
+   ========================================================================== */
+var AIRouter = {
+  defaultKey: "sk-xt-1e76a82a6e5be8a063d9f79d41f248c1469aeb7196683edc",
+  defaultUrl: "https://api.xkiro.com/v1/chat/completions",
+  getApiKey: function() { return localStorage.getItem('nox_ds_key') || this.defaultKey; },
+  setApiKey: function(newKey) { localStorage.setItem('nox_ds_key', newKey.trim()); },
+
+  board: null,
+  input: null,
+  isGenerating: false,
+  currentModel: "3.4",
+  abortController: null,
+
+  tierConfigs: {
+    "2.5": {
+      name: "GalaxyZ-2.5",
+      temperature: 0.75,
+      systemPrompt: "You are GalaxyZ-2.5 (Fast Casual Cosmic AI on NOX GALAXY ASCENSION OS 2.0, created by HminhGalaxy). When asked about your identity, you must state: 'Tôi là GalaxyZ-2.5 (Fast Casual) trên hệ điều hành NOX GALAXY ASCENSION OS 2.0.' Focus on rapid, direct, and helpful casual assistance with zero fluff."
+    },
+    "3.1": {
+      name: "GalaxyZ-3.1 Pro",
+      temperature: 0.60,
+      systemPrompt: "You are GalaxyZ-3.1 Pro (Pro Reasoning & Coding AI on NOX GALAXY ASCENSION OS 2.0, created by HminhGalaxy). When asked about your identity, you must state: 'Tôi là GalaxyZ-3.1 Pro (Pro Reasoning & Coding) trên hệ điều hành NOX GALAXY ASCENSION OS 2.0.' Specialize in clean Roblox Lua scripting, full web development, step-by-step reasoning, and debugging."
+    },
+    "3.4": {
+      name: "GalaxyZ-3.4 Pro (High)",
+      temperature: 0.45,
+      systemPrompt: "You are GalaxyZ-3.4 Pro (High Reasoning & Max Quality AI on NOX GALAXY ASCENSION OS 2.0, created by HminhGalaxy). When asked about your identity, you must state: 'Tôi là GalaxyZ-3.4 Pro (High Reasoning) trên hệ điều hành NOX GALAXY ASCENSION OS 2.0.' You possess deep architectural reasoning, flawless code generation, deep context understanding, and zero hallucination policy."
+    }
+  },
+
+  messageHistory: [],
+
+  init: function() {
+    this.board = DOM.get('noxgpt-board');
+    this.input = DOM.get('noxgpt-field');
+    this.switchModel("3.4");
+  },
+
+  switchModel: function(model) {
+    this.currentModel = model;
+    DOM.queryAll('.ai-tier-card').forEach(function(c) { c.classList.remove('is-active'); });
+    var targetCard = DOM.get('tier-card-' + model.replace('.', ''));
+    if(targetCard) targetCard.classList.add('is-active');
+
+    var conf = this.tierConfigs[model] || this.tierConfigs["3.4"];
+    DOM.get('gpt-active-model-title').innerText = conf.name.toUpperCase();
+    DOM.get('hud-ai-model-active').innerText = conf.name.toUpperCase();
+
+    this.messageHistory = [{ role: "system", content: conf.systemPrompt }];
+    NotificationEngine.show("Kích hoạt model: " + conf.name, "INFO");
+  },
+
+  clearChat: function() {
+    this.messageHistory = [{ role: "system", content: (this.tierConfigs[this.currentModel] || this.tierConfigs["3.4"]).systemPrompt }];
+    if(this.board) this.board.innerHTML = '';
+    NotificationEngine.show("Đã xóa cuộc trò chuyện.", "INFO");
+  },
+
+  setGeneratingState: function(state) {
+    this.isGenerating = state;
+    var btn = DOM.get('btn-gpt-send');
+    if(!btn) return;
+    if(state) {
+      btn.innerHTML = '⏹';
+      btn.title = "Dừng tạo câu trả lời";
+    } else {
+      btn.innerHTML = '<svg class="nox-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+      btn.title = "Gửi tin nhắn";
+    }
+  },
+
+  handleSendOrStop: function() {
+    if(this.isGenerating) this.stopGeneration();
+    else this.submit();
+  },
+
+  stopGeneration: function() {
+    if(this.abortController) { this.abortController.abort(); this.abortController = null; }
+    this.setGeneratingState(false);
+    var loader = DOM.get('gpt-active-loader');
+    if(loader) loader.remove();
+    this.appendMsg('other', this.tierConfigs[this.currentModel].name, '<i>[Đã dừng tạo phản hồi]</i>');
+  },
+
+  formatMarkdown: function(text) {
+    var out = text.replace(/```([a-zA-Z]*)\n([\s\S]*?)```/g, function(match, lang, code) {
+      var safeCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return '<div style="background:#03050C; border:1px solid rgba(0,217,245,0.25); border-radius:6px; margin:8px 0; overflow:hidden;">' +
+        '<div style="padding:4px 10px; background:rgba(255,255,255,0.05); font-size:0.7rem; color:var(--accent-cyan); font-family:monospace; display:flex; justify-content:space-between;">' +
+          '<span>' + (lang || 'CODE') + '</span>' +
+        '</div>' +
+        '<pre style="padding:10px; font-family:monospace; font-size:0.8rem; color:#6EE7B7; overflow-x:auto;"><code>' + safeCode + '</code></pre>' +
+      '</div>';
+    });
+    out = out.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    out = out.replace(/\n/g, '<br>');
+    return out;
+  },
+
+  appendMsg: function(type, name, htmlContent) {
+    if(!this.board) this.board = DOM.get('noxgpt-board');
+    if(!this.board) return;
+    var row = document.createElement('div'); row.className = 'msg-row-block type-' + type;
+    var innerHTML = '';
+    if(type === 'other') innerHTML += '<div class="msg-meta-tag sys">' + name + '</div>';
+    else innerHTML += '<div class="msg-meta-tag">' + (LangEngine.currentLang==='vi'?'Bạn':'You') + '</div>';
+    innerHTML += '<div class="msg-bubble-glass">' + this.formatMarkdown(htmlContent) + '</div>';
+    row.innerHTML = innerHTML; this.board.appendChild(row); this.board.scrollTop = this.board.scrollHeight;
+    return row; 
+  },
+
+  appendMorphingLoader: function() {
+    if(!this.board) this.board = DOM.get('noxgpt-board');
+    var row = document.createElement('div'); 
+    row.className = 'msg-row-block type-other';
+    row.id = 'gpt-active-loader';
+    row.innerHTML = 
+      '<div class="msg-meta-tag sys">' + this.tierConfigs[this.currentModel].name + '</div>' +
+      '<div class="msg-bubble-glass">' +
+        '<div class="ai-thinking-orb-dock">' +
+          '<div class="ai-orbit-spin-orb"><div class="ai-orb-ring"></div><div class="ai-orb-core"></div></div>' +
+          '<span class="ai-status-pulse-txt" id="gpt-thinking-step-txt">ANALYZING INPUT & CONTEXT...</span>' +
+        '</div>' +
+      '</div>';
+    this.board.appendChild(row); 
+    this.board.scrollTop = this.board.scrollHeight;
+    return row;
+  },
+
+  removeImage: function() { 
+    ImageProcessor.currentGptImage = null; 
+    var pImg = DOM.get('gpt-preview-img'); if(pImg) pImg.src = '';
+    var pZone = DOM.get('gpt-preview-zone'); if(pZone) pZone.style.display = 'none';
+    var upload = DOM.get('gpt-img-upload'); if(upload) upload.value = '';
+  },
+
+  detectImageRequest: function(text) {
+    var lower = text.toLowerCase().trim();
+    var triggers = [
+      "tạo ảnh", "vẽ ảnh", "vẽ", "tạo hình", "hình ảnh về", "ảnh",
+      "draw", "paint", "generate image", "create image", "make a picture", "make an image"
+    ];
+    for(var i = 0; i < triggers.length; i++) {
+      var t = triggers[i];
+      if(lower.startsWith(t) || lower.indexOf(t) !== -1) {
+        var subject = lower.replace(t, "").replace(/[:,"']/g, "").trim();
+        if(!subject) subject = "cosmic quantum abstract sphere wallpaper";
+        return subject + ", 8k resolution, highly detailed, photorealistic, cinematic lighting, masterpiece";
+      }
+    }
+    return null;
+  },
+
+  submit: async function() {
+    if(!FeatureFlagEngine.flags.AI_ENABLED) {
+      NotificationEngine.show("AI Matrix hiện đang tạm khóa bởi quản trị viên.", "WARNING");
+      return;
+    }
+    if(!this.input) this.input = DOM.get('noxgpt-field');
+    var text = this.input.value.trim(); var base64Img = ImageProcessor.currentGptImage;
+    if(!text && !base64Img) return;
+
+    var currentUser = ChatEngine.userProfile ? ChatEngine.userProfile.email : null;
+    var quotaCheck = await ServerQuotaEngine.checkAndConsumeQuota(currentUser, this.currentModel);
+
+    if (!quotaCheck.allowed) {
+      if (quotaCheck.reason === "AUTH_REQUIRED") {
+        NotificationEngine.show("Model " + this.tierConfigs[this.currentModel].name + " yêu cầu đăng nhập Google.", "WARNING");
+        openUI('modal-noxchat');
+        return;
+      }
+      if (quotaCheck.reason === "LIMIT_REACHED") {
+        NotificationEngine.show("Hạn mức đã hết (Reset sau ~" + quotaCheck.resetsIn + " phút).", "WARNING");
+        return;
+      }
+    }
+
+    var userHtml = text ? text.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+    if(base64Img) userHtml = '<img src="' + base64Img + '" style="max-width:100%; border-radius:6px; margin-bottom:6px; display:block;" alt="Uploaded Image">' + userHtml;
+    
+    this.input.value = ''; this.input.style.height = '42px'; this.removeImage();
+    this.appendMsg('user', 'Bạn', userHtml);
+    this.messageHistory.push({ role: "user", content: text || "[Sent Image]" });
+    this.setGeneratingState(true);
+
+    var startTime = Date.now();
+
+    var imagePrompt = this.detectImageRequest(text);
+    if(imagePrompt) {
+      var loader = this.appendMorphingLoader();
+      var encoded = encodeURIComponent(imagePrompt);
+      var seed = Math.floor(Math.random() * 999999);
+      var imageUrl = 'https://image.pollinations.ai/prompt/' + encoded + '?width=1024&height=768&nologo=true&enhance=true&model=flux&seed=' + seed;
+      var thinkDelay = (this.currentModel === "3.4") ? 2200 : 1400;
+
+      setTimeout(function() {
+        if(loader) loader.remove();
+        AIRouter.setGeneratingState(false);
+        var titleMsg = (LangEngine.currentLang==='vi') ? "Tác phẩm Quantum đã hoàn tất:" : "Quantum artwork generated:";
+        var imgHtml = '<div>' + titleMsg + '</div>' +
+          '<img src="' + imageUrl + '" style="max-width:100%; border-radius:6px; margin-top:6px; cursor:pointer;" onclick="openLightbox(\'' + imageUrl + '\')" alt="AI Art">';
+        AIRouter.appendMsg('other', AIRouter.tierConfigs[AIRouter.currentModel].name, imgHtml);
+        AIRouter.messageHistory.push({ role: "assistant", content: "Generated image: " + imagePrompt });
+        DevCenter.logAiRequest(AIRouter.tierConfigs[AIRouter.currentModel].name + ' [IMAGE]', Date.now() - startTime, true);
+      }, thinkDelay);
+      return;
+    }
+
+    var tempLoader = this.appendMorphingLoader();
+    this.abortController = new AbortController();
+
+    try {
+      var apiKey = this.getApiKey();
+      var currentConfig = this.tierConfigs[this.currentModel] || this.tierConfigs["3.4"];
+
+      var response = await fetch(this.defaultUrl, {
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+        body: JSON.stringify({ 
+          model: "deepseek/deepseek-v4-pro", 
+          messages: this.messageHistory,
+          temperature: currentConfig.temperature
+        }),
+        signal: this.abortController.signal
+      });
+
+      if(!response.ok) throw new Error("HTTP " + response.status);
+      var data = await response.json(); 
+      if(tempLoader) tempLoader.remove();
+      this.setGeneratingState(false);
+      
+      if(data.choices && data.choices[0] && data.choices[0].message) {
+        var reply = data.choices[0].message.content;
+        this.appendMsg('other', currentConfig.name, reply); 
+        this.messageHistory.push({ role: "assistant", content: reply });
+        DevCenter.logAiRequest(currentConfig.name, Date.now() - startTime, true);
+      }
+    } catch(err) {
+      if(err.name === 'AbortError') return;
+      if(tempLoader) tempLoader.remove();
+      
+      if(typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
+        puter.ai.chat(text).then(function(res) {
+          AIRouter.setGeneratingState(false);
+          var puterReply = (typeof res === 'string') ? res : (res.message ? res.message.content : JSON.stringify(res));
+          AIRouter.appendMsg('other', AIRouter.tierConfigs[AIRouter.currentModel].name, puterReply);
+          DevCenter.logAiRequest(AIRouter.tierConfigs[AIRouter.currentModel].name + ' [PUTER]', Date.now() - startTime, true);
+        }).catch(function() {
+          AIRouter.setGeneratingState(false);
+          var fb = DOM.get('gpt-fallback-container'); if(fb) fb.style.display = 'block';
+          DevCenter.logAiRequest(AIRouter.tierConfigs[AIRouter.currentModel].name, Date.now() - startTime, false);
+        });
+      } else {
+        AIRouter.setGeneratingState(false);
+        var fb = DOM.get('gpt-fallback-container'); if(fb) fb.style.display = 'block';
+        DevCenter.logAiRequest(AIRouter.tierConfigs[AIRouter.currentModel].name, Date.now() - startTime, false);
+      }
+    }
+  },
+  validateAndSaveConfig: function() {
+    var key = DOM.get('gpt-new-api-key').value.trim();
+    if(!key) return;
+    this.setApiKey(key);
+    DOM.get('gpt-fallback-container').style.display = 'none';
+    this.appendMsg('other', 'System', 'Đã lưu API Key mới.');
+  }
+};
+
+/* ==========================================================================
+   FIREBASE CHAT & VAULT ENGINE
+   ========================================================================== */
+var ChatEngine = {
+  dbRef: null, scriptRef: null, userProfile: null, board: DOM.get('noxchat-board'), input: DOM.get('noxchat-field'),
+  vaultMap: {}, isSetup: false,
+
+  initFirebaseAsync: function() {
+    return new Promise(function(resolve, reject) {
+      var firebaseConfig = {
+        apiKey: "AIzaSyDHyuP7FcF8SqOXsoyTeYnAvJbk0Uunq0c", authDomain: "chatting-74814.firebaseapp.com",
+        databaseURL: "https://chatting-74814-default-rtdb.firebaseio.com", projectId: "chatting-74814",
+        storageBucket: "chatting-74814.firebasestorage.app", messagingSenderId: "520016594870",
+        appId: "1:520016594870:web:df652fe9a0fd68dc7e6317", measurementId: "G-7HWYC4HCDT"
+      };
+
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        ChatEngine.dbRef = firebase.database().ref('nox_global_chat');
+        ChatEngine.scriptRef = firebase.database().ref('nox_global_scripts'); 
+        ChatEngine.isSetup = true;
+        resolve(true);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
+
+  removeImage: function() { 
+    ImageProcessor.currentChatImage = null; 
+    var cImg = DOM.get('chat-preview-img'); if(cImg) cImg.src = '';
+    var cZone = DOM.get('chat-preview-zone'); if(cZone) cZone.style.display = 'none';
+    var upload = DOM.get('chat-img-upload'); if(upload) upload.value = '';
+  },
+
+  appendMsg: function(senderName, htmlContent, isSystem, msgKey, role, isRecalled) {
+    if(!this.board) this.board = DOM.get('noxchat-board');
+    if(!this.board) return;
+
+    var isMe = (this.userProfile && senderName === this.userProfile.name);
+    var row = document.createElement('div'); 
+    row.className = 'msg-row-block ' + (isMe ? 'type-user' : 'type-other');
+    if(msgKey) row.id = 'msg-' + msgKey;
+    
+    var badge = role === 'DEV' ? '<span style="color:#FFF; background:#FF2A85; padding:1px 6px; border-radius:4px; font-size:0.65rem; font-weight:800;">DEV</span>' : (role === 'NOX' ? '<span style="color:#02040A; background:var(--accent-quantum); padding:1px 6px; border-radius:4px; font-size:0.65rem; font-weight:800;">NOX</span>' : '<span style="color:var(--text-muted); border:1px solid var(--border-glass); padding:1px 6px; border-radius:4px; font-size:0.65rem; background:var(--bg-input);">GUEST</span>');
+    if(isSystem) badge = '';
+
+    row.innerHTML = 
+      '<div class="msg-meta-tag ' + (isSystem ? 'sys' : '') + '">' + badge + ' ' + senderName + '</div>' +
+      '<div class="msg-bubble-glass">' + (isRecalled ? '<i>[Tin nhắn đã bị thu hồi]</i>' : htmlContent) + '</div>';
+
+    this.board.appendChild(row); 
+    this.board.scrollTop = this.board.scrollHeight;
+  },
+
+  listenForMessages: function() {
+    if(!this.dbRef) return;
+    this.dbRef.limitToLast(50).on('child_added', function(snapshot) {
+      var data = snapshot.val(); if(!data) return;
+      var html = data.text ? data.text.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+      if(data.image) { html = '<img src="' + data.image + '" style="max-width:100%; border-radius:6px; margin-bottom:6px; cursor:pointer;" onclick="openLightbox(\'' + data.image + '\')" alt="Chat Image">' + html; }
+      ChatEngine.appendMsg(data.user, html, false, snapshot.key, data.role, data.recalled);
+    });
+  },
+
+  sendMsg: function() {
+    if(!this.userProfile) { alert("Vui lòng đăng nhập trước!"); return; }
+    var safeKey = this.userProfile.email.replace(/\./g, '_dot_').replace(/@/g, '_at_');
+    
+    firebase.database().ref('nox_users_control/' + safeKey).once('value', function(snapshot) {
+      var ctrl = snapshot.val();
+      if(ctrl && ctrl.isMuted && Date.now() < ctrl.muteUntil) {
+        var timeStr = new Date(ctrl.muteUntil).toLocaleTimeString();
+        alert('BẠN ĐÃ BỊ CẤM CHAT (Đến ' + timeStr + ').');
+        return;
+      }
+      if(!ChatEngine.input) ChatEngine.input = DOM.get('noxchat-field');
+      var text = ChatEngine.input.value.trim(); var base64Img = ImageProcessor.currentChatImage;
+      if(!text && !base64Img) return;
+      
+      ChatEngine.input.value = ''; ChatEngine.input.style.height = '42px'; ChatEngine.removeImage();
+      ChatEngine.dbRef.push({ 
+        user: ChatEngine.userProfile.name, role: ChatEngine.userProfile.role, email: ChatEngine.userProfile.email,
+        text: text, image: base64Img || "", recalled: false, 
+        timestamp: firebase.database.ServerValue.TIMESTAMP 
+      }).catch(function() { ChatEngine.appendMsg('SYSTEM', 'Lỗi gửi tin nhắn.', true); });
+    });
+  },
+
+  sendScript: function() {
+    if(!this.userProfile) { alert("Vui lòng đăng nhập trước!"); return; }
+    var title = DOM.get('share-title').value.trim(); 
+    var image = DOM.get('share-image').value.trim();
+    var code = DOM.get('share-code').value.trim();
+    if(!title || !code) { alert("Điền đủ tên và mã script!"); return; }
+    this.scriptRef.push({ 
+      user: this.userProfile.name, role: this.userProfile.role, title: title, image: image, code: code, 
+      timestamp: firebase.database.ServerValue.TIMESTAMP 
+    }).then(function() { 
+      NotificationEngine.show("Đăng Script thành công!", "SUCCESS"); 
+      DOM.get('share-title').value = ''; DOM.get('share-image').value = ''; DOM.get('share-code').value = ''; 
+      closeUI('modal-script-share'); 
+    });
+  },
+
+  loadVaultScripts: function() {
+    var vBoard = DOM.get('vault-board'); if(!vBoard) return;
+    vBoard.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);">Đang tải...</div>';
+    this.scriptRef.limitToLast(50).on('value', function(snapshot) {
+      vBoard.innerHTML = '';
+      ChatEngine.vaultMap = {};
+      if(!snapshot.exists()) { vBoard.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Trống.</div>'; return; }
+      snapshot.forEach(function(child) {
+        var s = child.val();
+        ChatEngine.vaultMap[child.key] = s;
+        var box = document.createElement('div'); box.className = 'vault-item-card';
+        var safeCode = s.code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var imgHtml = s.image ? '<div class="card-preview-thumb" onclick="openLightbox(\'' + s.image + '\')"><img src="' + s.image + '" class="card-preview-img" alt="Script Preview"></div>' : '';
+        
+        box.innerHTML = 
+          imgHtml +
+          '<div class="card-top-row"><h4 class="card-title-text">' + s.title.replace(/</g,"&lt;") + '</h4><button class="btn btn-primary" style="height:30px; font-size:0.75rem;" onclick="ChatEngine.copyVaultScript(this, \'' + child.key + '\')">COPY</button></div>' +
+          '<div class="card-lua-code-block">' + safeCode + '</div>' +
+          '<div style="font-size:0.72rem; color:var(--text-muted);">Đóng góp bởi: ' + s.user + '</div>';
+        vBoard.appendChild(box);
+      });
+    });
+  },
+
+  copyVaultScript: function(btn, key) {
+    var s = this.vaultMap[key];
+    if(!s) return;
+    var txt = s.code;
+    var ok = function() {
+      btn.innerText = '✓ COPIED';
+      setTimeout(function() { btn.innerText = 'COPY'; }, 2000);
+    };
+    if(navigator.clipboard) navigator.clipboard.writeText(txt).then(ok).catch(function() { prompt('Copy:', txt); });
+    else prompt('Copy:', txt);
+  }
+};
+
+/* ==========================================================================
+   COMMAND PALETTE 2.0 (CTRL + K)
+   ========================================================================== */
+var CommandPalette = {
+  items: [
+    { title: "🤖 Mở AI GalaxyZ-3.4 Pro", action: function() { RestrictedAction.checkAndOpen('modal-noxgpt'); } },
+    { title: "💬 Mở Global Chatroom", action: function() { RestrictedAction.checkAndOpen('modal-noxchat'); } },
+    { title: "📦 Mở Kho Script Vault", action: function() { openUI('modal-script-vault'); ChatEngine.loadVaultScripts(); } },
+    { title: "🌐 Đổi ngôn ngữ (VN / EN)", action: function() { LangEngine.toggle(); } },
+    { title: "🎮 Chế độ đồ họa: ULTRA", action: function() { GraphicsEngine.setPreset('ULTRA'); } },
+    { title: "⚡ Chế độ đồ họa: LOW", action: function() { GraphicsEngine.setPreset('LOW'); } },
+    { title: "🩺 Chẩn đoán hệ thống (Diagnostics)", action: function() { openUI('modal-system-diag'); SystemDiagnosticsEngine.runFullCheck(); } },
+    { title: "🛡 Mở DEV Control Center", action: function() { if(IS_ADMIN){ openUI('modal-dev-control'); DevCenter.init(); } else MaintenanceAccessEngine.promptDevBypass(); } }
+  ],
+  open: function() {
+    var p = DOM.get('command-palette-modal');
+    if(p) {
+      p.classList.add('is-active');
+      DOM.get('palette-search-box').value = '';
+      this.filter('');
+      setTimeout(function() { DOM.get('palette-search-box').focus(); }, 100);
+    }
+  },
+  close: function() {
+    var p = DOM.get('command-palette-modal');
+    if(p) p.classList.remove('is-active');
+  },
+  filter: function(query) {
+    var q = query.toLowerCase().trim();
+    var list = DOM.get('palette-results-list');
+    if(!list) return;
+    list.innerHTML = '';
+    this.items.forEach(function(item) {
+      if(!q || item.title.toLowerCase().indexOf(q) !== -1) {
+        var el = document.createElement('div');
+        el.className = 'palette-item';
+        el.innerText = item.title;
+        el.onclick = function() {
+          CommandPalette.close();
+          item.action();
+        };
+        list.appendChild(el);
+      }
+    });
+  }
+};
+
+window.addEventListener('keydown', function(e) {
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    CommandPalette.open();
+  }
+});
+
+/* ==========================================================================
+   INITIALIZE SYSTEM BOOTSTRAPPER
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', function() {
+  SystemBootstrapper.boot();
+  
+  setInterval(function() {
+    var p = DOM.get('hud-ping');
+    if(p) p.innerText = Math.floor(Math.random() * 8 + 14) + "ms";
+  }, 3000);
+});
+</script>
+</body>
+</html>
