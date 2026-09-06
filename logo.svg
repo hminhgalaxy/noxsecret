@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Blue Shadow Eyes Logo</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #020205;
+      overflow: hidden;
+    }
+
+    .logo-container {
+      width: 650px;
+      max-width: 90vw;
+      filter: drop-shadow(0 0 25px rgba(0, 130, 255, 0.45));
+    }
+
+    /* Hiệu ứng xoay cuộn xoáy trong mắt */
+    .spiral-left {
+      transform-origin: 220px 250px;
+      animation: vortex 6s linear infinite;
+    }
+    .spiral-right {
+      transform-origin: 580px 250px;
+      animation: vortex-reverse 6s linear infinite;
+    }
+
+    /* Hiệu ứng nhịp thở phát sáng */
+    .glow-pulse {
+      animation: pulse 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes vortex {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes vortex-reverse {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(-360deg); }
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.75; }
+      100% { opacity: 1; filter: drop-shadow(0 0 35px #00aaff); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo-container">
+    <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Bộ lọc phát sáng -->
+        <filter id="neon-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="8" result="blur1" />
+          <feGaussianBlur stdDeviation="20" result="blur2" />
+          <feMerge>
+            <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+
+        <!-- Gradient nền mắt -->
+        <radialGradient id="eyeGlowLeft" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="20%" stop-color="#60a5fa" />
+          <stop offset="55%" stop-color="#1d4ed8" />
+          <stop offset="85%" stop-color="#05081c" />
+          <stop offset="100%" stop-color="#020205" />
+        </radialGradient>
+
+        <radialGradient id="eyeGlowRight" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="20%" stop-color="#60a5fa" />
+          <stop offset="55%" stop-color="#1d4ed8" />
+          <stop offset="85%" stop-color="#05081c" />
+          <stop offset="100%" stop-color="#020205" />
+        </radialGradient>
+
+        <!-- Mặt nạ định hình khung mắt hung dữ -->
+        <mask id="eyeMaskLeft">
+          <path d="M 60,255 Q 190,140 370,250 Q 220,360 60,255 Z" fill="#ffffff" />
+        </mask>
+        <mask id="eyeMaskRight">
+          <path d="M 740,255 Q 610,140 430,250 Q 580,360 740,255 Z" fill="#ffffff" />
+        </mask>
+      </defs>
+
+      <!-- Ánh sáng lan tỏa bên ngoài (Aura) -->
+      <g filter="url(#neon-glow)" class="glow-pulse">
+        <ellipse cx="220" cy="250" rx="140" ry="85" fill="#1e40af" opacity="0.6"/>
+        <ellipse cx="580" cy="250" rx="140" ry="85" fill="#1e40af" opacity="0.6"/>
+      </g>
+
+      <!-- Mắt trái -->
+      <g mask="url(#eyeMaskLeft)">
+        <rect x="50" y="100" width="340" height="300" fill="url(#eyeGlowLeft)" />
+        <g class="spiral-left" filter="url(#neon-glow)">
+          <path d="M 220,250 A 15,15 0 0,1 235,265 A 30,30 0 0,1 205,295 A 50,50 0 0,1 170,245 A 75,75 0 0,1 245,175 A 105,105 0 0,1 325,250" 
+                fill="none" stroke="#e0f2fe" stroke-width="12" stroke-linecap="round" opacity="0.9"/>
+          <path d="M 220,250 A 20,20 0 0,0 200,230 A 40,40 0 0,0 240,190 A 70,70 0 0,0 290,260 A 100,100 0 0,0 190,320" 
+                fill="none" stroke="#38bdf8" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
+        </g>
+      </g>
+
+      <!-- Mắt phải -->
+      <g mask="url(#eyeMaskRight)">
+        <rect x="410" y="100" width="350" height="300" fill="url(#eyeGlowRight)" />
+        <g class="spiral-right" filter="url(#neon-glow)">
+          <path d="M 580,250 A 15,15 0 0,0 565,265 A 30,30 0 0,0 595,295 A 50,50 0 0,0 630,245 A 75,75 0 0,0 555,175 A 105,105 0 0,0 475,250" 
+                fill="none" stroke="#e0f2fe" stroke-width="12" stroke-linecap="round" opacity="0.9"/>
+          <path d="M 580,250 A 20,20 0 0,1 600,230 A 40,40 0 0,1 560,190 A 70,70 0 0,1 510,260 A 100,100 0 0,1 610,320" 
+                fill="none" stroke="#38bdf8" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
+        </g>
+      </g>
+
+      <!-- Các lớp vệt lông / bóng đen cắt góc (Shadow Shards) -->
+      <g fill="#020205">
+        <!-- Vùng trán & sống mũi giữa -->
+        <polygon points="400,285 365,220 400,110 435,220" />
+        <polygon points="400,285 385,390 400,420 415,390" />
+        
+        <!-- Gai mí mắt trên (Trái) -->
+        <polygon points="120,180 180,225 240,195 270,225 330,190 380,250 220,140" />
+        <polygon points="80,220 140,240 100,200" />
+        
+        <!-- Gai mí mắt trên (Phải) -->
+        <polygon points="680,180 620,225 560,195 530,225 470,190 420,250 580,140" />
+        <polygon points="720,220 660,240 700,200" />
+
+        <!-- Gai mí mắt dưới -->
+        <polygon points="150,300 210,270 270,305 330,275 360,310 230,345" />
+        <polygon points="650,300 590,270 530,305 470,275 440,310 570,345" />
+      </g>
+    </svg>
+  </div>
+
+</body>
+</html>
