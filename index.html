@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>NOXGARDEN — Liquid Glass Garden</title>
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="theme-color" content="#eef8e0"><meta name="color-scheme" content="light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>NOXGARDEN — Living 3D Garden</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -689,22 +689,57 @@ try{var x=document.createElement('link');x.rel='icon';x.type='image/svg+xml';x.h
 <div id="homeScene" aria-hidden="true"><div class="hs-sky"></div></div></div>
 <div class="panel lg" style="--d:7"><div class="panel-head"><div><h3>Hoạt động</h3><p>Nhật ký trên thiết bị này.</p></div><button class="mini-btn" data-act="actClear"><i data-ic="trash"></i>Xoá</button></div><div id="actList"></div></div>
 <p class="foot lg">NOXGARDEN · GROW • CHAT • EXPLORE</p></section>
-<section class="view" id="view-garden"><div class="section-head" style="--d:0"><p class="eyebrow">GARDEN WORLD</p><h2>Khu vườn của bạn</h2><p class="sub">Trồng · tưới · thu hoạch · bán. Mưa tự tưới, cầu vồng x2 — đừng bỏ lỡ bướm vàng!</p></div>
-<div class="gwrap" style="--d:1"><div>
-<div class="lg" style="padding:16px 18px;margin-bottom:14px"><div class="gx-head"><b id="gxLevel">Garden Lv.1</b><span class="mono" id="gxText">0 / 120 XP</span></div><div class="gxp-bar"><i id="gxFill" style="width:0%"></i></div></div>
-<div id="gWorld"><div class="g-sky t-afternoon" id="gSky"></div><div id="gStars"></div><div class="g-orb" id="gOrb"></div>
-<span class="gc" style="top:11%"></span><span class="gc" style="top:24%;animation-duration:88s;animation-delay:-44s"></span>
-<svg class="g-hill" style="bottom:44%" viewBox="0 0 400 80" preserveAspectRatio="none"><path d="M0 80Q90 22 190 54T400 34V80z" fill="#79b553" opacity=".85"/></svg>
-<svg class="g-hill" style="bottom:40%" viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0 60Q130 20 260 44T400 48V60z" fill="#5da23f"/></svg>
-<div class="g-ground"></div><div class="gt gt1"></div><div class="gt gt2"></div><div id="gFlowers"></div><div id="gDecor"></div>
-<div id="gPlots" role="grid"></div>
-<div class="g-wx" id="gWx"></div><div class="fogly"></div><div class="g-storm"></div>
-<svg id="gRainbow" viewBox="0 0 300 160" preserveAspectRatio="none"><defs><linearGradient id="rbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6b73c"/><stop offset=".35" stop-color="#8fd3a0"/><stop offset=".7" stop-color="#8fc3f0"/><stop offset="1" stop-color="#d5a8e8"/></linearGradient></defs><path d="M10 160A140 140 0 0 1 290 160" fill="none" stroke="url(#rbg)" stroke-width="18" stroke-linecap="round" opacity=".8"/></svg>
-<div id="gCritters"></div></div>
-<div class="g-actions"><button class="btn primary" data-act="market" data-id="sell"><i data-ic="market"></i>Market</button><button class="btn" data-act="inv"><i data-ic="box"></i>Kho đồ</button><button class="btn gold" data-act="waterAll"><i data-ic="drop"></i>Tưới tất cả</button><button class="btn" data-act="boost"><i data-ic="boost"></i>Boost 60🪙</button></div></div>
-<div class="gside"><div class="panel lg" id="dailyCard" style="margin-top:0;padding:14px 16px"></div>
-<div class="panel lg" style="margin-top:0"><div class="panel-head"><div><h3>Nhiệm vụ hôm nay</h3><p>Đặt lại mỗi ngày.</p></div><span class="ui-chip mono" id="qDate">—</span></div><div id="qList"></div></div>
-<div class="panel lg" style="margin-top:0"><div class="panel-head"><div><h3>Thời tiết</h3><p id="wxDesc">Cây lớn thuận lợi</p></div></div><div id="wxNow" style="display:flex;align-items:center;gap:12px"><span style="font-size:30px">☀️</span><div><b style="display:block;font-size:14px">Nắng đẹp</b><small style="color:var(--ink3)">Cây lớn thuận lợi</small></div></div></div></div></div></section>
+
+<section class="view" id="view-garden">
+  <div class="section-head" style="--d:0">
+    <p class="eyebrow">GARDEN AI</p>
+    <h2>GalaxyZ-3 Sol trong khu vườn</h2>
+    <p class="sub">Khu vực Garden tạm thời chỉ giữ AI. Không còn Market, trồng cây, thu hoạch, tưới hay hệ gameplay cũ — hệ vườn 3D mới sẽ được thiết kế lại ở bước tiếp theo.</p>
+  </div>
+
+  <div class="nox-ai-garden-shell" style="--d:1">
+    <div class="nox-ai-garden-hero lg">
+      <div class="nox-ai-garden-orb" aria-hidden="true">✦</div>
+      <div>
+        <span class="nox-ai-kicker">GALAXYZ-3 SOL</span>
+        <h3>Hỏi AI trực tiếp ngay trong Garden</h3>
+        <p>Hỏi về ý tưởng khu vườn, thiết kế 3D, UX, hiệu năng, Firebase, lỗi web hoặc bất kỳ việc gì bạn muốn GalaxyZ-3 Sol phân tích.</p>
+      </div>
+      <span class="nox-ai-status"><i></i> ONLINE</span>
+    </div>
+
+    <div class="nox-ai-garden-chat lg">
+      <div class="nox-ai-garden-head">
+        <div>
+          <b>GalaxyZ-3 Sol</b>
+          <small>AI Garden Console · Puter · gpt-6-astra</small>
+        </div>
+        <button type="button" class="mini-btn" id="noxGardenAIClear">Xóa chat</button>
+      </div>
+
+      <div class="nox-ai-garden-body" id="noxGardenAIBody">
+        <div class="nox-ai-msg ai">
+          <span class="nox-ai-avatar">✦</span>
+          <div><b>GalaxyZ-3 Sol</b><p>Tôi đang ở ngay trong Garden. Cứ hỏi trực tiếp — không cần chuyển sang Chat.</p></div>
+        </div>
+      </div>
+
+      <form id="noxGardenAIForm" class="nox-ai-garden-form" autocomplete="off">
+        <input id="noxGardenAIInput" type="text" maxlength="2000"
+          placeholder="Hỏi GalaxyZ-3 Sol… ví dụ: thiết kế lại Garden 3D thế nào?"
+          aria-label="Hỏi GalaxyZ-3 Sol">
+        <button type="submit" id="noxGardenAISend" class="btn primary">Gửi <span>↵</span></button>
+      </form>
+
+      <div class="nox-ai-quick">
+        <button type="button" data-gai="Thiết kế một khu vườn 3D hiện đại, mượt và nhẹ cho điện thoại.">Thiết kế Garden 3D</button>
+        <button type="button" data-gai="Dò toàn bộ UX và hiệu năng của web, tìm điểm gây lag và đề xuất cách sửa.">Dò lỗi & hiệu năng</button>
+        <button type="button" data-gai="Kiểm tra kiến trúc Firebase hiện tại và đề xuất cách làm an toàn hơn.">Kiểm tra Firebase</button>
+        <button type="button" data-gai="Đề xuất 10 tính năng mới cho NOXGARDEN nhưng ưu tiên nhẹ, đẹp và dễ dùng.">Đề xuất tính năng</button>
+      </div>
+    </div>
+  </div>
+</section>
 <section class="view" id="view-chat"><div class="section-head" style="--d:0"><p class="eyebrow">PHÒNG CHUNG</p><h2>Global Chat</h2><p class="sub">Nhấn giữ tin nhắn để sao chép · kết bạn · nhắn riêng.</p></div>
 <div class="chat lg" style="--d:1"><div class="chat-head"><span class="net-dot" id="netDot"></span><div><b>Phòng chung NOXGARDEN</b><small id="gChatSub">Thời gian thực</small></div><div class="end"><span class="ui-chip mono"><b id="presCount">1</b> ON</span><span class="ui-chip mono" id="gCount">0</span></div></div>
 <div class="gbody" id="gBody" role="log"></div>
@@ -1976,7 +2011,6 @@ if(v==='profile')fillProfile();
 if(v==='chat')Chat.enter();
 if(v==='utilities')DATA.load()};
 window.NOX_palExtra=function(){var dev=resolveRole()==='DEV',cmds=[
-{i:'market',n:'Garden Market',f:function(){go('garden');setTimeout(function(){Garden.openMarket('sell')},250)}},
 {i:'gift',n:'Nhận quà hằng ngày',f:function(){go('garden');Garden.claimDaily($('#dailyCard'))}},
 {i:'drop',n:'Tưới tất cả cây',f:function(){go('garden');Garden.waterAll()}},
 {i:'user',n:sta.user?'Đăng xuất':'Đăng nhập',f:function(){sta.user?setLoggedOut():openLoginModal()}},
@@ -3282,5 +3316,457 @@ window.addEventListener('load',function(){setTimeout(boot,500)});
 .plot.wilted .plant{transform:rotate(4deg) translateY(3px);opacity:.72}
 .plot.wilted{filter:saturate(.85)}
 </style>
+
+
+<!-- NOXGARDEN v5 — 3D Garden / 120Hz / AI hotfix / compact loader / MS font -->
+<style id="nox-v5-3d-style">
+:root{
+  --nox-ms:"MS Sans Serif","Segoe UI","Tahoma",Arial,sans-serif;
+  --nox-ui:"MS Sans Serif","Segoe UI",Tahoma,Arial,sans-serif;
+}
+html,body,button,input,textarea,select{font-family:var(--nox-ms)!important}
+body{font-synthesis:none;-webkit-font-smoothing:antialiased;text-rendering:optimizeSpeed}
+#loader .ld-in>*{display:none!important}
+#loader .ld-in{width:30px;height:30px;display:block!important}
+#loader .ld-in:before{
+  content:"";display:block;width:30px;height:30px;border-radius:50%;
+  border:3px solid rgba(62,142,77,.16);border-top-color:#3e8e4d;
+  animation:noxV5Spin .72s linear infinite;
+}
+#loader{background:rgba(244,249,240,.96)!important;backdrop-filter:blur(10px)!important}
+@keyframes noxV5Spin{to{transform:rotate(360deg)}}
+
+/* Real interactive 3D garden surface */
+#gWorld{
+  min-height:420px!important;height:clamp(430px,64vh,680px)!important;
+  background:linear-gradient(180deg,#bfe6f7,#dff3dc 60%,#8dc66d)!important;
+  overflow:hidden!important;perspective:1100px;touch-action:none;
+}
+#gWorld>*:not(#nox3dRoot){display:none!important}
+#nox3dRoot{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none}
+.n3d-sky{position:absolute;inset:0;background:
+ radial-gradient(circle at 78% 18%,rgba(255,247,187,.95) 0 28px,rgba(255,247,187,.18) 29px,transparent 105px),
+ linear-gradient(180deg,#8ed1f0 0%,#ccecf7 46%,#dcefcf 68%,#9bcf7c 100%)}
+.n3d-cloud{position:absolute;width:120px;height:35px;border-radius:40px;background:rgba(255,255,255,.78);filter:blur(.2px);animation:n3dCloud 26s linear infinite}
+.n3d-cloud:before,.n3d-cloud:after{content:"";position:absolute;border-radius:50%;background:inherit}
+.n3d-cloud:before{width:52px;height:52px;left:22px;top:-24px}.n3d-cloud:after{width:65px;height:65px;right:18px;top:-34px}
+.n3d-cloud.c2{top:19%;left:55%;animation-duration:34s;transform:scale(.7)}
+.n3d-cloud.c1{top:11%;left:-16%}
+@keyframes n3dCloud{to{left:115%}}
+.n3d-camera{position:absolute;inset:0;display:grid;place-items:center;transform-style:preserve-3d}
+.n3d-world{position:relative;width:min(720px,88vw);height:min(500px,70vh);transform-style:preserve-3d;will-change:transform;transform:rotateX(58deg) rotateZ(-7deg) scale(.88)}
+.n3d-island{
+ position:absolute;left:50%;top:50%;width:92%;height:76%;transform:translate(-50%,-50%) rotateX(0deg);
+ transform-style:preserve-3d;border-radius:28px;
+ background:linear-gradient(145deg,#8fd067,#4f9b46);
+ box-shadow:0 30px 0 #6d8d4f,0 44px 30px rgba(29,73,38,.28),inset 0 5px 0 rgba(255,255,255,.32);
+}
+.n3d-island:before{content:"";position:absolute;inset:9px;border-radius:22px;background:
+ repeating-linear-gradient(35deg,rgba(255,255,255,.05) 0 2px,transparent 2px 15px),
+ linear-gradient(145deg,#b8e68b,#72bb5f 52%,#4c9348);box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+.n3d-rock{position:absolute;width:74px;height:42px;border-radius:50%;background:linear-gradient(145deg,#9aa58d,#536354);box-shadow:inset 8px 5px 10px rgba(255,255,255,.25),0 9px 10px rgba(35,70,35,.25);transform:rotateX(0deg) rotateZ(var(--rz,0deg))}
+.n3d-tree{position:absolute;width:70px;height:105px;transform-style:preserve-3d;transform:translateZ(28px);cursor:pointer;transition:transform .22s ease}
+.n3d-tree:hover{transform:translateZ(34px) scale(1.05)}
+.n3d-trunk{position:absolute;left:29px;bottom:8px;width:14px;height:62px;border-radius:7px;background:linear-gradient(90deg,#6f4728,#a66b39 55%,#57371f);box-shadow:3px 4px 5px rgba(40,45,20,.22)}
+.n3d-crown{position:absolute;left:4px;top:0;width:62px;height:62px;border-radius:50%;background:
+ radial-gradient(circle at 30% 28%,#d6f5a5 0 12%,transparent 13%),
+ radial-gradient(circle at 55% 42%,#6fc35e 0 34%,#3f9849 58%,#28723b 100%);
+ box-shadow:-9px 7px 0 rgba(50,121,57,.32),8px 10px 0 rgba(32,97,45,.28),inset 5px 4px 12px rgba(255,255,255,.22)}
+.n3d-fruit{position:absolute;width:13px;height:13px;border-radius:50%;background:#e8573f;box-shadow:1px 1px 3px rgba(60,20,10,.35);z-index:2}
+.n3d-plot{
+ position:absolute;width:116px;height:92px;border-radius:12px;background:
+ linear-gradient(90deg,rgba(112,68,37,.34) 0 5px,transparent 5px 28px,rgba(112,68,37,.28) 28px 33px,transparent 33px 56px,rgba(112,68,37,.28) 56px 61px,transparent 61px 84px,rgba(112,68,37,.28) 84px 89px,transparent 89px),
+ linear-gradient(145deg,#8e633c,#654126);
+ border:2px solid rgba(255,235,188,.28);box-shadow:inset 0 4px 9px rgba(255,255,255,.09),0 10px 13px rgba(48,66,31,.22);
+ transform:translateZ(7px);cursor:pointer;transition:filter .2s,transform .2s}
+.n3d-plot:hover{filter:brightness(1.12);transform:translateZ(13px)}
+.n3d-plot.locked{filter:grayscale(.35) brightness(.72);cursor:not-allowed}
+.n3d-plant{position:absolute;left:50%;bottom:13px;transform:translateX(-50%) translateZ(14px);width:62px;height:66px;pointer-events:none;transform-style:preserve-3d}
+.n3d-stem{position:absolute;left:29px;bottom:5px;width:5px;height:43px;border-radius:5px;background:#3c8245}
+.n3d-leaf{position:absolute;width:28px;height:15px;border-radius:100% 10%;background:linear-gradient(145deg,#9ad66c,#3b9548);box-shadow:inset 2px 2px 4px rgba(255,255,255,.25)}
+.n3d-leaf.l1{left:4px;top:30px;transform:rotate(-28deg)}.n3d-leaf.l2{right:3px;top:22px;transform:scaleX(-1) rotate(-28deg)}.n3d-leaf.l3{left:19px;top:10px;transform:rotate(8deg) scale(.85)}
+.n3d-fruits{position:absolute;inset:0}.n3d-fruits i{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff 0 10%,#f36a43 12% 65%,#b8322c 100%);box-shadow:1px 2px 4px rgba(40,20,10,.3)}
+.n3d-fruits i:nth-child(1){left:8px;top:38px}.n3d-fruits i:nth-child(2){left:40px;top:31px}.n3d-fruits i:nth-child(3){left:24px;top:47px}
+.n3d-wheat .n3d-leaf{height:9px;width:22px}.n3d-flower .n3d-fruits i{background:#f6b73c;width:11px;height:11px}
+.n3d-water{position:absolute;left:47%;top:8%;width:130px;height:86px;border-radius:50%;background:radial-gradient(circle,#a8ebff,#3cafd4 65%,#207ca6);box-shadow:0 8px 16px rgba(25,90,110,.25),inset 0 3px 8px rgba(255,255,255,.5);transform:translateZ(8px)}
+.n3d-water:after{content:"";position:absolute;left:46%;top:25%;width:9px;height:35px;border-radius:50%;background:linear-gradient(#fff,#72dcff);box-shadow:0 0 14px #dff}
+.n3d-cabin{position:absolute;right:5%;top:13%;width:112px;height:92px;transform:translateZ(34px);transform-style:preserve-3d}
+.n3d-house{position:absolute;bottom:0;width:100%;height:66px;border-radius:7px;background:linear-gradient(90deg,#b87b49,#e3ae6c);box-shadow:0 7px 10px rgba(53,66,35,.24)}
+.n3d-roof{position:absolute;left:-8px;top:-26px;width:128px;height:55px;background:linear-gradient(145deg,#4d7f5c,#2f5e42);clip-path:polygon(50% 0,100% 55%,94% 67%,50% 22%,6% 67%,0 55%);filter:drop-shadow(0 7px 5px rgba(40,50,30,.25))}
+.n3d-door{position:absolute;left:43px;bottom:0;width:25px;height:42px;border-radius:4px 4px 0 0;background:#754b2d}
+.n3d-window{position:absolute;right:12px;bottom:26px;width:23px;height:21px;background:#aee6ef;border:3px solid #754b2d}
+.n3d-windmill{position:absolute;left:6%;top:10%;width:78px;height:100px;transform:translateZ(30px)}
+.n3d-mast{position:absolute;left:36px;bottom:0;width:8px;height:80px;background:#6d573e}
+.n3d-wheel{position:absolute;left:11px;top:4px;width:58px;height:58px;border-radius:50%;animation:n3dWind 7s linear infinite}
+.n3d-wheel:before,.n3d-wheel:after{content:"";position:absolute;left:27px;top:0;width:5px;height:58px;background:#e9d2a0;border-radius:4px;transform-origin:50% 29px}
+.n3d-wheel:after{transform:rotate(90deg)}
+@keyframes n3dWind{to{transform:rotate(360deg)}}
+.n3d-label{position:absolute;left:50%;top:10px;transform:translateX(-50%);padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.75);backdrop-filter:blur(9px);font:700 11px var(--nox-ms);color:#29452d;box-shadow:0 8px 20px rgba(35,70,35,.14);white-space:nowrap}
+.n3d-hud{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:7px;justify-content:space-between;align-items:end;pointer-events:none}
+.n3d-hud .n3d-chip{pointer-events:auto;display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:14px;background:rgba(255,255,255,.76);backdrop-filter:blur(12px);font:700 11px var(--nox-ms);color:#29452d;box-shadow:0 9px 22px rgba(35,70,35,.15)}
+.n3d-controls{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+.n3d-controls .mini-btn{font-family:var(--nox-ms)!important}
+.n3d-selected{outline:3px solid rgba(246,183,60,.8)!important;outline-offset:2px}
+.n3d-waterfx{position:absolute;width:10px;height:18px;border-radius:80% 20% 70% 30%;background:#65cfff;z-index:8;pointer-events:none;animation:n3dDrop .85s ease-out forwards}
+@keyframes n3dDrop{from{opacity:1;transform:translateY(0) scale(.8)}to{opacity:0;transform:translateY(55px) scale(1.1)}}
+#nox3dPerf{margin-left:auto}
+@media(max-width:700px){
+ #gWorld{height:clamp(470px,70vh,650px)!important}
+ .n3d-world{width:760px;height:520px;transform:rotateX(58deg) rotateZ(-7deg) scale(.72)}
+ .n3d-hud{flex-wrap:wrap}.n3d-hud .n3d-chip{font-size:10px;padding:7px 9px}
+}
+@media(prefers-reduced-motion:reduce){.n3d-cloud,.n3d-wheel{animation:none}.n3d-world{transition:none}}
+</style>
+
+<script id="nox-v5-3d-engine">
+(function(){
+'use strict';
+var V5={root:null,world:null,rx:58,rz:-7,scale:.88,drag:false,lastX:0,lastY:0,selected:-1,auto:false,raf:0,lastT:0};
+function q(s){return document.querySelector(s)}
+function safe(fn){try{fn()}catch(e){console.warn('[NOX v5]',e)}}
+function esc(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function stageName(p){return p&&p.st==='ready'?'Sẵn sàng':p&&p.st==='grow'?'Đang lớn':p&&p.st==='empty'?'Đất trống':p&&p.st==='locked'?'Khoá':'—'}
+function cropName(p){
+ try{return (window.CROPS&&p&&CROPS[p.crop]&&CROPS[p.crop].name)||p.crop||'Cây'}
+ catch(e){return 'Cây'}
+}
+function plantHTML(p){
+ if(!p||p.st==='empty'||p.st==='locked')return '';
+ var cl=(String(p.crop||'').indexOf('wheat')>=0?'n3d-wheat ':'')+(String(p.crop||'').indexOf('flower')>=0?'n3d-flower ':'');
+ return '<div class="n3d-plant '+cl+'"><i class="n3d-stem"></i><i class="n3d-leaf l1"></i><i class="n3d-leaf l2"></i><i class="n3d-leaf l3"></i><span class="n3d-fruits"><i></i><i></i><i></i></span></div>';
+}
+function treeHTML(x,y,s){
+ return '<div class="n3d-tree" style="left:'+x+'%;top:'+y+'%;transform:translateZ(28px) scale('+s+')"><i class="n3d-trunk"></i><i class="n3d-crown"></i></div>';
+}
+function render(){
+ var host=q('#gWorld');if(!host)return;
+ if(!V5.root){
+  V5.root=document.createElement('div');V5.root.id='nox3dRoot';
+  V5.root.innerHTML='<div class="n3d-sky"></div><div class="n3d-cloud c1"></div><div class="n3d-cloud c2"></div><div class="n3d-camera"><div class="n3d-world"><div class="n3d-island"></div><div class="n3d-water"></div><div class="n3d-cabin"><i class="n3d-roof"></i><i class="n3d-house"></i><i class="n3d-door"></i><i class="n3d-window"></i></div><div class="n3d-windmill"><i class="n3d-mast"></i><i class="n3d-wheel"></i></div><div class="n3d-rock" style="left:15%;top:21%;--rz:-12deg"></div><div class="n3d-rock" style="left:71%;top:71%;--rz:9deg"></div><div class="n3d-trees"></div><div class="n3d-plots"></div></div></div><div class="n3d-label">Kéo để xoay 3D · Cuộn để zoom</div><div class="n3d-hud"><span class="n3d-chip">🌱 <b id="n3dSel">Chưa chọn ô</b></span><span class="n3d-chip" id="nox3dPerf">120 FPS ready</span></div>';
+  host.appendChild(V5.root);
+  V5.world=V5.root.querySelector('.n3d-world');
+  bind();
+ }
+ var G=window.Garden&&Garden.G;if(!G)return;
+ var plots=V5.world.querySelector('.n3d-plots'),trees=V5.world.querySelector('.n3d-trees');
+ plots.innerHTML='';trees.innerHTML='';
+ [[10,49],[27,43],[44,48],[61,43],[15,69],[32,64],[49,69],[66,64],[20,85],[37,80],[54,85],[71,80]].forEach(function(pos,i){
+   var p=G.plots[i]||{st:'locked'};
+   var el=document.createElement('div');el.className='n3d-plot '+(p.st==='locked'?'locked ':'')+(V5.selected===i?'n3d-selected ':'');
+   el.style.left=pos[0]+'%';el.style.top=pos[1]+'%';el.dataset.i=i;
+   el.innerHTML=plantHTML(p)+(p.st==='locked'?'<span style="position:absolute;inset:0;display:grid;place-items:center;font-size:22px">🔒</span>':'');
+   plots.appendChild(el);
+ });
+ [[5,38,.9],[23,18,1.05],[76,20,.92],[84,50,1.1],[7,70,.78]].forEach(function(a){trees.insertAdjacentHTML('beforeend',treeHTML(a[0],a[1],a[2]))});
+ var sel=V5.selected>=0&&G.plots[V5.selected];
+ var st=q('#n3dSel');if(st)st.textContent=sel?'Ô '+(V5.selected+1)+' · '+cropName(sel)+' · '+stageName(sel):'Chưa chọn ô';
+ applyTransform();
+}
+function applyTransform(){
+ if(!V5.world)return;
+ V5.world.style.transform='rotateX('+V5.rx+'deg) rotateZ('+V5.rz+'deg) scale('+V5.scale+')';
+}
+function select(i){
+ V5.selected=i;render();
+ var p=window.Garden&&Garden.G&&Garden.G.plots[i];
+ if(p&&p.st!=='locked'&&window.Garden&&Garden.plotClick)safe(function(){Garden.plotClick(i)});
+}
+function water(){
+ if(V5.selected<0)return;
+ if(window.Garden&&Garden.water)safe(function(){Garden.water(V5.selected)});
+ dropFX();render();
+}
+function harvest(){
+ if(V5.selected<0)return;
+ if(window.Garden&&Garden.harvest)safe(function(){Garden.harvest(V5.selected)});
+ render();
+}
+function dropFX(){
+ var host=q('#nox3dRoot');if(!host)return;
+ for(var i=0;i<12;i++){var d=document.createElement('i');d.className='n3d-waterfx';d.style.left=(30+Math.random()*40)+'%';d.style.top=(40+Math.random()*22)+'%';host.appendChild(d);setTimeout(function(x){x.remove()},900,d)}
+}
+function bind(){
+ var host=V5.root;
+ host.addEventListener('pointerdown',function(e){V5.drag=true;V5.lastX=e.clientX;V5.lastY=e.clientY;host.setPointerCapture&&host.setPointerCapture(e.pointerId)});
+ host.addEventListener('pointermove',function(e){if(!V5.drag)return;var dx=e.clientX-V5.lastX,dy=e.clientY-V5.lastY;V5.lastX=e.clientX;V5.lastY=e.clientY;V5.rz+=dx*.42;V5.rx=Math.max(42,Math.min(72,V5.rx-dy*.18));applyTransform()});
+ host.addEventListener('pointerup',function(){V5.drag=false});host.addEventListener('pointercancel',function(){V5.drag=false});
+ host.addEventListener('wheel',function(e){e.preventDefault();V5.scale=Math.max(.58,Math.min(1.12,V5.scale+(e.deltaY<0?.05:-.05)));applyTransform()},{passive:false});
+ host.addEventListener('click',function(e){
+   if(V5.drag)return;
+   var el=e.target.closest('.n3d-plot');if(el)select(+el.dataset.i);
+ });
+}
+function controls(){
+ var a=q('.g-actions');if(!a||a.querySelector('.n3d-controls'))return;
+ var c=document.createElement('div');c.className='n3d-controls';
+ c.innerHTML='<button class="mini-btn" data-n3d="reset">⟳ Góc chuẩn</button><button class="mini-btn" data-n3d="auto">↻ Tự xoay</button><button class="mini-btn gold" data-n3d="water">💧 Tưới ô chọn</button><button class="mini-btn" data-n3d="harvest">🧺 Thu hoạch ô chọn</button>';
+ a.parentNode.insertBefore(c,a);
+ c.addEventListener('click',function(e){var b=e.target.closest('[data-n3d]');if(!b)return;var ac=b.dataset.n3d;
+   if(ac==='reset'){V5.rx=58;V5.rz=-7;V5.scale=.88;applyTransform()}
+   if(ac==='auto'){V5.auto=!V5.auto;b.textContent=V5.auto?'⏸ Dừng tự xoay':'↻ Tự xoay'}
+   if(ac==='water')water();if(ac==='harvest')harvest();
+ });
+}
+function loop(t){
+ if(!V5.lastT)V5.lastT=t;
+ if(V5.auto&&!V5.drag){V5.rz+=(t-V5.lastT)*.018;applyTransform()}
+ var dt=t-V5.lastT;V5.lastT=t;
+ if(dt>0&&dt<100){var fps=Math.round(1000/dt);var el=q('#nox3dPerf');if(el)el.textContent=Math.min(120,fps)+' FPS'}
+ requestAnimationFrame(loop);
+}
+function boot(){
+ controls();render();
+ if(!V5.raf){V5.raf=requestAnimationFrame(loop)}
+ var old=window.Garden&&Garden.renderPlots;
+ if(old&&!old.__noxV5){var wrap=function(){var r=old.apply(this,arguments);setTimeout(render,0);return r};wrap.__noxV5=true;window.Garden.renderPlots=wrap}
+}
+window.NOX3DGarden={render:render,select:select,water:water,harvest:harvest,reset:function(){V5.rx=58;V5.rz=-7;V5.scale=.88;applyTransform()}};
+var n=0,timer=setInterval(function(){if(document.querySelector('#gWorld')){boot();if(++n>24)clearInterval(timer)}},300);
+window.addEventListener('load',function(){setTimeout(boot,350)});
+})();
+</script>
+
+<script id="nox-v5-ai-hotfix">
+(function(){
+'use strict';
+var busy=false;
+function input(){return document.getElementById('gInput')}
+function box(){return document.getElementById('gBody')}
+function add(text,ai){
+ var b=box();if(!b)return;
+ var row=document.createElement('div');row.className='mrow '+(ai?'ai':'me');
+ row.innerHTML='<div class="mava">✦</div><div class="mcontent"><b class="mname">'+(ai?'GalaxyZ-3 Sol':'Bạn')+'</b><div class="mbub"></div></div>';
+ row.querySelector('.mbub').textContent=text;b.appendChild(row);b.scrollTop=b.scrollHeight;return row;
+}
+function typing(){
+ var b=box();if(!b)return null;var r=document.createElement('div');r.className='typing-line';r.style.display='flex';r.innerHTML='<span class="tdots"><i></i><i></i><i></i></span><span>GalaxyZ-3 Sol đang suy nghĩ…</span>';b.appendChild(r);b.scrollTop=b.scrollHeight;return r;
+}
+function snap(){
+ var G=window.Garden&&Garden.G||{};
+ return {level:window.Garden&&Garden.gLevel?Garden.gLevel().lv:1,xp:G.xp||0,coins:G.coins||0,plots:G.plots||[],seeds:G.inv&&G.inv.seeds||{},crops:G.inv&&G.inv.crops||{},weather:window.WX&&WX.type||'clear'};
+}
+function send(){
+ var el=input();if(!el)return false;
+ var text=(el.value||'').trim();if(!/^@ai\b/i.test(text))return false;
+ var clean=text.replace(/^@ai\b/i,'').trim();
+ if(!clean){el.value='@ai ';el.focus();return true}
+ if(busy){return true}
+ el.value='';add('@ai '+clean,false);var ty=typing();busy=true;
+ if(!window.puter||!puter.ai||typeof puter.ai.chat!=='function'){
+   busy=false;if(ty)ty.remove();add('GalaxyZ-3 Sol chưa kết nối Puter AI. Kiểm tra mạng hoặc Puter rồi thử lại.',true);return true;
+ }
+ var prompt='Bạn là GalaxyZ-3 Sol của NOXGARDEN. Trả lời bằng tiếng Việt. Hãy hữu ích, chính xác, không bịa dữ liệu. Nếu có JSON Garden thì ưu tiên dùng nó. Người dùng hỏi: '+clean+'\\nGarden snapshot: '+JSON.stringify(snap());
+ Promise.resolve(puter.ai.chat(prompt,{model:'openai/gpt-6-astra'})).then(function(r){
+   var c=r&&r.message&&r.message.content;
+   if(Array.isArray(c))c=c.map(function(x){return x&&x.text||''}).join('');
+   if(!c)c=r&&r.content||'Mình chưa nhận được phản hồi.';
+   if(ty)ty.remove();add(String(c),true);
+ }).catch(function(e){if(ty)ty.remove();add('GalaxyZ-3 Sol gặp lỗi khi trả lời. Hãy thử lại.',true);console.warn(e)})
+ .finally(function(){busy=false});
+ return true;
+}
+function install(){
+ var form=document.getElementById('gForm'),el=input();
+ if(!form||!el)return;
+ if(!form.__noxV5){
+   form.__noxV5=true;
+   form.addEventListener('submit',function(e){
+     if(/^@ai\b/i.test((el.value||'').trim())){e.preventDefault();e.stopImmediatePropagation();send()}
+   },true);
+   el.addEventListener('keydown',function(e){
+     if(e.key==='Enter'&&!e.shiftKey&&/^@ai\b/i.test((el.value||'').trim())){e.preventDefault();e.stopImmediatePropagation();send()}
+   },true);
+ }
+}
+var obs=new MutationObserver(install);obs.observe(document.documentElement,{childList:true,subtree:true});
+var n=0,t=setInterval(function(){install();if(++n>120)clearInterval(t)},200);
+window.addEventListener('load',function(){setTimeout(install,500)});
+})();
+</script>
+
+<script id="nox-v5-120hz-performance">
+(function(){
+'use strict';
+/* Không thể ép màn hình 60Hz thành 120Hz bằng JS. Bản này loại bỏ throttling do code,
+   dùng requestAnimationFrame, giảm layout/paint nặng và tự chạy theo refresh rate của thiết bị. */
+var last=performance.now(),frames=0,fps=60;
+function loop(t){
+ frames++;
+ if(t-last>=500){fps=Math.round(frames*1000/(t-last));frames=0;last=t;
+   document.documentElement.dataset.fps=Math.min(120,fps);
+ }
+ requestAnimationFrame(loop);
+}
+document.documentElement.style.setProperty('--nox-refresh','120hz');
+if(document.visibilityState==='visible')requestAnimationFrame(loop);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')requestAnimationFrame(loop)});
+})();
+</script>
+
+
+<style id="nox-v5-loader-final">
+/* Cả hai lớp boot cũ đều chỉ còn một vòng tròn xoay, không còn bảng lớn/logo/card. */
+#noxBoot{
+  display:grid!important;place-items:center!important;
+  background:rgba(244,249,240,.96)!important;
+  backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;
+}
+#noxBoot .nox-boot-card{display:none!important}
+#noxBoot:after{
+  content:"";display:block;width:30px;height:30px;border-radius:50%;
+  border:3px solid rgba(62,142,77,.16);border-top-color:#3e8e4d;
+  animation:noxV5Spin .72s linear infinite;
+}
+body.nox-ready #noxBoot{opacity:0!important;visibility:hidden!important}
+</style>
+<script>
+(function(){
+  function noxHideLegacyBoot(){
+    var b=document.getElementById('noxBoot');
+    if(b && document.body.classList.contains('nox-ready')) b.style.visibility='hidden';
+  }
+  window.addEventListener('load',function(){setTimeout(noxHideLegacyBoot,80)});
+  setInterval(noxHideLegacyBoot,500);
+})();
+</script>
+
+
+<style id="nox-v6-ai-only">
+/* V6 — Garden is now an AI console only. No legacy Garden gameplay UI. */
+:root{
+  --n6-glass:rgba(255,255,255,.54);
+  --n6-glass-strong:rgba(255,255,255,.70);
+  --n6-border:rgba(255,255,255,.72);
+  --n6-shadow:0 18px 55px rgba(31,62,39,.11),inset 0 1px rgba(255,255,255,.88);
+}
+.nox-ai-garden-shell{max-width:980px;margin:0 auto;display:grid;gap:16px}
+.nox-ai-garden-hero{
+  display:flex;align-items:center;gap:16px;padding:18px 20px;
+  background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(231,244,229,.52));
+  border:1px solid var(--n6-border);box-shadow:var(--n6-shadow);
+}
+.nox-ai-garden-orb{
+  width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:18px;
+  background:radial-gradient(circle at 35% 30%,#fff,rgba(184,228,187,.72) 45%,rgba(74,142,82,.78));
+  color:#245b30;font-size:25px;box-shadow:0 10px 30px rgba(55,126,66,.18)
+}
+.nox-ai-kicker{font:700 10px "MS Sans Serif","Segoe UI",Tahoma,Arial,sans-serif;letter-spacing:.18em;color:#4c8155}
+.nox-ai-garden-hero h3{margin:3px 0 4px;font-size:20px}
+.nox-ai-garden-hero p{margin:0;color:#5c6d61;font-size:13px;line-height:1.5}
+.nox-ai-status{margin-left:auto;white-space:nowrap;font:700 10px "MS Sans Serif","Segoe UI",Tahoma,Arial,sans-serif;color:#4b8052}
+.nox-ai-status i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#55aa62;box-shadow:0 0 0 5px rgba(85,170,98,.12);margin-right:5px}
+.nox-ai-garden-chat{overflow:hidden;padding:0;background:var(--n6-glass);border:1px solid var(--n6-border);box-shadow:var(--n6-shadow)}
+.nox-ai-garden-head{display:flex;justify-content:space-between;align-items:center;padding:15px 17px;border-bottom:1px solid rgba(70,100,75,.08)}
+.nox-ai-garden-head b{display:block;font-size:14px}.nox-ai-garden-head small{display:block;margin-top:3px;color:#77847a;font-size:10px}
+.nox-ai-garden-body{height:min(52vh,560px);min-height:330px;overflow:auto;padding:18px;scroll-behavior:smooth}
+.nox-ai-msg{display:flex;gap:10px;max-width:86%;margin:0 0 14px;align-items:flex-start}
+.nox-ai-msg.user{margin-left:auto;flex-direction:row-reverse}
+.nox-ai-avatar{width:31px;height:31px;border-radius:11px;display:grid;place-items:center;flex:0 0 31px;background:rgba(79,146,87,.13);color:#3e7f49}
+.nox-ai-msg>div{padding:10px 13px;border-radius:15px;background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.72)}
+.nox-ai-msg.user>div{background:rgba(72,133,79,.10)}
+.nox-ai-msg b{font-size:10px;color:#52715a}.nox-ai-msg p{margin:4px 0 0;white-space:pre-wrap;line-height:1.52;font-size:13px;color:#344239}
+.nox-ai-typing{opacity:.65}.nox-ai-typing span{display:inline-block;animation:n6dot 1s infinite}.nox-ai-typing span:nth-child(2){animation-delay:.15s}.nox-ai-typing span:nth-child(3){animation-delay:.3s}
+@keyframes n6dot{0%,70%,100%{transform:translateY(0)}35%{transform:translateY(-4px)}}
+.nox-ai-garden-form{display:flex;gap:9px;padding:12px;border-top:1px solid rgba(70,100,75,.08);background:rgba(255,255,255,.28)}
+.nox-ai-garden-form input{min-width:0;flex:1;border:1px solid rgba(70,105,75,.10);background:rgba(255,255,255,.62);border-radius:15px;padding:13px 14px;outline:none;font:14px "MS Sans Serif","Segoe UI",Tahoma,Arial,sans-serif;color:#24372a}
+.nox-ai-garden-form input:focus{border-color:rgba(65,133,75,.35);box-shadow:0 0 0 4px rgba(65,133,75,.08)}
+.nox-ai-garden-form button{min-width:76px}
+.nox-ai-quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 12px 12px}
+.nox-ai-quick button{border:1px solid rgba(70,105,75,.10);background:rgba(255,255,255,.48);padding:8px 10px;border-radius:12px;color:#55705a;font:11px "MS Sans Serif","Segoe UI",Tahoma,Arial,sans-serif;cursor:pointer}
+.nox-ai-quick button:hover{background:rgba(255,255,255,.76);transform:translateY(-1px)}
+@media(max-width:620px){
+ .nox-ai-garden-hero{align-items:flex-start}.nox-ai-status{display:none}
+ .nox-ai-garden-body{min-height:300px;height:54vh;padding:12px}
+ .nox-ai-msg{max-width:94%}.nox-ai-garden-form button{min-width:62px}
+}
+@media(prefers-reduced-motion:reduce){.nox-ai-typing span{animation:none}.nox-ai-quick button{transition:none}}
+</style>
+
+<script id="nox-v6-garden-ai">
+(function(){
+  'use strict';
+  var busy=false, key='nox-v6-garden-ai-chat';
+  function $(id){return document.getElementById(id)}
+  function body(){return $('noxGardenAIBody')}
+  function scroll(){var b=body();if(b)b.scrollTop=b.scrollHeight}
+  function add(role,text){
+    var b=body();if(!b)return;
+    var row=document.createElement('div');row.className='nox-ai-msg '+role;
+    var av=document.createElement('span');av.className='nox-ai-avatar';av.textContent=role==='user'?'●':'✦';
+    var box=document.createElement('div');var name=document.createElement('b');name.textContent=role==='user'?'Bạn':'GalaxyZ-3 Sol';
+    var p=document.createElement('p');p.textContent=text;
+    box.appendChild(name);box.appendChild(p);row.appendChild(av);row.appendChild(box);b.appendChild(row);scroll();
+  }
+  function typing(on){
+    var old=document.getElementById('n6typing');if(old)old.remove();
+    if(!on)return null;
+    var b=body(),r=document.createElement('div');r.id='n6typing';r.className='nox-ai-msg ai nox-ai-typing';
+    r.innerHTML='<span class="nox-ai-avatar">✦</span><div><b>GalaxyZ-3 Sol</b><p><span>●</span> <span>●</span> <span>●</span></p></div>';
+    b.appendChild(r);scroll();return r;
+  }
+  function snapshot(){
+    var out={app:'NOXGARDEN',mode:'Garden AI only',timestamp:Date.now()};
+    try{out.user=window.DATA&&DATA.user?{name:DATA.user.name||'',role:DATA.user.role||''}:null}catch(e){}
+    return out;
+  }
+  function ask(text){
+    text=(text||'').trim();if(!text||busy)return;
+    add('user',text);busy=true;var ty=typing(true),btn=$('noxGardenAISend');if(btn)btn.disabled=true;
+    var prompt=[
+      'Bạn là GalaxyZ-3 Sol, AI lõi của NOXGARDEN.',
+      'Đây là Garden AI Console. Hiện tại Garden gameplay cũ đã bị loại khỏi giao diện.',
+      'Người dùng đang hỏi trực tiếp trong Garden.',
+      'Trả lời bằng tiếng Việt, thông minh, thực tế, dứt điểm. Nếu yêu cầu liên quan code/web, đưa phương án triển khai cụ thể.',
+      'Không tự bịa dữ liệu hệ thống.',
+      'SNAPSHOT: '+JSON.stringify(snapshot()),
+      'CÂU HỎI: '+text
+    ].join('\n');
+    if(!window.puter||!puter.ai||typeof puter.ai.chat!=='function'){
+      if(ty)ty.remove();add('ai','GalaxyZ-3 Sol chưa kết nối Puter AI. Hãy kiểm tra kết nối Puter.');busy=false;if(btn)btn.disabled=false;return;
+    }
+    Promise.resolve(puter.ai.chat(prompt,{model:'openai/gpt-6-astra'}))
+      .then(function(res){
+        var out='';
+        if(typeof res==='string')out=res;
+        else if(res&&typeof res.message==='string')out=res.message;
+        else if(res&&res.message&&typeof res.message.content==='string')out=res.message.content;
+        else if(res&&typeof res.content==='string')out=res.content;
+        else out='GalaxyZ-3 Sol đã nhận câu hỏi nhưng không đọc được nội dung phản hồi.';
+        if(ty)ty.remove();add('ai',out);
+      })
+      .catch(function(e){if(ty)ty.remove();add('ai','GalaxyZ-3 Sol gặp lỗi khi phản hồi. Hãy thử lại.');console.warn('[NOX v6 AI]',e)})
+      .finally(function(){busy=false;if(btn)btn.disabled=false});
+  }
+  function install(){
+    var f=$('noxGardenAIForm'),inp=$('noxGardenAIInput'),clear=$('noxGardenAIClear');
+    if(!f||!inp||f.__n6)return;
+    f.__n6=true;
+    f.addEventListener('submit',function(e){e.preventDefault();e.stopPropagation();var v=inp.value;inp.value='';ask(v)},true);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();e.stopImmediatePropagation();f.requestSubmit()}},true);
+    document.querySelectorAll('[data-gai]').forEach(function(b){b.addEventListener('click',function(){ask(b.getAttribute('data-gai'))})});
+    if(clear)clear.addEventListener('click',function(){
+      body().innerHTML='<div class="nox-ai-msg ai"><span class="nox-ai-avatar">✦</span><div><b>GalaxyZ-3 Sol</b><p>Chat đã được làm sạch. Hỏi tôi bất cứ điều gì.</p></div></div>';
+      inp.focus();
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+  window.NOXGardenAI=ask;
+})();
+</script>
+
+
+<script id="nox-v6-legacy-garden-guard">
+(function(){
+  function guard(){
+    ['gPlots','gWorld','dailyCard','nox-ecosystem-v3','gardenMarket'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el && el.closest('#view-garden')) el.remove();
+    });
+    document.querySelectorAll('#view-garden [data-act="market"],#view-garden [data-act="waterAll"],#view-garden [data-act="boost"],#view-garden [data-act="inv"]').forEach(function(el){el.remove()});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',guard);else guard();
+  setTimeout(guard,250);setTimeout(guard,1000);
+})();
+</script>
 
 </body></html>
