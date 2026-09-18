@@ -23,8 +23,240 @@
 .aiTyping{display:inline-flex;gap:4px;align-items:center;padding:3px 0}.aiTyping i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.45;animation:typing 1s infinite}.aiTyping i:nth-child(2){animation-delay:.15s}.aiTyping i:nth-child(3){animation-delay:.3s}@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
 #aiStop{margin-left:auto;display:none}.aiRunning #aiStop{display:block}.aiRunning #puterSend{display:none}
 .maintenance{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 35%,#1a2544f2,#02050afc 68%);display:none;place-items:center;padding:22px;text-align:center}.maintenance.show{display:grid;animation:in .25s ease}.maintenanceCard{width:min(560px,100%);padding:30px;border-radius:25px}.maintenanceIcon{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;margin:0 auto 15px;background:#ffc96b12;border:1px solid #ffc96b35;color:#ffd98a;font-size:22px}.maintenanceCard h2{font-size:27px}.maintenanceCard p{color:var(--mut);line-height:1.7;font-size:12px}.devManage{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.dangerBtn{border-color:#ff6f833d!important;color:#ff9aaa!important}.successBtn{border-color:#58e0a23d!important;color:#8bf0c1!important}
-</style></head><body><div id="pageLoader"><div class="loaderCore"><div class="loaderRing"></div></div><div class="loaderBar"><i></i></div></div><div id="space"></div><div id="grid"></div><div id="stars"></div>
-<div class="shell"><aside class="side glass"><div class="logo"><div class="mark">N</div><div><b>SKIBIDI - SCRIPT</b><small>CODE · COMMUNITY</small></div></div>
+</style>
+<style>
+/* NEXUS MOTION PACK */
+:root{--ease:cubic-bezier(.2,.8,.2,1)}
+html{scroll-behavior:smooth}.smartStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.smartCard{padding:14px;border-radius:16px;position:relative;overflow:hidden;transition:.3s var(--ease)}.smartCard:before{content:"";position:absolute;inset:-80%;background:conic-gradient(from 0deg,transparent,#67ddff18,transparent 30%);animation:orbit 7s linear infinite;pointer-events:none}.smartCard>*{position:relative}.smartCard b{display:block;font:700 10px "Space Grotesk";letter-spacing:.12em}.smartCard span{display:block;color:var(--mut);font-size:10px;margin-top:5px}.smartCard:hover{transform:translateY(-3px) scale(1.01);border-color:#67ddff33}.msg{animation:msgIn .28s var(--ease);will-change:transform,opacity}.msg:hover .ava{transform:translateY(-2px) rotate(-2deg);box-shadow:0 8px 25px #0005}.ava{transition:.25s var(--ease)}.bubble{transition:transform .2s var(--ease),box-shadow .2s var(--ease)}.msg:hover .bubble{box-shadow:0 10px 35px #0005}.mine .bubble{background:linear-gradient(135deg,#67ddff12,#9b7cff10)}.devMsg .ava{box-shadow:0 0 0 1px #ffc96b55,0 0 24px #ffc96b18;animation:devPulse 2.2s ease-in-out infinite}.aiReply .ava{box-shadow:0 0 0 1px #9b7cff55,0 0 24px #9b7cff18;animation:aiPulse 2s ease-in-out infinite}.badgeDev,.badgeAi{animation:badgeFloat 2.5s ease-in-out infinite}.send{position:relative;overflow:hidden}.send:after,.chatIconBtn:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,#fff3 50%,transparent 70%);transform:translateX(-120%);animation:shine 3.5s infinite}.chatIconBtn{position:relative;overflow:hidden}.view.active{animation:viewIn .45s var(--ease)}.nav button{transition:.22s var(--ease)}.nav button:hover{transform:translateX(3px)}.metric{transition:.25s var(--ease)}.metric:hover{transform:translateY(-4px);box-shadow:0 18px 35px #0005}.toast{animation:toastIn .3s var(--ease)}.modalwrap.show .modal,.palette.show .pal{animation:modalIn .3s var(--ease)}.mention{animation:mentionGlow 1.4s ease-in-out infinite alternate}.msgImage{transition:.25s var(--ease)}.msgImage:hover{transform:scale(1.015);box-shadow:0 12px 35px #0007}.typingDots{display:inline-flex;gap:4px}.typingDots i{width:4px;height:4px;border-radius:50%;background:currentColor;animation:typing 1s infinite}.typingDots i:nth-child(2){animation-delay:.14s}.typingDots i:nth-child(3){animation-delay:.28s}.recalled{opacity:.7}.onlineRing{animation:onlinePulse 2s infinite}.disabledView{opacity:.45;pointer-events:none}
+@keyframes orbit{to{transform:rotate(360deg)}}@keyframes shine{0%,55%{transform:translateX(-120%)}75%,100%{transform:translateX(120%)}}@keyframes viewIn{from{opacity:0;transform:translateY(15px) scale(.99);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}@keyframes toastIn{from{opacity:0;transform:translateX(25px) scale(.96)}to{opacity:1;transform:none}}@keyframes badgeFloat{50%{transform:translateY(-1px)}}@keyframes devPulse{50%{box-shadow:0 0 0 2px #ffc96b22,0 0 34px #ffc96b24}}@keyframes aiPulse{50%{box-shadow:0 0 0 2px #9b7cff22,0 0 34px #9b7cff24}}@keyframes mentionGlow{to{text-shadow:0 0 10px #67ddff99}}@keyframes onlinePulse{50%{box-shadow:0 0 0 5px #58e0a20a,0 0 15px #58e0a244}}
+@media(max-width:700px){.smartStrip{grid-template-columns:1fr}.smartCard{padding:12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+</style>
+<style id="skibidi-hardening">
+#pageLoader{animation:loaderFailsafe 1ms linear 2s forwards;will-change:opacity,visibility}
+#pageLoader .loaderCore{animation:loaderFloat 1.8s ease-in-out infinite,loaderPulse 1.5s ease-in-out infinite}
+@keyframes loaderFailsafe{to{opacity:0!important;visibility:hidden!important;pointer-events:none!important;display:none!important}}
+@keyframes loaderPulse{50%{box-shadow:0 0 95px #67ddff28,inset 0 1px #fff2;transform:translateY(-4px) scale(1.025)}}
+#space{animation:bgDrift 18s ease-in-out infinite alternate}
+@keyframes bgDrift{to{filter:hue-rotate(18deg) brightness(1.06);transform:scale(1.035)}}
+#grid{animation:gridDrift 28s linear infinite}
+@keyframes gridDrift{to{background-position:44px 44px}}
+.item,.metric,.devAction,.utilityTab,.vaultTab,.btn,.chatIconBtn{transition:transform .18s cubic-bezier(.2,.8,.2,1),border-color .18s,box-shadow .18s,background .18s,filter .18s}
+.item:hover,.metric:hover,.devAction:hover{transform:translateY(-2px)}
+.btn:hover,.chatIconBtn:hover,.utilityTab:hover,.vaultTab:hover{transform:translateY(-1px)}
+.msg{animation:msgEnter .28s cubic-bezier(.2,.8,.2,1);transform-origin:bottom}
+@keyframes msgEnter{from{opacity:0;transform:translateY(12px) scale(.97);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+.msg.mine .bubble{animation:mineGlow .55s ease-out}
+@keyframes mineGlow{0%{box-shadow:0 0 0 #67ddff00}45%{box-shadow:0 0 28px #67ddff18}100%{box-shadow:none}}
+.msgImage{transition:transform .25s ease,box-shadow .25s ease}.msgImage:hover{transform:scale(1.015);box-shadow:0 14px 40px #0009}
+.toast{animation:toastIn .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes toastIn{from{opacity:0;transform:translateX(15px) scale(.96)}to{opacity:1;transform:none}}
+html,body{overscroll-behavior:none}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+.aurora{position:fixed;inset:-20%;z-index:-2;pointer-events:none;filter:blur(60px);opacity:.22;background:radial-gradient(circle at 20% 25%,#67ddff22,transparent 20%),radial-gradient(circle at 75% 30%,#9b7cff20,transparent 23%),radial-gradient(circle at 55% 80%,#58e0a218,transparent 20%);animation:auroraMove 24s ease-in-out infinite alternate}
+@keyframes auroraMove{50%{transform:translate3d(2%, -2%,0) scale(1.04)}100%{transform:translate3d(-2%,2%,0) scale(1.08)}}
+.ripple{position:absolute;border-radius:50%;pointer-events:none;background:#fff4;transform:scale(0);animation:ripple .55s ease-out forwards}
+@keyframes ripple{to{transform:scale(3);opacity:0}}
+.chatJump{position:absolute;right:16px;bottom:73px;z-index:14;width:34px;height:34px;border-radius:50%;background:#101c2df2;border:1px solid #67ddff35;color:var(--c);display:none;box-shadow:0 10px 30px #0008;animation:floatIn .2s ease}.chatJump.show{display:grid;place-items:center}
+@keyframes floatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.newMsg{animation:newMsg .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes newMsg{0%{opacity:0;transform:translateY(18px) scale(.96)}65%{transform:translateY(-2px) scale(1.01)}100%{opacity:1;transform:none}}
+</style>
+<style id="skibidi-v2-style">
+/* ================================================================
+   SKIBIDI SCRIPT // V2 STABILITY + MOTION ENGINE
+   The visual layer is intentionally CSS-first: no animation depends
+   on Firebase, Google, Puter, or any remote service being available.
+   ================================================================ */
+:root{--ease-out:cubic-bezier(.16,1,.3,1);--ease-spring:cubic-bezier(.22,1.2,.36,1);--motion-fast:140ms;--motion-med:280ms;--motion-slow:620ms;--surface:#0b1524;--surface2:#0e1a2c}
+html{scroll-behavior:smooth}
+body{overflow-x:hidden;isolation:isolate}
+/* The loader must NEVER be able to trap input. */
+#pageLoader{pointer-events:none!important;animation:hardLoaderOut 1.65s ease forwards!important;will-change:opacity,visibility}
+@keyframes hardLoaderOut{0%,72%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden}}
+#pageLoader .loaderCore{animation:loaderFloat 1.2s ease-in-out infinite,loaderPulse 1.2s ease-in-out infinite}
+@keyframes loaderPulse{50%{box-shadow:0 0 100px #67ddff30,inset 0 1px #fff2;transform:scale(1.035)}}
+#space{animation:spaceBreath 12s ease-in-out infinite alternate}
+@keyframes spaceBreath{from{filter:saturate(.9) brightness(.94)}to{filter:saturate(1.16) brightness(1.05)}}
+#grid{animation:gridDrift 28s linear infinite}
+@keyframes gridDrift{to{background-position:44px 44px}}
+#stars{animation:starsDrift 38s linear infinite}
+@keyframes starsDrift{to{transform:translate3d(-8px,-12px,0)}}
+.star{animation:tw 2.4s ease-in-out infinite alternate,starFloat 9s ease-in-out infinite alternate}
+@keyframes starFloat{to{transform:translate3d(7px,-5px,0) scale(1.15)}}
+.shell{animation:shellIn .65s var(--ease-out) both}
+@keyframes shellIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.side{transition:transform var(--motion-med) var(--ease-out),border-color var(--motion-med),box-shadow var(--motion-med)}
+.side:hover{transform:translateY(-2px);border-color:#67ddff2b}
+.logo .mark{transition:transform .35s var(--ease-spring),box-shadow .35s}
+.logo:hover .mark{transform:rotate(-7deg) scale(1.06);box-shadow:0 0 30px #67ddff25}
+.nav button{position:relative;overflow:hidden;transition:transform .2s var(--ease-out),background .2s,color .2s}
+.nav button:hover{transform:translateX(3px)}
+.nav button.active:before{content:"";position:absolute;left:0;top:25%;bottom:25%;width:2px;border-radius:9px;background:linear-gradient(var(--c),var(--v));box-shadow:0 0 15px #67ddff80}
+.btn,.top button,.chatIconBtn,.utilityTab,.vaultTab,.mobile button{transition:transform .18s var(--ease-spring),filter .18s,box-shadow .22s,border-color .22s,background .22s}
+.btn:hover,.top button:hover,.chatIconBtn:hover,.utilityTab:hover,.vaultTab:hover{transform:translateY(-2px);box-shadow:0 9px 28px #0005}
+.btn:active,.top button:active,.chatIconBtn:active,.utilityTab:active,.vaultTab:active{transform:translateY(1px) scale(.975)}
+.btn.primary{position:relative;overflow:hidden}
+.btn.primary:after{content:"";position:absolute;inset:-80% -20%;background:linear-gradient(105deg,transparent 38%,#fff2 48%,transparent 58%);transform:translateX(-70%) rotate(8deg);transition:transform .7s var(--ease-out);pointer-events:none}
+.btn.primary:hover:after{transform:translateX(70%) rotate(8deg)}
+.hero{transform:translateZ(0);transition:transform .45s var(--ease-out),box-shadow .45s,border-color .45s}
+.hero:hover{transform:translateY(-3px);box-shadow:0 30px 90px #0008,inset 0 1px #fff1}
+.hero:before{content:"";position:absolute;inset:auto -20% -65% -20%;height:55%;background:radial-gradient(ellipse,#67ddff0d,transparent 62%);pointer-events:none;animation:heroAura 7s ease-in-out infinite alternate}
+@keyframes heroAura{to{transform:translateX(7%) scale(1.08);opacity:.75}}
+h1{letter-spacing:-.045em;animation:titleIn .75s .08s var(--ease-out) both}
+h1 span{display:inline-block;animation:gradientText 5s ease-in-out infinite alternate}
+@keyframes gradientText{from{filter:brightness(.9)}to{filter:brightness(1.35)}}
+.lede{animation:titleIn .75s .17s var(--ease-out) both}
+.actions{animation:titleIn .75s .25s var(--ease-out) both}
+@keyframes titleIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.metrics .metric{animation:metricIn .5s var(--ease-out) both;transition:transform .25s var(--ease-out),border-color .25s,background .25s}
+.metrics .metric:nth-child(1){animation-delay:.12s}.metrics .metric:nth-child(2){animation-delay:.17s}.metrics .metric:nth-child(3){animation-delay:.22s}.metrics .metric:nth-child(4){animation-delay:.27s}
+@keyframes metricIn{from{opacity:0;transform:translateY(9px) scale(.98)}to{opacity:1;transform:none}}
+.metric:hover{transform:translateY(-4px);border-color:#67ddff26;background:#102039e6}
+.item{transition:transform .22s var(--ease-out),background .22s,border-color .22s,box-shadow .22s}
+.item:hover{transform:translateX(3px);background:#0d1929e8;border-color:#67ddff18;box-shadow:0 10px 28px #0004}
+.itemic{transition:transform .25s var(--ease-spring),background .25s}
+.item:hover .itemic{transform:scale(1.05) rotate(-3deg);background:#67ddff15}
+.view.active{animation:viewEnter .42s var(--ease-out)}
+@keyframes viewEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.chat{overflow:hidden;box-shadow:0 22px 70px #0006}
+.chathead{background:linear-gradient(90deg,#0d1929aa,transparent);position:relative}
+.chathead:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,#67ddff55,transparent);animation:lineSweep 4s ease-in-out infinite}
+@keyframes lineSweep{0%,100%{opacity:.25;transform:scaleX(.35)}50%{opacity:1;transform:scaleX(1)}}
+.chatbody{scrollbar-width:thin;scrollbar-color:#67ddff30 transparent;overscroll-behavior:contain}
+.msg{animation:messageEnter .32s var(--ease-out);transform-origin:bottom}
+.msg:hover{z-index:2}
+@keyframes messageEnter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.msg.mine{animation-name:messageMine}
+@keyframes messageMine{from{opacity:0;transform:translateY(9px) translateX(8px) scale(.985)}to{opacity:1;transform:none}}
+.msg .ava{transition:transform .25s var(--ease-spring),box-shadow .25s}
+.msg:hover .ava{transform:scale(1.05);box-shadow:0 7px 22px #0005}
+.bubble{transition:background .2s,border-color .2s,box-shadow .2s,transform .2s var(--ease-spring)}
+.msg:not(.mine) .bubble:hover{transform:translateY(-1px)}
+.msgImage{transition:transform .25s var(--ease-spring),filter .25s,box-shadow .25s}
+.msgImage:hover{transform:scale(1.012);filter:brightness(1.08);box-shadow:0 14px 40px #0007}
+.msgTools{backdrop-filter:blur(10px)}
+.msgTool{transition:transform .16s var(--ease-spring),color .16s,background .16s}
+.msgTool:hover{transform:translateY(-1px);background:#142238}
+.chatTools{background:linear-gradient(180deg,transparent,#09132188)}
+.chatIconBtn{position:relative;overflow:hidden}
+.chatIconBtn:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 120%,#67ddff16,transparent 55%);opacity:0;transition:opacity .2s}
+.chatIconBtn:hover:after{opacity:1}
+.send{box-shadow:0 8px 24px #1d668a30}
+#chatInput{transition:box-shadow .2s,border-color .2s,transform .2s}
+#chatInput:focus{transform:translateY(-1px)}
+.mention{position:relative;text-shadow:0 0 12px #67ddff44}
+.badgeDev,.badgeAi,.tag{transition:transform .2s var(--ease-spring),box-shadow .2s}
+.badgeDev:hover,.badgeAi:hover,.tag:hover{transform:translateY(-1px);box-shadow:0 5px 16px #0004}
+.badgeDev{animation:devPulse 2.8s ease-in-out infinite}
+@keyframes devPulse{50%{box-shadow:0 0 20px #ffc96b1d}}
+.badgeAi{animation:aiPulse 3s ease-in-out infinite}
+@keyframes aiPulse{50%{box-shadow:0 0 22px #9b7cff22}}
+.aiRunning #puterSend,.aiRunning #aiStop,.chatTools.aiRunning #chatAiStop{animation:controlPop .2s var(--ease-spring)}
+@keyframes controlPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+.aiTyping i,.typingDots i{box-shadow:0 0 8px currentColor}
+.profileHero{transition:transform .3s var(--ease-out),box-shadow .3s}
+.profileHero:hover{transform:translateY(-2px);box-shadow:0 20px 60px #0007}
+.bigava{transition:transform .35s var(--ease-spring),box-shadow .35s}
+.profileHero:hover .bigava{transform:scale(1.035) rotate(-2deg);box-shadow:0 0 35px #67ddff18}
+.modalwrap,.palette{backdrop-filter:blur(8px);animation:none}
+.modalwrap.show .modal,.palette.show .pal{animation:modalIn .32s var(--ease-spring)}
+@keyframes modalIn{from{opacity:0;transform:translateY(15px) scale(.97)}to{opacity:1;transform:none}}
+.modal{box-shadow:0 35px 100px #000b}
+.field input,.field textarea,.pal input,.puterInput input{transition:border-color .2s,box-shadow .2s,transform .2s}
+.field input:focus,.field textarea:focus,.pal input:focus,.puterInput input:focus{transform:translateY(-1px)}
+.toast{animation:toastIn .32s var(--ease-spring);position:relative;overflow:hidden}
+.toast:after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:linear-gradient(90deg,var(--c),var(--v));transform-origin:left;animation:toastTimer 2.8s linear forwards}
+@keyframes toastIn{from{opacity:0;transform:translateX(18px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes toastTimer{to{transform:scaleX(0)}}
+.maintenance.show .maintenanceCard{animation:maintenanceIn .5s var(--ease-spring)}
+@keyframes maintenanceIn{from{opacity:0;transform:scale(.94) translateY(15px)}to{opacity:1;transform:none}}
+.maintenanceIcon{animation:maintenanceFloat 2.5s ease-in-out infinite}
+@keyframes maintenanceFloat{50%{transform:translateY(-5px) rotate(2deg)}}
+#mentionMenu{animation:menuRise .2s var(--ease-out)}
+@keyframes menuRise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+#chatJump{animation:jumpIn .25s var(--ease-spring)}
+@keyframes jumpIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+/* Ripple surface */
+.sk-ripple{position:absolute;border-radius:50%;pointer-events:none;width:8px;height:8px;background:#ffffff36;transform:translate(-50%,-50%) scale(0);animation:rippleOut .55s ease-out forwards}
+@keyframes rippleOut{to{transform:translate(-50%,-50%) scale(25);opacity:0}}
+/* Image viewer */
+#skImageViewer{position:fixed;inset:0;z-index:500;display:none;place-items:center;background:#01040bd9;backdrop-filter:blur(14px);padding:20px;cursor:zoom-out}
+#skImageViewer.show{display:grid;animation:fadeIn .2s ease}
+#skImageViewer img{max-width:min(96vw,1200px);max-height:86vh;object-fit:contain;border-radius:18px;border:1px solid #ffffff1c;box-shadow:0 30px 100px #000b;animation:imageIn .3s var(--ease-spring)}
+#skImageViewer .skImageClose{position:absolute;right:16px;top:16px;width:40px;height:40px;border-radius:12px;background:#0d1828e8;color:var(--txt);border:1px solid #ffffff18;font-size:20px}
+@keyframes imageIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+/* Context menu */
+#skContext{position:fixed;z-index:450;display:none;min-width:190px;padding:6px;border-radius:15px;background:#0a1422f2;border:1px solid #ffffff17;box-shadow:0 20px 60px #000a;backdrop-filter:blur(18px)}
+#skContext.show{display:block;animation:menuRise .18s var(--ease-out)}
+#skContext button{display:block;width:100%;padding:9px 11px;border-radius:9px;text-align:left;background:transparent;color:var(--txt);font-size:10.5px}
+#skContext button:hover{background:#67ddff10}
+#skContext button.danger{color:#ff9aaa}
+/* Smart status rail */
+#skStatusRail{position:fixed;left:50%;top:12px;transform:translateX(-50%) translateY(-20px);z-index:120;display:flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;background:#08111ee8;border:1px solid #ffffff13;box-shadow:0 12px 35px #0007;opacity:0;pointer-events:none;font-size:9px;color:var(--mut);transition:.28s var(--ease-spring)}
+#skStatusRail.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#skStatusRail i{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 10px #58e0a277}
+/* Guest lock cards */
+.guestLocked{position:relative;overflow:hidden}
+.guestLocked:after{content:"GOOGLE ACCOUNT REQUIRED";position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#060b14e8,#0a1322ed);color:#9db0c9;font:700 10px "Space Grotesk";letter-spacing:.14em;opacity:0;pointer-events:none;transition:opacity .25s}
+body.sk-guest .guestLocked:after{opacity:1}
+/* Focus ring is deliberately visible for keyboard users. */
+:focus-visible{outline:2px solid #67ddff66;outline-offset:2px}
+@media(max-width:900px){
+  .hero:hover,.item:hover,.profileHero:hover{transform:none}
+  .side:hover{transform:none}
+  #skStatusRail{top:7px;max-width:92vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+}
+</style>
+<style id="skibidi-v3-style">
+/* ================================================================
+   SKIBIDI SCRIPT // V3 INTERACTION + RECOVERY PACK
+   Everything below is optional UX enhancement. It does not replace
+   Firebase data structures and does not require another database.
+   ================================================================ */
+.sk-reveal{opacity:0;transform:translateY(12px);transition:opacity .55s var(--ease-out),transform .55s var(--ease-out)}
+.sk-reveal.sk-visible{opacity:1;transform:none}
+.sk-shimmer{position:relative;overflow:hidden}
+.sk-shimmer:before{content:"";position:absolute;inset:0 -60%;background:linear-gradient(105deg,transparent 38%,#ffffff0a 50%,transparent 62%);transform:translateX(-40%);animation:shimmerPass 4.5s ease-in-out infinite;pointer-events:none}
+@keyframes shimmerPass{50%{transform:translateX(40%)}100%{transform:translateX(40%)}}
+.hero,.card,.chat,.profileHero,.metric{transform-style:preserve-3d}
+.sk-glow-follow{position:relative;overflow:hidden}
+.sk-glow-follow:after{content:"";position:absolute;width:180px;height:180px;left:var(--mx,50%);top:var(--my,50%);transform:translate(-50%,-50%);background:radial-gradient(circle,#67ddff10,transparent 68%);pointer-events:none;opacity:0;transition:opacity .2s}
+.sk-glow-follow:hover:after{opacity:1}
+.item[data-key],.msg[data-key]{contain:layout style paint}
+.msg.newMsg{animation:messageArrival .5s var(--ease-spring)}
+@keyframes messageArrival{0%{opacity:0;transform:translateY(16px) scale(.97)}55%{transform:translateY(-2px) scale(1.005)}100%{opacity:1;transform:none}}
+.msg.mine .bubble{position:relative}
+.msg.mine .bubble:after{content:"";position:absolute;inset:-1px;border-radius:inherit;border:1px solid #67ddff10;opacity:0;animation:mineRing .7s ease-out}
+@keyframes mineRing{0%{opacity:.8;transform:scale(.98)}100%{opacity:0;transform:scale(1.035)}}
+.msg.devMsg{position:relative}
+.msg.devMsg:before{content:"";position:absolute;left:-5px;top:8px;bottom:8px;width:2px;border-radius:99px;background:linear-gradient(var(--gold),transparent);opacity:.7}
+.msg.aiReply{position:relative}
+.msg.aiReply:before{content:"AI";position:absolute;right:-2px;top:-8px;padding:2px 5px;border-radius:999px;background:#9b7cff14;color:#c9bdff;font:700 7px "Space Grotesk";letter-spacing:.08em;opacity:.8}
+#chatBody::-webkit-scrollbar{width:6px}#chatBody::-webkit-scrollbar-thumb{background:#67ddff22;border-radius:99px}#chatBody::-webkit-scrollbar-track{background:transparent}
+#scriptList .item,#utility-apk .item,#utility-links .item,#utility-ios .item{animation:listIn .35s var(--ease-out) both}
+#scriptList .item:nth-child(2n),#utility-apk .item:nth-child(2n),#utility-links .item:nth-child(2n),#utility-ios .item:nth-child(2n){animation-delay:.035s}
+#scriptList .item:nth-child(3n),#utility-apk .item:nth-child(3n),#utility-links .item:nth-child(3n),#utility-ios .item:nth-child(3n){animation-delay:.07s}
+@keyframes listIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.utilityTab.active{box-shadow:0 0 24px #67ddff0b}
+#smartText{transition:color .3s,opacity .3s}
+.sk-online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 10px #58e0a255;vertical-align:middle;margin-right:5px}
+.sk-offline #smartText{color:#ff9aaa!important}
+/* Better mobile touch targets without making the interface huge. */
+@media(max-width:700px){.btn{min-height:38px}.chatIconBtn{min-width:38px;min-height:38px}.send{min-height:40px}.msgTools{opacity:1;transform:none;pointer-events:auto}.msgTool{padding:6px 8px}.bubble{max-width:calc(100vw - 85px)}}
+/* Compact motion mode when the user is on a constrained device. */
+body.sk-low-power .sk-glow-follow:after,body.sk-low-power .hero:before{display:none}
+/* Accessibility: visible focus and a less aggressive backdrop. */
+body.sk-accessible .glass{backdrop-filter:blur(10px)}
+body.sk-accessible .muted,body.sk-accessible .sub{opacity:.95}
+</style>
+</head><body><div id="pageLoader"><div class="loaderCore"><div class="loaderRing"></div></div><div class="loaderBar"><i></i></div></div><div id="space"></div><div id="grid"></div><div class="aurora"></div><div id="stars"></div>
+<script>
+(function(){var done=false;window.__SKIBIDI_HIDE_LOADER=function(){if(done)return;done=true;try{document.body.classList.add('loaded');var l=document.getElementById('pageLoader');if(l){l.style.opacity='0';l.style.visibility='hidden';l.style.pointerEvents='none';setTimeout(function(){if(l)l.remove()},650)}}catch(e){}};window.addEventListener('error',function(e){console.warn('[SKIBIDI runtime]',e.error||e.message);setTimeout(window.__SKIBIDI_HIDE_LOADER,80)});window.addEventListener('unhandledrejection',function(e){console.warn('[SKIBIDI promise]',e.reason);setTimeout(window.__SKIBIDI_HIDE_LOADER,80)});setTimeout(window.__SKIBIDI_HIDE_LOADER,2300)})();
+</script><div class="shell"><aside class="side glass"><div class="logo"><div class="mark">N</div><div><b>SKIBIDI - SCRIPT</b><small>CODE · COMMUNITY</small></div></div>
 <nav class="nav" id="nav">
 <button data-view="home" class="active"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-5h6v5"/></svg>Trang chính</button>
 <button data-view="ai"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/><circle cx="12" cy="12" r="3.5"/></svg>NoxAI</button>
@@ -34,7 +266,7 @@
 </nav>
 <div class="bottom"><div class="state"><i class="dot" id="dot"></i><span id="conn">Connecting…</span></div><button class="btn primary" style="width:100%" id="loginBtn">ĐĂNG NHẬP</button></div></aside>
 <main class="main"><header class="top"><div class="crumb" id="crumb">SKIBIDI - SCRIPT / COMMAND CENTER</div><button id="searchBtn">⌕ TÌM</button><button id="userBtn">Guest</button><button id="devTop" class="hidden">DEV PANEL</button></header>
-<section class="view active" id="view-home"><div class="hero glass"><div class="ey">SKIBIDI - SCRIPT</div><h1>Script. Share. Connect.<br><span>Everything in one place.</span></h1><p class="lede">Kho scripts, APK, LINK, iOS, cộng đồng và NoxAI.</p><div class="actions"><button class="btn primary" data-view="ai">OPEN AI HUB</button><button class="btn" data-view="utilities">MỞ TIỆN ÍCH</button><button class="btn" data-view="community">CHAT</button></div><div class="metrics"><div class="metric glass"><small>ACCOUNT</small><b id="mAccount">GUEST</b></div><div class="metric glass"><small>ROLE</small><b id="mRole">GUEST</b></div><div class="metric glass"><small>DATA</small><b id="mData">SYNC</b></div><div class="metric glass"><small>LISTENERS</small><b id="mLis">0</b></div></div></div></section>
+<section class="view active" id="view-home"><div class="hero glass"><div class="ey">SKIBIDI - SCRIPT</div><h1>Script. Share. Connect.<br><span>Everything in one place.</span></h1><p class="lede">Kho scripts, APK, LINK, iOS, cộng đồng và NoxAI.</p><div class="actions"><button class="btn primary" data-view="ai">OPEN AI HUB</button><button class="btn" data-view="utilities">MỞ TIỆN ÍCH</button><button class="btn" data-view="community">CHAT</button></div><div class="metrics"><div class="metric glass"><small>ACCOUNT</small><b id="mAccount">GUEST</b></div><div class="metric glass"><small>ROLE</small><b id="mRole">GUEST</b></div><div class="metric glass"><small>DATA</small><b id="mData">SYNC</b></div><div class="metric glass"><small>LISTENERS</small><b id="mLis">0</b></div></div></div><div class="smartStrip"><div class="smartCard glass"><b>SMART HUB</b><span id="smartText">Đang kiểm tra trạng thái hệ thống…</span></div><div class="smartCard glass"><b>SHORTCUTS</b><span>Ctrl / ⌘ + K · tìm nhanh</span></div><div class="smartCard glass"><b>ACCOUNT</b><span>Google unlocks AI + Community</span></div></div></section>
 <section class="view" id="view-ai"><div class="head"><div><h2>NoxAI</h2><p>Trợ lý</p></div><span class="tag">NoxAI</span></div><div class="cols"><div class="card glass puterChat"><div class="puterMessages" id="puterMessages"><div class="puterMsg"><div class="pmBubble">Xin chào. Bạn muốn làm gì?</div></div></div><div class="puterInput"><input id="puterInput" maxlength="4000" placeholder="Nhập yêu cầu…"><button class="btn primary" id="puterSend">GỬI</button><button class="btn dangerBtn" id="aiStop" type="button">NGẮT</button></div><div class="aiStatus" id="puterStatus">Sẵn sàng</div></div><div class="card glass aiInfo"><h3>NoxAI</h3><div class="kv"><span>Model</span><b>openai/gpt-6-astra</b></div><div class="kv"><span>Engine</span><b>Puter</b></div><div class="kv"><span>Trạng thái</span><b id="puterConn">Sẵn sàng</b></div></div></div></section>
 
 <section class="view" id="view-utilities">
@@ -51,9 +283,9 @@
 <div class="utilityGroup" id="utility-links"></div>
 <div class="utilityGroup" id="utility-ios"></div>
 </div></section>
-<section class="view" id="view-community"><div class="head"><div><h2>Community</h2><p>Global Chat + friends/DM sử dụng node hiện tại.</p></div><span class="tag">REALTIME</span></div><div class="cols"><div class="chat glass"><div class="chathead"><i class="dot on"></i><div class="grow"><b>Global Chat</b><small id="chatSub">Real-time</small></div><span class="tag" id="chatCount">0</span></div><div class="chatbody" id="chatBody"></div><div class="chatTools" id="chatTools"><button class="chatIconBtn" id="imageBtn" type="button" title="Gửi hình ảnh">▧</button><input id="imageInput" type="file" accept="image/*" hidden><small id="imageName" style="color:var(--mut);font-size:9px">Ảnh tối đa 1 MB</small><button class="btn dangerBtn" id="chatAiStop" type="button">NGẮT AI</button></div><form class="chatform" id="chatForm"><input id="chatInput" maxlength="1000" placeholder="Đăng nhập để gửi tin nhắn…"><button class="send">→</button></form><div id="mentionMenu" class="mention-menu hidden"></div></div><div class="card glass"><h3>Friends / DM</h3><div class="sub">Giữ nguyên nox_friends, nox_friends_unread và nox_dm.</div><div class="actions"><button class="btn primary" id="addFriend">ADD UID</button></div><div class="list" id="friendsList"></div></div></div></section>
+<section class="view" id="view-community"><div class="head"><div><h2>Community</h2><p>Global Chat + friends/DM sử dụng node hiện tại.</p></div><span class="tag">REALTIME</span></div><div class="cols"><div class="chat glass"><div class="chathead"><i class="dot on"></i><div class="grow"><b>Global Chat</b><small id="chatSub">Real-time</small></div><span class="tag" id="typingStatus"></span><span class="tag" id="chatCount">0</span></div><div class="chatbody" id="chatBody"></div><button class="chatJump" id="chatJump" type="button" title="Xuống tin mới nhất">↓</button><div class="chatTools" id="chatTools"><button class="chatIconBtn" id="imageBtn" type="button" title="Gửi hình ảnh">▧</button><input id="imageInput" type="file" accept="image/*" hidden><small id="imageName" style="color:var(--mut);font-size:9px">Ảnh tối đa 1 MB</small><button class="btn dangerBtn" id="chatAiStop" type="button">NGẮT AI</button></div><form class="chatform" id="chatForm"><input id="chatInput" maxlength="1000" placeholder="Đăng nhập để gửi tin nhắn…"><button class="send">→</button></form><div id="mentionMenu" class="mention-menu hidden"></div></div><div class="card glass"><h3>Friends / DM</h3><div class="sub">Giữ nguyên nox_friends, nox_friends_unread và nox_dm.</div><div class="actions"><button class="btn primary" id="addFriend">ADD UID</button></div><div class="list" id="friendsList"></div></div></div></section>
 
-<section class="view" id="view-profile"><div class="head"><div><h2>Account</h2><p>Thông tin tài khoản</p></div></div><div class="profile"><div class="profileHero glass"><div class="bigava" id="pAva"></div><div class="grow"><h2 id="pName">Guest</h2><p id="pBio" style="color:var(--mut);font-size:11px">Chưa đăng nhập</p><div class="actions"><button class="btn primary" id="pLogin">ĐĂNG NHẬP</button><button class="btn" id="logout">LOG OUT</button></div></div></div><div class="card glass"><h3>Identity</h3><div class="kv"><span>UID</span><b class="mono" id="pUid">—</b></div><div class="kv"><span>Provider</span><b id="pProvider">—</b></div><div class="kv"><span>Role</span><b id="pRole">GUEST</b></div></div><div class="card glass"><h3>Progress</h3><div class="kv"><span>Level</span><b id="pLevel">1</b></div><div class="kv"><span>XP</span><b id="pXp">0</b></div><div class="kv"><span>Coins</span><b id="pCoins">0</b></div></div></div></section>
+<section class="view" id="view-profile"><div class="head"><div><h2>Account</h2><p>Thông tin tài khoản</p></div></div><div class="profile"><div class="profileHero glass"><div class="bigava" id="pAva"></div><div class="grow"><h2 id="pName">Guest</h2><p id="pBio" style="color:var(--mut);font-size:11px">Chưa đăng nhập</p><div class="actions"><button class="btn primary" id="pLogin">ĐĂNG NHẬP</button><button class="btn" id="editProfile">CHỈNH HỒ SƠ</button><button class="btn" id="notifyBtn">THÔNG BÁO</button><button class="btn" id="logout">LOG OUT</button></div></div></div><div class="card glass"><h3>Identity</h3><div class="kv"><span>UID</span><b class="mono" id="pUid">—</b></div><div class="kv"><span>Provider</span><b id="pProvider">—</b></div><div class="kv"><span>Role</span><b id="pRole">GUEST</b></div><div class="kv"><span>Đổi tên</span><b id="pNameCooldown">—</b></div></div><div class="card glass"><h3>Progress</h3><div class="kv"><span>Level</span><b id="pLevel">1</b></div><div class="kv"><span>XP</span><b id="pXp">0</b></div><div class="kv"><span>Coins</span><b id="pCoins">0</b></div></div></div></section>
 
 </main></div><nav class="mobile glass" id="mobile">
 <button data-view="home" class="active"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/></svg><span>Home</span></button>
@@ -88,28 +320,38 @@ function loginGoogle(g){if(!FB_LIVE)return toast('Firebase offline');var uid='g_
 var store={get:function(k,d){try{var x=localStorage.getItem(k);return x==null?d:JSON.parse(x)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del:function(k){try{localStorage.removeItem(k)}catch(e){}}};
 var state={user:null,control:null,chat:null,friends:null};
 function guest(){var g=store.get('nox-guest',null);if(!g){var n=1000+Math.floor(Math.random()*9000);g={uid:'guest_'+n,name:'Guest_'+n,createdAt:Date.now()};store.set('nox-guest',g)}finish({uid:g.uid,name:g.name,username:g.name,avatar:'',email:'',role:'GUEST',level:1,xp:0,coins:store.get('nox-gcoins',40)},'guest',null)}
-function finish(p,provider,control){state.user=Object.assign({},p,{provider:provider,role:roleOf(p)});state.control=control||null;store.set('nox-session',{type:provider,uid:p.uid});if(provider==='google')store.set('nox-cache-'+p.uid,p);watchControl();watchChat();watchFriends();renderProfile();toast('Chào mừng, '+(p.username||p.name)+'!')}
+function finish(p,provider,control){state.user=Object.assign({},p,{provider:provider,role:roleOf(p)});state.control=control||null;store.set('nox-session',{type:provider,uid:p.uid});if(provider==='google'){store.set('nox-cache-'+p.uid,p);watchControl();watchChat();watchFriends();watchTyping()}else{clearTyping();unref(controlRef);unref(state.chat);unref(state.friends);state.chat=null;state.friends=null}renderProfile();applyAccess();if(provider==='google'){var d=store.get('nox-chat-draft','');if(d&&$('#chatInput'))$('#chatInput').value=d}toast('Chào mừng, '+(p.username||p.name)+'!')}
 var controlRef=null;
 function watchControl(){if(!FB_LIVE||!state.user)return;unref(controlRef);controlRef=lref('nox_users_control/'+state.user.uid);controlRef.on('value',function(s){state.control=s.val()||null;if(state.user)state.user.role=roleOf(state.user);renderProfile();var c=state.control||{};$('#chatInput').disabled=!!(c.banned||c.muted)})}
+var typingTimer=null,typingRef=null,typingWatchRef=null;
+function setTyping(on){if(!isGoogleUser()||!FB_LIVE)return;var uid=state.user.uid.replace(/[.#$\[\]]/g,'_');typingRef=typingRef||db.ref('nox_chat_typing/'+uid);typingRef.set(on?{name:state.user.username||state.user.name,ts:SV_TS}:null)}
+function watchTyping(){if(!FB_LIVE||!isGoogleUser())return;unref(typingWatchRef);typingWatchRef=lref('nox_chat_typing');typingWatchRef.on('value',function(s){var v=s.val()||{},names=Object.entries(v).filter(function(p){return p[0]!==state.user.uid}).map(function(p){return p[1]&&p[1].name}).filter(Boolean).slice(0,2);var el=$('#typingStatus');if(el)el.innerHTML=names.length?'<span class="typingDots"><i></i><i></i><i></i></span> '+esc(names.join(', '))+' đang nhập…':''})}
+function stopTyping(){if(typingTimer)clearTimeout(typingTimer);setTyping(false)}
+function clearTyping(){stopTyping();if(typingRef)typingRef.remove().catch(function(){});unref(typingWatchRef);typingWatchRef=null;typingRef=null}
+function smartNotify(text){if(!('Notification' in window)||Notification.permission!=='granted')return;try{new Notification('SKIBIDI - SCRIPT',{body:text})}catch(e){}}
 function watchChat(){if(!FB_LIVE)return;unref(state.chat);state.chat=lref('nox_chat').limitToLast(80);state.chat.on('value',function(s){renderChat(s.val()||{})})}
-function guestAvatar(){return '<img alt="Guest" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22%3E%3Crect width=%2280%22 height=%2280%22 rx=%2220%22 fill=%22%23101d31%22/%3E%3Ccircle cx=%2240%22 cy=%2229%22 r=%2213%22 fill=%22%2367ddff%22/%3E%3Cpath d=%22M17 67c3-14 11-21 23-21s20 7 23 21%22 fill=%22%2367ddff%22/%3E%3C/svg%3E">'}
-function avatarHtml(m){return m.ava?'<img alt="" src="'+esc(m.ava)+'">':guestAvatar()}
-function formatMsg(m){if(m.recalled)return '<span class="recalled">Tin nhắn đã được thu hồi</span>';var tx=m.text||'',safe=esc(tx).replace(/@([A-Za-z0-9_.-]{1,30})/g,'<span class="mention">@$1</span>');var out='';if(m.image)out+='<img class="msgImage" src="'+esc(m.image)+'" alt="Hình ảnh" loading="lazy" data-image="'+esc(m.image)+'">';if(safe)out+=(out?'<br>':'')+safe;if(m.editedAt)out+='<span class="edited"> · đã chỉnh sửa</span>';return out||'<span class="recalled">[trống]</span>'}
-function renderChat(v){var a=Object.entries(v),b=$('#chatBody');$('#chatCount').textContent=a.length;mentionNames=[];a.forEach(function(p){var n=p[1]&&p[1].name;if(n&&mentionNames.indexOf(n)<0)mentionNames.push(n)});if(!a.length){b.innerHTML='<div class="empty">Chưa có tin nhắn.</div>';return}b.innerHTML=a.map(function(p){var key=p[0],m=p[1]||{},mine=state.user&&m.uid===state.user.uid,isdev=String(m.role||'').toUpperCase()==='DEV'||m.uid==='dev',isai=m.ai||m.uid==='nox_ai';var role=isai?'AI':(isdev?'DEV':(m.role||'USER'));var badge=isai?'<span class="badgeAi">NoxAI</span>':isdev?'<span class="badgeDev">DEV</span>':'<span>'+esc(role)+'</span>';var tools='';if(mine||isDev(state.user)){tools='<div class="msgTools">'+(mine&&!m.recalled?'<button class="msgTool" data-msg-action="recall" data-key="'+esc(key)+'">Thu hồi</button><button class="msgTool" data-msg-action="edit" data-key="'+esc(key)+'">Sửa</button>':'')+(isDev(state.user)?'<button class="msgTool dangerBtn" data-msg-action="delete" data-key="'+esc(key)+'">Xóa</button>':'')+'</div>'}return '<div class="msg '+(mine?'mine ':'')+(isai?'aiReply ':'')+(isdev?'devMsg':'')+'" data-key="'+esc(key)+'"><div class="ava">'+avatarHtml(m)+'</div><div class="grow"><div class="meta"><b>'+esc(m.name||'???')+'</b>'+badge+'<span>'+(m.ts?new Date(m.ts).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'')+'</span></div><div class="bubble">'+formatMsg(m)+'</div>'+tools+'</div></div>'}).join('');bindMessageActions();requestAnimationFrame(function(){b.scrollTop=b.scrollHeight})}
+function guestAvatar(){return '<img alt="Guest avatar" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop stop-color=%22%2367ddff%22/%3E%3Cstop offset=%221%22 stop-color=%22%239b7cff%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2280%22 height=%2280%22 rx=%2224%22 fill=%22%230a1424%22/%3E%3Crect x=%2214%22 y=%2218%22 width=%2252%22 height=%2244%22 rx=%2214%22 fill=%22url(%23g)%22 opacity=%22.22%22 stroke=%22%2367ddff%22/%3E%3Ccircle cx=%2229%22 cy=%2239%22 r=%225%22 fill=%22%2367ddff%22/%3E%3Ccircle cx=%2251%22 cy=%2239%22 r=%225%22 fill=%22%239b7cff%22/%3E%3Cpath d=%22M27 51c7 5 19 5 26 0%22 fill=%22none%22 stroke=%22%23eaf4ff%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M40 18v-6%22 stroke=%22%2367ddff%22 stroke-width=%223%22/%3E%3Ccircle cx=%2240%22 cy=%2210%22 r=%223%22 fill=%22%23ffc96b%22/%3E%3C/svg%3E">'}
+function safeImageUrl(u){try{var x=new URL(String(u),location.href);return /^(https?:|data:image\/)/i.test(x.protocol)?x.href:''}catch(e){return ''}}function avatarHtml(m){var u=safeImageUrl(m.ava);return u?'<img alt="" src="'+esc(u)+'">':guestAvatar()}
+function formatMsg(m){if(m.recalled)return '<span class="recalled">Tin nhắn đã được thu hồi</span>';var tx=m.text||'',safe=esc(tx).replace(/@([A-Za-z0-9_.-]{1,30})/g,'<span class="mention">@$1</span>');var out='';var iu=safeImageUrl(m.image);if(iu)out+='<img class="msgImage" src="'+esc(iu)+'" alt="Hình ảnh" loading="lazy" data-image="'+esc(iu)+'">';if(safe)out+=(out?'<br>':'')+safe;if(m.editedAt)out+='<span class="edited"> · đã chỉnh sửa</span>';return out||'<span class="recalled">[trống]</span>'}
+function renderChat(v){var a=Object.entries(v),b=$('#chatBody'),nearBottom=b?(b.scrollHeight-b.scrollTop-b.clientHeight<90):true,oldKeys=window.__chatKeys||{};$('#chatCount').textContent=a.length;mentionNames=[];a.forEach(function(p){var n=p[1]&&p[1].name;if(n&&mentionNames.indexOf(n)<0)mentionNames.push(n)});if(!a.length){b.innerHTML='<div class="empty">Chưa có tin nhắn.</div>';window.__chatKeys={};return}var html=a.map(function(p){var key=p[0],m=p[1]||{},mine=state.user&&m.uid===state.user.uid,isdev=String(m.role||'').toUpperCase()==='DEV'||m.uid==='dev',isai=m.ai||m.uid==='nox_ai',isNew=!oldKeys[key];var role=isai?'AI':(isdev?'DEV':(m.role||'USER'));var badge=isai?'<span class="badgeAi">NoxAI</span>':isdev?'<span class="badgeDev">DEV</span>':'<span>'+esc(role)+'</span>';var tools='';if(mine||isDev(state.user)){tools='<div class="msgTools">'+(mine&&!m.recalled?'<button class="msgTool" data-msg-action="recall" data-key="'+esc(key)+'">Thu hồi</button><button class="msgTool" data-msg-action="edit" data-key="'+esc(key)+'">Sửa</button>':'')+(isDev(state.user)?'<button class="msgTool dangerBtn" data-msg-action="delete" data-key="'+esc(key)+'">Xóa</button>':'')+'</div>'}return '<div class="msg '+(mine?'mine ':'')+(isai?'aiReply ':'')+(isdev?'devMsg ':'')+(isNew?'newMsg':'')+'" data-key="'+esc(key)+'"><div class="ava">'+avatarHtml(m)+'</div><div class="grow"><div class="meta"><b>'+esc(m.name||'???')+'</b>'+badge+'<span>'+(m.ts?new Date(m.ts).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'')+'</span></div><div class="bubble">'+formatMsg(m)+'</div>'+tools+'</div></div>'}).join('');b.innerHTML=html;window.__chatKeys={};a.forEach(function(p){window.__chatKeys[p[0]]=1});bindMessageActions();requestAnimationFrame(function(){if(nearBottom)b.scrollTop=b.scrollHeight;var j=$('#chatJump');if(j)j.classList.toggle('show',!nearBottom)})}
 var MOD_WORDS=[/lừa\s*đảo/i,/scam/i,/phishing/i,/hack\s*tài\s*khoản/i,/mật\s*khẩu/i,/đe\s*dọa/i,/giết/i,/kill/i];
 function scanMessage(t){return MOD_WORDS.filter(function(r){return r.test(t)}).map(function(r){return r.source})}
 function renderMentionMenu(){var i=$('#chatInput'),m=$('#mentionMenu');if(!i||!m)return;var at=i.value.lastIndexOf('@');if(at<0||/\s/.test(i.value.slice(at+1))){m.classList.add('hidden');return}var q=i.value.slice(at+1).toLowerCase();var a=[{name:'ai',label:'NoxAI'}].concat(mentionNames.map(function(n){return{name:n,label:n}})).filter(function(x){return x.name.toLowerCase().indexOf(q)>=0}).slice(0,8);if(!a.length){m.classList.add('hidden');return}m.innerHTML=a.map(function(x){return '<button data-name="'+esc(x.name)+'"><b>@'+esc(x.label)+'</b></button>'}).join('');m.classList.remove('hidden');$$('#mentionMenu button').forEach(function(b){b.onclick=function(){i.value=i.value.slice(0,at)+'@'+b.dataset.name+' ';m.classList.add('hidden');i.focus()}})}
 var aiChatStop=false;
-async function answerInChat(text,key){try{if(typeof puter==='undefined'||!puter.ai)return;aiChatStop=false;$('#chatSub').textContent='NoxAI đang trả lời…';$('#chatTools')&&$('#chatTools').classList.add('aiRunning');var q=text.replace(/@ai\b/ig,'').trim()||'Xin chào';var role=state.user&&roleOf(state.user)==='DEV'?'DEV':'USER';var r=await puter.ai.chat('Bạn là NoxAI của SKIBIDI - SCRIPT. Người gửi có vai trò '+role+'. Trả lời ngắn gọn, hữu ích và chỉ thực hiện yêu cầu trong phạm vi website.\n\n'+q,{model:'openai/gpt-6-astra',stream:true});var out='';if(r&&r[Symbol.asyncIterator]){for await(var part of r){if(aiChatStop)break;if(part&&part.text)out+=part.text}}else{out=(r&&r.message&&r.message.content)||r&&r.text||''}if(out&&!aiChatStop)db.ref('nox_chat').push({uid:'nox_ai',name:'NoxAI',role:'AI',ava:'',ts:SV_TS,text:out,ai:true,replyTo:key})}catch(e){if(!aiChatStop)db.ref('nox_chat').push({uid:'nox_ai',name:'NoxAI',role:'AI',ava:'',ts:SV_TS,text:'AI đang bận, thử lại sau.',ai:true,replyTo:key})}finally{$('#chatSub').textContent='Real-time';$('#chatTools').classList.remove('aiRunning')}}
-$('#chatInput').addEventListener('input',renderMentionMenu);
+async function answerInChat(text,key){try{if(!isGoogleUser())return;if(typeof puter==='undefined'||!puter.ai)return;aiChatStop=false;$('#chatSub').textContent='NoxAI đang trả lời…';$('#chatTools')&&$('#chatTools').classList.add('aiRunning');var q=text.replace(/@ai\b/ig,'').trim()||'Xin chào';var role=state.user&&roleOf(state.user)==='DEV'?'DEV':'USER';var r=await puter.ai.chat('Bạn là NoxAI của SKIBIDI - SCRIPT. Người gửi có vai trò '+role+'. Trả lời ngắn gọn, hữu ích và chỉ thực hiện yêu cầu trong phạm vi website.\n\n'+q,{model:'openai/gpt-6-astra',stream:true});var out='';if(r&&r[Symbol.asyncIterator]){for await(var part of r){if(aiChatStop)break;if(part&&part.text)out+=part.text}}else{out=(r&&r.message&&r.message.content)||r&&r.text||''}if(out&&!aiChatStop)db.ref('nox_chat').push({uid:'nox_ai',name:'NoxAI',role:'AI',ava:'',ts:SV_TS,text:out,ai:true,replyTo:key})}catch(e){if(!aiChatStop)db.ref('nox_chat').push({uid:'nox_ai',name:'NoxAI',role:'AI',ava:'',ts:SV_TS,text:'AI đang bận, thử lại sau.',ai:true,replyTo:key})}finally{$('#chatSub').textContent='Real-time';$('#chatTools').classList.remove('aiRunning')}}
+$('#chatInput').addEventListener('input',function(){renderMentionMenu();store.set('nox-chat-draft',this.value);if(isGoogleUser()){setTyping(true);clearTimeout(typingTimer);typingTimer=setTimeout(stopTyping,1800)}});$('#chatInput').addEventListener('blur',stopTyping);
 function bindMessageActions(){var timers={};$$('.msg').forEach(function(el){var key=el.dataset.key;el.addEventListener('pointerdown',function(){timers[key]=setTimeout(function(){openMessageActions(key)},520)});['pointerup','pointerleave','pointercancel'].forEach(function(ev){el.addEventListener(ev,function(){clearTimeout(timers[key])})});el.addEventListener('contextmenu',function(e){e.preventDefault();openMessageActions(key)});el.querySelectorAll('[data-msg-action]').forEach(function(b){b.onclick=function(){performMessageAction(b.dataset.msgAction,key)}});el.querySelectorAll('[data-image]').forEach(function(im){im.onclick=function(){var w=window.open();if(w)w.document.write('<title>Image</title><body style="margin:0;background:#000;display:grid;place-items:center"><img src="'+im.dataset.image+'" style="max-width:100%;max-height:100vh"></body>')}})})}
 function getMessage(key){return db.ref('nox_chat/'+key).once('value').then(function(s){return s.val()})}
-function openMessageActions(key){if(!state.user)return;getMessage(key).then(function(m){if(!m)return;var mine=m.uid===state.user.uid,dev=isDev(state.user);var acts=[];if(mine&&!m.recalled){var age=Date.now()-Number(m.ts||0);if(age<=3600000)acts.push(['THU HỒI',function(){performMessageAction('recall',key)}]);else acts.push(['ĐÃ QUÁ 1 GIỜ',function(){toast('Tin nhắn quá 1 giờ, không thể thu hồi')}]);acts.push(['CHỈNH SỬA',function(){performMessageAction('edit',key)}])}if(dev)acts.push(['XÓA',function(){performMessageAction('delete',key)}]);if(!acts.length)return;modal('TIN NHẮN', '<div class="sub">'+esc(m.name||'User')+'</div><div class="field"><div class="bubble">'+formatMsg(m)+'</div></div>',acts.concat([['ĐÓNG',closeModal]]))})}
-function performMessageAction(action,key){getMessage(key).then(function(m){if(!m)return closeModal();var mine=state.user&&m.uid===state.user.uid;if(action==='recall'){if(!mine)return;var age=Date.now()-Number(m.ts||0);if(age>3600000){closeModal();return toast('Tin nhắn quá 1 giờ, không thể thu hồi')}db.ref('nox_chat/'+key).update({recalled:true,text:'',image:null,editedAt:null}).then(function(){closeModal();toast('Đã thu hồi tin nhắn')})}else if(action==='edit'){if(!mine||m.recalled)return;modal('CHỈNH SỬA TIN NHẮN','<div class="field"><label>NỘI DUNG</label><textarea id="editMsg" maxlength="1000">'+esc(m.text||'')+'</textarea></div>',[['HUỶ',closeModal],['LƯU',function(){var t=$('#editMsg').value.trim();if(!t)return;db.ref('nox_chat/'+key).update({text:t,editedAt:SV_TS}).then(function(){closeModal();toast('Đã chỉnh sửa')})}]])}else if(action==='delete'){if(!isDev(state.user))return;modal('XÓA TIN NHẮN','<p style="color:var(--mut);font-size:11px">Xóa vĩnh viễn tin nhắn này?</p>',[['HUỶ',closeModal],['XÓA',function(){db.ref('nox_chat/'+key).remove().then(function(){closeModal();toast('DEV đã xóa tin nhắn')})}]])}})}
-function compressImage(file){return new Promise(function(resolve,reject){if(!file||!file.type.startsWith('image/'))return reject(new Error('not-image'));if(file.size>2*1024*1024)return reject(new Error('too-large'));var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var max=1000,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.78))};im.onerror=reject;im.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
+function openMessageActions(key){if(!state.user)return;getMessage(key).then(function(m){if(!m)return;var mine=m.uid===state.user.uid,dev=isDev(state.user);var acts=[];if(mine&&!m.recalled){var mt=Number(m.ts||0),age=mt?Date.now()-mt:0;if(!mt||age<=3600000)acts.push(['THU HỒI',function(){performMessageAction('recall',key)}]);else acts.push(['ĐÃ QUÁ 1 GIỜ',function(){toast('Tin nhắn quá 1 giờ, không thể thu hồi')}]);acts.push(['CHỈNH SỬA',function(){performMessageAction('edit',key)}])}if(dev)acts.push(['XÓA',function(){performMessageAction('delete',key)}]);if(!acts.length)return;modal('TIN NHẮN', '<div class="sub">'+esc(m.name||'User')+'</div><div class="field"><div class="bubble">'+formatMsg(m)+'</div></div>',acts.concat([['ĐÓNG',closeModal]]))})}
+function performMessageAction(action,key){getMessage(key).then(function(m){if(!m)return closeModal();var mine=state.user&&m.uid===state.user.uid;if(action==='recall'){if(!mine)return;var mt=Number(m.ts||0),age=mt?Date.now()-mt:0;if(mt&&age>3600000){closeModal();return toast('Tin nhắn quá 1 giờ, không thể thu hồi')}db.ref('nox_chat/'+key).update({recalled:true,text:'',image:null,editedAt:null}).then(function(){closeModal();toast('Đã thu hồi tin nhắn')})}else if(action==='edit'){if(!mine||m.recalled)return;modal('CHỈNH SỬA TIN NHẮN','<div class="field"><label>NỘI DUNG</label><textarea id="editMsg" maxlength="1000">'+esc(m.text||'')+'</textarea></div>',[['HUỶ',closeModal],['LƯU',function(){var t=$('#editMsg').value.trim();if(!t)return;db.ref('nox_chat/'+key).update({text:t,editedAt:SV_TS}).then(function(){closeModal();toast('Đã chỉnh sửa')})}]])}else if(action==='delete'){if(!isDev(state.user))return;modal('XÓA TIN NHẮN','<p style="color:var(--mut);font-size:11px">Xóa vĩnh viễn tin nhắn này?</p>',[['HUỶ',closeModal],['XÓA',function(){db.ref('nox_chat/'+key).remove().then(function(){closeModal();toast('DEV đã xóa tin nhắn')})}]])}})}
+function compressImage(file){return new Promise(function(resolve,reject){if(!file||!file.type.startsWith('image/'))return reject(new Error('not-image'));if(file.size>2*1024*1024)return reject(new Error('too-large'));var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var max=1000,scale=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));c.getContext('2d').drawImage(im,0,0,c.width,c.height);var out=c.toDataURL('image/jpeg',.78);if(out.length>950000)return reject(new Error('encoded-too-large'));resolve(out)};im.onerror=reject;im.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
 var pendingImage='';$('#imageBtn').onclick=function(){if(!state.user)return openLogin();$('#imageInput').click()};$('#imageInput').onchange=function(){var f=this.files&&this.files[0];if(!f)return;compressImage(f).then(function(u){pendingImage=u;$('#imageName').textContent='Đã chọn ảnh';toast('Ảnh đã sẵn sàng để gửi')}).catch(function(){toast('Ảnh quá lớn hoặc không hợp lệ')})};
 function stopChatAI(){aiChatStop=true;toast('Đã yêu cầu NoxAI ngắt trả lời');$('#chatSub').textContent='Đang ngắt…'}$('#chatAiStop').onclick=stopChatAI;
-$('#chatForm').onsubmit=function(e){e.preventDefault();var t=$('#chatInput').value.trim(),u=state.user;if(!u)return openLogin();if((!t&&!pendingImage)||!FB_LIVE)return;if(state.control&&(state.control.banned||state.control.muted))return toast('Bạn không thể gửi tin nhắn');var hits=scanMessage(t);if(hits.length){toast('Tin nhắn cần kiểm tra nội dung');return}var mentions=(t.match(/@([A-Za-z0-9_.-]{1,30})/g)||[]).map(function(x){return x.slice(1)}),payload={uid:u.uid,name:u.username||u.name,ava:u.avatar||'',role:roleOf(u),vip:0,prem:0,ts:SV_TS,text:t,mentions:mentions};if(pendingImage)payload.image=pendingImage;db.ref('nox_chat').push(payload).then(function(ref){var ai=/@ai\b/i.test(t);$('#chatInput').value='';pendingImage='';$('#imageInput').value='';$('#imageName').textContent='Ảnh tối đa 1 MB';$('#mentionMenu').classList.add('hidden');if(ai)answerInChat(t,ref.key)}).catch(function(){toast('Không gửi được tin nhắn')})};
+$('#chatForm').onsubmit=function(e){e.preventDefault();var t=$('#chatInput').value.trim(),u=state.user;if(!u||!isGoogleUser())return openLogin();if((!t&&!pendingImage)||!FB_LIVE)return;if(state.control&&(state.control.banned||state.control.muted))return toast('Bạn không thể gửi tin nhắn');var hits=scanMessage(t);if(hits.length){toast('Tin nhắn cần kiểm tra nội dung');return}var mentions=(t.match(/@([A-Za-z0-9_.-]{1,30})/g)||[]).map(function(x){return x.slice(1)}),payload={uid:u.uid,name:u.username||u.name,ava:u.avatar||'',role:roleOf(u),vip:0,prem:0,ts:SV_TS,text:t,mentions:mentions};if(pendingImage)payload.image=pendingImage;db.ref('nox_chat').push(payload).then(function(ref){var ai=/@ai\b/i.test(t);$('#chatInput').value='';store.del('nox-chat-draft');pendingImage='';$('#imageInput').value='';$('#imageName').textContent='Ảnh tối đa 1 MB';$('#mentionMenu').classList.add('hidden');if(ai)answerInChat(t,ref.key)}).catch(function(){toast('Không gửi được tin nhắn')})};
+
+$('#chatBody').addEventListener('scroll',function(){var near=this.scrollHeight-this.scrollTop-this.clientHeight<90;$('#chatJump').classList.toggle('show',!near)});$('#chatJump').onclick=function(){$('#chatBody').scrollTo({top:$('#chatBody').scrollHeight,behavior:'smooth'})};
+document.addEventListener('click',function(e){var b=e.target.closest('.btn,.send,.chatIconBtn,.utilityTab,.vaultTab,.devAction');if(!b||b.disabled)return;var r=b.getBoundingClientRect(),x=document.createElement('i');x.className='ripple';x.style.width=x.style.height=Math.max(r.width,r.height)+'px';x.style.left=(e.clientX-r.left-Math.max(r.width,r.height)/2)+'px';x.style.top=(e.clientY-r.top-Math.max(r.width,r.height)/2)+'px';b.style.position=b.style.position||'relative';b.style.overflow='hidden';b.appendChild(x);setTimeout(function(){x.remove()},600)});
+
 
 
 /* Existing friends path + registry */
@@ -132,9 +374,13 @@ $$('[data-asset-tab]').forEach(function(b){b.onclick=function(){var k=b.dataset.
 /* Profile/session */
 var maintenanceInfo={active:false,title:'',reason:''};
 function applyMaintenance(){var on=!!maintenanceInfo.active&&!(state.user&&isDev(state.user));$('#maintenance').classList.toggle('show',on);if(on){$('#maintenanceTitle').textContent=maintenanceInfo.title||'Hệ thống đang bảo trì';$('#maintenanceReason').textContent=maintenanceInfo.reason||'SKIBIDI - SCRIPT đang tạm đóng để cập nhật.'}}
-function renderProfile(){var u=state.user;$('#mAccount').textContent=(u?(u.username||u.name):'GUEST').toUpperCase();$('#mRole').textContent=u?(u.role||'USER'):'GUEST';$('#userBtn').textContent=u?(u.username||u.name):'Guest';$('#pName').textContent=u?(u.username||u.name):'Guest';$('#pBio').textContent=u?(u.email||u.provider||'NOX account'):'Chưa đăng nhập';$('#pUid').textContent=u?u.uid:'—';$('#pProvider').textContent=u?u.provider:'—';$('#pRole').textContent=u?(u.role||'USER'):'GUEST';$('#pLevel').textContent=u?(u.level||1):1;$('#pXp').textContent=u?(u.xp||0):0;$('#pCoins').textContent=u?(u.coins||0):0;$('#loginBtn').textContent=u?'TÀI KHOẢN':'ĐĂNG NHẬP';var a=$('#pAva');a.innerHTML=u&&u.avatar?'<img src="'+esc(u.avatar)+'">':guestAvatar();var dbx=$('#devBox');if(dbx)dbx.classList.toggle('hidden',!(u&&roleOf(u)==='DEV'));$('#devTop').classList.toggle('hidden',!(u&&isDev(u)));applyMaintenance()}
+function isGoogleUser(){return !!(state.user&&state.user.provider==='google')}
+function applyAccess(){var g=isGoogleUser();var restricted=['ai','community','profile'];$$('[data-view]').forEach(function(b){var v=b.dataset.view;if(restricted.indexOf(v)>=0)b.classList.toggle('hidden',!g)});if(!g&&restricted.indexOf(cur)>=0)go('home');var input=$('#chatInput');if(input){input.disabled=!g||!!(state.control&&(state.control.banned||state.control.muted));input.placeholder=g?'Nhắn tin…':'Đăng nhập Google để tham gia chat'}var aiView=$('#view-ai');if(aiView)aiView.classList.toggle('guestLocked',!g);var edit=$('#editProfile');if(edit)edit.classList.toggle('hidden',!g)}
+function profileEditor(){if(!isGoogleUser())return toast('Tính năng này yêu cầu tài khoản Google');var u=state.user||{},last=Number(u.nameChangedAt||0),remaining=Math.max(0,604800000-(Date.now()-last)),days=Math.ceil(remaining/86400000);var canName=remaining<=0;var body='<div class="field"><label>TÊN HIỂN THỊ</label><input id="newName" maxlength="30" value="'+esc(u.username||u.name||'')+'"><div class="sub">'+(canName?'Có thể đổi tên hôm nay.':'Còn khoảng '+days+' ngày mới đổi tên được.')+'</div></div><div class="field"><label>AVATAR</label><input id="newAvatar" type="file" accept="image/*"><div class="sub">Avatar chỉ dành cho tài khoản Google, ảnh sẽ được nén trước khi lưu.</div></div>';modal('CHỈNH HỒ SƠ',body,[['HUỶ',closeModal],['LƯU',function(){saveProfile(canName)}]])}
+function saveProfile(canName){if(!isGoogleUser())return;var u=state.user,n=$('#newName').value.trim(),f=$('#newAvatar').files&&$('#newAvatar').files[0];if(!n)return toast('Tên không được để trống');if(!canName&&n!==(u.username||u.name||''))return toast('Bạn chỉ có thể đổi tên mỗi 7 ngày');var promise=Promise.resolve('');if(f)promise=compressImage(f).then(function(x){return x});promise.then(function(avatar){var patch={};if(n!==(u.username||u.name||'')){patch.username=n;patch.name=n;patch.nameChangedAt=Date.now()}if(avatar)patch.avatar=avatar;if(!Object.keys(patch).length){closeModal();return toast('Không có thay đổi')}return db.ref('nox_users_registry/'+u.uid).update(patch).then(function(){Object.assign(state.user,patch);store.set('nox-cache-'+u.uid,state.user);renderProfile();closeModal();toast('Đã cập nhật hồ sơ')})}).catch(function(){toast('Không thể lưu hồ sơ')})}
+function renderProfile(){var u=state.user;$('#mAccount').textContent=(u?(u.username||u.name):'GUEST').toUpperCase();$('#mRole').textContent=u?(u.role||'USER'):'GUEST';$('#userBtn').textContent=u?(u.username||u.name):'Guest';$('#pName').textContent=u?(u.username||u.name):'Guest';$('#pBio').textContent=u?(u.email||u.provider||'NOX account'):'Chưa đăng nhập';$('#pUid').textContent=u?u.uid:'—';$('#pProvider').textContent=u?u.provider:'—';$('#pRole').textContent=u?(u.role||'USER'):'GUEST';$('#pLevel').textContent=u?(u.level||1):1;$('#pXp').textContent=u?(u.xp||0):0;$('#pCoins').textContent=u?(u.coins||0):0;var nc=$('#pNameCooldown');if(nc)nc.textContent=u&&u.provider==='google'?(Math.max(0,604800000-(Date.now()-Number(u.nameChangedAt||0)))<=0?'Có thể đổi':'Còn '+Math.ceil(Math.max(0,604800000-(Date.now()-Number(u.nameChangedAt||0)))/86400000)+' ngày'):'Google only';$('#loginBtn').textContent=u?'TÀI KHOẢN':'ĐĂNG NHẬP';var a=$('#pAva');a.innerHTML=u&&u.avatar?'<img src="'+esc(u.avatar)+'">':guestAvatar();var dbx=$('#devBox');if(dbx)dbx.classList.toggle('hidden',!(u&&roleOf(u)==='DEV'));$('#devTop').classList.toggle('hidden',!(u&&isDev(u)));applyAccess();applyMaintenance()}
 function restore(){var s=store.get('nox-session',null);if(!s)return;if(s.type==='guest')return guest();if(s.type==='google'&&s.uid&&FB_LIVE)return db.ref('nox_users_registry/'+s.uid).once('value').then(function(x){if(x.exists())return db.ref('nox_users_control/'+s.uid).once('value').then(function(c){finish(x.val(),'google',c.val())});var p=store.get('nox-cache-'+s.uid,null);if(p)return finish(p,'google',null);store.del('nox-session');renderProfile()}).catch(function(){var p=store.get('nox-cache-'+s.uid,null);if(p)return finish(p,'google',null);store.del('nox-session');renderProfile()})}
-function logout(){state.user=null;state.control=null;store.del('nox-session');if(state.chat)unref(state.chat);state.chat=null;renderProfile();renderChat({});toast('Đã đăng xuất')}
+function logout(){clearTyping();state.user=null;state.control=null;store.del('nox-session');if(state.chat)unref(state.chat);state.chat=null;renderProfile();renderChat({});toast('Đã đăng xuất')}
 function openLogin(){modal('ĐĂNG NHẬP','<p style="color:var(--mut);font-size:11px;line-height:1.6">Google dùng chính Google Identity Services/client ID của source gốc. Guest chỉ dùng local session.</p>',[['GUEST',function(){closeModal();guest()}],['GOOGLE',function(){closeModal();initGoogle();try{google.accounts.id.prompt()}catch(e){toast('Google chưa sẵn sàng')}}]])}
 
 
@@ -144,11 +390,11 @@ function devData(){if(!(state.user&&state.user.role==='DEV'))return;$('#devOut')
 
 /* Modal/navigation/palette */
 function modal(t,b,acts){$('#modalTitle').textContent=t;$('#modalBody').innerHTML=b;var f=$('#modalFoot');f.innerHTML='';(acts||[]).forEach(function(a){var x=document.createElement('button');x.className='btn'+(a[0]==='ADD'||a[0]==='SEND'||a[0]==='GOOGLE'?' primary':'');x.textContent=a[0];x.onclick=a[1];f.appendChild(x)});$('#modalWrap').classList.add('show')}function closeModal(){$('#modalWrap').classList.remove('show')}$('#modalClose').onclick=closeModal;$('#modalWrap').onclick=function(e){if(e.target===this)closeModal()}
-var cur='home';function go(v){if(!$('#view-'+v))return;cur=v;$$('.view').forEach(function(x){x.classList.toggle('active',x.id==='view-'+v)});$$('[data-view]').forEach(function(x){x.classList.toggle('active',x.dataset.view===v)});var n={home:'TRANG CHÍNH',ai:'NOXAI',utilities:'TIỆN ÍCH',community:'COMMUNITY',profile:'ACCOUNT'};$('#crumb').textContent='SKIBIDI - SCRIPT / '+n[v]}$$('[data-view]').forEach(function(b){b.onclick=function(){go(b.dataset.view)}})
+var cur='home';function go(v){if(!$('#view-'+v))return;if(!isGoogleUser()&&['ai','community','profile'].indexOf(v)>=0){openLogin();return}cur=v;$$('.view').forEach(function(x){x.classList.toggle('active',x.id==='view-'+v)});$$('[data-view]').forEach(function(x){x.classList.toggle('active',x.dataset.view===v)});var n={home:'TRANG CHÍNH',ai:'NOXAI',utilities:'TIỆN ÍCH',community:'COMMUNITY',profile:'ACCOUNT'};$('#crumb').textContent='SKIBIDI - SCRIPT / '+n[v]}$$('[data-view]').forEach(function(b){b.onclick=function(){go(b.dataset.view)}})
 var cmds=[['Trang chính','home'],['NoxAI','ai'],['Tiện ích','utilities'],['Community','community'],['Account','profile']],pi=0,items=[];
 function palOpen(){$('#palette').classList.add('show');$('#palInput').value='';buildPal('');$('#palInput').focus()}function palClose(){$('#palette').classList.remove('show')}function buildPal(q){items=cmds.filter(function(x){return!q||x[0].toLowerCase().includes(q.toLowerCase())});pi=0;$('#palList').innerHTML=items.map(function(x,i){return '<button class="palItem '+(i===0?'sel':'')+'" data-i="'+i+'">'+esc(x[0])+'</button>'}).join('')}$('#searchBtn').onclick=palOpen;$('#palette').onclick=function(e){if(e.target===this)palClose()};$('#palInput').oninput=function(){buildPal(this.value)};$('#palInput').onkeydown=function(e){if(e.key==='ArrowDown'){pi=Math.min(pi+1,items.length-1);hl()}else if(e.key==='ArrowUp'){pi=Math.max(0,pi-1);hl()}else if(e.key==='Enter'&&items[pi]){go(items[pi][1]);palClose()}};function hl(){$$('.palItem').forEach(function(x,i){x.classList.toggle('sel',i===pi)})}$('#palList').onclick=function(e){var b=e.target.closest('.palItem');if(b){go(items[+b.dataset.i][1]);palClose()}}
-$('#loginBtn').onclick=function(){state.user?go('profile'):openLogin()};$('#devTop').onclick=openDevPanel;$('#userBtn').onclick=function(){state.user?go('profile'):openLogin()};$('#pLogin').onclick=function(){state.user?go('profile'):openLogin()};$('#logout').onclick=function(){state.user?logout():openLogin()};$('#addFriend').onclick=addFriend;
-var puterHistory=[],puterStop=false;async function sendPuter(){var input=$('#puterInput'),text=input.value.trim();if(!text)return;input.value='';addPuterMsg(text,true);$('#puterStatus').textContent='Đang xử lý…';$('#puterSend').disabled=true;puterStop=false;document.querySelector('.puterChat').classList.add('aiRunning');try{if(typeof puter==='undefined'||!puter.ai)throw new Error('Puter chưa sẵn sàng');var model='openai/gpt-6-astra';var aiRole=state.user&&roleOf(state.user)==='DEV'?'DEV':'USER';var messages=[{role:'system',content:'Bạn là NoxAI của SKIBIDI - SCRIPT. Vai trò hiện tại: '+aiRole+'. Hỗ trợ thao tác trong phạm vi chức năng website; không tự ý thực thi mã tùy ý hoặc yêu cầu khóa/bí mật.'}].concat(puterHistory);messages.push({role:'user',content:text});var resp=await puter.ai.chat(messages,{model:model,stream:true});var answer='';addPuterMsg('',false,true);if(resp&&resp[Symbol.asyncIterator]){for await(var part of resp){if(puterStop)break;if(part&&part.text){answer+=part.text;updateLastPuter(answer)}}}else answer=(resp&&resp.message&&resp.message.content)||resp&&resp.text||'';if(!puterStop&&answer){puterHistory.push({role:'user',content:text},{role:'assistant',content:answer});if(puterHistory.length>12)puterHistory=puterHistory.slice(-12)}$('#puterStatus').textContent=puterStop?'Đã ngắt':'Sẵn sàng'}catch(e){if(!puterStop)updateLastPuter('Không thể kết nối Puter: '+(e.message||e));$('#puterStatus').textContent=puterStop?'Đã ngắt':'Lỗi kết nối'}finally{$('#puterSend').disabled=false;document.querySelector('.puterChat').classList.remove('aiRunning');input.focus()}}function stopPuter(){puterStop=true;aiChatStop=true;$('#puterStatus').textContent='Đang ngắt…';toast('Đã yêu cầu NoxAI ngắt trả lời')}function addPuterMsg(t,user,streaming){var w=document.createElement('div');w.className='puterMsg '+(user?'user':'');w.innerHTML='<div class="pmBubble"></div>';w.querySelector('.pmBubble').textContent=t;$('#puterMessages').appendChild(w);$('#puterMessages').scrollTop=999999;if(streaming)w.dataset.streaming='1'}function updateLastPuter(t){var a=$$('#puterMessages .puterMsg'),w=a[a.length-1];if(w)w.querySelector('.pmBubble').textContent=t;$('#puterMessages').scrollTop=999999}$('#puterSend').onclick=sendPuter;$('#aiStop').onclick=stopPuter;$('#puterInput').onkeydown=function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendPuter()}};function openDevPanel(){if(!isDev(state.user))return toast('Chỉ DEV mới mở được');$('#devPanel').classList.add('show');devUsers2()}function closeDevPanel(){$('#devPanel').classList.remove('show')}function devUsers2(){if(!isDev(state.user))return;db.ref('nox_users_registry').once('value').then(function(s){var v=s.val()||{};var entries=Object.entries(v);$('#devOut').innerHTML=entries.slice(0,100).map(function(p){var u=p[1]||{},role=roleOf(u),isSelf=p[0]===state.user.uid;return '<div class="item"><div class="itemic">'+(role==='DEV'?'★':'U')+'</div><div class="ibody"><b>'+esc(u.username||u.name||'?')+'</b><small>'+esc(u.email||p[0])+'</small><div class="devManage">'+(isSelf?'<span class="tag">BẠN</span>':'<button class="btn" data-manage-user="'+esc(p[0])+'">QUẢN LÝ</button>')+'</div></div><span class="tag '+(role==='DEV'?'badgeDev':'')+'">'+esc(role)+'</span></div>'}).join('')||'<div class="empty">Chưa có người dùng.</div>';$$('[data-manage-user]').forEach(function(b){b.onclick=function(){manageUser(b.dataset.manageUser)}})})}
+$('#loginBtn').onclick=function(){state.user?go('profile'):openLogin()};$('#devTop').onclick=openDevPanel;$('#userBtn').onclick=function(){state.user?go('profile'):openLogin()};$('#pLogin').onclick=function(){state.user?go('profile'):openLogin()};$('#logout').onclick=function(){state.user?logout():openLogin()};$('#addFriend').onclick=function(){if(!isGoogleUser())return toast('Đăng nhập Google để sử dụng');addFriend()};$('#editProfile').onclick=profileEditor;$('#notifyBtn').onclick=function(){if(!('Notification' in window))return toast('Trình duyệt không hỗ trợ thông báo');Notification.requestPermission().then(function(x){toast(x==='granted'?'Đã bật thông báo':'Thông báo chưa được cấp quyền')})};
+var puterHistory=[],puterStop=false,puterController=null;async function sendPuter(){if(!isGoogleUser())return openLogin();var input=$('#puterInput'),text=input.value.trim();if(!text)return;input.value='';addPuterMsg(text,true);$('#puterStatus').textContent='Đang xử lý…';$('#puterSend').disabled=true;puterStop=false;puterController={};document.querySelector('.puterChat').classList.add('aiRunning');try{if(typeof puter==='undefined'||!puter.ai)throw new Error('Puter chưa sẵn sàng');var model='openai/gpt-6-astra';var aiRole=state.user&&roleOf(state.user)==='DEV'?'DEV':'USER';var messages=[{role:'system',content:'Bạn là NoxAI của SKIBIDI - SCRIPT. Vai trò hiện tại: '+aiRole+'. Hỗ trợ thao tác trong phạm vi chức năng website; không tự ý thực thi mã tùy ý hoặc yêu cầu khóa/bí mật.'}].concat(puterHistory);messages.push({role:'user',content:text});var resp=await puter.ai.chat(messages,{model:model,stream:true});var answer='';addPuterMsg('',false,true);if(resp&&resp[Symbol.asyncIterator]){for await(var part of resp){if(puterStop)break;if(part&&part.text){answer+=part.text;updateLastPuter(answer)}}}else answer=(resp&&resp.message&&resp.message.content)||resp&&resp.text||'';if(!puterStop&&answer){puterHistory.push({role:'user',content:text},{role:'assistant',content:answer});if(puterHistory.length>12)puterHistory=puterHistory.slice(-12)}$('#puterStatus').textContent=puterStop?'Đã ngắt':'Sẵn sàng'}catch(e){if(!puterStop)updateLastPuter('Không thể kết nối Puter: '+(e.message||e));$('#puterStatus').textContent=puterStop?'Đã ngắt':'Lỗi kết nối'}finally{$('#puterSend').disabled=false;document.querySelector('.puterChat').classList.remove('aiRunning');input.focus()}}function stopPuter(){puterStop=true;aiChatStop=true;if(puterController&&puterController.abort)try{puterController.abort()}catch(e){};$('#puterStatus').textContent='Đang ngắt…';toast('Đã yêu cầu NoxAI ngắt trả lời')}function addPuterMsg(t,user,streaming){var w=document.createElement('div');w.className='puterMsg '+(user?'user':'');w.innerHTML='<div class="pmBubble"></div>';w.querySelector('.pmBubble').textContent=t;$('#puterMessages').appendChild(w);$('#puterMessages').scrollTop=999999;if(streaming)w.dataset.streaming='1'}function updateLastPuter(t){var a=$$('#puterMessages .puterMsg'),w=a[a.length-1];if(w)w.querySelector('.pmBubble').textContent=t;$('#puterMessages').scrollTop=999999}$('#puterSend').onclick=sendPuter;$('#aiStop').onclick=stopPuter;$('#puterInput').onkeydown=function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendPuter()}};function openDevPanel(){if(!isDev(state.user))return toast('Chỉ DEV mới mở được');$('#devPanel').classList.add('show');devUsers2()}function closeDevPanel(){$('#devPanel').classList.remove('show')}function devUsers2(){if(!isDev(state.user))return;db.ref('nox_users_registry').once('value').then(function(s){var v=s.val()||{};var entries=Object.entries(v);$('#devOut').innerHTML=entries.slice(0,100).map(function(p){var u=p[1]||{},role=roleOf(u),isSelf=p[0]===state.user.uid;return '<div class="item"><div class="itemic">'+(role==='DEV'?'★':'U')+'</div><div class="ibody"><b>'+esc(u.username||u.name||'?')+'</b><small>'+esc(u.email||p[0])+'</small><div class="devManage">'+(isSelf?'<span class="tag">BẠN</span>':'<button class="btn" data-manage-user="'+esc(p[0])+'">QUẢN LÝ</button>')+'</div></div><span class="tag '+(role==='DEV'?'badgeDev':'')+'">'+esc(role)+'</span></div>'}).join('')||'<div class="empty">Chưa có người dùng.</div>';$$('[data-manage-user]').forEach(function(b){b.onclick=function(){manageUser(b.dataset.manageUser)}})})}
 function manageUser(uid){if(!isDev(state.user)||uid===state.user.uid)return;Promise.all([db.ref('nox_users_registry/'+uid).once('value'),db.ref('nox_users_control/'+uid).once('value')]).then(function(a){var u=a[0].val()||{},c=a[1].val()||{};modal('QUẢN LÝ NGƯỜI DÙNG','<div class="profileHero glass" style="padding:13px"><div class="bigava" style="width:48px;height:48px">'+(u.avatar?'<img src="'+esc(u.avatar)+'">':guestAvatar())+'</div><div><b>'+esc(u.username||u.name||uid)+'</b><div class="sub">'+esc(u.email||uid)+'</div></div></div><div class="kv"><span>Ban</span><b>'+((c.banned)?'Đang ban':'Không')+'</b></div><div class="kv"><span>Mute</span><b>'+((c.muted)?'Đang mute':'Không')+'</b></div>',[['BAN / UNBAN',function(){setUserControl(uid,'banned',!c.banned)}],['MUTE / UNMUTE',function(){setUserControl(uid,'muted',!c.muted)}],['ĐÓNG',closeModal]])})}
 function setUserControl(uid,key,val){if(!isDev(state.user))return;var o={};o[key]=val;o[key+'At']=val?SV_TS:null;o[key+'By']=val?state.user.uid:null;db.ref('nox_users_control/'+uid).update(o).then(function(){closeModal();toast((val?(key==='banned'?'Đã ban ':'Đã mute '):(key==='banned'?'Đã unban ':'Đã unmute '))+'người dùng');devUsers2()}).catch(function(){toast('Không thể cập nhật quyền')})}
 function devData2(){if(!isDev(state.user))return;$('#devOut').innerHTML='<div class="item"><div class="itemic">DB</div><div class="ibody"><b>nox_data</b><small>scripts · apk · links · ios · vault</small></div></div>'}function devMaint2(){if(!isDev(state.user))return;db.ref('nox_maintenance').once('value').then(function(s){var m=s.val()||{};modal('BẢO TRÌ','<div class="field"><label>TIÊU ĐỀ</label><input id="mtT" value="'+esc(m.title||'Hệ thống đang bảo trì')+'"></div><div class="field"><label>NỘI DUNG</label><textarea id="mtR" maxlength="500">'+esc(m.reason||'Đang cập nhật hệ thống.')+'</textarea></div><div class="sub">Bật bảo trì sẽ khóa toàn bộ giao diện cho người dùng.</div>',[['HUỶ',closeModal],['LƯU',function(){db.ref('nox_maintenance').update({active:true,title:$('#mtT').value,reason:$('#mtR').value,by:state.user.uid,updatedAt:SV_TS}).then(function(){closeModal();toast('Đã bật bảo trì')})}],['TẮT BẢO TRÌ',function(){db.ref('nox_maintenance').update({active:false,updatedAt:SV_TS}).then(function(){closeModal();toast('Đã mở lại web')})}]]);})} 
@@ -157,5 +403,468 @@ document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key
 (function(){var s=$('#stars');for(var i=0;i<100;i++){var e=document.createElement('i');e.className='star';e.style.left=Math.random()*100+'%';e.style.top=Math.random()*100+'%';e.style.animationDelay=(-Math.random()*4)+'s';s.appendChild(e)}})();
 function watchMaintenance(){if(!FB_LIVE)return;db.ref('nox_maintenance').on('value',function(s){var m=s.val()||{};maintenanceInfo={active:!!m.active,title:m.title||'',reason:m.reason||''};applyMaintenance()})}
 
-initGoogle();restore();loadData();updateDiag();watchMaintenance();window.addEventListener("load",function(){setTimeout(function(){document.body.classList.add("loaded")},260)});setTimeout(function(){document.body.classList.add("loaded")},3500);
-</script></body></html>
+function bootSafe(label,fn){try{var r=fn();if(r&&typeof r.catch==='function')r.catch(function(e){console.warn('[SKIBIDI '+label+']',e);toast(label+' tạm thời không khả dụng')});return r}catch(e){console.warn('[SKIBIDI '+label+']',e);return null}}
+bootSafe('Google',initGoogle);bootSafe('Session',restore);bootSafe('Data',loadData);bootSafe('Diagnostics',updateDiag);bootSafe('Maintenance',watchMaintenance);bootSafe('Access',applyAccess);
+if(FB_LIVE)bootSafe('Maintenance check',function(){return db.ref('nox_maintenance').once('value')});
+setInterval(function(){var el=$('#smartText');if(el)el.textContent=FB_LIVE?'Firebase · kết nối dữ liệu sẵn sàng':'Firebase · đang chờ kết nối'},3000);
+window.addEventListener('load',function(){setTimeout(window.__SKIBIDI_HIDE_LOADER,120)});setTimeout(window.__SKIBIDI_HIDE_LOADER,2400);
+window.addEventListener('online',function(){toast('Đã kết nối mạng');if(state.user&&isGoogleUser())bootSafe('Chat reconnect',watchChat)});window.addEventListener('offline',function(){toast('Mất kết nối mạng · chế độ offline')});window.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')window.__SKIBIDI_HIDE_LOADER()});
+</script><script id="skibidi-v2-engine">
+(function(){
+  'use strict';
+  /* ---------------------------------------------------------------
+     STABILITY CORE
+     --------------------------------------------------------------- */
+  var root=document.documentElement, body=document.body;
+  var qs=function(s,r){return (r||document).querySelector(s)};
+  var qsa=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var safe=function(fn){try{return fn()}catch(e){console.warn('[SKIBIDI V2]',e);return null}};
+  var timers=[];
+  function later(fn,ms){var id=setTimeout(function(){safe(fn)},ms);timers.push(id);return id}
+  function removeLoader(){safe(function(){
+    body.classList.add('loaded');
+    var l=qs('#pageLoader');
+    if(l){l.style.opacity='0';l.style.visibility='hidden';l.style.pointerEvents='none';}
+  })}
+  later(removeLoader,950);
+  later(removeLoader,1700);
+  later(removeLoader,2800);
+  window.addEventListener('load',function(){later(removeLoader,80)});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')removeLoader()});
+  window.addEventListener('pageshow',removeLoader);
+  window.addEventListener('error',function(e){console.warn('[SKIBIDI runtime]',e.message||e.error);later(removeLoader,0)});
+  window.addEventListener('unhandledrejection',function(e){console.warn('[SKIBIDI promise]',e.reason);later(removeLoader,0)});
+
+  /* Never allow a hidden overlay to keep intercepting touches. */
+  function overlayWatch(){
+    ['#pageLoader','#modalWrap','#palette','#maintenance','#skImageViewer','#skContext'].forEach(function(sel){
+      var el=qs(sel); if(!el)return;
+      if(sel==='#pageLoader')el.style.pointerEvents='none';
+      else if(!el.classList.contains('show'))el.style.pointerEvents='none';
+    });
+  }
+  overlayWatch();
+  later(overlayWatch,500);later(overlayWatch,1200);
+
+  /* ---------------------------------------------------------------
+     ACCESS STATE
+     --------------------------------------------------------------- */
+  function googleUser(){try{return !!(window.state&&state.user&&state.user.provider==='google')}catch(e){return false}}
+  function updateBodyMode(){body.classList.toggle('sk-guest',!googleUser())}
+  later(updateBodyMode,50);
+  later(updateBodyMode,500);
+  window.addEventListener('load',function(){later(updateBodyMode,100)});
+
+  /* ---------------------------------------------------------------
+     STATUS RAIL / SMART FEEDBACK
+     --------------------------------------------------------------- */
+  var rail=document.createElement('div');rail.id='skStatusRail';rail.innerHTML='<i></i><span>Đang kiểm tra hệ thống…</span>';body.appendChild(rail);
+  function status(t,good){
+    safe(function(){rail.querySelector('span').textContent=t;rail.querySelector('i').style.background=good===false?'var(--r)':'var(--g)';rail.classList.add('show');later(function(){rail.classList.remove('show')},2200)})
+  }
+  window.SKIBIDI_STATUS=status;
+  window.addEventListener('online',function(){status('Đã kết nối mạng',true)});
+  window.addEventListener('offline',function(){status('Đang offline · dữ liệu mạng tạm ngắt',false)});
+
+  /* ---------------------------------------------------------------
+     RIPPLE ENGINE
+     --------------------------------------------------------------- */
+  function ripple(e){
+    var b=e.currentTarget;if(!b)return;
+    var old=b.style.position;if(getComputedStyle(b).position==='static')b.style.position='relative';
+    var r=document.createElement('span');r.className='sk-ripple';
+    var rect=b.getBoundingClientRect();r.style.left=(e.clientX-rect.left)+'px';r.style.top=(e.clientY-rect.top)+'px';b.appendChild(r);
+    later(function(){if(r&&r.parentNode)r.remove();if(old)b.style.position=old},650);
+  }
+  qsa('.btn,.top button,.chatIconBtn,.send,.utilityTab,.vaultTab,.mobile button').forEach(function(b){b.addEventListener('pointerdown',ripple,{passive:true})});
+
+  /* ---------------------------------------------------------------
+     IMAGE LIGHTBOX
+     --------------------------------------------------------------- */
+  var viewer=document.createElement('div');viewer.id='skImageViewer';viewer.innerHTML='<button class="skImageClose" aria-label="Đóng">×</button><img alt="Xem ảnh">';body.appendChild(viewer);
+  var viewerImg=viewer.querySelector('img');
+  function openImage(src){if(!src)return;viewerImg.src=src;viewer.classList.add('show');viewer.style.pointerEvents='auto';body.style.overflow='hidden'}
+  function closeImage(){viewer.classList.remove('show');viewer.style.pointerEvents='none';viewerImg.removeAttribute('src');body.style.overflow=''}
+  viewer.addEventListener('click',function(e){if(e.target===viewer||e.target.classList.contains('skImageClose'))closeImage()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImage()});
+  document.addEventListener('click',function(e){var im=e.target.closest&&e.target.closest('.msgImage');if(im){e.preventDefault();openImage(im.dataset.image||im.src)}});
+
+  /* ---------------------------------------------------------------
+     MESSAGE CONTEXT MENU
+     This is deliberately additive: the existing message-action
+     implementation remains the source of truth for Firebase writes.
+     --------------------------------------------------------------- */
+  var ctx=document.createElement('div');ctx.id='skContext';body.appendChild(ctx);
+  var ctxKey=null;
+  function closeCtx(){ctx.classList.remove('show');ctx.style.pointerEvents='none';ctxKey=null}
+  function ctxButton(label,action,cls){var b=document.createElement('button');b.textContent=label;if(cls)b.className=cls;b.onclick=function(){closeCtx();safe(action)};ctx.appendChild(b)}
+  function showCtx(e,msg){
+    ctx.innerHTML='';ctxKey=msg&&msg.key||null;
+    var text=(msg&&msg.text)||'';
+    ctxButton('Sao chép nội dung',function(){if(navigator.clipboard&&text)navigator.clipboard.writeText(text).then(function(){status('Đã sao chép tin nhắn')})});
+    if(msg&&msg.image)ctxButton('Mở hình ảnh',function(){openImage(msg.image)});
+    if(msg&&msg.mine&&!msg.recalled){
+      ctxButton('Thu hồi',function(){var k=msg.key;if(window.performMessageAction)performMessageAction('recall',k)});
+      ctxButton('Chỉnh sửa',function(){var k=msg.key;if(window.performMessageAction)performMessageAction('edit',k)});
+    }
+    if(window.isDev&&isDev(window.state&&state.user)&&msg&&msg.key)ctxButton('Xóa tin nhắn · DEV',function(){performMessageAction('delete',msg.key)},'danger');
+    var x=Math.min(e.clientX,innerWidth-205),y=Math.min(e.clientY,innerHeight-220);ctx.style.left=Math.max(8,x)+'px';ctx.style.top=Math.max(8,y)+'px';ctx.style.pointerEvents='auto';ctx.classList.add('show');
+  }
+  document.addEventListener('contextmenu',function(e){var bubble=e.target.closest&&e.target.closest('.msg');if(!bubble)return;var key=bubble.getAttribute('data-key');if(!key)return;e.preventDefault();var mine=bubble.classList.contains('mine');var msg={key:key,mine:mine};safe(function(){if(window.getMessage){var m=getMessage(key)||{};msg.text=m.text||'';msg.image=m.image||'';msg.recalled=!!m.recalled}});showCtx(e,msg)});
+  document.addEventListener('click',function(e){if(!e.target.closest('#skContext'))closeCtx()});
+  window.addEventListener('resize',closeCtx);window.addEventListener('scroll',closeCtx,{passive:true});
+
+  /* ---------------------------------------------------------------
+     TOUCH / LONG PRESS FOR MOBILE MESSAGE ACTIONS
+     --------------------------------------------------------------- */
+  var pressTimer=null,pressTarget=null;
+  document.addEventListener('pointerdown',function(e){
+    var m=e.target.closest&&e.target.closest('.msg');if(!m||e.pointerType==='mouse')return;
+    pressTarget=m;pressTimer=setTimeout(function(){
+      var key=m.getAttribute('data-key');if(!key)return;
+      var fake={clientX:Math.min(innerWidth-200,Math.max(8,e.clientX)),clientY:Math.min(innerHeight-220,Math.max(8,e.clientY))};
+      var data={key:key,mine:m.classList.contains('mine')};safe(function(){if(window.getMessage){var x=getMessage(key)||{};data.text=x.text||'';data.image=x.image||'';data.recalled=!!x.recalled}});showCtx(fake,data);
+    },520);
+  },{passive:true});
+  ['pointerup','pointercancel','pointermove'].forEach(function(ev){document.addEventListener(ev,function(){if(pressTimer){clearTimeout(pressTimer);pressTimer=null}}, {passive:true})});
+
+  /* ---------------------------------------------------------------
+     SMART DRAFT / INPUT QUALITY
+     --------------------------------------------------------------- */
+  var draftTimer=null;
+  document.addEventListener('input',function(e){
+    var t=e.target;if(!t||t.id!=='chatInput')return;
+    if(!googleUser())return;
+    if(draftTimer)clearTimeout(draftTimer);
+    draftTimer=setTimeout(function(){safe(function(){if(window.store)store.set('nox-chat-draft',t.value)})},260);
+    var n=t.value.indexOf('@');
+    if(n>=0&&window.renderMentionMenu){safe(function(){renderMentionMenu(t)})}
+  });
+
+  /* Ctrl/Cmd+Enter = send; Escape clears mention suggestions first. */
+  document.addEventListener('keydown',function(e){
+    var t=e.target;
+    if(t&&t.id==='chatInput'){
+      if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();var f=qs('#chatForm');if(f&&f.requestSubmit)f.requestSubmit();else if(window.sendChat)sendChat()}
+      if(e.key==='Escape'){var mm=qs('#mentionMenu');if(mm)mm.classList.add('hidden')}
+    }
+  });
+
+  /* ---------------------------------------------------------------
+     CHAT SCROLL INTELLIGENCE
+     --------------------------------------------------------------- */
+  var newMsgCount=0,lastChatSignature='';
+  function enhanceChat(){
+    var b=qs('#chatBody');if(!b)return;
+    b.addEventListener('scroll',function(){
+      var near=b.scrollHeight-b.scrollTop-b.clientHeight<90;
+      var j=qs('#chatJump');if(j)j.classList.toggle('hidden',near);
+      if(near)newMsgCount=0;
+    },{passive:true});
+  }
+  later(enhanceChat,300);
+  var observer=new MutationObserver(function(muts){
+    var b=qs('#chatBody');if(!b)return;
+    var signature=String(b.lastElementChild&&b.lastElementChild.getAttribute('data-key')||'')+'|'+b.children.length;
+    if(signature!==lastChatSignature){
+      var near=b.scrollHeight-b.scrollTop-b.clientHeight<120;
+      if(!near)newMsgCount++;
+      lastChatSignature=signature;
+      var j=qs('#chatJump');if(j){j.classList.toggle('hidden',near);j.title=newMsgCount?newMsgCount+' tin mới':'Tin mới'}
+    }
+  });
+  var cb=qs('#chatBody');if(cb)observer.observe(cb,{childList:true});
+  later(function(){var j=qs('#chatJump');if(j)j.onclick=function(){var b=qs('#chatBody');if(b){b.scrollTo({top:b.scrollHeight,behavior:'smooth'});newMsgCount=0;j.classList.add('hidden')}}},400);
+
+  /* ---------------------------------------------------------------
+     ACCESS HARDENING
+     --------------------------------------------------------------- */
+  function enforceGuest(){
+    if(googleUser())return updateBodyMode();
+    updateBodyMode();
+    qsa('[data-view="ai"],[data-view="community"],[data-view="profile"]').forEach(function(b){b.classList.add('hidden')});
+    var ai=qs('#view-ai'),com=qs('#view-community'),pro=qs('#view-profile');
+    [ai,com,pro].forEach(function(v){if(v)v.classList.add('guestLocked')});
+  }
+  later(enforceGuest,350);later(enforceGuest,1000);window.addEventListener('load',function(){later(enforceGuest,200)});
+
+  /* ---------------------------------------------------------------
+     GOOGLE-ONLY GUARD FOR IMPORTANT ACTIONS
+     --------------------------------------------------------------- */
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-view="ai"],[data-view="community"],[data-view="profile"]');
+    if(b&&!googleUser()){e.preventDefault();e.stopImmediatePropagation();if(window.openLogin)openLogin();return false}
+    var aiSend=e.target.closest&&e.target.closest('#puterSend,#aiStop');
+    if(aiSend&&!googleUser()){e.preventDefault();if(window.openLogin)openLogin();return false}
+  },true);
+
+  /* ---------------------------------------------------------------
+     NETWORK DIAGNOSTICS
+     --------------------------------------------------------------- */
+  var diag={started:Date.now(),errors:0,online:navigator.onLine!==false};
+  window.SKIBIDI_DIAGNOSTICS=diag;
+  window.addEventListener('error',function(){diag.errors++});
+  window.addEventListener('unhandledrejection',function(){diag.errors++});
+  later(function(){
+    if(navigator.onLine===false)status('Offline · web vẫn hoạt động phần cục bộ',false);
+    else if(window.FB_LIVE===false)status('Firebase chưa sẵn sàng · giao diện vẫn mở',false);
+    else status('Hệ thống đã sẵn sàng',true);
+  },1400);
+
+  /* ---------------------------------------------------------------
+     PERFORMANCE GUARD
+     Avoids dozens of heavy effects on low-end/mobile devices.
+     --------------------------------------------------------------- */
+  var lowPower=false;
+  try{lowPower=!!(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4)||(innerWidth<500&&devicePixelRatio>2)}catch(e){}
+  if(lowPower){body.classList.add('sk-low-power');var style=document.createElement('style');style.textContent='.sk-low-power #stars{animation:none}.sk-low-power .star{animation:tw 4s ease-in-out infinite alternate}.sk-low-power #grid{animation:none}.sk-low-power #space{animation:none}.sk-low-power .badgeDev,.sk-low-power .badgeAi{animation:none}';document.head.appendChild(style)}
+
+  /* ---------------------------------------------------------------
+     KEYBOARD SHORTCUTS
+     --------------------------------------------------------------- */
+  document.addEventListener('keydown',function(e){
+    if(e.altKey&&e.key.toLowerCase()==='h'){e.preventDefault();if(window.go)go('home')}
+    if(e.altKey&&e.key.toLowerCase()==='a'&&googleUser()){e.preventDefault();if(window.go)go('ai')}
+    if(e.altKey&&e.key.toLowerCase()==='c'&&googleUser()){e.preventDefault();if(window.go)go('community')}
+    if(e.key==='/'&&!/input|textarea/i.test(document.activeElement&&document.activeElement.tagName||'')){var s=qs('#scriptSearch');if(s&&document.querySelector('#view-utilities.active')){e.preventDefault();s.focus()}}
+  });
+
+  /* ---------------------------------------------------------------
+     SAFE DOM OBSERVER
+     Repairs pointer-events on overlays if another component hides
+     them through display/classes without updating inline styles.
+     --------------------------------------------------------------- */
+  var bodyObserver=new MutationObserver(function(){
+    safe(function(){
+      ['#modalWrap','#palette','#maintenance','#skImageViewer','#skContext'].forEach(function(sel){var e=qs(sel);if(e&&!e.classList.contains('show'))e.style.pointerEvents='none';else if(e)e.style.pointerEvents='auto'});
+      var l=qs('#pageLoader');if(l){l.style.pointerEvents='none';if(Date.now()-window.__skStart>1800)removeLoader()}
+      updateBodyMode();
+    });
+  });
+  window.__skStart=Date.now();bodyObserver.observe(body,{attributes:true,subtree:true,attributeFilter:['class','style']});
+  later(function(){bodyObserver.disconnect()},7000);
+
+  /* ---------------------------------------------------------------
+     FINAL BOOT REPORT
+     --------------------------------------------------------------- */
+  later(function(){
+    var checks={loader:!!qs('#pageLoader'),chat:!!qs('#chatBody'),ai:!!qs('#view-ai'),utilities:!!qs('#view-utilities'),profile:!!qs('#view-profile'),firebase:!!window.FB_LIVE};
+    window.SKIBIDI_BOOT=checks;
+    console.info('[SKIBIDI] V2 boot',checks);
+    removeLoader();
+  },1750);
+})();
+</script>
+<script id="skibidi-v3-engine">
+(function(){
+  'use strict';
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var safe=function(f){try{return f()}catch(e){console.warn('[SKIBIDI V3]',e);return null}};
+  var later=function(f,t){return setTimeout(function(){safe(f)},t||0)};
+
+  /* ---------------------------------------------------------------
+     HARD NAVIGATION FALLBACK
+     If a previous component ever loses an onclick handler, the
+     delegated handler below keeps the core navigation clickable.
+     --------------------------------------------------------------- */
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-view]');
+    if(!b)return;
+    var v=b.getAttribute('data-view');
+    if(!v)return;
+    var restricted=v==='ai'||v==='community'||v==='profile';
+    var google=!!(window.state&&state.user&&state.user.provider==='google');
+    if(restricted&&!google){e.preventDefault();e.stopPropagation();if(window.openLogin)safe(openLogin);return;}
+    if(window.go){e.preventDefault();safe(function(){go(v)});}
+  },true);
+
+  /* Utility tabs are also delegated so dynamic re-rendering cannot
+     accidentally remove their click behavior. */
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-utility-tab]');if(!b)return;
+    var k=b.getAttribute('data-utility-tab');
+    $$('.utilityTab').forEach(function(x){x.classList.toggle('active',x===b)});
+    $$('.utilityGroup').forEach(function(x){x.classList.toggle('active',x.id==='utility-'+k)});
+  });
+
+  /* ---------------------------------------------------------------
+     BUTTON SELF-HEALING
+     --------------------------------------------------------------- */
+  function bind(id,fn){var e=$(id);if(e&&!e.__skv3){e.__skv3=true;e.addEventListener('click',function(ev){safe(function(){fn(ev)})})}}
+  bind('#searchBtn',function(){if(window.palOpen)palOpen()});
+  bind('#userBtn',function(){if(window.state&&state.user){if(window.go)go('profile')}else if(window.openLogin)openLogin()});
+  bind('#devTop',function(){if(window.openDevPanel)openDevPanel()});
+  bind('#modalClose',function(){if(window.closeModal)closeModal()});
+  bind('#devClose',function(){if(window.closeDevPanel)closeDevPanel()});
+  bind('#chatJump',function(){var b=$('#chatBody');if(b)b.scrollTo({top:b.scrollHeight,behavior:'smooth'})});
+  later(function(){
+    bind('#loginBtn',function(){if(window.state&&state.user){if(window.go)go('profile')}else if(window.openLogin)openLogin()});
+    bind('#pLogin',function(){if(window.state&&state.user){if(window.go)go('profile')}else if(window.openLogin)openLogin()});
+    bind('#editProfile',function(){if(window.profileEditor)profileEditor()});
+    bind('#logout',function(){if(window.logout)logout()});
+  },500);
+
+  /* ---------------------------------------------------------------
+     VISUAL REVEAL / POINTER LIGHT
+     --------------------------------------------------------------- */
+  function decorate(){
+    $$('.hero,.card,.metric,.profileHero').forEach(function(el){el.classList.add('sk-glow-follow')});
+    $$('.hero,.card,.metric,.profileHero').forEach(function(el){
+      if(el.__skPointer)return;el.__skPointer=true;
+      el.addEventListener('pointermove',function(e){var r=el.getBoundingClientRect();el.style.setProperty('--mx',(e.clientX-r.left)+'px');el.style.setProperty('--my',(e.clientY-r.top)+'px')},{passive:true});
+    });
+  }
+  later(decorate,300);later(decorate,1200);
+
+  /* ---------------------------------------------------------------
+     MESSAGE LINKIFY + COPY HELPERS
+     Existing renderChat remains the source of Firebase data. This
+     observer only enhances safe text already rendered into bubbles.
+     --------------------------------------------------------------- */
+  function linkify(){
+    $$('#chatBody .bubble').forEach(function(b){
+      if(b.dataset.linkified)return;
+      b.dataset.linkified='1';
+      Array.prototype.slice.call(b.childNodes).forEach(function(n){
+        if(n.nodeType!==3)return;
+        var text=n.nodeValue||'';var re=/(https?:\/\/[^\s<]+)/g;if(!re.test(text))return;
+        var frag=document.createDocumentFragment(),last=0,m;
+        re.lastIndex=0;
+        while((m=re.exec(text))){
+          if(m.index>last)frag.appendChild(document.createTextNode(text.slice(last,m.index)));
+          var a=document.createElement('a');a.href=m[1];a.target='_blank';a.rel='noopener noreferrer';a.textContent=m[1];a.style.color='var(--c)';a.style.textDecoration='none';a.style.fontWeight='700';frag.appendChild(a);last=m.index+m[1].length;
+        }
+        if(last<text.length)frag.appendChild(document.createTextNode(text.slice(last)));b.replaceChild(frag,n);
+      });
+    });
+  }
+  var chatObserver=new MutationObserver(function(){later(linkify,0)});var chat=$('#chatBody');if(chat)chatObserver.observe(chat,{childList:true,subtree:true});
+
+  /* ---------------------------------------------------------------
+     CHAT EMPTY / LOADING STATES
+     --------------------------------------------------------------- */
+  function chatHealth(){
+    var b=$('#chatBody');if(!b)return;
+    if(!window.state||!state.user||state.user.provider!=='google'){
+      var input=$('#chatInput');if(input){input.disabled=true;input.placeholder='Đăng nhập Google để tham gia chat'}
+    }
+    var count=$('#chatCount');if(count&&b.querySelector('.msg'))count.textContent=b.querySelectorAll('.msg').length;
+  }
+  later(chatHealth,700);later(chatHealth,1600);
+
+  /* ---------------------------------------------------------------
+     DRAFT STATUS
+     --------------------------------------------------------------- */
+  function draftStatus(){
+    var i=$('#chatInput');if(!i)return;
+    if(i.value){i.setAttribute('data-draft','saved')}else{i.removeAttribute('data-draft')}
+  }
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='chatInput')draftStatus()});
+
+  /* ---------------------------------------------------------------
+     PROFILE COOLDOWN TICKER
+     --------------------------------------------------------------- */
+  function cooldown(){
+    var el=$('#pNameCooldown');if(!el||!window.state||!state.user||state.user.provider!=='google')return;
+    var left=Math.max(0,604800000-(Date.now()-Number(state.user.nameChangedAt||0)));
+    if(left<=0){el.textContent='Có thể đổi tên';return}
+    var d=Math.floor(left/86400000),h=Math.floor((left%86400000)/3600000),m=Math.floor((left%3600000)/60000);el.textContent='Còn '+d+' ngày '+h+' giờ '+m+' phút';
+  }
+  cooldown();setInterval(cooldown,60000);
+
+  /* ---------------------------------------------------------------
+     CONNECTION QUALITY ESTIMATE
+     --------------------------------------------------------------- */
+  var connection= navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  function connectionHint(){
+    var text='';if(!navigator.onLine){body.classList.add('sk-offline');return}
+    body.classList.remove('sk-offline');
+    if(connection){if(connection.saveData||/2g/.test(connection.effectiveType||''))text='Mạng chậm · đã giảm hiệu ứng';else if(connection.effectiveType==='4g')text='Mạng tốt · đồng bộ bình thường'}
+    if(text&&window.SKIBIDI_STATUS)SKIBIDI_STATUS(text,true);
+  }
+  window.addEventListener('online',connectionHint);window.addEventListener('offline',connectionHint);if(connection)connection.addEventListener('change',connectionHint);later(connectionHint,1200);
+
+  /* ---------------------------------------------------------------
+     NOTIFICATION SAFETY
+     --------------------------------------------------------------- */
+  bind('#notifyBtn',function(){
+    if(!('Notification' in window))return window.SKIBIDI_STATUS&&SKIBIDI_STATUS('Trình duyệt không hỗ trợ thông báo',false);
+    Notification.requestPermission().then(function(p){if(window.SKIBIDI_STATUS)SKIBIDI_STATUS(p==='granted'?'Đã bật thông báo':'Thông báo chưa được cấp quyền',p==='granted')}).catch(function(){if(window.SKIBIDI_STATUS)SKIBIDI_STATUS('Không thể xin quyền thông báo',false)});
+  });
+
+  /* ---------------------------------------------------------------
+     IMAGE INPUT FEEDBACK
+     --------------------------------------------------------------- */
+  document.addEventListener('change',function(e){
+    if(!e.target||e.target.id!=='imageInput')return;
+    var f=e.target.files&&e.target.files[0];if(!f)return;
+    if(f.size>2*1024*1024){if(window.SKIBIDI_STATUS)SKIBIDI_STATUS('Ảnh quá 2 MB · hãy chọn ảnh nhỏ hơn',false);return}
+    if(window.SKIBIDI_STATUS)SKIBIDI_STATUS('Đang chuẩn bị hình ảnh…',true);
+  });
+
+  /* ---------------------------------------------------------------
+     AI VISUAL STATE
+     --------------------------------------------------------------- */
+  function aiState(){
+    var send=$('#puterSend'),stop=$('#aiStop'),statusEl=$('#puterStatus');
+    if(!send||!stop)return;
+    var running=!!(document.querySelector('.puterChat.aiRunning'));
+    send.setAttribute('aria-busy',running?'true':'false');stop.setAttribute('aria-hidden',running?'false':'true');
+    if(statusEl&&running)statusEl.style.opacity='.92';
+  }
+  var aiObserver=new MutationObserver(aiState);var aiChat=$('.puterChat');if(aiChat)aiObserver.observe(aiChat,{attributes:true,attributeFilter:['class']});later(aiState,600);
+
+  /* ---------------------------------------------------------------
+     SAFE ESCAPE FROM STALE MODALS
+     --------------------------------------------------------------- */
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape')return;
+    var ctx=$('#skContext');if(ctx&&ctx.classList.contains('show')){ctx.classList.remove('show');ctx.style.pointerEvents='none';e.stopPropagation();return}
+    var v=$('#skImageViewer');if(v&&v.classList.contains('show')){v.classList.remove('show');v.style.pointerEvents='none';document.body.style.overflow='';e.stopPropagation();return}
+    var m=$('#modalWrap');if(m&&m.classList.contains('show')&&window.closeModal)closeModal();
+  },true);
+
+  /* ---------------------------------------------------------------
+     PERIODIC SELF TEST
+     --------------------------------------------------------------- */
+  function selfTest(){
+    var required=['#pageLoader','#view-home','#view-utilities','#modalWrap','#toasts'];
+    var missing=required.filter(function(x){return !$(x)});
+    var loader=$('#pageLoader');if(loader){loader.style.pointerEvents='none';if(Date.now()-window.__skStart>2200){loader.style.opacity='0';loader.style.visibility='hidden'}}
+    window.SKIBIDI_SELFTEST={ok:missing.length===0,missing:missing,online:navigator.onLine,errors:window.SKIBIDI_DIAGNOSTICS?window.SKIBIDI_DIAGNOSTICS.errors:0,time:Date.now()};
+    if(missing.length)console.warn('[SKIBIDI] Missing DOM nodes',missing);
+  }
+  later(selfTest,2000);setInterval(selfTest,15000);
+
+  /* ---------------------------------------------------------------
+     FINAL FAILSAFE: if any animation layer ever accidentally creates
+     a full-screen blocker, only known modal layers may intercept.
+     --------------------------------------------------------------- */
+  function blockerGuard(){
+    qsa('body *').forEach(function(el){
+      if(el===body||el.id==='pageLoader'||el.id==='modalWrap'||el.id==='palette'||el.id==='maintenance'||el.id==='skImageViewer'||el.id==='skContext'||el.closest('#modalWrap,#palette,#maintenance,#skImageViewer,#skContext'))return;
+      var r=el.getBoundingClientRect();
+      if(r.width>innerWidth*.98&&r.height>innerHeight*.92){
+        var z=parseInt(getComputedStyle(el).zIndex||'0',10);
+        if(z>40){el.style.pointerEvents='none';console.warn('[SKIBIDI] blocker guard disabled pointer events',el)}
+      }
+    });
+  }
+  later(blockerGuard,1800);
+
+  /* ---------------------------------------------------------------
+     Small utility API for future additions. Keeping these helpers
+     global makes later modules independent from Firebase internals.
+     --------------------------------------------------------------- */
+  window.SKIBIDI_V3={
+    status:function(t,g){if(window.SKIBIDI_STATUS)SKIBIDI_STATUS(t,g)},
+    refresh:function(){safe(decorate);safe(linkify);safe(chatHealth);safe(selfTest);safe(removeLoader)},
+    diagnostics:function(){return window.SKIBIDI_SELFTEST||null},
+    isGoogle:function(){return !!(window.state&&state.user&&state.user.provider==='google')}
+  };
+  function removeLoader(){var l=$('#pageLoader');if(l){document.body.classList.add('loaded');l.style.opacity='0';l.style.visibility='hidden';l.style.pointerEvents='none'}}
+  later(removeLoader,2200);window.addEventListener('load',function(){later(removeLoader,100)});
+})();
+</script>
+</body></html>
