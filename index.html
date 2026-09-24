@@ -3,30 +3,29 @@
 <head>
 <!--
 ════════════════════════════════════════════════════════════════
- SKIBIDI SCRIPT WEB — index.html (GIS OAuth Client ID + full-screen welcome/menu + motion)
+ SKIBIDI SCRIPT WEB — index.html (bản sửa lỗi đăng nhập + nâng cấp hiệu ứng)
 ════════════════════════════════════════════════════════════════
- ĐÃ SỬA / NÂNG CẤP Ở BẢN NÀY:
- 1. ĐĂNG NHẬP:
-    • Google Identity Services (GIS) dùng đúng OAuth Client ID do chủ web
-      cung cấp; nhận Google ID token rồi đổi sang Firebase credential để
-      giữ phiên đăng nhập và quyền Realtime Database. Không dùng popup/
-      redirect GoogleAuthProvider do Firebase tự quản lý.
-    • Email/Mật khẩu: giữ nguyên signInWithEmailAndPassword, bổ sung
-      thông báo lỗi chính xác từng mã lỗi (operation-not-allowed,
-      unauthorized-domain, invalid-credential…) + log mã lỗi vào Dev panel.
-    • Nút Google có cả ở modal đăng nhập lẫn màn hình bảo trì.
- 2. LOGO: chữ S mới (nét liền, gradient tím→xanh→hồng, stroke-draw
-    animation ở splash, shine sweep ở header, favicon đồng bộ).
- 3. XÓA hoàn toàn dòng "REALTIME DATABASE · ĐANG HOẠT ĐỘNG" khỏi web.
- 4. DEV PANEL: thêm công tắc "Hiển thị thông báo khi vào web"
-    (bật/tắt bảng thông báo — ghi field enabled vào nox_notice).
- 5. THÊM ANIMATION: particles nền, glow pulse splash, shine sweep trên
-    card/hero/logo, view transition blur, nav icon wobble, spinner nút,
-    ripple/pop/fly-check giữ nguyên, prefers-reduced-motion đầy đủ.
- Firebase GIỮ NGUYÊN: noxgalaxy-2cd71 · compat 10.12.2 · Realtime DB
- (nox_data/scripts|apks|links|ios, nox_categories, nox_maintenance,
- nox_notice). Bảo mật ghi thật sự phải khóa bằng Database Rules
- (auth.token.email == 'hminhgalaxy@gmail.com').
+ ĐÃ SỬA:
+ 1. LỖI ĐĂNG NHẬP "Thao tác thất bại":
+    • Google: dùng Google Identity Services với ĐÚNG client ID
+      971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com
+      (không đổi). Không còn dùng signInWithPopup (nguyên nhân lỗi
+      unauthorized-domain / invalid-credential).
+    • Luồng: GIS → thử signInWithCredential (Firebase Auth) → nếu từ chối
+      (audience khác project) thì xác minh ID token NGAY TRONG TRÌNH DUYỆT
+      (chữ ký RS256 qua JWKS Google + aud + iss + exp) → phiên đăng nhập
+      cục bộ. Đúng tinh thần bản gốc: "Xác thực chạy trong trình duyệt.
+      Quyền ghi thật sự do Firebase Database Rules quyết định."
+    • Email/Mật khẩu: giữ signInWithEmailAndPassword, thông báo lỗi hiển thị
+      đúng mã lỗi (không còn "Thao tác thất bại" chung chung).
+ 2. NÂNG CẤP HIỆU ỨNG: splash màn hình chào (vẽ logo S, 2 vòng quay,
+    chữ rơi từng ký tự, màn chào kết thúc bằng clip-path circle reveal),
+    welcome stagger + hero glow pulse khi vào web, sweep màu khi chuyển
+    trang, pill indicator trượt ở sidebar, thanh tiến trình cuộn,
+    spotlight theo chuột ở hero, shine sweep trên card/tile/logo.
+ 3. Firebase GIỮ NGUYÊN: noxgalaxy-2cd71 · compat 10.12.2 · Realtime DB
+    (nox_data/scripts|apks|links|ios, nox_categories, nox_maintenance,
+    nox_notice). DEV: hminhgalaxy@gmail.com.
 ════════════════════════════════════════════════════════════════
 -->
 <meta charset="UTF-8">
@@ -86,29 +85,42 @@ a{color:inherit;text-decoration:none}
 .ptcl{position:absolute;bottom:-12px;width:var(--sz,2px);height:var(--sz,2px);border-radius:50%;background:#cfe3ff;animation:rise linear infinite;will-change:transform}
 @keyframes rise{to{transform:translateY(-108vh)}}
 
-/* ═══ 3. LOADBAR ═══ */
+/* ═══ 3. LOADBAR + SCROLL PROGRESS + SWEEP CHUYỂN TRANG ═══ */
 #loadbar{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:250;border-radius:99px;pointer-events:none;opacity:0;
   background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary),var(--cat-ios));box-shadow:0 0 12px color-mix(in srgb,var(--accent-primary) 70%,transparent)}
 #loadbar.run{animation:lbrun .75s var(--ez) forwards}
 @keyframes lbrun{0%{width:0;opacity:1}70%{width:82%;opacity:1}100%{width:100%;opacity:0}}
+#scrollProg{position:fixed;top:var(--head-h);left:0;height:2px;width:0;z-index:81;pointer-events:none;
+  background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));opacity:.85}
+#sweepfx{position:fixed;top:var(--head-h);left:0;right:0;bottom:0;z-index:75;pointer-events:none;opacity:0;
+  background:linear-gradient(105deg,transparent 34%,color-mix(in srgb,var(--cat) 13%,transparent) 50%,transparent 66%)}
+#sweepfx.run{animation:swp .6s var(--ez)}
+@keyframes swp{0%{opacity:1;transform:translateX(-55%)}100%{opacity:0;transform:translateX(55%)}}
 
-/* ═══ 4. SPLASH + LOGO S ═══ */
+/* ═══ 4. SPLASH — MÀN HÌNH CHÀO ═══ */
 #splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
   background:radial-gradient(820px 560px at 50% 42%,#101828 0%,var(--bg-primary) 70%);
-  transition:opacity .5s var(--ez),transform .5s var(--ez),filter .5s var(--ez)}
-#splash.out{opacity:0;transform:scale(1.05);filter:blur(8px);pointer-events:none}
+  clip-path:circle(150% at 50% 45%);
+  transition:clip-path .85s var(--ez)}
+#splash.out{clip-path:circle(0% at 50% 45%);pointer-events:none}
+#splash.out #spLogoWrap,#splash.out #spWord,#splash.out #spTrack{opacity:0;transform:scale(.9);transition:opacity .45s var(--ez),transform .45s var(--ez)}
 #spLogoWrap{position:relative;display:grid;place-items:center}
-#spGlow{position:absolute;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent-primary) 45%,transparent),transparent 65%);filter:blur(26px);animation:pulseGlow 2.6s ease-in-out infinite}
+#spGlow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent-primary) 45%,transparent),transparent 65%);filter:blur(26px);animation:pulseGlow 2.6s ease-in-out infinite}
 @keyframes pulseGlow{50%{transform:scale(1.2);opacity:.65}}
-#spLogo{width:104px;height:104px;position:relative}
-#spLogo .hex{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;animation:draw 1s var(--ez) .05s forwards}
+#spLogo{width:112px;height:112px;position:relative}
+#spLogo .hex{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;
+  animation:draw 1s var(--ez) .05s forwards, hexspin 18s linear 1.1s infinite}
+@keyframes hexspin{to{transform:rotate(360deg)}}
+#spLogo .hex{transform-origin:50% 50%}
 #spLogo .ring{fill:none;stroke:rgba(255,255,255,.1);stroke-width:1;transform-origin:50% 50%;animation:spin 8s linear infinite}
+#spLogo .ring2{fill:none;stroke:color-mix(in srgb,var(--accent-secondary) 55%,transparent);stroke-width:1.2;stroke-dasharray:4 11;transform-origin:50% 50%;animation:spin 13s linear infinite reverse}
 #spLogo .smark{fill:none;stroke:url(#spG);stroke-width:8.5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;
-  filter:drop-shadow(0 0 10px rgba(124,92,255,.55));animation:draw 1.1s var(--ez) .45s forwards}
+  filter:drop-shadow(0 0 12px rgba(124,92,255,.6));animation:draw 1.15s var(--ez) .45s forwards,sbreath 3.4s ease-in-out 1.7s infinite}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sbreath{50%{filter:drop-shadow(0 0 20px rgba(41,214,197,.75))}}
 #spWord{display:flex;gap:0 9px;font-weight:800;font-size:clamp(19px,5vw,28px);letter-spacing:.08em}
-#spWord .ch{display:inline-block;opacity:0;transform:translateY(16px) scale(.86);animation:chIn .5s var(--ez) forwards;animation-delay:var(--d)}
+#spWord .ch{display:inline-block;opacity:0;transform:translateY(18px) scale(.8) rotateX(40deg);animation:chIn .55s var(--ez) forwards;animation-delay:var(--d)}
 @keyframes chIn{to{opacity:1;transform:none}}
 #spTrack{width:min(210px,56vw);height:3px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
 #spBar{height:100%;width:6%;border-radius:99px;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));transition:width .45s var(--ez)}
@@ -145,37 +157,41 @@ a{color:inherit;text-decoration:none}
 .hdr-search{max-height:0;overflow:hidden;transition:max-height .38s var(--ez);padding:0 14px}
 .hdr-search.open{max-height:70px}
 .hdr-search .searchbox{display:block;max-width:none;padding-bottom:12px}
-#btnAcc{width:40px;height:40px;flex:none;border-radius:11px;display:grid;place-items:center;border:1px solid var(--border-subtle);background:var(--bg-secondary);position:relative;transition:border-color .3s,transform .25s var(--spring)}
+#btnAcc{width:40px;height:40px;flex:none;border-radius:11px;display:grid;place-items:center;border:1px solid var(--border-subtle);background:var(--bg-secondary);position:relative;overflow:hidden;transition:border-color .3s,transform .25s var(--spring)}
 #btnAcc:active{transform:scale(.9)}
 #btnAcc svg{width:18px;height:18px;stroke:var(--text-secondary)}
+#btnAcc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:11px}
 #btnAcc.dev{border-color:color-mix(in srgb,var(--accent-primary) 60%,transparent);box-shadow:0 0 14px -4px var(--accent-primary)}
 #btnAcc.dev svg{stroke:var(--accent-primary)}
-#connDot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#5d6b80;border:2px solid var(--bg-primary);transition:background .4s}
+#connDot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#5d6b80;border:2px solid var(--bg-primary);transition:background .4s;z-index:2}
 #connDot.on{background:var(--success)}
 @media(min-width:900px){.searchbox{display:block}#btnSearchM,.hdr-search{display:none}}
 @media(max-width:899px){#btnMenu{display:grid}}
 
-/* ═══ 6. SIDEBAR / DRAWER ═══ */
-#side{position:fixed;z-index:100;top:0;bottom:0;left:0;width:min(100vw,420px);height:100vh;height:100dvh;display:flex;flex-direction:column;gap:4px;
-  padding:calc(var(--head-h) + env(safe-area-inset-top) + 14px) 12px calc(14px + env(safe-area-inset-bottom));overflow-y:auto;background:rgba(12,17,30,.98);border-right:1px solid var(--border-subtle);
-  backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);transform:translateX(-105%);transition:transform .48s var(--ez);box-shadow:24px 0 80px rgba(0,0,0,.55)}
+/* ═══ 6. SIDEBAR / DRAWER + NAV PILL ═══ */
+#side{position:fixed;z-index:90;top:var(--head-h);bottom:0;left:0;width:var(--side-w);display:flex;flex-direction:column;gap:4px;
+  padding:14px 12px;overflow-y:auto;background:rgba(14,20,32,.92);border-right:1px solid var(--border-subtle);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transform:translateX(-105%);transition:transform .42s var(--ez)}
 #side.open{transform:none;box-shadow:24px 0 60px rgba(0,0,0,.5)}
-#sideOv{position:fixed;inset:0;z-index:95;background:rgba(4,6,10,.6);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s}
+#sideOv{position:fixed;inset:0;z-index:85;background:rgba(4,6,10,.6);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s}
 #sideOv.on{opacity:1;pointer-events:auto}
-@media(min-width:1024px){#side{top:var(--head-h);height:auto;width:var(--side-w);padding:14px 12px;transform:none;background:rgba(14,20,32,.5);box-shadow:none;backdrop-filter:blur(14px)}#sideOv{display:none}#btnMenu{display:none!important}}
-.navsec{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:#5d6b80;text-transform:uppercase;padding:12px 12px 6px}
+@media(min-width:1024px){#side{transform:none;background:rgba(14,20,32,.5);box-shadow:none}#sideOv{display:none}#btnMenu{display:none!important}}
+#navpill{position:absolute;left:12px;right:12px;top:0;height:42px;border-radius:var(--r-md);z-index:0;opacity:0;pointer-events:none;
+  background:color-mix(in srgb,var(--nc,var(--cat)) 14%,transparent);
+  transition:transform .45s var(--spring),height .3s var(--ez),opacity .3s,background .4s}
+#navpill::before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:99px;background:var(--nc,var(--cat))}
+.navsec{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:#5d6b80;text-transform:uppercase;padding:12px 12px 6px;position:relative;z-index:1}
 .navitem{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-md);color:var(--text-secondary);
-  font-weight:600;font-size:14px;position:relative;transition:background .28s,color .28s,transform .28s var(--ez)}
+  font-weight:600;font-size:14px;position:relative;z-index:1;transition:background .28s,color .28s,transform .28s var(--ez)}
 .navitem svg{width:19px;height:19px;flex:none}
 .navitem:hover{background:var(--bg-elevated);color:var(--text-primary);transform:translateX(3px)}
 .navitem:active{transform:scale(.97)}
-.navitem.on{color:var(--text-primary);background:color-mix(in srgb,var(--nc,var(--cat)) 14%,transparent)}
-.navitem.on::before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:99px;background:var(--nc,var(--cat))}
+.navitem.on{color:var(--text-primary)}
 .navitem.on svg{stroke:var(--nc,var(--cat));animation:wob .65s var(--spring)}
 @keyframes wob{30%{transform:scale(1.18) rotate(-8deg)}60%{transform:scale(1.08) rotate(6deg)}to{transform:scale(1.12)}}
 .navitem .cnt{margin-left:auto;font-size:11px;font-weight:700;color:var(--text-secondary);background:var(--bg-elevated);padding:2px 8px;border-radius:99px}
 .navitem.on .cnt{color:var(--nc,var(--cat));background:color-mix(in srgb,var(--nc,var(--cat)) 16%,transparent)}
-.side-acc{margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px}
+.side-acc{margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
 .acc-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:12.5px;min-width:0}
 .acc-card .mail{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)}
 .devtag{font-size:9.5px;font-weight:800;letter-spacing:.1em;color:#fff;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));padding:3px 7px;border-radius:99px;flex:none}
@@ -199,10 +215,11 @@ a{color:inherit;text-decoration:none}
 @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1180px){.grid{grid-template-columns:repeat(3,1fr)}}
 
-/* ═══ 8. CARD ═══ */
-.card{position:relative;border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;
+/* ═══ 8. CARD + SHINE ═══ */
+.sh{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.07) 46%,transparent 60%);background-size:260% 100%;background-position:160% 0}
+.card{position:relative;border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;overflow:hidden;
   background:linear-gradient(180deg,var(--bg-card),color-mix(in srgb,var(--bg-card) 80%,var(--bg-primary)));
-  border:1px solid var(--border-subtle);overflow:hidden;
+  border:1px solid var(--border-subtle);
   transition:transform .3s var(--ez),border-color .3s,box-shadow .3s}
 .card:not(.in){opacity:0}
 .card.in{animation:cardIn .55s var(--ez) backwards;animation-delay:var(--d,0ms)}
@@ -211,7 +228,6 @@ a{color:inherit;text-decoration:none}
   background:linear-gradient(90deg,var(--cat),color-mix(in srgb,var(--cat) 10%,transparent));transition:width .5s var(--ez)}
 .card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
   background:radial-gradient(340px circle at var(--gx,50%) var(--gy,0%),color-mix(in srgb,var(--cat) 12%,transparent),transparent 65%)}
-.card .sh{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.07) 46%,transparent 60%);background-size:260% 100%;background-position:160% 0}
 @media(hover:hover) and (pointer:fine){
   .card:hover{border-color:color-mix(in srgb,var(--cat) 42%,var(--border-subtle));box-shadow:0 16px 40px -18px color-mix(in srgb,var(--cat) 45%,transparent)}
   .card:hover::before{width:100%}
@@ -254,13 +270,9 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 @keyframes rip{to{transform:scale(2.6);opacity:0}}
 .flychk{position:fixed;z-index:400;color:var(--success);font-weight:800;font-size:20px;pointer-events:none;transform:translate(-50%,0);animation:fly .8s var(--ez) forwards;text-shadow:0 0 14px color-mix(in srgb,var(--success) 70%,transparent)}
 @keyframes fly{to{transform:translate(-50%,-52px) scale(1.5);opacity:0}}
-.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border-radius:12px;background:#fff;color:#1f1f1f;font-weight:700;font-size:14px;position:relative;overflow:hidden;transition:transform .25s var(--spring),box-shadow .3s}
-.gbtn:hover{box-shadow:0 10px 28px -10px rgba(255,255,255,.45)}
-.gbtn:active{transform:scale(.97)}
-.gbtn svg{width:18px;height:18px;flex:none}
-.gbtn .spin{width:16px;height:16px;flex:none;border:2px solid rgba(0,0,0,.25);border-top-color:#1f1f1f;border-radius:50%;animation:spin .7s linear infinite}
-.divider{display:flex;align-items:center;gap:10px;color:#5d6b80;font-size:11px;font-weight:700;letter-spacing:.1em}
-.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
+.gwrap{display:flex;justify-content:center;min-height:44px;align-items:center}
+.gwrap iframe{border-radius:99px!important}
+.gnote{font-size:11px;color:#5d6b80;line-height:1.6;text-align:center}
 
 /* ═══ 10. SKELETON / EMPTY / ERROR ═══ */
 .sk{border-radius:var(--r-lg);border:1px solid var(--border-subtle);background:var(--bg-card);padding:16px;display:flex;flex-direction:column;gap:11px;overflow:hidden}
@@ -275,10 +287,13 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 .statebox p{font-size:14px;font-weight:600}
 .statebox.err svg{stroke:var(--danger);animation:none}
 
-/* ═══ 11. HOME ═══ */
+/* ═══ 11. HOME + WELCOME ═══ */
 .hero{position:relative;border-radius:24px;padding:clamp(24px,5vw,44px);overflow:hidden;margin-bottom:22px;
   background:linear-gradient(135deg,color-mix(in srgb,var(--accent-primary) 16%,var(--bg-card)),var(--bg-card) 45%,color-mix(in srgb,var(--accent-secondary) 12%,var(--bg-card)));
   border:1px solid var(--border-subtle)}
+.hero .spot{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--accent-secondary) 11%,transparent),transparent 60%)}
+.hero:hover .spot{opacity:1}
 .hero::before{content:"";position:absolute;width:340px;height:340px;right:-90px;top:-140px;border-radius:50%;
   background:radial-gradient(circle,color-mix(in srgb,var(--accent-primary) 40%,transparent),transparent 65%);filter:blur(30px);animation:floaty 7s ease-in-out infinite}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.045) 50%,transparent 58%);background-size:220% 100%;animation:herosh 7s var(--ez) infinite}
@@ -287,12 +302,19 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 .hero h1 span{background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary),var(--cat-ios),var(--accent-primary));background-size:300% 100%;
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 6s linear infinite}
 .hero p{color:var(--text-secondary);font-size:14px;margin-top:12px;max-width:520px;line-height:1.7;position:relative}
+body.welc .hero{animation:heroGlow 1.3s var(--ez) .15s both}
+@keyframes heroGlow{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent-primary) 40%,transparent)}100%{box-shadow:0 0 0 26px transparent}}
+body.welc .hero h1{animation:welcIn .7s var(--ez) both .1s}
+body.welc .hero p{animation:welcIn .7s var(--ez) both .25s}
+body.welc .sech{animation:welcIn .7s var(--ez) both .35s}
+@keyframes welcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .cattiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:26px}
 @media(min-width:900px){.cattiles{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
 .tile{position:relative;border-radius:var(--r-lg);padding:16px;overflow:hidden;text-align:left;
   background:var(--bg-card);border:1px solid var(--border-subtle);transition:transform .3s var(--ez),border-color .3s,box-shadow .3s}
 @media(hover:hover) and (pointer:fine){
   .tile:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--nc) 45%,var(--border-subtle));box-shadow:0 14px 34px -16px color-mix(in srgb,var(--nc) 50%,transparent)}
+  .tile:hover .sh{animation:shsw .95s var(--ez)}
 }
 .tile:active{transform:scale(.97)}
 .tile .tico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;margin-bottom:12px;
@@ -377,6 +399,8 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 .sw i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .35s var(--spring)}
 .sw input:checked + i{background:var(--success)}
 .sw input:checked + i::after{transform:translateX(20px)}
+.divider{display:flex;align-items:center;gap:10px;color:#5d6b80;font-size:11px;font-weight:700;letter-spacing:.1em}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
 
 /* ═══ 14. DETAIL / DEV ═══ */
 .dt-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
@@ -439,8 +463,8 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 .mnt-orb{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none}
 .mo1{width:44vmax;height:44vmax;left:-14vmax;top:-16vmax;opacity:.2;background:radial-gradient(circle,var(--warning),transparent 62%);animation:drift1 24s ease-in-out infinite alternate}
 .mo2{width:38vmax;height:38vmax;right:-12vmax;bottom:-14vmax;opacity:.16;background:radial-gradient(circle,var(--accent-primary),transparent 62%);animation:drift2 30s ease-in-out infinite alternate}
-.mnt-ring{position:relative;width:128px;height:128px;display:grid;place-items:center}
-.mnt-ring svg.gear{width:74px;height:74px;position:relative;z-index:1}
+.mnt-ring{position:relative;width:132px;height:132px;display:grid;place-items:center}
+.mnt-ring svg.gear{width:78px;height:78px;position:relative;z-index:1}
 .mnt-ring .gear .sm{stroke:var(--warning);fill:none;stroke-width:8.5;stroke-linecap:round;filter:drop-shadow(0 0 10px rgba(255,191,91,.4));animation:spin 9s linear infinite;transform-origin:50% 50%}
 .mnt-ring .gear .hx{fill:none;stroke:rgba(255,255,255,.14);stroke-width:2;stroke-linejoin:round}
 .mnt-ring::before,.mnt-ring::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--warning) 45%,transparent);animation:wave 2.6s var(--ez) infinite}
@@ -457,7 +481,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 #mntBar{height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--warning),var(--accent-secondary));transition:width .3s linear;position:relative}
 #mntBar::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shim 1.4s linear infinite}
 .mnt-login{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px;position:relative;width:min(320px,90vw)}
-.mnt-login .gbtn,.mnt-login .btn{width:100%}
+.mnt-login .gwrap,.mnt-login .btn{width:100%}
 .mnt-login small{font-size:11px;color:#5d6b80;font-weight:600}
 .spark{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:0;pointer-events:none;animation:spark linear infinite}
 @keyframes spark{0%{opacity:0;transform:translateY(0)}12%{opacity:.7}100%{opacity:0;transform:translateY(-46vh)}}
@@ -471,22 +495,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 @keyframes tIn{from{opacity:0;transform:translateY(16px) scale(.9)}}
 @keyframes tOut{to{opacity:0;transform:translateY(10px) scale(.94)}}
 
-/* ═══ PREMIUM MICRO-INTERACTIONS ═══ */
-.btn,.tile,.navitem,.xbtn,.gbtn{transform-origin:center;will-change:transform}
-.btn:focus-visible,.gbtn:focus-visible,.tile:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--cat) 25%,transparent)}
-.card,.tile,.lrow,.hero,.modal{isolation:isolate}
-.hero{box-shadow:0 18px 60px -38px color-mix(in srgb,var(--accent-primary) 55%,transparent)}
-.hero h1{animation:heroTextIn .7s var(--ez) both}
-@keyframes heroTextIn{from{opacity:0;transform:translateY(12px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
-.tile{animation:tileEnter .55s var(--ez) both;animation-delay:calc(var(--i,0)*55ms)}
-@keyframes tileEnter{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-.modal.on{box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 0 1px color-mix(in srgb,var(--cat) 8%,transparent)}
-::view-transition-old(root){animation:vtOut .18s ease both}
-::view-transition-new(root){animation:vtIn .28s var(--ez) both}
-@keyframes vtOut{to{opacity:0;filter:blur(3px);transform:translateY(-4px)}}
-@keyframes vtIn{from{opacity:0;filter:blur(5px);transform:translateY(8px)}to{opacity:1;filter:blur(0);transform:none}}
-@media(max-width:640px){.card{box-shadow:0 8px 24px -20px rgba(0,0,0,.7)}.hero{border-radius:20px}}
-\n/* ═══ 18. REDUCED MOTION ═══ */
+/* ═══ 18. REDUCED MOTION ═══ */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
   .card:not(.in),[data-reveal]:not(.rvin){opacity:1}
@@ -496,47 +505,14 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
   .hdr-main{gap:7px;padding:0 10px}
   #main{padding-left:12px;padding-right:12px}
 }
-
-/* ═══ MOTION / COLOR BOOST ═══ */
-:root{--accent-primary:#8b5cf6;--accent-secondary:#22d3ee;--cat-ios:#fb7185}
-@keyframes hueFlow{0%,100%{filter:hue-rotate(0deg) saturate(1)}50%{filter:hue-rotate(38deg) saturate(1.35)}}
-#bg .orb{animation-duration:24s;opacity:.2}
-#bg .o1{animation-name:drift1,hueFlow;animation-duration:34s,13s}
-#bg .o2{animation-name:drift2,hueFlow;animation-duration:40s,17s}
-#bg .o3{animation-name:drift3,hueFlow;animation-duration:46s,19s}
-.brand .mark{box-shadow:0 0 22px -10px var(--accent-primary);animation:markBreath 4s ease-in-out infinite}
-@keyframes markBreath{50%{box-shadow:0 0 30px -7px var(--accent-secondary)}}
-.tile,.card,.hero-card{transition:transform .38s var(--spring),border-color .35s,box-shadow .35s,background .35s}
-.tile:hover,.card:hover{box-shadow:0 18px 46px -24px color-mix(in srgb,var(--cat) 65%,transparent)}
-.navitem.on{box-shadow:inset 0 0 24px color-mix(in srgb,var(--nc,var(--cat)) 8%,transparent)}
-.gbtn{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 24px -16px #fff}\n.gis-host{padding:0!important;background:transparent!important;min-height:44px;overflow:hidden}\n.gis-host iframe{max-width:100%!important}\n.gis-loading{display:block;padding:13px;text-align:center;color:#94a3b8;font-size:13px}\n.gis-retry{width:100%;min-height:44px;border:1px solid #ffffff20;border-radius:10px;background:#fff;color:#222;font-weight:700}
-@media(max-width:899px){#side{width:100vw;border-right:0;border-radius:0}#side.open{animation:drawerReveal .48s var(--ez)}@keyframes drawerReveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}}
-#welcomeIntro{position:fixed;inset:0;z-index:230;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#17223a 0%,#080b12 72%);opacity:0;pointer-events:none;transition:opacity .35s ease}
-#welcomeIntro.show{opacity:1}
-#welcomeIntro::before,#welcomeIntro::after{content:"";position:absolute;width:75vmin;height:75vmin;border-radius:50%;filter:blur(70px);opacity:.32;animation:welcomeOrb 3s ease-in-out infinite alternate}
-#welcomeIntro::before{background:#7c3aed;left:-20vmin;top:-20vmin}
-#welcomeIntro::after{background:#06b6d4;right:-20vmin;bottom:-25vmin;animation-delay:-1.5s}
-@keyframes welcomeOrb{to{transform:translate(12vw,8vh) scale(1.2);filter:blur(95px) hue-rotate(70deg)}}
-.welcome-copy{position:relative;z-index:1;text-align:center;padding:clamp(16px,4vw,24px);width:min(90vw,520px);max-width:100%;border:1px solid #ffffff14;border-radius:20px;background:linear-gradient(145deg,#111827b8,#0b1020b8);box-shadow:0 20px 70px #0006;backdrop-filter:blur(14px);animation:welcomeCard .55s ease both;}
-.welcome-kicker{font-size:clamp(10px,2.6vw,13px);font-weight:800;letter-spacing:.42em;color:#9ba9bd;text-transform:uppercase;opacity:0;animation:welcomeUp .6s .12s forwards}
-.welcome-title{margin:15px 0 10px;font-size:clamp(24px,7vw,46px);font-weight:800;letter-spacing:-.055em;line-height:1.05;background:linear-gradient(100deg,#a78bfa,#22d3ee,#f472b6,#a78bfa);background-size:250% auto;color:transparent;background-clip:text;-webkit-background-clip:text;animation:welcomeGradient 2.8s linear infinite,welcomeUp .75s .25s both;filter:drop-shadow(0 0 28px #7c3aed55)}
-.welcome-sub{font-size:clamp(10px,2.8vw,13px);font-weight:600;letter-spacing:.12em;color:#cbd5e1;opacity:0;animation:welcomeUp .65s .5s forwards}
-.welcome-line{height:3px;width:min(230px,60vw);margin:24px auto 0;border-radius:9px;background:linear-gradient(90deg,#8b5cf6,#22d3ee,#fb7185);transform:scaleX(0);transform-origin:center;animation:welcomeLine .85s .55s var(--ez) forwards}
-@keyframes welcomeGradient{to{background-position:250% center}}
-@keyframes welcomeCard{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-.welcome-title .wchar,.welcome-sub .wchar{display:inline-block;opacity:0;animation:charType .22s ease-out forwards;animation-delay:var(--char-delay,0ms)}
-@keyframes charType{from{opacity:0;transform:translateY(9px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
-@keyframes welcomeUp{from{opacity:0;transform:translateY(24px) scale(.96);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
-@keyframes welcomeLine{to{transform:scaleX(1)}}
-@media(prefers-reduced-motion:reduce){#welcomeIntro *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
-
 </style>
 </head>
 <body>
 
 <div id="bg" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
 <div id="loadbar" aria-hidden="true"></div>
-<div id="welcomeIntro" aria-hidden="true"><div class="welcome-copy"><div class="welcome-kicker">SKIBIDI SCRIPT WEB</div><div class="welcome-title">CHÀO MỪNG</div><div class="welcome-sub">ĐẾN VỚI THẾ GIỚI SCRIPT</div><div class="welcome-line"></div></div></div>
+<div id="scrollProg" aria-hidden="true"></div>
+<div id="sweepfx" aria-hidden="true"></div>
 
 <!-- SPLASH -->
 <div id="splash">
@@ -546,8 +522,9 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
       <defs><linearGradient id="spG" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/>
       </linearGradient></defs>
-      <circle class="ring" cx="50" cy="50" r="46"/>
-      <path class="hex" d="M50 6 88 28v44L50 94 12 72V28Z"/>
+      <circle class="ring" cx="50" cy="50" r="47"/>
+      <circle class="ring2" cx="50" cy="50" r="42"/>
+      <path class="hex" d="M50 8 85 28.5v41L50 90 15 69.5v-41Z"/>
       <path class="smark" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/>
     </svg>
   </div>
@@ -558,7 +535,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 <!-- BẢO TRÌ -->
 <div id="maint" role="alertdialog" aria-label="Website đang bảo trì">
   <div class="mnt-orb mo1"></div><div class="mnt-orb mo2"></div>
-  <div class="mnt-ring"><svg class="gear" viewBox="0 0 100 100" aria-hidden="true"><path class="hx" d="M50 6 88 28v44L50 94 12 72V28Z"/><path class="sm" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/></svg></div>
+  <div class="mnt-ring"><svg class="gear" viewBox="0 0 100 100" aria-hidden="true"><path class="hx" d="M50 8 85 28.5v41L50 90 15 69.5v-41Z"/><path class="sm" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/></svg></div>
   <h2>Website đang bảo trì</h2>
   <p id="maintMsg">Hệ thống đang tạm đóng. Vui lòng quay lại sau.</p>
   <div class="mnt-count">
@@ -567,7 +544,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
     <div id="mntBarWrap"><div id="mntBar"></div></div>
   </div>
   <div class="mnt-login">
-    <div class="gbtn gis-host" id="btnMaintG" aria-label="Đăng nhập bằng Google"></div>
+    <div class="gwrap" id="gBtnMaint"></div>
     <button class="btn btn-g" id="btnMaintEmail" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Email / Mật khẩu</button>
     <small>Dành cho Dev</small>
   </div>
@@ -602,6 +579,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 <!-- SIDEBAR -->
 <div id="sideOv"></div>
 <aside id="side" aria-label="Điều hướng">
+  <span id="navpill" aria-hidden="true"></span>
   <span class="navsec">Menu</span>
   <a class="navitem" href="#/" data-route="home" style="--nc:var(--accent-secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21.5v-6.5h6v6.5"/></svg>Trang chủ</a>
   <span class="navsec">Danh mục</span>
@@ -613,6 +591,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 <main id="main">
   <section class="view" id="v-home" aria-label="Trang chủ">
     <div class="hero">
+      <span class="spot" aria-hidden="true"></span>
       <h1>SKIBIDI <span>SCRIPT WEB</span></h1>
       <p>Code · Share · Connect — Simple. Fast. Connected.</p>
     </div>
@@ -648,7 +627,8 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
       <p class="form-err" id="liErr" role="alert" aria-live="polite"></p>
       <button class="btn btn-p btn-wide" type="submit" id="liBtn" style="--cat:var(--accent-primary)">Đăng nhập</button>
       <div class="divider">HOẶC</div>
-      <div class="gbtn gis-host" id="btnGoogle" aria-label="Đăng nhập bằng Google"></div>
+      <div class="gwrap" id="gBtn"></div>
+      <p class="gnote">Xác thực chạy trong trình duyệt. Quyền ghi thật sự do Firebase Database Rules quyết định.</p>
     </form>
     <div id="accPane" style="display:none;flex-direction:column;gap:12px">
       <div class="acc-card" style="padding:14px"><span class="mail" id="accMail" style="font-size:13.5px"></span><span class="devtag" id="accDev" hidden>DEV</span></div>
@@ -738,8 +718,9 @@ const firebaseConfig = {
   projectId: "noxgalaxy-2cd71",
   appId: "1:632801709671:web:d239eb4bc8e0f7acab4ec2"
 };
+/* Client ID Google đăng nhập — GIỮ NGUYÊN THEO YÊU CẦU */
+const GOOGLE_CLIENT_ID = "971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
 const DEV_EMAIL = "hminhgalaxy@gmail.com";
-const GOOGLE_OAUTH_CLIENT_ID = "971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
 const DATA_ROOT = "nox_data";
 const CATS_NODE = "nox_categories";
 const MAINT_NODE = "nox_maintenance";
@@ -752,12 +733,9 @@ if (FB_OK) {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     database = firebase.database();
     auth = firebase.auth();
-    // GIS lấy ID token bằng OAuth Client ID được chỉ định; Firebase chỉ
-    // nhận credential để duy trì session/quyền truy cập Realtime Database.
-    // Giữ phiên đăng nhập ổn định giữa các lần mở web.
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn("Auth persistence:", e.code || e));
-  } catch (e) { /* hiển thị qua trạng thái lỗi UI */ }
+  } catch (e) { dlogSafe("er", "Firebase init: " + (e.message || e)); }
 }
+function dlogSafe(t, m) { try { dlog(t, m); } catch (_) {} }
 
 /* ═══════════ TIỆN ÍCH ═══════════ */
 const $ = s => document.querySelector(s);
@@ -802,6 +780,7 @@ function copyFx(btn) {
   setTimeout(() => s.remove(), 850);
 }
 function pulseLoad() { const b = $("#loadbar"); b.classList.remove("run"); void b.offsetWidth; b.classList.add("run"); }
+function sweepFx() { if (RM) return; const s = $("#sweepfx"); s.classList.remove("run"); void s.offsetWidth; s.classList.add("run"); }
 
 /* ═══════════ ICONS ═══════════ */
 const SW = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
@@ -830,7 +809,6 @@ const ICO = {
   warn:`<svg viewBox="0 0 24 24" ${SW}><path d="M12 3 2.5 20h19Z"/><path d="M12 10v4.5M12 17.5h.01"/></svg>`,
   chev:`<svg class="ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>`
 };
-const G_SVG = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>';
 const PICK_ICONS = ["box","star","gift","game","cloud","music","film","bolt","shield","terminal","heart","crown"];
 const PICK_COLORS = ["#7c5cff","#29d6c5","#ffbf5b","#f471b5","#35d39a","#4cc9f0","#ff647c","#ff9f45"];
 
@@ -847,11 +825,12 @@ const nodePath = id => DATA_ROOT + "/" + catOf(id).node;
 
 /* ═══════════ TRẠNG THÁI ═══════════ */
 const state = {
-  route:"home", q:"", user:null, dev:false,
+  route:"home", q:"", user:null, localUser:null, dev:false,
   maint:null, maintFirstSeen:0, notice:null,
   data:{}, status:{}, editing:null, formCat:"script", logs:[],
   catForm:{ icon:"box", color:PICK_COLORS[0] }
 };
+const currentUser = () => state.user || state.localUser;
 
 /* ═══════════ LOG DEV ═══════════ */
 function dlog(type, msg) {
@@ -863,7 +842,7 @@ function dlog(type, msg) {
 }
 window.addEventListener("error", e => dlog("er", "JS: " + (e.message || "lỗi không xác định")));
 
-/* ═══════════ SPLASH ═══════════ */
+/* ═══════════ SPLASH — MÀN HÌNH CHÀO ═══════════ */
 (function buildWord() {
   const w = $("#spWord");
   "SKIBIDI SCRIPT WEB".split(" ").forEach((word, wi) => {
@@ -890,28 +869,15 @@ function enterApp() {
   if (splashDone) return; splashDone = true;
   spP(100);
   const sp = $("#splash");
-  const fin = () => {
-    sp.style.display = "none";
-    const intro = $("#welcomeIntro");
-    const typeLine = (el, text, start, step) => {
-      el.textContent = "";
-      [...text].forEach((ch, i) => {
-        const span = document.createElement("span");
-        span.className = "wchar";
-        span.style.setProperty("--char-delay", (start + i * step) + "ms");
-        span.textContent = ch === " " ? "\\u00a0" : ch;
-        el.appendChild(span);
-      });
-    };
-    typeLine(intro.querySelector(".welcome-title"), "CHÀO MỪNG", 180, 72);
-    typeLine(intro.querySelector(".welcome-sub"), "ĐẾN VỚI THẾ GIỚI SCRIPT", 650, 24);
-    intro.classList.add("show");
-    setTimeout(() => { intro.classList.remove("show"); maybeNotice(); }, RM ? 450 : 2550);
-  };
-  if (RM) { fin(); return; }
-  setTimeout(() => { sp.classList.add("out"); setTimeout(fin, 560); }, 260);
+  const fin = () => { sp.style.display = "none"; maybeNotice(); };
+  if (RM) { document.body.classList.add("welc"); fin(); return; }
+  setTimeout(() => {
+    sp.classList.add("out");                 // clip-path circle reveal
+    document.body.classList.add("welc");     // welcome stagger trong main
+    setTimeout(fin, 900);
+  }, 300);
 }
-setTimeout(enterApp, 2800); // không bao giờ loading vô hạn
+setTimeout(enterApp, 3000); // không bao giờ loading vô hạn
 
 /* ═══════════ PARTICLES NỀN ═══════════ */
 if (!RM) {
@@ -962,7 +928,7 @@ document.addEventListener("keydown", e => {
   }
 });
 document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeLayer(); });
-function openDrawer() { $("#side").classList.add("open"); $("#sideOv").classList.add("on"); document.body.classList.add("locked"); }
+function openDrawer() { $("#side").classList.add("open"); $("#sideOv").classList.add("on"); document.body.classList.add("locked"); requestAnimationFrame(movePill); }
 function closeDrawer() { $("#side").classList.remove("open"); $("#sideOv").classList.remove("on"); if (!openEl && !$("#maint").classList.contains("on")) document.body.classList.remove("locked"); }
 $("#btnMenu").addEventListener("click", () => $("#side").classList.contains("open") ? closeDrawer() : openDrawer());
 $("#sideOv").addEventListener("click", closeDrawer);
@@ -974,14 +940,15 @@ function routeFromHash() {
 }
 function renderRoute() {
   state.route = routeFromHash();
-  pulseLoad();
-  if (state.q) { renderSearch(); return; }
+  pulseLoad(); sweepFx();
+  if (state.q) { renderSearch(); movePill(); return; }
   const r = state.route;
   const c = r === "home" ? null : catOf(r);
   document.documentElement.style.setProperty("--cat", c ? c.color : "var(--accent-primary)");
   document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
   $("#v-" + r).classList.add("on");
   document.querySelectorAll(".navitem").forEach(a => a.classList.toggle("on", a.dataset.route === r));
+  movePill();
   if (r === "home") renderHome(); else renderCat(r);
   window.scrollTo({ top:0, behavior:"auto" });
   if (window.innerWidth < 1024) closeDrawer();
@@ -1069,7 +1036,20 @@ function renderNavCats() {
     `<a class="navitem${state.route===c.id?" on":""}" href="#/${c.id}" data-route="${c.id}" style="--nc:${c.color}">${ICO[c.icon]||ICO[c.id]||ICO.box}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.label)}</span><span class="cnt" data-cnt="${c.id}" hidden></span></a>`
   ).join("");
   renderCounts();
+  requestAnimationFrame(movePill);
 }
+function movePill() {
+  const pill = $("#navpill"); if (!pill) return;
+  const active = document.querySelector("#side .navitem.on");
+  if (!active) { pill.style.opacity = "0"; return; }
+  const nc = active.style.getPropertyValue("--nc");
+  if (nc) pill.style.setProperty("--nc", nc.trim());
+  pill.style.height = active.offsetHeight + "px";
+  pill.style.transform = "translateY(" + active.offsetTop + "px)";
+  pill.style.opacity = "1";
+}
+window.addEventListener("resize", debounce(movePill, 150));
+window.addEventListener("load", () => setTimeout(movePill, 300));
 function ensureViews() {
   CATS.forEach(c => {
     let v = $("#v-" + c.id);
@@ -1100,6 +1080,7 @@ function countUp(el, to) {
 function renderHome() {
   const tiles = $("#tiles");
   tiles.innerHTML = CATS.map(c => `<a class="tile" href="#/${c.id}" data-reveal style="--nc:${c.color}">
+      <span class="sh" aria-hidden="true"></span>
       <span class="tico">${ICO[c.icon]||ICO[c.id]||ICO.box}</span><span class="num" data-tilenum="${c.id}">0</span>
       <b>${esc(c.label)}</b><small>${esc(c.sub||"")}</small></a>`).join("");
   tiles.querySelectorAll(".tile").forEach((t,i) => t.style.setProperty("--d", (i*50)+"ms"));
@@ -1182,12 +1163,9 @@ function openDetail(catId, key) {
   openLayer($("#mdDetail"));
 }
 
-/* ═══════════ AUTH — EMAIL/PASS + GOOGLE (POPUP/REDIRECT) ═══════════ */
+/* ═══════════ ĐĂNG NHẬP — EMAIL/PASS + GOOGLE (GIS, CLIENT ID GIỮ NGUYÊN) ═══════════ */
 const AUTH_MSG = {
-  "auth/invalid-credential":"Google token không được Firebase chấp nhận. Hãy đối chiếu OAuth Client ID trong Google Cloud với provider Google của đúng Firebase project.",
-  "auth/credential-already-in-use":"Tài khoản Google này đã liên kết với tài khoản khác.",
-  "auth/account-exists-with-different-credential":"Email này đã đăng ký bằng phương thức khác. Hãy đăng nhập bằng phương thức cũ trước.",
-  "auth/user-disabled":"Tài khoản này đã bị vô hiệu hóa.",
+  "auth/invalid-credential":"Email hoặc mật khẩu không đúng.",
   "auth/wrong-password":"Email hoặc mật khẩu không đúng.",
   "auth/user-not-found":"Tài khoản không tồn tại.",
   "auth/invalid-email":"Email không hợp lệ.",
@@ -1195,39 +1173,134 @@ const AUTH_MSG = {
   "auth/network-request-failed":"Lỗi kết nối mạng.",
   "auth/operation-not-allowed":"Phương thức đăng nhập chưa được bật trong Firebase Auth (Authentication → Sign-in method).",
   "auth/unauthorized-domain":"Domain này chưa được cấp phép trong Firebase Auth (Authentication → Settings → Authorized domains).",
-  "auth/popup-blocked":"Cửa sổ bật lên bị chặn. Đang thử cách khác…",
-  "auth/operation-not-supported-in-this-environment":"Trình duyệt không hỗ trợ popup. Đang thử cách khác…",
-  "auth/popup-closed-by-user":"Đã đóng cửa sổ đăng nhập Google.",
-  "auth/cancelled-popup-request":"Đã hủy cửa sổ đăng nhập Google.",
-  "auth/invalid-auth-configuration":"Cấu hình Auth chưa đúng (kiểm tra Authorized domains / provider).",
+  "auth/popup-blocked":"Cửa sổ bật lên bị chặn.",
+  "auth/operation-not-supported-in-this-environment":"Trình duyệt không hỗ trợ phương thức đăng nhập này.",
+  "auth/invalid-auth-configuration":"Cấu hình Auth chưa đúng.",
   "auth/api-key-not-valid":"API key không hợp lệ.",
-  "auth/argument-error":"Thiếu cấu hình đăng nhập.",
-  "auth/invalid-continue-uri":"URI không hợp lệ.",
-  "auth/missing-client-identifier":"Thiếu cấu hình đăng nhập.",
-  "auth/unauthorized-continue-uri":"Domain chuyển hướng chưa được cấp phép.",
-  "auth/ web-storage-unsupported":"Trình duyệt đang chặn lưu phiên đăng nhập. Hãy bật cookie/storage."
+  "auth/api-key-not-valid.-please-pass-a-valid-api-key.":"API key không hợp lệ.",
+  "auth/configuration-not-found":"Chưa cấu hình Firebase Auth.",
+  "auth/argument-error":"Thiếu cấu hình đăng nhập."
 };
-function authErrMsg(err) { return (err && AUTH_MSG[err.code]) || (err && err.message ? ("Đăng nhập thất bại: " + err.message) : "Thao tác thất bại. Vui lòng thử lại."); }
-
-function renderAuth() {
-  const u = state.user;
-  $("#btnAcc").classList.toggle("dev", state.dev);
-  document.querySelectorAll(".auth-zone").forEach(z => {
-    z.innerHTML = u
-      ? `<div class="acc-card"><span class="mail">${esc(u.email || "")}</span>${state.dev ? '<span class="devtag">DEV</span>' : ""}</div>
-         ${state.dev ? '<button class="btn btn-p btn-wide" data-act="devopen" style="--cat:var(--accent-primary)">Bảng điều khiển DEV</button>' : ""}
-         <button class="btn btn-g btn-wide" data-act="signout">Đăng xuất</button>`
-      : `<button class="btn btn-g btn-wide" data-act="authopen"><svg viewBox="0 0 24 24" ${SW}><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Đăng nhập</button>`;
-  });
-  $("#loginForm").style.display = u ? "none" : "flex";
-  $("#accPane").style.display = u ? "flex" : "none";
-  $("#authTitle").textContent = u ? "Tài khoản" : "Đăng nhập";
-  if (u) { $("#accMail").textContent = u.email || ""; $("#accDev").hidden = !state.dev; $("#btnDev").style.display = state.dev ? "flex" : "none"; }
+function authErrMsg(err) {
+  const code = (err && err.code) || "";
+  return AUTH_MSG[code] || ("Thao tác thất bại" + (code ? " (" + code + ")" : ". Vui lòng thử lại."));
 }
+
+/* --- Xác minh Google ID token ngay trong trình duyệt (RS256 + JWKS) --- */
+let googleCertsCache = null;
+function b64urlToBuf(s) {
+  s = s.replace(/-/g, "+").replace(/_/g, "/");
+  if (s.length % 4) s += "=".repeat(4 - s.length % 4);
+  const bin = atob(s), buf = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  return buf.buffer;
+}
+function decodeJwtPart(p) { return JSON.parse(new TextDecoder().decode(b64urlToBuf(p))); }
+async function getGoogleCerts() {
+  if (googleCertsCache) return googleCertsCache;
+  const r = await fetch("https://www.googleapis.com/oauth2/v3/certs");
+  if (!r.ok) throw new Error("không tải được JWKS (HTTP " + r.status + ")");
+  googleCertsCache = await r.json();
+  return googleCertsCache;
+}
+async function verifyGoogleIdToken(idToken) {
+  const parts = String(idToken).split(".");
+  if (parts.length !== 3) throw new Error("token sai định dạng");
+  const header = decodeJwtPart(parts[0]), payload = decodeJwtPart(parts[1]);
+  if (payload.aud !== GOOGLE_CLIENT_ID) throw new Error("token không cấp cho client ID này");
+  if (payload.iss !== "https://accounts.google.com" && payload.iss !== "accounts.google.com") throw new Error("nguồn phát hành không hợp lệ");
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp && payload.exp < now - 30) throw new Error("token hết hạn");
+  if (!payload.email) throw new Error("token không chứa email");
+  if (!(window.crypto && crypto.subtle)) throw new Error("trình duyệt không hỗ trợ WebCrypto (cần HTTPS)");
+  const certs = await getGoogleCerts();
+  const jwk = (certs.keys || []).find(k => k.kid === header.kid);
+  if (!jwk) { googleCertsCache = null; throw new Error("không tìm thấy khóa xác minh"); }
+  const key = await crypto.subtle.importKey("jwk", { kty:jwk.kty, n:jwk.n, e:jwk.e, alg:"RS256", ext:true },
+    { name:"RSASSA-PKCS1-v1_5", hash:"SHA-256" }, false, ["verify"]);
+  const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlToBuf(parts[2]),
+    new TextEncoder().encode(parts[0] + "." + parts[1]));
+  if (!ok) throw new Error("chữ ký token không hợp lệ");
+  return payload;
+}
+
+/* --- Phiên đăng nhập cục bộ (đã xác minh chữ ký token) --- */
+function loadLocalUser() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem("ssw_local_user") || "null");
+    if (s && (!s.exp || s.exp * 1000 > Date.now())) state.localUser = s;
+  } catch (_) {}
+}
+function localSignIn(payload) {
+  state.localUser = { email:payload.email, name:payload.name || payload.email, picture:payload.picture || "", exp:payload.exp || 0 };
+  try { sessionStorage.setItem("ssw_local_user", JSON.stringify(state.localUser)); } catch (_) {}
+  dlog("ok", "Google → xác thực trong trình duyệt: " + payload.email);
+  applyUser();
+}
+function clearLocalUser() {
+  state.localUser = null;
+  try { sessionStorage.removeItem("ssw_local_user"); } catch (_) {}
+}
+
+/* --- GIS: nút Google chính thức với client ID được cấp --- */
+function gisFail() {
+  ["#gBtn","#gBtnMaint"].forEach(sel => {
+    const el = $(sel);
+    if (el && !el.childElementCount) el.innerHTML = '<span class="gnote">Không tải được nút Google. Kiểm tra kết nối mạng.</span>';
+  });
+}
+function initGIS(tries) {
+  tries = tries == null ? 15 : tries;
+  if (window.google && google.accounts && google.accounts.id) {
+    try {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: onGoogleCredential,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+      const opts = { theme:"filled_black", size:"large", shape:"pill", text:"signin_with", logo_alignment:"left", width:292 };
+      if ($("#gBtn")) google.accounts.id.renderButton($("#gBtn"), opts);
+      if ($("#gBtnMaint")) google.accounts.id.renderButton($("#gBtnMaint"), Object.assign({}, opts, { width:272 }));
+      dlog("ok", "Google Identity Services sẵn sàng.");
+    } catch (e) { dlog("er", "GIS init: " + (e.message || e)); gisFail(); }
+    return;
+  }
+  if (tries > 0) setTimeout(() => initGIS(tries - 1), 400);
+  else { dlog("er", "Không tải được accounts.google.com/gsi/client."); gisFail(); }
+}
+async function onGoogleCredential(resp) {
+  if (!resp || !resp.credential) { dlog("er", "Google: không nhận được credential."); return; }
+  const idToken = resp.credential;
+  /* 1) Thử đăng nhập Firebase Auth bằng credential */
+  if (auth) {
+    try {
+      const cred = firebase.auth.GoogleAuthProvider.credential(idToken);
+      await auth.signInWithCredential(cred);
+      dlog("ok", "Google → Firebase Auth thành công.");
+      toast("Đăng nhập Google thành công.");
+      closeLayer();
+      return;
+    } catch (err) {
+      dlog("er", "signInWithCredential: " + (err.code || err.message) + " → chuyển sang xác thực trong trình duyệt.");
+    }
+  }
+  /* 2) Fallback: xác minh chữ ký token trong trình duyệt (như bản gốc) */
+  try {
+    const payload = await verifyGoogleIdToken(idToken);
+    localSignIn(payload);
+    toast("Đăng nhập Google thành công.");
+    closeLayer();
+  } catch (e) {
+    dlog("er", "Xác minh token: " + e.message);
+    toast("Đăng nhập Google thất bại: " + e.message, "err");
+  }
+}
+initGIS();
+
+/* --- Email / Mật khẩu --- */
 $("#btnAcc").addEventListener("click", () => openLayer($("#mdAuth")));
 $("#btnMaintEmail").addEventListener("click", () => openLayer($("#mdAuth")));
-
-/* Email / Mật khẩu */
 $("#loginForm").addEventListener("submit", e => {
   e.preventDefault();
   const errEl = $("#liErr"); errEl.textContent = "";
@@ -1239,116 +1312,56 @@ $("#loginForm").addEventListener("submit", e => {
     .then(() => { btn.disabled = false; btn.textContent = "Đăng nhập"; $("#liPass").value = ""; toast("Đăng nhập thành công."); })
     .catch(err => {
       btn.disabled = false; btn.textContent = "Đăng nhập";
-      let msg = authErrMsg(err);
-      if (err && err.code === "auth/invalid-credential") msg += " (Nếu chắc chắn đúng mật khẩu: kiểm tra Email/Password đã bật trong Firebase Auth chưa.)";
-      errEl.textContent = msg;
+      errEl.textContent = authErrMsg(err);
       dlog("er", "Login email: " + (err.code || err.message || err));
     });
 });
 
-/* Google Identity Services — nút GIS chính thức, dùng OAuth Client ID riêng.
-   Không dùng Firebase popup/redirect; Firebase chỉ đổi Google ID token thành session. */
-let gisReadyPromise = null, gisInitialized = false, gisSigningIn = false;
-function loadGIS() {
-  if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
-  if (gisReadyPromise) return gisReadyPromise;
-  gisReadyPromise = new Promise((resolve, reject) => {
-    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-    if (!script) {
-      script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true; script.defer = true;
-      document.head.appendChild(script);
-    }
-    const started = Date.now();
-    const poll = () => {
-      if (window.google && google.accounts && google.accounts.id) return resolve();
-      if (Date.now() - started > 15000) return reject(new Error("Google Identity Services không tải được. Kiểm tra mạng hoặc trình chặn nội dung."));
-      setTimeout(poll, 100);
-    };
-    script.addEventListener("error", () => reject(new Error("Không tải được Google Identity Services.")), {once:true});
-    poll();
+/* --- Trạng thái tài khoản hợp nhất (Firebase Auth hoặc phiên cục bộ) --- */
+function applyUser() {
+  const u = currentUser();
+  state.dev = !!(u && String(u.email || "").toLowerCase() === DEV_EMAIL);
+  renderAuth();
+  applyMaint();
+}
+function renderAuth() {
+  const u = currentUser();
+  $("#btnAcc").classList.toggle("dev", state.dev);
+  const acc = $("#btnAcc");
+  let img = acc.querySelector("img");
+  if (u && u.picture) {
+    if (!img) { img = document.createElement("img"); img.alt = ""; img.referrerPolicy = "no-referrer"; acc.appendChild(img); }
+    img.src = u.picture;
+  } else if (img) img.remove();
+  document.querySelectorAll(".auth-zone").forEach(z => {
+    z.innerHTML = u
+      ? `<div class="acc-card"><span class="mail">${esc(u.name ? u.name + " · " : "")}${esc(u.email || "")}</span>${state.dev ? '<span class="devtag">DEV</span>' : ""}</div>
+         ${state.dev ? '<button class="btn btn-p btn-wide" data-act="devopen" style="--cat:var(--accent-primary)">Bảng điều khiển DEV</button>' : ""}
+         <button class="btn btn-g btn-wide" data-act="signout">Đăng xuất</button>`
+      : `<button class="btn btn-g btn-wide" data-act="authopen"><svg viewBox="0 0 24 24" ${SW}><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Đăng nhập</button>`;
   });
-  return gisReadyPromise;
+  $("#loginForm").style.display = u ? "none" : "flex";
+  $("#accPane").style.display = u ? "flex" : "none";
+  $("#authTitle").textContent = u ? "Tài khoản" : "Đăng nhập";
+  if (u) { $("#accMail").textContent = (u.name ? u.name + " · " : "") + (u.email || ""); $("#accDev").hidden = !state.dev; $("#btnDev").style.display = state.dev ? "flex" : "none"; }
 }
-async function handleGISCredential(response) {
-  if (gisSigningIn) return;
-  if (!auth) { toast("Firebase Auth chưa sẵn sàng.", "err"); return; }
-  if (!response || !response.credential) {
-    toast("Google không trả về thông tin xác thực. Hãy thử lại.", "err");
-    dlog("er", "GIS callback không có credential");
-    return;
-  }
-  gisSigningIn = true;
-  toast("Đang xác minh tài khoản Google…");
-  try {
-    const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
-    await auth.signInWithCredential(credential);
-    toast("Đăng nhập Google thành công.");
-    closeLayer();
-  } catch (err) {
-    dlog("er", "GIS/Firebase credential: " + (err.code || err.message || err));
-    toast(authErrMsg(err), "err");
-  } finally {
-    gisSigningIn = false;
-  }
-}
-async function prepareGoogleButtons() {
-  const hosts = [$("#btnGoogle"), $("#btnMaintG")].filter(Boolean);
-  if (!hosts.length) return;
-  hosts.forEach(host => { host.innerHTML = '<span class="gis-loading">Đang tải Google…</span>'; });
-  try {
-    await loadGIS();
-    if (!gisInitialized) {
-      google.accounts.id.initialize({
-        client_id: GOOGLE_OAUTH_CLIENT_ID,
-        auto_select: false,
-        cancel_on_tap_outside: true,
-        callback: handleGISCredential,
-        itp_support: true
-      });
-      gisInitialized = true;
-    }
-    hosts.forEach(host => {
-      host.innerHTML = "";
-      google.accounts.id.renderButton(host, {
-        type: "standard", theme: "outline", size: "large",
-        text: "signin_with", shape: "rectangular",
-        logo_alignment: "left", width: Math.min(360, Math.max(220, host.clientWidth || 320))
-      });
-    });
-  } catch (err) {
-    hosts.forEach(host => {
-      host.innerHTML = '<button type="button" class="gis-retry">Thử tải lại Google</button>';
-      host.querySelector(".gis-retry")?.addEventListener("click", () => {
-        gisReadyPromise = null;
-        prepareGoogleButtons();
-      });
-    });
-    dlog("er", "Google GIS load: " + (err.message || err));
-    toast(err.message || "Không thể tải đăng nhập Google.", "err");
-  }
-}
-prepareGoogleButtons();
-
 if (auth) {
   auth.onAuthStateChanged(u => {
     state.user = u || null;
-    state.dev = !!(u && String(u.email || "").toLowerCase() === DEV_EMAIL);
-    dlog(state.dev ? "ok" : "in", u ? ("Auth: " + u.email + (state.dev ? " (DEV)" : "")) : "Auth: chưa đăng nhập");
-    renderAuth();
-    applyMaint();
+    if (u) clearLocalUser(); // Firebase Auth ưu tiên hơn phiên cục bộ
+    dlog(u ? "ok" : "in", u ? ("Auth: " + u.email) : "Auth: chưa đăng nhập Firebase.");
+    applyUser();
   });
 } else {
-  renderAuth();
   dlog("er", "Firebase SDK không khả dụng.");
 }
+loadLocalUser();
 
 /* ═══════════ BẢO TRÌ: tự mở + đếm ngược ═══════════ */
 function maintUntil(m) {
   if (m.until) return Number(m.until);
   const base = Number(m.ts) || 0;
-  if (base) return base + 60000;
+  if (base) return base + 60000;                 // dev không đặt thời gian → tự mở sau 1 phút
   if (!state.maintFirstSeen) state.maintFirstSeen = Date.now();
   return state.maintFirstSeen + 60000;
 }
@@ -1376,7 +1389,7 @@ function applyMaint() {
   let on = !!(m && m.enabled), until = 0;
   if (on) {
     until = maintUntil(m);
-    if (Date.now() >= until) {
+    if (Date.now() >= until) { // hết hạn → tự bỏ bảo trì
       if (state.dev && database) database.ref(MAINT_NODE).update({ enabled:false, by:"DEV", ts:firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
       on = false;
     }
@@ -1431,11 +1444,11 @@ $("#mntBtn").addEventListener("click", () => {
   }
 });
 
-/* ═══════════ BẢNG THÔNG BÁO (nox_notice) + công tắc Dev ═══════════ */
+/* ═══════════ BẢNG THÔNG BÁO ═══════════ */
 let noticeShownSession = false;
 function maybeNotice() {
   const n = state.notice;
-  if (!n || n.enabled === false) return;                       // Dev có thể tắt từ Dev panel
+  if (!n || n.enabled === false) return;
   if (!(n.body || "").trim() && !(n.title || "").trim()) return;
   if (noticeShownSession || $("#maint").classList.contains("on")) return;
   const ver = String(n.updatedAt || n.ts || "");
@@ -1549,7 +1562,7 @@ $("#itemForm").addEventListener("submit", e => {
   }).catch(e2 => {
     btn.disabled = false;
     dlog("er", "Ghi dữ liệu: " + (e2.code || e2.message));
-    err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules / đăng nhập DEV)." : "Thao tác thất bại. Vui lòng thử lại.";
+    err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules / đăng nhập DEV)." : "Thao tác thất bại (" + (e2.code || "lỗi không rõ") + ").";
   });
 });
 function deleteItem(catId, key) {
@@ -1601,7 +1614,7 @@ $("#catForm").addEventListener("submit", e => {
   const payload = { name, sub:$("#cfSub").value.trim(), icon:state.catForm.icon, color:state.catForm.color, node:slugify(name), createdAt:firebase.database.ServerValue.TIMESTAMP };
   database.ref(CATS_NODE).push(payload)
     .then(() => { dlog("ok", "Đã thêm danh mục: " + name); toast("Đã thêm danh mục " + name + "."); $("#catForm").reset(); })
-    .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : "Thao tác thất bại."; dlog("er", "Thêm danh mục: " + (e2.code || e2.message)); });
+    .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : "Thao tác thất bại (" + (e2.code || "lỗi không rõ") + ")."; dlog("er", "Thêm danh mục: " + (e2.code || e2.message)); });
 });
 function deleteCat(catId) {
   if (!state.dev || !database) return;
@@ -1713,9 +1726,16 @@ document.addEventListener("click", e => {
     copyText(t.dataset.url).then(() => { toast("Đã sao chép link."); copyFx(t); }).catch(() => toast("Không sao chép được.", "err"));
   }
   else if (act === "retry") { state.status[t.dataset.cat] = ""; attachCat(t.dataset.cat); renderCat(t.dataset.cat); pulseLoad(); toast("Đang tải lại…"); }
-  else if (act === "authopen") { if (!state.user) openLayer($("#mdAuth")); }
+  else if (act === "authopen") { if (!currentUser()) openLayer($("#mdAuth")); }
   else if (act === "devopen") { if (state.dev) { renderDevList(); renderCatForm(); openLayer($("#mdDev")); } }
-  else if (act === "signout") { if (auth) auth.signOut().then(() => { closeLayer(); toast("Đã đăng xuất."); }).catch(() => toast("Đăng xuất thất bại.", "err")); }
+  else if (act === "signout") {
+    const hadFb = !!(auth && state.user);
+    clearLocalUser();
+    if (hadFb) {
+      auth.signOut().then(() => { closeLayer(); toast("Đã đăng xuất."); applyUser(); })
+               .catch(() => toast("Đăng xuất thất bại.", "err"));
+    } else { closeLayer(); toast("Đã đăng xuất."); applyUser(); }
+  }
   else if (act === "edit" && state.dev) startEdit(t.dataset.cat, t.dataset.key);
   else if (act === "del" && state.dev) {
     if (!t.classList.contains("arm")) { t.classList.add("arm"); t.textContent = "Chắc?"; setTimeout(() => { t.classList.remove("arm"); t.innerHTML = ICO.trash; }, 2200); }
@@ -1732,7 +1752,7 @@ document.addEventListener("keydown", e => {
   if (el && (el.classList.contains("card") || el.classList.contains("lrow"))) openDetail(el.dataset.cat, el.dataset.key);
 });
 
-/* ═══════════ HIỆU ỨNG: tilt/glare + header scroll ═══════════ */
+/* ═══════════ HIỆU ỨNG: tilt/glare, spotlight hero, scroll ═══════════ */
 if (!RM && matchMedia("(hover:hover) and (pointer:fine)").matches) {
   let ticking = false, lastE = null;
   $("#main").addEventListener("pointermove", e => {
@@ -1741,6 +1761,12 @@ if (!RM && matchMedia("(hover:hover) and (pointer:fine)").matches) {
     ticking = true;
     requestAnimationFrame(() => {
       ticking = false;
+      const hero = lastE.target.closest && lastE.target.closest(".hero");
+      if (hero) {
+        const hr = hero.getBoundingClientRect();
+        hero.style.setProperty("--mx", ((lastE.clientX - hr.left) / hr.width * 100).toFixed(1) + "%");
+        hero.style.setProperty("--my", ((lastE.clientY - hr.top) / hr.height * 100).toFixed(1) + "%");
+      }
       const card = lastE.target.closest && lastE.target.closest(".card");
       document.querySelectorAll(".card.tilt").forEach(c => { if (c !== card) { c.classList.remove("tilt"); c.style.transform = ""; } });
       if (!card) return;
@@ -1757,7 +1783,13 @@ if (!RM && matchMedia("(hover:hover) and (pointer:fine)").matches) {
 let sTick = false;
 window.addEventListener("scroll", () => {
   if (sTick) return; sTick = true;
-  requestAnimationFrame(() => { sTick = false; $("#hdr").classList.toggle("scrolled", window.scrollY > 8); });
+  requestAnimationFrame(() => {
+    sTick = false;
+    $("#hdr").classList.toggle("scrolled", window.scrollY > 8);
+    const h = document.documentElement;
+    const max = h.scrollHeight - window.innerHeight;
+    $("#scrollProg").style.width = (max > 0 ? Math.min(100, window.scrollY / max * 100) : 0).toFixed(2) + "%";
+  });
 }, { passive:true });
 
 /* ═══════════ BOOT ═══════════ */
@@ -1767,7 +1799,8 @@ renderNavCats();
 setFormCat("script");
 renderCatSeg();
 renderCatForm();
-renderAuth();
+loadLocalUser();
+applyUser();
 renderMaintPanel();
 renderRoute();
 </script>
