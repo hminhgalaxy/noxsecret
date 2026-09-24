@@ -3,15 +3,14 @@
 <head>
 <!--
 ════════════════════════════════════════════════════════════════
- SKIBIDI SCRIPT WEB — index.html (bản sửa lỗi đăng nhập + logo S mới)
+ SKIBIDI SCRIPT WEB — index.html (GIS OAuth Client ID + full-screen welcome/menu + motion)
 ════════════════════════════════════════════════════════════════
  ĐÃ SỬA / NÂNG CẤP Ở BẢN NÀY:
  1. ĐĂNG NHẬP:
-    • Google: chuyển sang signInWithPopup(GoogleAuthProvider) của chính
-      Firebase (OAuth client do Firebase quản lý) + tự chuyển
-      signInWithRedirect nếu popup bị chặn + xử lý getRedirectResult.
-      (Cách cũ dùng GIS + client ID 971947846929-… dễ lỗi
-      auth/invalid-credential vì audience khác project noxgalaxy-2cd71.)
+    • Google Identity Services (GIS) dùng đúng OAuth Client ID do chủ web
+      cung cấp; nhận Google ID token rồi đổi sang Firebase credential để
+      giữ phiên đăng nhập và quyền Realtime Database. Không dùng popup/
+      redirect GoogleAuthProvider do Firebase tự quản lý.
     • Email/Mật khẩu: giữ nguyên signInWithEmailAndPassword, bổ sung
       thông báo lỗi chính xác từng mã lỗi (operation-not-allowed,
       unauthorized-domain, invalid-credential…) + log mã lỗi vào Dev panel.
@@ -44,6 +43,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/600.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/700.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/800.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ═══ 1. TOKENS ═══ */
 @property --cat { syntax:"<color>"; inherits:true; initial-value:#7c5cff }
@@ -156,13 +156,13 @@ a{color:inherit;text-decoration:none}
 @media(max-width:899px){#btnMenu{display:grid}}
 
 /* ═══ 6. SIDEBAR / DRAWER ═══ */
-#side{position:fixed;z-index:90;top:var(--head-h);bottom:0;left:0;width:var(--side-w);display:flex;flex-direction:column;gap:4px;
-  padding:14px 12px;overflow-y:auto;background:rgba(14,20,32,.92);border-right:1px solid var(--border-subtle);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transform:translateX(-105%);transition:transform .42s var(--ez)}
+#side{position:fixed;z-index:100;top:0;bottom:0;left:0;width:min(100vw,420px);height:100vh;height:100dvh;display:flex;flex-direction:column;gap:4px;
+  padding:calc(var(--head-h) + env(safe-area-inset-top) + 14px) 12px calc(14px + env(safe-area-inset-bottom));overflow-y:auto;background:rgba(12,17,30,.98);border-right:1px solid var(--border-subtle);
+  backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);transform:translateX(-105%);transition:transform .48s var(--ez);box-shadow:24px 0 80px rgba(0,0,0,.55)}
 #side.open{transform:none;box-shadow:24px 0 60px rgba(0,0,0,.5)}
-#sideOv{position:fixed;inset:0;z-index:85;background:rgba(4,6,10,.6);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s}
+#sideOv{position:fixed;inset:0;z-index:95;background:rgba(4,6,10,.6);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s}
 #sideOv.on{opacity:1;pointer-events:auto}
-@media(min-width:1024px){#side{transform:none;background:rgba(14,20,32,.5);box-shadow:none}#sideOv{display:none}#btnMenu{display:none!important}}
+@media(min-width:1024px){#side{top:var(--head-h);height:auto;width:var(--side-w);padding:14px 12px;transform:none;background:rgba(14,20,32,.5);box-shadow:none;backdrop-filter:blur(14px)}#sideOv{display:none}#btnMenu{display:none!important}}
 .navsec{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:#5d6b80;text-transform:uppercase;padding:12px 12px 6px}
 .navitem{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-md);color:var(--text-secondary);
   font-weight:600;font-size:14px;position:relative;transition:background .28s,color .28s,transform .28s var(--ez)}
@@ -496,12 +496,44 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
   .hdr-main{gap:7px;padding:0 10px}
   #main{padding-left:12px;padding-right:12px}
 }
+
+/* ═══ MOTION / COLOR BOOST ═══ */
+:root{--accent-primary:#8b5cf6;--accent-secondary:#22d3ee;--cat-ios:#fb7185}
+@keyframes hueFlow{0%,100%{filter:hue-rotate(0deg) saturate(1)}50%{filter:hue-rotate(38deg) saturate(1.35)}}
+#bg .orb{animation-duration:24s;opacity:.2}
+#bg .o1{animation-name:drift1,hueFlow;animation-duration:34s,13s}
+#bg .o2{animation-name:drift2,hueFlow;animation-duration:40s,17s}
+#bg .o3{animation-name:drift3,hueFlow;animation-duration:46s,19s}
+.brand .mark{box-shadow:0 0 22px -10px var(--accent-primary);animation:markBreath 4s ease-in-out infinite}
+@keyframes markBreath{50%{box-shadow:0 0 30px -7px var(--accent-secondary)}}
+.tile,.card,.hero-card{transition:transform .38s var(--spring),border-color .35s,box-shadow .35s,background .35s}
+.tile:hover,.card:hover{box-shadow:0 18px 46px -24px color-mix(in srgb,var(--cat) 65%,transparent)}
+.navitem.on{box-shadow:inset 0 0 24px color-mix(in srgb,var(--nc,var(--cat)) 8%,transparent)}
+.gbtn{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 24px -16px #fff}
+@media(max-width:899px){#side{width:100vw;border-right:0;border-radius:0}#side.open{animation:drawerReveal .48s var(--ez)}@keyframes drawerReveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}}
+#welcomeIntro{position:fixed;inset:0;z-index:230;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#17223a 0%,#080b12 72%);opacity:0;pointer-events:none;transition:opacity .35s ease}
+#welcomeIntro.show{opacity:1}
+#welcomeIntro::before,#welcomeIntro::after{content:"";position:absolute;width:75vmin;height:75vmin;border-radius:50%;filter:blur(70px);opacity:.32;animation:welcomeOrb 3s ease-in-out infinite alternate}
+#welcomeIntro::before{background:#7c3aed;left:-20vmin;top:-20vmin}
+#welcomeIntro::after{background:#06b6d4;right:-20vmin;bottom:-25vmin;animation-delay:-1.5s}
+@keyframes welcomeOrb{to{transform:translate(12vw,8vh) scale(1.2);filter:blur(95px) hue-rotate(70deg)}}
+.welcome-copy{position:relative;z-index:1;text-align:center;padding:24px;max-width:100%;}
+.welcome-kicker{font-size:clamp(10px,2.6vw,13px);font-weight:800;letter-spacing:.42em;color:#9ba9bd;text-transform:uppercase;opacity:0;animation:welcomeUp .6s .12s forwards}
+.welcome-title{margin:15px 0 10px;font-size:clamp(35px,10vw,76px);font-weight:800;letter-spacing:-.055em;line-height:1.05;background:linear-gradient(100deg,#a78bfa,#22d3ee,#f472b6,#a78bfa);background-size:250% auto;color:transparent;background-clip:text;-webkit-background-clip:text;animation:welcomeGradient 2.8s linear infinite,welcomeUp .75s .25s both;filter:drop-shadow(0 0 28px #7c3aed55)}
+.welcome-sub{font-size:clamp(11px,3vw,15px);font-weight:600;letter-spacing:.12em;color:#cbd5e1;opacity:0;animation:welcomeUp .65s .5s forwards}
+.welcome-line{height:3px;width:min(230px,60vw);margin:24px auto 0;border-radius:9px;background:linear-gradient(90deg,#8b5cf6,#22d3ee,#fb7185);transform:scaleX(0);transform-origin:center;animation:welcomeLine .85s .55s var(--ez) forwards}
+@keyframes welcomeGradient{to{background-position:250% center}}
+@keyframes welcomeUp{from{opacity:0;transform:translateY(24px) scale(.96);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes welcomeLine{to{transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){#welcomeIntro *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
 </style>
 </head>
 <body>
 
 <div id="bg" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
 <div id="loadbar" aria-hidden="true"></div>
+<div id="welcomeIntro" aria-hidden="true"><div class="welcome-copy"><div class="welcome-kicker">SKIBIDI SCRIPT WEB</div><div class="welcome-title">CHÀO MỪNG</div><div class="welcome-sub">ĐẾN VỚI THẾ GIỚI SCRIPT</div><div class="welcome-line"></div></div></div>
 
 <!-- SPLASH -->
 <div id="splash">
@@ -704,20 +736,21 @@ const firebaseConfig = {
   appId: "1:632801709671:web:d239eb4bc8e0f7acab4ec2"
 };
 const DEV_EMAIL = "hminhgalaxy@gmail.com";
+const GOOGLE_OAUTH_CLIENT_ID = "971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
 const DATA_ROOT = "nox_data";
 const CATS_NODE = "nox_categories";
 const MAINT_NODE = "nox_maintenance";
 const NOTICE_NODE = "nox_notice";
 
 const FB_OK = (typeof firebase !== "undefined");
-let database = null, auth = null, googleProvider = null;
+let database = null, auth = null;
 if (FB_OK) {
   try {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     database = firebase.database();
     auth = firebase.auth();
-    googleProvider = new firebase.auth.GoogleAuthProvider();
-    googleProvider.setCustomParameters({ prompt: "select_account" });
+    // GIS lấy ID token bằng OAuth Client ID được chỉ định; Firebase chỉ
+    // nhận credential để duy trì session/quyền truy cập Realtime Database.
     // Giữ phiên đăng nhập ổn định giữa các lần mở web.
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn("Auth persistence:", e.code || e));
   } catch (e) { /* hiển thị qua trạng thái lỗi UI */ }
@@ -854,8 +887,11 @@ function enterApp() {
   if (splashDone) return; splashDone = true;
   spP(100);
   const sp = $("#splash");
-  const fin = () => { sp.style.display = "none"; maybeNotice();
-    try { if (!sessionStorage.getItem("skibidi_welcomed")) { sessionStorage.setItem("skibidi_welcomed","1"); setTimeout(() => toast("Chào mừng bạn đến với SKIBIDI SCRIPT WEB ✨"), 220); } } catch (_) {}
+  const fin = () => {
+    sp.style.display = "none";
+    const intro = $("#welcomeIntro");
+    intro.classList.add("show");
+    setTimeout(() => { intro.classList.remove("show"); maybeNotice(); }, RM ? 350 : 1900);
   };
   if (RM) { fin(); return; }
   setTimeout(() => { sp.classList.add("out"); setTimeout(fin, 560); }, 260);
@@ -1133,7 +1169,7 @@ function openDetail(catId, key) {
 
 /* ═══════════ AUTH — EMAIL/PASS + GOOGLE (POPUP/REDIRECT) ═══════════ */
 const AUTH_MSG = {
-  "auth/invalid-credential":"Email hoặc mật khẩu không đúng.",
+  "auth/invalid-credential":"Thông tin xác thực không hợp lệ. Kiểm tra OAuth Client ID / cấu hình Google trong Firebase.",
   "auth/wrong-password":"Email hoặc mật khẩu không đúng.",
   "auth/user-not-found":"Tài khoản không tồn tại.",
   "auth/invalid-email":"Email không hợp lệ.",
@@ -1192,27 +1228,71 @@ $("#loginForm").addEventListener("submit", e => {
     });
 });
 
-/* Google — popup, fallback redirect */
+/* Google Identity Services — OAuth Client ID riêng của website */
 function gBtnHTML() { return G_SVG + "<span>Đăng nhập bằng Google</span>"; }
+let gisReadyPromise = null, gisInitialized = false, gisPendingBtn = null;
+function loadGIS() {
+  if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
+  if (gisReadyPromise) return gisReadyPromise;
+  gisReadyPromise = new Promise((resolve, reject) => {
+    let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (!script) { script = document.createElement("script"); script.src = "https://accounts.google.com/gsi/client"; script.async = true; script.defer = true; document.head.appendChild(script); }
+    const started = Date.now();
+    const poll = () => {
+      if (window.google && google.accounts && google.accounts.id) return resolve();
+      if (Date.now() - started > 12000) return reject(new Error("Không tải được Google Identity Services. Kiểm tra mạng/chặn quảng cáo."));
+      setTimeout(poll, 120);
+    };
+    script.addEventListener("error", () => reject(new Error("Không tải được Google Identity Services.")), {once:true});
+    poll();
+  });
+  return gisReadyPromise;
+}
 async function googleSignIn(btn) {
-  if (!auth || !googleProvider) { toast("Hệ thống đăng nhập chưa sẵn sàng.", "err"); dlog("er", "Google: Firebase Auth chưa khởi tạo."); return; }
+  if (!auth) { toast("Firebase chưa sẵn sàng để tạo phiên đăng nhập.", "err"); return; }
   const old = btn ? btn.innerHTML : null;
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span><span>Đang mở Google…</span>'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span><span>Đang kết nối Google…</span>'; }
   try {
-    await auth.signInWithPopup(googleProvider);
-    toast("Đăng nhập Google thành công.");
-    closeLayer();
-  } catch (err) {
-    const code = (err && err.code) || "";
-    dlog("er", "Google popup: " + code);
-    if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
-      try { await auth.signInWithRedirect(googleProvider); return; } // trang sẽ reload, xử lý ở getRedirectResult
-      catch (e2) { dlog("er", "Google redirect: " + (e2.code || e2.message)); toast(authErrMsg(e2), "err"); }
-    } else if (!/cancelled|closed/.test(code)) {
-      toast(authErrMsg(err), "err");
+    await loadGIS();
+    gisPendingBtn = btn;
+    if (!gisInitialized) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_OAUTH_CLIENT_ID,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        callback: async response => {
+          try {
+            if (!response || !response.credential) throw new Error("Google không trả về ID token. Hãy thử lại.");
+            const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+            await auth.signInWithCredential(credential);
+            toast("Đăng nhập Google thành công.");
+            closeLayer();
+          } catch (err) {
+            dlog("er", "GIS/Firebase credential: " + (err.code || err.message || err));
+            toast(authErrMsg(err), "err");
+          } finally {
+            const b = gisPendingBtn;
+            if (b) { b.disabled = false; b.innerHTML = gBtnHTML(); }
+            gisPendingBtn = null;
+          }
+        }
+      });
+      gisInitialized = true;
     }
-  } finally {
-    if (btn && old) { btn.disabled = false; btn.innerHTML = old; }
+    // GIS hiển thị luồng chọn tài khoản; không gọi signInWithPopup/Redirect.
+    google.accounts.id.prompt(notification => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        const reason = notification.getNotDisplayedReason ? notification.getNotDisplayedReason() : "";
+        dlog("er", "Google GIS prompt: " + reason);
+        if (gisPendingBtn) { gisPendingBtn.disabled = false; gisPendingBtn.innerHTML = gBtnHTML(); }
+        gisPendingBtn = null;
+        toast("Google không mở được màn hình chọn tài khoản. Kiểm tra OAuth Client ID và Authorized JavaScript origins.", "err");
+      }
+    });
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.innerHTML = old || gBtnHTML(); }
+    dlog("er", "Google GIS: " + (err.message || err));
+    toast(err.message || "Không thể kết nối Google.", "err");
   }
 }
 $("#btnGoogle").innerHTML = gBtnHTML();
@@ -1227,11 +1307,6 @@ if (auth) {
     dlog(state.dev ? "ok" : "in", u ? ("Auth: " + u.email + (state.dev ? " (DEV)" : "")) : "Auth: chưa đăng nhập");
     renderAuth();
     applyMaint();
-  });
-  auth.getRedirectResult().then(res => {
-    if (res && res.user) { toast("Đăng nhập Google thành công."); dlog("ok", "Google redirect: " + res.user.email); }
-  }).catch(err => {
-    if (err && err.code && !/cancelled|closed/.test(err.code)) { dlog("er", "Google redirect result: " + err.code); toast(authErrMsg(err), "err"); }
   });
 } else {
   renderAuth();
