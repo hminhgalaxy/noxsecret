@@ -471,7 +471,22 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 @keyframes tIn{from{opacity:0;transform:translateY(16px) scale(.9)}}
 @keyframes tOut{to{opacity:0;transform:translateY(10px) scale(.94)}}
 
-/* ═══ 18. REDUCED MOTION ═══ */
+/* ═══ PREMIUM MICRO-INTERACTIONS ═══ */
+.btn,.tile,.navitem,.xbtn,.gbtn{transform-origin:center;will-change:transform}
+.btn:focus-visible,.gbtn:focus-visible,.tile:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--cat) 25%,transparent)}
+.card,.tile,.lrow,.hero,.modal{isolation:isolate}
+.hero{box-shadow:0 18px 60px -38px color-mix(in srgb,var(--accent-primary) 55%,transparent)}
+.hero h1{animation:heroTextIn .7s var(--ez) both}
+@keyframes heroTextIn{from{opacity:0;transform:translateY(12px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+.tile{animation:tileEnter .55s var(--ez) both;animation-delay:calc(var(--i,0)*55ms)}
+@keyframes tileEnter{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.modal.on{box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 0 1px color-mix(in srgb,var(--cat) 8%,transparent)}
+::view-transition-old(root){animation:vtOut .18s ease both}
+::view-transition-new(root){animation:vtIn .28s var(--ez) both}
+@keyframes vtOut{to{opacity:0;filter:blur(3px);transform:translateY(-4px)}}
+@keyframes vtIn{from{opacity:0;filter:blur(5px);transform:translateY(8px)}to{opacity:1;filter:blur(0);transform:none}}
+@media(max-width:640px){.card{box-shadow:0 8px 24px -20px rgba(0,0,0,.7)}.hero{border-radius:20px}}
+\n/* ═══ 18. REDUCED MOTION ═══ */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
   .card:not(.in),[data-reveal]:not(.rvin){opacity:1}
@@ -678,7 +693,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
 "use strict";
 /* ═══════════ FIREBASE CONFIG GỐC — GIỮ NGUYÊN ═══════════ */
 const firebaseConfig = {
@@ -703,6 +718,8 @@ if (FB_OK) {
     auth = firebase.auth();
     googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: "select_account" });
+    // Giữ phiên đăng nhập ổn định giữa các lần mở web.
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn("Auth persistence:", e.code || e));
   } catch (e) { /* hiển thị qua trạng thái lỗi UI */ }
 }
 
@@ -837,7 +854,9 @@ function enterApp() {
   if (splashDone) return; splashDone = true;
   spP(100);
   const sp = $("#splash");
-  const fin = () => { sp.style.display = "none"; maybeNotice(); };
+  const fin = () => { sp.style.display = "none"; maybeNotice();
+    try { if (!sessionStorage.getItem("skibidi_welcomed")) { sessionStorage.setItem("skibidi_welcomed","1"); setTimeout(() => toast("Chào mừng bạn đến với SKIBIDI SCRIPT WEB ✨"), 220); } } catch (_) {}
+  };
   if (RM) { fin(); return; }
   setTimeout(() => { sp.classList.add("out"); setTimeout(fin, 560); }, 260);
 }
@@ -1130,7 +1149,9 @@ const AUTH_MSG = {
   "auth/api-key-not-valid":"API key không hợp lệ.",
   "auth/argument-error":"Thiếu cấu hình đăng nhập.",
   "auth/invalid-continue-uri":"URI không hợp lệ.",
-  "auth/missing-client-identifier":"Thiếu cấu hình đăng nhập."
+  "auth/missing-client-identifier":"Thiếu cấu hình đăng nhập.",
+  "auth/unauthorized-continue-uri":"Domain chuyển hướng chưa được cấp phép.",
+  "auth/ web-storage-unsupported":"Trình duyệt đang chặn lưu phiên đăng nhập. Hãy bật cookie/storage."
 };
 function authErrMsg(err) { return (err && AUTH_MSG[err.code]) || "Thao tác thất bại. Vui lòng thử lại."; }
 
