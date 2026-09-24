@@ -2,366 +2,431 @@
 <html lang="vi">
 <head>
 <!--
-  ============================================================
-  SKIBIDI SCRIPT WEB — index.html (bản redesign toàn diện)
-  - Giữ nguyên hệ thống Firebase + Google Login của file gốc.
-  - Dán lại đúng firebaseConfig gốc vào khối FIREBASE_CONFIG bên dưới.
-  - Đường dẫn dữ liệu giữ nguyên: scripts / apks / links / ios / settings.
-  - AI & Chat đã loại bỏ hoàn toàn.
-  - Dev duy nhất: hminhgalaxy@gmail.com (kiểm tra sau Google Auth).
-  ============================================================
+════════════════════════════════════════════════════════════════
+ SKIBIDI SCRIPT WEB — index.html (nâng cấp toàn diện)
+════════════════════════════════════════════════════════════════
+ BÁO CÁO THỰC HIỆN
+ 1. File đã sửa: index.html (project 1 file — giữ nguyên cấu trúc).
+ 2. Firebase GIỮ NGUYÊN 100%:
+    - Config gốc: project noxgalaxy-2cd71 (compat SDK 10.12.2).
+    - Realtime Database, đúng node thật đã kiểm tra trực tiếp:
+      nox_data/scripts (name, desc, code, copies, createdAt)
+      nox_data/links   (name, desc, url, createdAt, updatedAt/editedAt)
+      nox_data/apks, nox_data/ios (node rỗng → empty state, dev thêm sẽ tự tạo)
+      nox_maintenance  (enabled, message, by, ts) — giữ màn hình bảo trì thật.
+    - Không tạo project mới, không đổi schema, không localStorage giả lập.
+ 3. Đăng nhập: Email/Mật khẩu qua Firebase Auth (đúng yêu cầu — KHÔNG Google).
+    DEV_EMAIL = hminhgalaxy@gmail.com → mở khóa bảng điều khiển.
+    Quyền Dev: THÊM / CHỈNH SỬA / XÓA (Script, APK, LINK, iOS) + công tắc
+    bảo trì cũ (BẬT BẢO TRÌ / MỞ WEBSITE — chức năng cũ được bảo toàn).
+    LƯU Ý BẢO MẬT: kiểm tra dev ở client chỉ là lớp UI. Quyền ghi THẬT phải
+    khóa bằng Database Rules, ví dụ:
+      { "rules": {
+          "nox_data":        { ".read": true, ".write": "auth != null && auth.token.email === 'hminhgalaxy@gmail.com'" },
+          "nox_maintenance": { ".read": true, ".write": "auth != null && auth.token.email === 'hminhgalaxy@gmail.com'" }
+      } }
+ 4. Đã loại bỏ theo yêu cầu các phiên bản trước: Chat, Group, Gemini/AI,
+    quản lý user/mute/ban (AI/model không được phép thêm).
+    Puter.js: đã kiểm tra toàn bộ source — KHÔNG tồn tại đoạn code Puter.js
+    nào trong project, nên không có gì để bảo toàn/khôi phục.
+ 5. Nâng cấp mới: Trang chủ (dữ liệu thật), tìm kiếm tiếng Việt (debounce,
+    lọc dữ liệu đã tải — không gọi Firebase theo ký tự), modal chi tiết tài
+    nguyên, hash routing (#/script, #/apk, #/link, #/ios) không hỏng refresh,
+    skeleton/empty/error + thử lại, animation (splash, stagger, tilt, ripple,
+    modal spring, drawer, màu nhấn động theo danh mục), prefers-reduced-motion,
+    SEO meta + favicon thương hiệu, responsive 320px→1440px.
+ 6. Không có dữ liệu giả, không nút giả, không login giả; mọi lỗi auth/DB
+    đều có thông báo thân thiện (chi tiết kỹ thuật chỉ log ở bảng Dev).
+════════════════════════════════════════════════════════════════
 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#120E2E">
 <title>SKIBIDI SCRIPT WEB</title>
+<meta name="description" content="SKIBIDI SCRIPT WEB — Kho Script, APK, LINK và iOS cập nhật realtime. Simple. Fast. Connected.">
+<meta property="og:title" content="SKIBIDI SCRIPT WEB">
+<meta property="og:description" content="Kho Script, APK, LINK và iOS cập nhật realtime.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#080b12">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2329d6c5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='56' height='56' rx='16' fill='%230e1420'/%3E%3Cpath d='M36 10 18 36h11l-4 18 20-28H33Z' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/400.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/500.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/600.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/700.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/800.css">
 <style>
-/* ============ 1. NỀN TẢNG ============ */
+/* ═══════════ 1. DESIGN TOKENS ═══════════ */
+@property --cat { syntax:"<color>"; inherits:true; initial-value:#7c5cff }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg0:#151038; --bg1:#100C26; --bg2:#0C1F2A;
-  --ink:#F5F2FF; --mut:#A79FC9; --mut2:#7C76A3;
-  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
-  --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.09);
-  --panel:#171233; --deep:#0B0920;
-  --script:#8CFF64; --apk:#FFB454; --link:#4CC9F0; --ios:#FF6BC9;
-  --cat:var(--script);
-  --err:#FF6B6B; --ok:#8CFF64;
+  --bg-primary:#080b12; --bg-secondary:#0e1420; --bg-card:#121a28; --bg-elevated:#182235;
+  --text-primary:#f4f7fb; --text-secondary:#9ba9bd;
+  --border-subtle:rgba(255,255,255,.08); --border-strong:rgba(255,255,255,.16);
+  --accent-primary:#7c5cff; --accent-secondary:#29d6c5;
+  --success:#35d39a; --warning:#ffbf5b; --danger:#ff647c; --cat-ios:#f471b5;
+  --cat:var(--accent-primary);
   --ez:cubic-bezier(.22,1,.36,1); --spring:cubic-bezier(.34,1.56,.64,1);
-  --nav-h:66px; --head-h:60px;
+  --head-h:64px; --side-w:250px; --r-lg:18px; --r-md:13px; --r-sm:9px;
 }
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;transition:--cat .6s ease}
 body{
   font-family:"Be Vietnam Pro",system-ui,-apple-system,sans-serif;
-  color:var(--ink); background:var(--bg1); min-height:100vh;
-  overflow-x:hidden; -webkit-tap-highlight-color:transparent;
-  background:
-    radial-gradient(1100px 720px at 88% -12%, rgba(64,38,140,.55) 0%, transparent 60%),
-    radial-gradient(900px 640px at -12% 34%, rgba(14,74,88,.5) 0%, transparent 55%),
-    radial-gradient(760px 560px at 50% 118%, rgba(120,26,92,.35) 0%, transparent 60%),
-    linear-gradient(160deg,var(--bg0),var(--bg1) 55%,var(--bg2));
-  background-attachment:fixed;
+  background:var(--bg-primary); color:var(--text-primary);
+  min-height:100vh; overflow-x:hidden; -webkit-tap-highlight-color:transparent;
 }
+body.locked{overflow:hidden}
 button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
-input,select,textarea{font-family:inherit}
+input,textarea,select{font-family:inherit}
 a{color:inherit;text-decoration:none}
 ::selection{background:color-mix(in srgb,var(--cat) 40%,transparent)}
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:99px}
-::-webkit-scrollbar-track{background:transparent}
+:focus-visible{outline:2px solid var(--cat);outline-offset:2px;border-radius:6px}
+::placeholder{color:#5d6b80}
 
-/* ============ 2. LỚP NỀN TRANG TRÍ ============ */
-#bgLayer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.blob{position:absolute;border-radius:50%;filter:blur(78px);mix-blend-mode:screen;opacity:.42;will-change:transform}
-.b1{width:52vmax;height:52vmax;left:-18vmax;top:-20vmax;background:radial-gradient(circle at 35% 35%,rgba(140,255,100,.5),transparent 62%);animation:drift1 30s ease-in-out infinite alternate}
-.b2{width:46vmax;height:46vmax;right:-16vmax;top:8vmax;background:radial-gradient(circle at 60% 40%,rgba(76,201,240,.48),transparent 62%);animation:drift2 36s ease-in-out infinite alternate}
-.b3{width:44vmax;height:44vmax;left:16vmax;bottom:-22vmax;background:radial-gradient(circle at 50% 50%,rgba(255,107,201,.4),transparent 62%);animation:drift3 42s ease-in-out infinite alternate}
-@keyframes drift1{to{transform:translate3d(9vmax,7vmax,0) scale(1.12)}}
-@keyframes drift2{to{transform:translate3d(-8vmax,9vmax,0) scale(1.08)}}
-@keyframes drift3{to{transform:translate3d(7vmax,-8vmax,0) scale(1.15)}}
-.gridfx{position:absolute;inset:0;background:
-  repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 46px),
-  repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 46px);
-  -webkit-mask-image:radial-gradient(80% 60% at 50% 30%,#000 0%,transparent 78%);
-  mask-image:radial-gradient(80% 60% at 50% 30%,#000 0%,transparent 78%)}
-.noisefx{position:absolute;inset:0;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E")}
+/* ═══════════ 2. NỀN ═══════════ */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+.o1{width:46vmax;height:46vmax;left:-16vmax;top:-18vmax;opacity:.16;background:radial-gradient(circle,var(--accent-primary),transparent 62%);animation:drift1 34s ease-in-out infinite alternate}
+.o2{width:40vmax;height:40vmax;right:-14vmax;top:12vmax;opacity:.12;background:radial-gradient(circle,var(--accent-secondary),transparent 62%);animation:drift2 40s ease-in-out infinite alternate}
+.o3{width:42vmax;height:42vmax;left:18vmax;bottom:-20vmax;opacity:.13;background:radial-gradient(circle,color-mix(in srgb,var(--cat) 80%,transparent),transparent 62%);animation:drift3 46s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate3d(7vmax,6vmax,0) scale(1.1)}}
+@keyframes drift2{to{transform:translate3d(-6vmax,7vmax,0) scale(1.07)}}
+@keyframes drift3{to{transform:translate3d(6vmax,-7vmax,0) scale(1.12)}}
+#bg .grid{position:absolute;inset:0;opacity:.5;background:
+  repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 48px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 1px,transparent 1px 48px);
+  -webkit-mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%);
+  mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%)}
 
-/* ============ 3. MÀN HÌNH MỞ ĐẦU ============ */
-#splash{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
-  background:radial-gradient(900px 620px at 50% 42%,#241a52 0%,#100C26 68%);
-  transition:opacity .55s var(--ez),transform .55s var(--ez),filter .55s var(--ez)}
-#splash.out{opacity:0;transform:scale(1.07);filter:blur(10px);pointer-events:none}
-#spLogo{width:96px;height:96px;overflow:visible}
-#spLogo .hex{fill:none;stroke:url(#spGrad);stroke-width:2.4;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;animation:draw 1s var(--ez) .1s forwards}
-#spLogo .bolt{fill:url(#spGrad);transform-origin:50% 50%;transform:scale(0);animation:pop .55s var(--spring) .75s forwards}
-#spLogo .ring{fill:none;stroke:rgba(255,255,255,.14);stroke-width:1;transform-origin:50% 50%;animation:spin 6s linear infinite}
+/* ═══════════ 3. SPLASH ═══════════ */
+#splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+  background:radial-gradient(820px 560px at 50% 42%,#101828 0%,var(--bg-primary) 70%);
+  transition:opacity .5s var(--ez),transform .5s var(--ez),filter .5s var(--ez)}
+#splash.out{opacity:0;transform:scale(1.05);filter:blur(8px);pointer-events:none}
+#spLogo{width:92px;height:92px}
+#spLogo .hex{fill:none;stroke:url(#spG);stroke-width:2.4;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;animation:draw 1s var(--ez) .05s forwards}
+#spLogo .bolt{fill:url(#spG);transform-origin:50% 50%;transform:scale(0);animation:pop .55s var(--spring) .7s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
-@keyframes pop{60%{transform:scale(1.18)}100%{transform:scale(1)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-#spWord{display:flex;flex-wrap:wrap;justify-content:center;gap:0 10px;font-weight:800;font-size:clamp(22px,6vw,34px);letter-spacing:.06em}
-#spWord .w{display:flex}
-#spWord .ch{display:inline-block;opacity:0;transform:translateY(18px) scale(.85);animation:chIn .5s var(--ez) forwards;animation-delay:var(--d);
-  background:linear-gradient(120deg,var(--ink),var(--ink) 55%,color-mix(in srgb,var(--link) 70%,var(--ink)));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+@keyframes pop{60%{transform:scale(1.18)}to{transform:scale(1)}}
+#spWord{display:flex;gap:0 9px;font-weight:800;font-size:clamp(19px,5vw,28px);letter-spacing:.08em}
+#spWord .ch{display:inline-block;opacity:0;transform:translateY(16px) scale(.86);animation:chIn .5s var(--ez) forwards;animation-delay:var(--d)}
 @keyframes chIn{to{opacity:1;transform:none}}
-#spTrack{width:min(220px,58vw);height:3px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
-#spBar{height:100%;width:6%;border-radius:99px;background:linear-gradient(90deg,var(--script),var(--link) 50%,var(--ios));transition:width .5s var(--ez)}
+#spTrack{width:min(210px,56vw);height:3px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+#spBar{height:100%;width:6%;border-radius:99px;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));transition:width .45s var(--ez)}
 
-/* ============ 4. THANH ĐẦU ============ */
-#appBar{position:sticky;top:0;z-index:60;height:var(--head-h);display:flex;align-items:center;gap:12px;padding:0 16px;
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  background:linear-gradient(180deg,rgba(16,12,38,.82),rgba(16,12,38,.55));
-  border-bottom:1px solid var(--line);
-  transform:translateY(-100%);transition:transform .6s var(--ez) .1s}
-body.entered #appBar{transform:none}
-#logoMini{width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:10px;
-  background:linear-gradient(135deg,color-mix(in srgb,var(--script) 26%,transparent),color-mix(in srgb,var(--ios) 26%,transparent));
-  border:1px solid var(--line2);transition:transform .4s var(--spring)}
-#logoMini:active{transform:scale(.9)}
-#logoMini svg{width:18px;height:18px}
-#wordmark{font-weight:800;font-size:15px;letter-spacing:.08em;white-space:nowrap;
-  background:linear-gradient(90deg,var(--script),var(--link) 48%,var(--ios));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-#headSpace{flex:1}
-#maintChip{display:none;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--apk);
-  border:1px solid color-mix(in srgb,var(--apk) 45%,transparent);background:color-mix(in srgb,var(--apk) 14%,transparent);
-  padding:5px 10px;border-radius:99px}
-#maintChip.on{display:inline-flex;animation:chIn .4s var(--ez)}
-#liveDot{width:9px;height:9px;border-radius:50%;background:var(--mut2);position:relative;flex:none;transition:background .4s}
-#liveDot.on{background:var(--ok)}
-#liveDot.on::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--ok);opacity:0;animation:ping 2.2s var(--ez) infinite}
-@keyframes ping{0%{transform:scale(.5);opacity:.9}80%,100%{transform:scale(1.5);opacity:0}}
-#btnAuth{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;overflow:hidden;
-  background:var(--glass);border:1px solid var(--line);transition:transform .3s var(--spring),background .3s,border-color .3s}
-#btnAuth:hover{background:var(--glass2);border-color:var(--line2)}
-#btnAuth:active{transform:scale(.88)}
-#btnAuth svg{width:19px;height:19px;stroke:var(--mut)}
-#btnAuth img{width:100%;height:100%;object-fit:cover}
-
-/* ============ 5. BỐ CỤC CHÍNH ============ */
-#shell{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:22px 16px calc(var(--nav-h) + 34px + env(safe-area-inset-bottom))}
+/* ═══════════ 4. HEADER ═══════════ */
+#hdr{position:fixed;top:0;left:0;right:0;z-index:80;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(8,11,18,.78);border-bottom:1px solid transparent;transition:border-color .35s,box-shadow .35s,background .35s}
+#hdr.scrolled{border-bottom-color:var(--border-subtle);box-shadow:0 10px 34px rgba(0,0,0,.4);background:rgba(8,11,18,.9)}
+.hdr-main{display:flex;align-items:center;gap:10px;height:var(--head-h);padding:0 14px;max-width:1560px;margin:0 auto}
+#btnMenu{display:none;width:40px;height:40px;border-radius:11px;place-items:center;background:transparent;border:1px solid var(--border-subtle);transition:background .3s}
+#btnMenu:hover{background:var(--bg-elevated)}
+#btnMenu svg{width:19px;height:19px;stroke:var(--text-primary)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .mark{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:var(--bg-secondary);border:1px solid var(--border-subtle);position:relative;overflow:hidden}
+.brand .mark::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,color-mix(in srgb,var(--accent-primary) 30%,transparent),color-mix(in srgb,var(--accent-secondary) 30%,transparent));opacity:.8}
+.brand .mark svg{width:19px;height:19px;position:relative;z-index:1}
+.brand b{font-size:14.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:linear-gradient(90deg,#c9bcff,#8de8dd 55%,#c9bcff);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 7s linear infinite}
+@keyframes shine{to{background-position:200% 0}}
+.hdr-sp{flex:1}
+.searchbox{position:relative;flex:1;max-width:430px;display:none}
+.searchbox svg.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-secondary);pointer-events:none}
+.searchbox input{width:100%;height:40px;border-radius:12px;padding:0 38px;background:var(--bg-secondary);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:13.5px;outline:none;transition:border-color .3s,box-shadow .3s}
+.searchbox input:focus{border-color:color-mix(in srgb,var(--cat) 60%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--cat) 16%,transparent)}
+.searchbox .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:7px;display:none;place-items:center;color:var(--text-secondary)}
+.searchbox .clr svg{width:12px;height:12px}
+.searchbox.has-q .clr{display:grid}
+#btnSearchM{display:grid;width:40px;height:40px;border-radius:11px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s}
+#btnSearchM svg{width:17px;height:17px;stroke:var(--text-primary)}
+.hdr-search{max-height:0;overflow:hidden;transition:max-height .38s var(--ez);padding:0 14px}
+.hdr-search.open{max-height:70px}
+.hdr-search .searchbox{display:block;max-width:none;padding-bottom:12px}
+#btnAcc{width:40px;height:40px;flex:none;border-radius:11px;display:grid;place-items:center;border:1px solid var(--border-subtle);background:var(--bg-secondary);position:relative;transition:border-color .3s,transform .25s var(--spring)}
+#btnAcc:active{transform:scale(.9)}
+#btnAcc svg{width:18px;height:18px;stroke:var(--text-secondary)}
+#btnAcc.dev{border-color:color-mix(in srgb,var(--accent-primary) 60%,transparent);box-shadow:0 0 14px -4px var(--accent-primary)}
+#btnAcc.dev svg{stroke:var(--accent-primary)}
+#connDot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#5d6b80;border:2px solid var(--bg-primary);transition:background .4s}
+#connDot.on{background:var(--success)}
 @media(min-width:900px){
-  #shell{padding:30px 34px 60px calc(232px + 34px);max-width:calc(1240px + 266px)}
+  .searchbox{display:block}
+  #btnSearchM,.hdr-search{display:none}
 }
-/* Nav cạnh (desktop) */
-#sideNav{display:none}
-@media(min-width:900px){
-  #sideNav{display:flex;flex-direction:column;gap:6px;position:fixed;left:22px;top:calc(var(--head-h) + 22px);bottom:22px;width:212px;z-index:50;
-    padding:12px;border-radius:24px;background:rgba(23,18,51,.6);border:1px solid var(--line);
-    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-    opacity:0;transform:translateX(-18px);transition:opacity .6s var(--ez) .25s,transform .6s var(--ez) .25s}
-  body.entered #sideNav{opacity:1;transform:none}
-  .navbtn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:15px;color:var(--mut);font-weight:600;font-size:14.5px;
-    position:relative;transition:background .3s,color .3s,transform .3s var(--ez)}
-  .navbtn svg{width:20px;height:20px;flex:none;transition:transform .35s var(--spring)}
-  .navbtn:hover{background:var(--glass);color:var(--ink);transform:translateX(3px)}
-  .navbtn.on{color:var(--ink);background:color-mix(in srgb,var(--nc) 15%,transparent)}
-  .navbtn.on::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:99px;background:var(--nc)}
-  .navbtn.on svg{transform:scale(1.12);stroke:var(--nc)}
-  .navbtn .cnt{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--glass2);color:var(--mut)}
-  .navbtn.on .cnt{background:color-mix(in srgb,var(--nc) 22%,transparent);color:var(--nc)}
-}
-/* Nav đáy (mobile) */
-#bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:60;height:calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding:0 8px env(safe-area-inset-bottom);display:flex;
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  background:linear-gradient(0deg,rgba(14,10,34,.94),rgba(14,10,34,.72));
-  border-top:1px solid var(--line);
-  transform:translateY(102%);transition:transform .6s var(--ez) .2s}
-body.entered #bottomNav{transform:none}
-@media(min-width:900px){#bottomNav{display:none}}
-#bnInd{position:absolute;top:8px;left:8px;width:calc(25% - 12px);height:calc(var(--nav-h) - 18px);border-radius:16px;
-  background:color-mix(in srgb,var(--cat) 15%,transparent);border:1px solid color-mix(in srgb,var(--cat) 30%,transparent);
-  transform:translateX(calc(var(--idx,0) * 100%));transition:transform .5s var(--spring),background .4s,border-color .4s}
-.navbtn-m{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--mut);
-  font-size:10.5px;font-weight:700;letter-spacing:.04em;position:relative;z-index:1;transition:color .3s}
-.navbtn-m svg{width:21px;height:21px;transition:transform .4s var(--spring)}
-.navbtn-m.on{color:var(--cat)}
-.navbtn-m.on svg{transform:translateY(-1px) scale(1.1);stroke:var(--cat)}
-.navbtn-m:active svg{transform:scale(.85)}
+@media(max-width:899px){ #btnMenu{display:grid} }
 
-/* ============ 6. KHUNG NHÌN DANH MỤC ============ */
+/* ═══════════ 5. SIDEBAR / DRAWER ═══════════ */
+#side{position:fixed;z-index:90;top:var(--head-h);bottom:0;left:0;width:var(--side-w);display:flex;flex-direction:column;gap:4px;
+  padding:14px 12px;overflow-y:auto;background:rgba(14,20,32,.92);border-right:1px solid var(--border-subtle);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transform:translateX(-105%);transition:transform .42s var(--ez)}
+#side.open{transform:none;box-shadow:24px 0 60px rgba(0,0,0,.5)}
+#sideOv{position:fixed;inset:0;z-index:85;background:rgba(4,6,10,.6);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s}
+#sideOv.on{opacity:1;pointer-events:auto}
+@media(min-width:1024px){
+  #side{transform:none;background:rgba(14,20,32,.5);box-shadow:none}
+  #sideOv{display:none}
+  #btnMenu{display:none!important}
+}
+.navsec{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:#5d6b80;text-transform:uppercase;padding:12px 12px 6px}
+.navitem{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-md);color:var(--text-secondary);
+  font-weight:600;font-size:14px;position:relative;transition:background .28s,color .28s,transform .28s var(--ez)}
+.navitem svg{width:19px;height:19px;flex:none;transition:transform .35s var(--spring)}
+.navitem:hover{background:var(--bg-elevated);color:var(--text-primary);transform:translateX(3px)}
+.navitem.on{color:var(--text-primary);background:color-mix(in srgb,var(--nc,var(--cat)) 14%,transparent)}
+.navitem.on::before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:99px;background:var(--nc,var(--cat))}
+.navitem.on svg{stroke:var(--nc,var(--cat));transform:scale(1.1)}
+.navitem .cnt{margin-left:auto;font-size:11px;font-weight:700;color:var(--text-secondary);background:var(--bg-elevated);padding:2px 8px;border-radius:99px}
+.navitem.on .cnt{color:var(--nc,var(--cat));background:color-mix(in srgb,var(--nc,var(--cat)) 16%,transparent)}
+.side-acc{margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px}
+.acc-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:12.5px;min-width:0}
+.acc-card .mail{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)}
+.devtag{font-size:9.5px;font-weight:800;letter-spacing:.1em;color:#fff;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));padding:3px 7px;border-radius:99px;flex:none}
+
+/* ═══════════ 6. MAIN / VIEWS ═══════════ */
+#main{position:relative;z-index:1;padding:calc(var(--head-h) + 22px) 16px 40px;max-width:1280px;margin:0 auto;min-height:100vh}
+@media(min-width:1024px){ #main{margin-left:var(--side-w);padding:calc(var(--head-h) + 30px) 34px 48px;max-width:calc(1280px + var(--side-w))} }
 .view{display:none}
 .view.on{display:block;animation:viewIn .45s var(--ez)}
-@keyframes viewIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.view[data-cat="script"]{--cat:var(--script)} .view[data-cat="apk"]{--cat:var(--apk)}
-.view[data-cat="link"]{--cat:var(--link)} .view[data-cat="ios"]{--cat:var(--ios)}
-.vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:6px 0 22px}
-.vhead h2{font-size:clamp(26px,6vw,36px);font-weight:800;letter-spacing:-.01em;line-height:1.1;position:relative;padding-bottom:12px}
-.vhead h2::after{content:"";position:absolute;left:0;bottom:0;height:4px;width:58px;border-radius:99px;
-  background:linear-gradient(90deg,var(--cat),color-mix(in srgb,var(--cat) 20%,transparent));
-  transform:scaleX(0);transform-origin:left;animation:sweep .7s var(--ez) .12s forwards}
+@keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
+.vhead h2{font-size:clamp(24px,5.4vw,34px);font-weight:800;letter-spacing:-.01em;position:relative;padding-bottom:11px}
+.vhead h2::after{content:"";position:absolute;left:0;bottom:0;height:4px;width:56px;border-radius:99px;
+  background:linear-gradient(90deg,var(--cat),color-mix(in srgb,var(--cat) 15%,transparent));
+  transform:scaleX(0);transform-origin:left;animation:sweep .65s var(--ez) .1s forwards}
 @keyframes sweep{to{transform:scaleX(1)}}
-.vsub{color:var(--mut);font-size:13.5px;margin-top:8px;font-weight:500}
+.vsub{color:var(--text-secondary);font-size:13px;margin-top:8px;font-weight:500}
 .vcount{flex:none;font-size:12px;font-weight:700;color:var(--cat);padding:6px 12px;border-radius:99px;
-  background:color-mix(in srgb,var(--cat) 13%,transparent);border:1px solid color-mix(in srgb,var(--cat) 32%,transparent)}
-.vgrid{display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:640px){.vgrid{grid-template-columns:repeat(2,1fr)}}
-@media(min-width:1100px){.vgrid{grid-template-columns:repeat(3,1fr)}}
+  background:color-mix(in srgb,var(--cat) 12%,transparent);border:1px solid color-mix(in srgb,var(--cat) 32%,transparent)}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1180px){.grid{grid-template-columns:repeat(3,1fr)}}
 
-/* ============ 7. THẺ DỮ LIỆU ============ */
-.card{position:relative;border-radius:20px;padding:18px;overflow:hidden;display:flex;flex-direction:column;gap:10px;
-  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.03));
-  border:1px solid var(--line);
-  transition:transform .35s var(--ez),border-color .3s,box-shadow .35s,background .3s}
+/* ═══════════ 7. CARD ═══════════ */
+.card{position:relative;border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;
+  background:linear-gradient(180deg,var(--bg-card),color-mix(in srgb,var(--bg-card) 80%,var(--bg-primary)));
+  border:1px solid var(--border-subtle);overflow:hidden;
+  transition:transform .3s var(--ez),border-color .3s,box-shadow .3s}
 .card:not(.in){opacity:0}
-.card.in{animation:cardIn .6s var(--ez) backwards;animation-delay:var(--d,0ms)}
-@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
-.card::before{content:"";position:absolute;top:0;left:0;height:3px;width:42%;border-radius:0 99px 99px 0;
-  background:linear-gradient(90deg,var(--cat),color-mix(in srgb,var(--cat) 15%,transparent));transition:width .5s var(--ez)}
-.card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--cat) 42%,var(--line));
-  box-shadow:0 16px 44px -16px color-mix(in srgb,var(--cat) 42%,transparent)}
-.card:hover::before{width:100%}
-.card:active{transform:translateY(-1px) scale(.99)}
-.ctop{display:flex;align-items:center;gap:10px}
-.cico{width:40px;height:40px;flex:none;border-radius:13px;display:grid;place-items:center;
-  background:color-mix(in srgb,var(--cat) 15%,transparent);border:1px solid color-mix(in srgb,var(--cat) 32%,transparent)}
-.cico svg{width:20px;height:20px;stroke:var(--cat)}
-.cbadge{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.06em;
-  color:var(--apk);border:1px solid color-mix(in srgb,var(--apk) 42%,transparent);
-  background:color-mix(in srgb,var(--apk) 12%,transparent);padding:4px 9px;border-radius:99px}
-.cbadge svg{width:11px;height:11px;stroke:var(--apk)}
-.card h3{font-size:16.5px;font-weight:700;line-height:1.35;word-break:break-word}
-.cdesc{color:var(--mut);font-size:13px;line-height:1.6;font-weight:400;word-break:break-word;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.clink{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:11px;background:rgba(0,0,0,.24);border:1px solid var(--line);min-width:0}
-.clink i{width:6px;height:6px;flex:none;border-radius:50%;background:var(--cat);box-shadow:0 0 8px var(--cat)}
-.clink code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--mut);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cacts{display:flex;gap:8px;margin-top:auto;padding-top:4px}
-/* Nút bấm */
-.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:12px;
+.card.in{animation:cardIn .55s var(--ez) backwards;animation-delay:var(--d,0ms)}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+.card::before{content:"";position:absolute;top:0;left:0;height:2.5px;width:38%;border-radius:0 99px 99px 0;
+  background:linear-gradient(90deg,var(--cat),color-mix(in srgb,var(--cat) 10%,transparent));transition:width .5s var(--ez)}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(340px circle at var(--gx,50%) var(--gy,0%),color-mix(in srgb,var(--cat) 12%,transparent),transparent 65%)}
+@media(hover:hover) and (pointer:fine){
+  .card:hover{border-color:color-mix(in srgb,var(--cat) 42%,var(--border-subtle));box-shadow:0 16px 40px -18px color-mix(in srgb,var(--cat) 45%,transparent)}
+  .card:hover::before{width:100%}
+  .card:hover::after{opacity:1}
+}
+.card:active{transform:scale(.985)}
+.card .ctop{display:flex;align-items:center;gap:10px}
+.ico-tile{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--cat) 13%,transparent);border:1px solid color-mix(in srgb,var(--cat) 30%,transparent)}
+.ico-tile svg{width:18px;height:18px;stroke:var(--cat)}
+.chip{font-size:10px;font-weight:800;letter-spacing:.08em;padding:4px 9px;border-radius:99px;
+  color:var(--cat);background:color-mix(in srgb,var(--cat) 12%,transparent);border:1px solid color-mix(in srgb,var(--cat) 28%,transparent)}
+.ctime{margin-left:auto;font-size:11px;color:#5d6b80;font-weight:500;white-space:nowrap}
+.card h3{font-size:15.5px;font-weight:700;line-height:1.4;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .desc{color:var(--text-secondary);font-size:12.5px;line-height:1.6;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+pre.codeprev{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.55;color:#8de8dd;
+  background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:var(--r-sm);padding:9px 11px;
+  white-space:pre-wrap;word-break:break-all;max-height:66px;overflow:hidden;position:relative}
+pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(transparent,var(--bg-primary))}
+.card .cfoot{display:flex;gap:8px;margin-top:auto;padding-top:2px}
+.thumb{width:100%;height:130px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--border-subtle);background:var(--bg-elevated)}
+
+/* Nút */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  font-weight:700;font-size:13px;padding:9.5px 15px;border-radius:11px;
   transition:transform .25s var(--spring),background .3s,border-color .3s,box-shadow .3s,color .3s}
 .btn:active{transform:scale(.95)}
-.btn svg{width:16px;height:16px;flex:none}
-.btn-cat{color:var(--cat);background:color-mix(in srgb,var(--cat) 15%,transparent);border:1px solid color-mix(in srgb,var(--cat) 36%,transparent)}
-.btn-cat:hover{background:color-mix(in srgb,var(--cat) 26%,transparent);box-shadow:0 6px 20px -8px color-mix(in srgb,var(--cat) 60%,transparent)}
-.btn-ghost{color:var(--mut);background:var(--glass);border:1px solid var(--line)}
-.btn-ghost:hover{color:var(--ink);background:var(--glass2);border-color:var(--line2)}
-.btn-icon{width:40px;height:40px;padding:0;border-radius:12px;color:var(--mut);background:var(--glass);border:1px solid var(--line)}
-.btn-icon:hover{color:var(--cat);border-color:color-mix(in srgb,var(--cat) 40%,transparent);background:color-mix(in srgb,var(--cat) 10%,transparent)}
-.btn-icon svg{width:17px;height:17px}
-.btn-wide{width:100%;padding:13px}
-.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.25;transform:scale(0);animation:rip .55s var(--ez) forwards;pointer-events:none}
+.btn svg{width:15px;height:15px;flex:none}
+.btn-p{color:#fff;background:linear-gradient(120deg,color-mix(in srgb,var(--cat) 88%,#000),var(--cat));border:1px solid color-mix(in srgb,var(--cat) 60%,transparent)}
+.btn-p:hover{box-shadow:0 8px 22px -8px color-mix(in srgb,var(--cat) 65%,transparent);filter:brightness(1.08)}
+.btn-g{color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle)}
+.btn-g:hover{color:var(--text-primary);border-color:var(--border-strong)}
+.btn-d{color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent)}
+.btn-d:hover{background:color-mix(in srgb,var(--danger) 20%,transparent)}
+.btn-i{width:36px;height:36px;padding:0;border-radius:10px;color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle)}
+.btn-i:hover{color:var(--cat);border-color:color-mix(in srgb,var(--cat) 45%,transparent)}
+.btn-i svg{width:15px;height:15px}
+.btn-wide{width:100%;padding:12px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s var(--ez) forwards;pointer-events:none}
 @keyframes rip{to{transform:scale(2.6);opacity:0}}
-/* Skeleton + trống */
-.sk{border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column;gap:12px;overflow:hidden;position:relative}
-.sk i{display:block;border-radius:8px;background:rgba(255,255,255,.07);position:relative;overflow:hidden}
-.sk i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);animation:shim 1.3s linear infinite}
+
+/* Skeleton / Empty / Error */
+.sk{border-radius:var(--r-lg);border:1px solid var(--border-subtle);background:var(--bg-card);padding:16px;display:flex;flex-direction:column;gap:11px;overflow:hidden}
+.sk i{display:block;border-radius:8px;background:rgba(255,255,255,.06);position:relative;overflow:hidden}
+.sk i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.11),transparent);animation:shim 1.25s linear infinite}
 @keyframes shim{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-.sk .a{width:40px;height:40px;border-radius:13px}.sk .b{width:62%;height:16px}.sk .c{width:100%;height:11px}.sk .d{width:84%;height:11px}.sk .e{width:46%;height:34px;border-radius:12px;margin-top:4px}
-.empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:52px 20px;text-align:center;
-  border:1px dashed var(--line2);border-radius:22px;color:var(--mut);animation:viewIn .5s var(--ez)}
-.empty svg{width:52px;height:52px;stroke:var(--mut2);animation:float 3.4s ease-in-out infinite}
-@keyframes float{50%{transform:translateY(-7px)}}
-.empty p{font-size:14px;font-weight:600}
+.sk .a{width:38px;height:38px;border-radius:12px}.sk .b{width:60%;height:15px}.sk .c{width:100%;height:10px}.sk .d{width:80%;height:10px}.sk .e{width:44%;height:32px;border-radius:11px;margin-top:3px}
+.statebox{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:52px 20px;text-align:center;
+  border:1px dashed var(--border-strong);border-radius:var(--r-lg);color:var(--text-secondary);animation:viewIn .5s var(--ez)}
+.statebox svg{width:48px;height:48px;stroke:#5d6b80;animation:floaty 3.4s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-7px)}}
+.statebox p{font-size:14px;font-weight:600}
+.statebox.err svg{stroke:var(--danger);animation:none}
 
-/* ============ 8. LỚP PHỦ / BẢNG ============ */
-#backdrop{position:fixed;inset:0;z-index:80;background:rgba(8,6,20,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  opacity:0;pointer-events:none;transition:opacity .4s var(--ez)}
-#backdrop.on{opacity:1;pointer-events:auto}
-.sheet{position:fixed;z-index:90;left:0;right:0;bottom:0;max-height:88vh;display:flex;flex-direction:column;
-  background:rgba(23,18,51,.97);border-top:1px solid var(--line2);border-radius:26px 26px 0 0;
-  transform:translateY(103%);transition:transform .5s var(--ez);box-shadow:0 -20px 60px rgba(0,0,0,.5)}
-.sheet.on{transform:none}
-.sheet .grab{width:44px;height:4px;border-radius:99px;background:var(--line2);margin:10px auto 2px;flex:none}
-.sheet .shead{display:flex;align-items:center;gap:10px;padding:12px 20px 12px;flex:none}
-.sheet .shead h3{font-size:16px;font-weight:800;letter-spacing:.02em;flex:1}
-.sheet .sbody{overflow-y:auto;padding:2px 20px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
-.xbtn{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line);color:var(--mut);transition:transform .3s var(--spring),color .3s}
-.xbtn:hover{color:var(--ink)} .xbtn:active{transform:rotate(90deg) scale(.85)}
-.xbtn svg{width:15px;height:15px}
-@media(min-width:760px){
-  .sheet{left:50%;right:auto;bottom:auto;top:50%;width:min(560px,92vw);border-radius:24px;border:1px solid var(--line2);
-    transform:translate(-50%,-46%) scale(.95);opacity:0;transition:transform .45s var(--ez),opacity .35s}
-  .sheet.on{transform:translate(-50%,-50%) scale(1);opacity:1}
-  .sheet .grab{display:none}
-  .sheet.dev{width:min(680px,94vw)}
+/* ═══════════ 8. HOME ═══════════ */
+.hero{position:relative;border-radius:24px;padding:clamp(24px,5vw,44px);overflow:hidden;margin-bottom:22px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent-primary) 16%,var(--bg-card)),var(--bg-card) 45%,color-mix(in srgb,var(--accent-secondary) 12%,var(--bg-card)));
+  border:1px solid var(--border-subtle)}
+.hero::before{content:"";position:absolute;width:340px;height:340px;right:-90px;top:-140px;border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--accent-primary) 40%,transparent),transparent 65%);filter:blur(30px);animation:floaty 7s ease-in-out infinite}
+.hero .kicker{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--accent-secondary);
+  border:1px solid color-mix(in srgb,var(--accent-secondary) 35%,transparent);background:color-mix(in srgb,var(--accent-secondary) 10%,transparent);
+  padding:5px 12px;border-radius:99px;margin-bottom:14px}
+.hero .kicker::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent-secondary);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.hero h1{font-size:clamp(26px,6vw,42px);font-weight:800;letter-spacing:-.01em;line-height:1.12}
+.hero h1 span{background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--text-secondary);font-size:14px;margin-top:12px;max-width:520px;line-height:1.7}
+.cattiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:26px}
+@media(min-width:900px){.cattiles{grid-template-columns:repeat(4,1fr)}}
+.tile{position:relative;border-radius:var(--r-lg);padding:16px;overflow:hidden;text-align:left;
+  background:var(--bg-card);border:1px solid var(--border-subtle);
+  transition:transform .3s var(--ez),border-color .3s,box-shadow .3s}
+.tile:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--nc) 45%,var(--border-subtle));box-shadow:0 14px 34px -16px color-mix(in srgb,var(--nc) 50%,transparent)}
+.tile:active{transform:scale(.97)}
+.tile .tico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;margin-bottom:12px;
+  background:color-mix(in srgb,var(--nc) 13%,transparent);border:1px solid color-mix(in srgb,var(--nc) 30%,transparent)}
+.tile .tico svg{width:19px;height:19px;stroke:var(--nc)}
+.tile b{display:block;font-size:15px;font-weight:800}
+.tile small{display:block;color:var(--text-secondary);font-size:11.5px;margin-top:4px;line-height:1.5}
+.tile .num{position:absolute;top:14px;right:14px;font-size:20px;font-weight:800;color:color-mix(in srgb,var(--nc) 80%,var(--text-primary))}
+.sech{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:16px;font-weight:800}
+.sech::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
+.latest{display:flex;flex-direction:column;gap:9px;margin-bottom:26px}
+.lrow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--bg-card);
+  border:1px solid var(--border-subtle);cursor:pointer;transition:border-color .3s,transform .3s var(--ez),background .3s}
+.lrow:hover{border-color:color-mix(in srgb,var(--nc) 45%,var(--border-subtle));transform:translateX(4px);background:var(--bg-elevated)}
+.lrow .lico{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--nc) 12%,transparent)}
+.lrow .lico svg{width:16px;height:16px;stroke:var(--nc)}
+.lrow .lt{flex:1;min-width:0}
+.lrow b{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow small{display:block;color:#5d6b80;font-size:11px;margin-top:2px}
+.lrow .chip{flex:none}
+#footer{border-top:1px solid var(--border-subtle);padding-top:20px;margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#footer b{font-size:12.5px;font-weight:800;letter-spacing:.06em;color:var(--text-secondary)}
+#footer span{font-size:11.5px;color:#5d6b80}
+
+/* ═══════════ 9. OVERLAY + MODAL ═══════════ */
+#ov{position:fixed;inset:0;z-index:100;background:rgba(4,6,10,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .35s}
+#ov.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;z-index:110;left:50%;top:50%;width:min(560px,94vw);max-height:88vh;display:flex;flex-direction:column;
+  background:var(--bg-secondary);border:1px solid var(--border-strong);border-radius:22px;
+  transform:translate(-50%,-46%) scale(.94);opacity:0;pointer-events:none;
+  transition:transform .42s var(--ez),opacity .3s;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal.on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+.modal.wide{width:min(700px,94vw)}
+@media(max-width:640px){
+  .modal{left:0;right:0;bottom:0;top:auto;width:100%;max-height:90vh;border-radius:22px 22px 0 0;transform:translateY(103%);opacity:1}
+  .modal.on{transform:none}
 }
-/* Biểu mẫu */
+.m-grab{width:42px;height:4px;border-radius:99px;background:var(--border-strong);margin:10px auto 0;flex:none}
+@media(min-width:641px){.m-grab{display:none}}
+.m-head{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;flex:none}
+.m-head h3{font-size:16px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xbtn{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-secondary);transition:transform .3s var(--spring),color .3s}
+.xbtn:hover{color:var(--text-primary)} .xbtn:active{transform:rotate(90deg) scale(.85)}
+.xbtn svg{width:14px;height:14px}
+.m-body{overflow-y:auto;padding:4px 20px 22px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+
+/* Form */
 .fld{display:flex;flex-direction:column;gap:7px}
-.fld label{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--mut);text-transform:uppercase}
-.fld input,.fld select{width:100%;padding:12px 13px;border-radius:13px;font-size:14px;color:var(--ink);
-  background:rgba(255,255,255,.06);border:1px solid var(--line);outline:none;transition:border-color .3s,box-shadow .3s,background .3s}
-.fld select option{background:var(--panel);color:var(--ink)}
-.fld input:focus,.fld select:focus{border-color:color-mix(in srgb,var(--cat) 55%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--cat) 18%,transparent)}
-.fld input::placeholder{color:var(--mut2)}
-.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
-.switch span{font-size:13.5px;font-weight:600}
-.sw{position:relative;width:46px;height:26px;flex:none}
-.sw input{position:absolute;opacity:0;inset:0;cursor:pointer;z-index:1}
-.sw i{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.14);transition:background .3s}
-.sw i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .35s var(--spring)}
-.sw input:checked + i{background:color-mix(in srgb,var(--apk) 70%,transparent)}
-.sw input:checked + i::after{transform:translateX(20px)}
-/* Google */
-.gbtn{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;padding:13px;border-radius:14px;
-  background:#fff;color:#1f1f1f;font-weight:700;font-size:14.5px;position:relative;overflow:hidden;
-  transition:transform .25s var(--spring),box-shadow .3s}
-.gbtn:hover{box-shadow:0 10px 30px -10px rgba(255,255,255,.35)}
-.gbtn:active{transform:scale(.97)}
-.gbtn svg{width:19px;height:19px}
-.urow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--glass);border:1px solid var(--line)}
-.urow img{width:44px;height:44px;border-radius:14px;object-fit:cover;border:1px solid var(--line2)}
-.urow b{display:block;font-size:14.5px}
-.urow small{display:block;color:var(--mut);font-size:12px;word-break:break-all}
-.devtag{font-size:10px;font-weight:800;letter-spacing:.1em;color:#0B0920;background:linear-gradient(90deg,var(--script),var(--link));padding:3px 8px;border-radius:99px;margin-left:auto}
-/* Dev center */
-.dgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.dstat{padding:11px 12px;border-radius:13px;background:var(--glass);border:1px solid var(--line);font-size:11px;color:var(--mut);font-weight:600;letter-spacing:.04em}
-.dstat b{display:block;margin-top:4px;font-size:13px;color:var(--ink);letter-spacing:0;word-break:break-all}
-.dstat b.ok{color:var(--ok)} .dstat b.er{color:var(--err)}
-.dsec{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--mut2);text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.dsec::after{content:"";flex:1;height:1px;background:var(--line)}
-#devLog{background:var(--deep);border:1px solid var(--line);border-radius:14px;padding:10px 12px;max-height:170px;overflow-y:auto;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.7;display:flex;flex-direction:column;gap:2px}
-#devLog div{word-break:break-word;animation:viewIn .3s var(--ez)}
-#devLog .t{color:var(--mut2)} #devLog .ok{color:var(--ok)} #devLog .er{color:var(--err)} #devLog .in{color:var(--link)}
-details.dlist{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--glass)}
-details.dlist summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:12px 14px;font-weight:700;font-size:13.5px}
-details.dlist summary::-webkit-details-marker{display:none}
-details.dlist summary .ar{margin-left:auto;transition:transform .3s var(--ez)}
-details.dlist[open] summary .ar{transform:rotate(90deg)}
-details.dlist summary svg{width:16px;height:16px}
-.ditem{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);font-size:13px;animation:viewIn .3s var(--ez)}
-.ditem span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut)}
-.ditem button{width:32px;height:32px;flex:none;border-radius:9px;display:grid;place-items:center;color:var(--mut);background:rgba(255,255,255,.05);border:1px solid var(--line);transition:all .25s}
-.ditem button svg{width:14px;height:14px}
-.ditem button:hover{color:var(--err);border-color:color-mix(in srgb,var(--err) 50%,transparent)}
-.ditem button.arm{color:#fff;background:var(--err);border-color:var(--err);font-size:10px;font-weight:800}
-.drow{display:flex;gap:8px;flex-wrap:wrap}
-.drow .btn{flex:1;min-width:130px}
+.fld label{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text-secondary);text-transform:uppercase}
+.fld input,.fld select,.fld textarea{width:100%;padding:11.5px 13px;border-radius:12px;font-size:14px;color:var(--text-primary);
+  background:var(--bg-card);border:1px solid var(--border-subtle);outline:none;transition:border-color .3s,box-shadow .3s}
+.fld textarea{min-height:110px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.6}
+.fld select option{background:var(--bg-secondary)}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:color-mix(in srgb,var(--cat) 55%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--cat) 15%,transparent)}
+.form-err{font-size:12.5px;color:var(--danger);font-weight:600;min-height:0}
+.seg{display:flex;gap:7px;flex-wrap:wrap}
+.seg button{padding:8px 14px;border-radius:10px;font-size:12.5px;font-weight:700;color:var(--text-secondary);
+  background:var(--bg-card);border:1px solid var(--border-subtle);transition:all .28s}
+.seg button.on{color:var(--sc,var(--cat));border-color:color-mix(in srgb,var(--sc,var(--cat)) 50%,transparent);background:color-mix(in srgb,var(--sc,var(--cat)) 12%,transparent)}
 
-/* ============ 9. BẢO TRÌ ============ */
-#maint{position:fixed;inset:0;z-index:110;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;
-  background:radial-gradient(800px 560px at 50% 40%,#241a52 0%,#100C26 70%)}
+/* Detail */
+.dt-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.dt-meta .t{font-size:11.5px;color:#5d6b80;font-weight:600}
+.dt-title{font-size:19px;font-weight:800;line-height:1.35;word-break:break-word}
+.dt-desc{color:var(--text-secondary);font-size:13.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+pre.dt-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.65;color:#8de8dd;
+  background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:14px;
+  max-height:230px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+.dt-url{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:12px;background:var(--bg-primary);border:1px solid var(--border-subtle);min-width:0}
+.dt-url i{width:7px;height:7px;flex:none;border-radius:50%;background:var(--cat);box-shadow:0 0 9px var(--cat)}
+.dt-url code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt-acts{display:flex;gap:9px;flex-wrap:wrap}
+.dt-acts .btn{flex:1;min-width:140px}
+.dt-img{width:100%;max-height:240px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--border-subtle)}
+
+/* Dev list */
+details.dl{border:1px solid var(--border-subtle);border-radius:var(--r-md);overflow:hidden;background:var(--bg-card)}
+details.dl summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;font-weight:700;font-size:13.5px;user-select:none}
+details.dl summary::-webkit-details-marker{display:none}
+details.dl summary svg.ci{width:16px;height:16px}
+details.dl summary .n{color:#5d6b80;font-size:11px;font-weight:700}
+details.dl summary .ar{margin-left:auto;width:14px;height:14px;color:#5d6b80;transition:transform .3s var(--ez)}
+details.dl[open] summary .ar{transform:rotate(90deg)}
+.drow{display:flex;align-items:center;gap:9px;padding:10px 14px;border-top:1px solid var(--border-subtle);font-size:13px;animation:viewIn .3s var(--ez)}
+.drow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)}
+.drow button{width:31px;height:31px;flex:none;border-radius:9px;display:grid;place-items:center;color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle);transition:all .25s}
+.drow button svg{width:13.5px;height:13.5px}
+.drow button.ed:hover{color:var(--cat);border-color:color-mix(in srgb,var(--cat) 50%,transparent)}
+.drow button.de:hover{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 50%,transparent)}
+.drow button.de.arm{color:#fff;background:var(--danger);border-color:var(--danger);font-size:9.5px;font-weight:800}
+.dsec{font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#5d6b80;text-transform:uppercase;display:flex;align-items:center;gap:9px}
+.dsec::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
+.maint-state{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:13px;font-weight:600}
+.maint-state .dot{width:9px;height:9px;border-radius:50%;flex:none}
+#devLog{background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;max-height:150px;overflow-y:auto;
+  font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.7;display:flex;flex-direction:column;gap:2px}
+#devLog div{word-break:break-word;animation:viewIn .25s var(--ez)}
+#devLog .t{color:#5d6b80}#devLog .ok{color:var(--success)}#devLog .er{color:var(--danger)}#devLog .in{color:var(--accent-secondary)}
+
+/* ═══════════ 10. BẢO TRÌ ═══════════ */
+#maint{position:fixed;inset:0;z-index:150;display:none;flex-direction:column;align-items:center;justify-content:center;gap:15px;text-align:center;padding:26px;
+  background:radial-gradient(760px 520px at 50% 40%,#101828,var(--bg-primary) 72%)}
 #maint.on{display:flex;animation:viewIn .5s var(--ez)}
-#maint svg.gear{width:74px;height:74px;stroke:var(--apk);animation:spin 7s linear infinite}
-#maint h2{font-size:24px;font-weight:800}
-#maint p{color:var(--mut);font-size:14px;max-width:320px;line-height:1.6}
-#maint .btn{margin-top:6px}
+#maint svg.gear{width:70px;height:70px;stroke:var(--warning);animation:spin 7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#maint h2{font-size:23px;font-weight:800}
+#maintMsg{color:var(--text-secondary);font-size:13.5px;max-width:440px;line-height:1.7;white-space:pre-wrap}
 
-/* ============ 10. TOAST ============ */
-#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + 18px + env(safe-area-inset-bottom));z-index:130;
-  display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:max-content;max-width:92vw}
-@media(min-width:900px){#toasts{bottom:26px}}
+/* ═══════════ 11. TOAST ═══════════ */
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:300;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:max-content;max-width:92vw}
 .toast{display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:99px;font-size:13px;font-weight:600;
-  background:rgba(23,18,51,.95);border:1px solid var(--line2);box-shadow:0 12px 34px rgba(0,0,0,.45);
-  animation:tIn .45s var(--spring);max-width:92vw}
+  background:var(--bg-elevated);border:1px solid var(--border-strong);box-shadow:0 12px 34px rgba(0,0,0,.5);animation:tIn .45s var(--spring);max-width:92vw}
 .toast.out{animation:tOut .35s var(--ez) forwards}
-.toast svg{width:15px;height:15px;flex:none;stroke:var(--cat)}
+.toast svg{width:15px;height:15px;flex:none;stroke:var(--tc,var(--success))}
 @keyframes tIn{from{opacity:0;transform:translateY(16px) scale(.9)}}
 @keyframes tOut{to{opacity:0;transform:translateY(10px) scale(.94)}}
 
-/* ============ 11. GIẢM CHUYỂN ĐỘNG ============ */
+/* ═══════════ 12. GIẢM CHUYỂN ĐỘNG ═══════════ */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
-  .blob{animation:none}
   .card:not(.in){opacity:1}
+}
+@media(max-width:359px){
+  .brand b{font-size:12px}
+  .hdr-main{gap:7px;padding:0 10px}
+  #main{padding-left:12px;padding-right:12px}
 }
 </style>
 </head>
 <body>
 
-<!-- Nền trang trí -->
-<div id="bgLayer" aria-hidden="true">
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
-  <div class="gridfx"></div><div class="noisefx"></div>
-</div>
+<div id="bg" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
 
-<!-- Màn hình mở đầu -->
-<div id="splash">
+<!-- SPLASH -->
+<div id="splash" role="presentation">
   <svg id="spLogo" viewBox="0 0 100 100" aria-hidden="true">
-    <defs><linearGradient id="spGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#8CFF64"/><stop offset=".5" stop-color="#4CC9F0"/><stop offset="1" stop-color="#FF6BC9"/>
-    </linearGradient></defs>
-    <circle class="ring" cx="50" cy="50" r="46"/>
+    <defs><linearGradient id="spG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#29d6c5"/></linearGradient></defs>
     <path class="hex" d="M50 6 88 28v44L50 94 12 72V28Z"/>
     <path class="bolt" d="M55 24 34 55h13l-4 21 23-33H52Z"/>
   </svg>
@@ -369,566 +434,856 @@ details.dlist summary svg{width:16px;height:16px}
   <div id="spTrack"><div id="spBar"></div></div>
 </div>
 
-<!-- Bảo trì -->
-<div id="maint">
+<!-- BẢO TRÌ (dữ liệu thật từ nox_maintenance) -->
+<div id="maint" role="alertdialog" aria-label="Website đang bảo trì">
   <svg class="gear" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
   <h2>Website đang bảo trì</h2>
-  <p>Hệ thống đang tạm đóng. Vui lòng quay lại sau.</p>
-  <button class="btn btn-ghost" id="btnMaintDev"></button>
+  <p id="maintMsg">Hệ thống đang tạm đóng. Vui lòng quay lại sau.</p>
 </div>
 
-<!-- Thanh đầu -->
-<header id="appBar">
-  <span id="logoMini"><svg viewBox="0 0 24 24" fill="none"><path d="M13.4 2.5 5 13h5.2l-1.6 8.5L17 11h-5.2Z" fill="url(#lg1)"/><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8CFF64"/><stop offset="1" stop-color="#4CC9F0"/></linearGradient></defs></svg></span>
-  <span id="wordmark">SKIBIDI SCRIPT WEB</span>
-  <span id="headSpace"></span>
-  <span id="maintChip">BẢO TRÌ</span>
-  <span id="liveDot" title=""></span>
-  <button id="btnAuth" aria-label="Tài khoản"></button>
+<!-- HEADER -->
+<header id="hdr">
+  <div class="hdr-main">
+    <button id="btnMenu" aria-label="Mở menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <a class="brand" href="#/" aria-label="SKIBIDI SCRIPT WEB — Trang chủ">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M13.4 2.5 5 13h5.2l-1.6 8.5L17 11h-5.2Z" fill="url(#bg1)"/><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#29d6c5"/></linearGradient></defs></svg></span>
+      <b>SKIBIDI SCRIPT WEB</b>
+    </a>
+    <span class="hdr-sp"></span>
+    <div class="searchbox" role="search">
+      <svg class="si" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Tìm Script, APK, LINK, iOS…" aria-label="Tìm kiếm" autocomplete="off">
+      <button class="clr" id="qClr" aria-label="Xóa từ khóa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <button id="btnSearchM" aria-label="Tìm kiếm"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <button id="btnAcc" aria-label="Tài khoản"><span id="connDot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg></button>
+  </div>
+  <div class="hdr-search" id="hdrSearch">
+    <div class="searchbox" role="search">
+      <svg class="si" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="qM" type="search" placeholder="Tìm Script, APK, LINK, iOS…" aria-label="Tìm kiếm" autocomplete="off">
+      <button class="clr" id="qClrM" aria-label="Xóa từ khóa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+  </div>
 </header>
 
-<!-- Nav cạnh desktop -->
-<aside id="sideNav"></aside>
+<!-- SIDEBAR / DRAWER -->
+<div id="sideOv"></div>
+<aside id="side" aria-label="Điều hướng">
+  <span class="navsec">Menu</span>
+  <a class="navitem" href="#/" data-route="home" style="--nc:var(--accent-secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21.5v-6.5h6v6.5"/></svg>Trang chủ</a>
+  <a class="navitem" href="#/script" data-route="script" style="--nc:var(--accent-primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg>Script<span class="cnt" data-cnt="script" hidden></span></a>
+  <a class="navitem" href="#/apk" data-route="apk" style="--nc:var(--warning)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/><path d="M12 13v7"/></svg>APK<span class="cnt" data-cnt="apk" hidden></span></a>
+  <a class="navitem" href="#/link" data-route="link" style="--nc:var(--accent-secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>LINK<span class="cnt" data-cnt="link" hidden></span></a>
+  <a class="navitem" href="#/ios" data-route="ios" style="--nc:var(--cat-ios)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.6 8.6c-.2-2 1.5-3 1.5-3-1-1.4-2.5-1.6-3.1-1.6-1.4-.1-2.3.8-2.9.8-.6 0-1.6-.8-2.8-.8-1.6 0-3.8 1.3-3.8 4.9 0 3.3 2.5 7.4 4.1 7.4 1 0 1.4-.6 2.8-.6 1.3 0 1.7.6 2.8.6 1.6 0 4-4 4-7.2 0-2.4-1.8-3.4-2.6-3.5Z"/><path d="M12.2 3.9c0-1.5 1.2-2.7 2.7-2.7.1 1.6-1.3 2.8-2.7 2.7Z"/></svg>iOS<span class="cnt" data-cnt="ios" hidden></span></a>
+  <div class="side-acc auth-zone"></div>
+</aside>
 
-<!-- Nội dung -->
-<main id="shell">
-  <section class="view" data-cat="script">
+<!-- MAIN -->
+<main id="main">
+  <!-- TRANG CHỦ -->
+  <section class="view" id="v-home" aria-label="Trang chủ">
+    <div class="hero">
+      <span class="kicker">REALTIME DATABASE</span>
+      <h1>SKIBIDI <span>SCRIPT WEB</span></h1>
+      <p>Code · Share · Connect — Simple. Fast. Connected.</p>
+    </div>
+    <div class="cattiles" id="tiles"></div>
+    <h2 class="sech">Mới được thêm</h2>
+    <div class="latest" id="latest"></div>
+    <footer id="footer"><b>SKIBIDI SCRIPT WEB</b><span id="yr"></span></footer>
+  </section>
+
+  <!-- DANH MỤC -->
+  <section class="view" id="v-script" data-cat="script" style="--cat:var(--accent-primary)" aria-label="Script">
     <div class="vhead"><div><h2>Script</h2><p class="vsub">Kho script cập nhật realtime.</p></div><span class="vcount"></span></div>
-    <div class="vgrid"></div>
+    <div class="grid"></div>
   </section>
-  <section class="view" data-cat="apk">
+  <section class="view" id="v-apk" data-cat="apk" style="--cat:var(--warning)" aria-label="APK">
     <div class="vhead"><div><h2>APK</h2><p class="vsub">Kho APK và APK Vault.</p></div><span class="vcount"></span></div>
-    <div class="vgrid"></div>
+    <div class="grid"></div>
   </section>
-  <section class="view" data-cat="link">
+  <section class="view" id="v-link" data-cat="link" style="--cat:var(--accent-secondary)" aria-label="LINK">
     <div class="vhead"><div><h2>LINK</h2><p class="vsub">Liên kết hữu ích.</p></div><span class="vcount"></span></div>
-    <div class="vgrid"></div>
+    <div class="grid"></div>
   </section>
-  <section class="view" data-cat="ios">
+  <section class="view" id="v-ios" data-cat="ios" style="--cat:var(--cat-ios)" aria-label="iOS">
     <div class="vhead"><div><h2>iOS</h2><p class="vsub">Kho iOS và iOS Vault.</p></div><span class="vcount"></span></div>
-    <div class="vgrid"></div>
+    <div class="grid"></div>
+  </section>
+
+  <!-- TÌM KIẾM -->
+  <section class="view" id="v-search" aria-label="Kết quả tìm kiếm">
+    <div class="vhead"><div><h2 id="srTitle">Kết quả tìm kiếm</h2><p class="vsub" id="srSub"></p></div><span class="vcount" id="srCount"></span></div>
+    <div class="grid" id="srGrid"></div>
   </section>
 </main>
 
-<!-- Nav đáy mobile -->
-<nav id="bottomNav"><span id="bnInd"></span></nav>
+<!-- OVERLAY + MODALS -->
+<div id="ov"></div>
 
-<!-- Lớp phủ + bảng -->
-<div id="backdrop"></div>
+<div class="modal" id="mdDetail" role="dialog" aria-modal="true" aria-label="Chi tiết">
+  <div class="m-grab"></div>
+  <div class="m-head"><h3>Chi tiết</h3><button class="xbtn" data-close aria-label="Đóng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="m-body" id="dtBody"></div>
+</div>
 
-<div class="sheet" id="shLogin" role="dialog" aria-modal="true">
-  <div class="grab"></div>
-  <div class="shead"><h3>Đăng nhập</h3><button class="xbtn" data-close></button></div>
-  <div class="sbody">
-    <button class="gbtn" id="btnGoogle"></button>
+<div class="modal" id="mdAuth" role="dialog" aria-modal="true" aria-label="Đăng nhập">
+  <div class="m-grab"></div>
+  <div class="m-head"><h3 id="authTitle">Đăng nhập</h3><button class="xbtn" data-close aria-label="Đóng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="m-body">
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:12px" novalidate>
+      <div class="fld"><label for="liEmail">Email</label><input id="liEmail" type="email" autocomplete="username" required></div>
+      <div class="fld"><label for="liPass">Mật khẩu</label><input id="liPass" type="password" autocomplete="current-password" required></div>
+      <p class="form-err" id="liErr" role="alert" aria-live="polite"></p>
+      <button class="btn btn-p btn-wide" type="submit" id="liBtn" style="--cat:var(--accent-primary)">Đăng nhập</button>
+    </form>
+    <div id="accPane" style="display:none;flex-direction:column;gap:12px">
+      <div class="acc-card" style="padding:14px"><span class="mail" id="accMail" style="font-size:13.5px"></span><span class="devtag" id="accDev" hidden>DEV</span></div>
+      <button class="btn btn-p btn-wide" id="btnDev" style="display:none;--cat:var(--accent-primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5.5v6c0 5 3.4 8.6 8 10.5 4.6-1.9 8-5.5 8-10.5v-6Z"/></svg>Bảng điều khiển DEV</button>
+      <button class="btn btn-g btn-wide" id="btnOut">Đăng xuất</button>
+    </div>
   </div>
 </div>
 
-<div class="sheet" id="shUser" role="dialog" aria-modal="true">
-  <div class="grab"></div>
-  <div class="shead"><h3>Tài khoản</h3><button class="xbtn" data-close></button></div>
-  <div class="sbody">
-    <div class="urow" id="uRow"></div>
-    <button class="btn btn-cat btn-wide" id="btnDevOpen" style="display:none"></button>
-    <button class="btn btn-ghost btn-wide" id="btnOut"></button>
-  </div>
-</div>
-
-<div class="sheet dev" id="shDev" role="dialog" aria-modal="true">
-  <div class="grab"></div>
-  <div class="shead"><h3>DEV CONTROL CENTER</h3><button class="xbtn" data-close></button></div>
-  <div class="sbody">
-    <div class="dgrid">
-      <div class="dstat">SDK<b id="dvSdk">—</b></div>
-      <div class="dstat">DATABASE<b id="dvDb">—</b></div>
-      <div class="dstat">IP<b id="dvIp">—</b></div>
-      <div class="dstat">VPN<b id="dvVpn">—</b></div>
-    </div>
-
-    <span class="dsec">Quản lý website</span>
-    <div class="switch"><span>Bật bảo trì</span><label class="sw"><input type="checkbox" id="tgMaint"><i></i></label></div>
-    <div class="drow">
-      <button class="btn btn-ghost" id="btnRefresh"></button>
-      <button class="btn btn-ghost" id="btnNet"></button>
-    </div>
-
-    <span class="dsec">Thêm dữ liệu</span>
-    <form id="addForm" style="display:flex;flex-direction:column;gap:12px">
-      <div class="fld"><label>Danh mục</label><select id="fCat">
-        <option value="script">Script</option><option value="apk">APK</option><option value="link">LINK</option><option value="ios">iOS</option>
-      </select></div>
-      <div class="fld"><label>Tên</label><input id="fTen" placeholder="Tên mục" autocomplete="off"></div>
-      <div class="fld"><label>Mô tả</label><input id="fMoTa" placeholder="Mô tả ngắn" autocomplete="off"></div>
-      <div class="fld"><label>Link</label><input id="fLink" placeholder="https://…" autocomplete="off" inputmode="url"></div>
-      <div class="switch"><span>Vault</span><label class="sw"><input type="checkbox" id="fVault"><i></i></label></div>
-      <button class="btn btn-cat btn-wide" type="submit"></button>
+<div class="modal wide" id="mdDev" role="dialog" aria-modal="true" aria-label="Bảng điều khiển DEV">
+  <div class="m-grab"></div>
+  <div class="m-head"><h3 id="devTitle">Bảng điều khiển DEV</h3><button class="xbtn" data-close aria-label="Đóng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="m-body">
+    <span class="dsec" id="formSec">Thêm dữ liệu</span>
+    <form id="itemForm" style="display:flex;flex-direction:column;gap:12px" novalidate>
+      <div class="fld"><label>Danh mục</label>
+        <div class="seg" id="catSeg">
+          <button type="button" data-c="script" class="on" style="--sc:var(--accent-primary)">Script</button>
+          <button type="button" data-c="apk" style="--sc:var(--warning)">APK</button>
+          <button type="button" data-c="link" style="--sc:var(--accent-secondary)">LINK</button>
+          <button type="button" data-c="ios" style="--sc:var(--cat-ios)">iOS</button>
+        </div>
+      </div>
+      <div class="fld"><label for="fName">Tên</label><input id="fName" autocomplete="off" required></div>
+      <div class="fld"><label for="fDesc">Mô tả</label><input id="fDesc" autocomplete="off"></div>
+      <div class="fld" id="wrapUrl"><label for="fUrl">Link</label><input id="fUrl" type="url" placeholder="https://…" autocomplete="off" inputmode="url"></div>
+      <div class="fld" id="wrapCode" style="display:none"><label for="fCode">Code</label><textarea id="fCode" spellcheck="false"></textarea></div>
+      <p class="form-err" id="fErr" role="alert" aria-live="polite"></p>
+      <div style="display:flex;gap:9px">
+        <button class="btn btn-p" type="submit" id="fSave" style="flex:1;--cat:var(--accent-primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="fSaveTxt">Thêm</span></button>
+        <button class="btn btn-g" type="button" id="fCancel" style="display:none">Hủy chỉnh sửa</button>
+      </div>
     </form>
 
     <span class="dsec">Dữ liệu kho</span>
-    <div id="dataList" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div id="devList" style="display:flex;flex-direction:column;gap:8px"></div>
+
+    <span class="dsec">Quản lý website</span>
+    <div class="maint-state"><span class="dot" id="mntDot"></span><span id="mntTxt">Đang kiểm tra…</span><button class="btn btn-g" id="mntBtn" style="margin-left:auto">—</button></div>
 
     <span class="dsec">Hệ thống</span>
     <div id="devLog"></div>
   </div>
 </div>
 
-<div id="toasts"></div>
+<div id="toasts" aria-live="polite"></div>
 
-<script type="module">
-/* ============================================================
-   SKIBIDI SCRIPT WEB — logic chính
-   ============================================================ */
-/* ---- CẤU HÌNH FIREBASE: GIỮ NGUYÊN TỪ FILE GỐC ----
-   Dán lại đúng firebaseConfig của bản gốc vào đây.
-   Không đổi đường dẫn dữ liệu (xem DB_NODES). */
-const FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+<!-- Firebase compat SDK 10.12.2 (giữ nguyên phiên bản gốc) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+"use strict";
+/* ═══════════════ FIREBASE CONFIG GỐC — GIỮ NGUYÊN ═══════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDNGa1YNLJk1n5C_cxCqsGlx7_hP7DjetA",
+  authDomain: "noxgalaxy-2cd71.firebaseapp.com",
+  databaseURL: "https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "noxgalaxy-2cd71",
+  appId: "1:632801709671:web:d239eb4bc8e0f7acab4ec2"
 };
-/* Đường dẫn dữ liệu giữ nguyên như hệ thống hiện tại */
-const DB_NODES = { script:"scripts", apk:"apks", link:"links", ios:"ios", settings:"settings" };
 const DEV_EMAIL = "hminhgalaxy@gmail.com";
+const DATA_ROOT = "nox_data";                      // node thật: nox_data/scripts|apks|links|ios
+const MAINT_NODE = "nox_maintenance";              // node thật: enabled/message/by/ts
 
-/* ---------- Tiện ích ---------- */
-const $  = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
+const FB_OK = (typeof firebase !== "undefined");
+let database = null, auth = null;
+if (FB_OK) {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    auth = firebase.auth();
+  } catch (e) { /* xử lý bên dưới qua trạng thái lỗi */ }
+}
+
+/* ═══════════════ TIỆN ÍCH ═══════════════ */
+const $ = s => document.querySelector(s);
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pick = (o, ks) => { for (const k of ks) if (o && o[k] != null && o[k] !== "") return o[k]; return ""; };
-
-const ICO = {
-  script:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg>',
-  apk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0v7H6Z"/><path d="m8.6 6.6-1.4-2M15.4 6.6l1.4-2"/><path d="M9.5 10.5h.01M14.5 10.5h.01" stroke-width="2.4"/></svg>',
-  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
-  ios:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.6 8.6c-.2-2 1.5-3 1.5-3-1-1.4-2.5-1.6-3.1-1.6-1.4-.1-2.3.8-2.9.8-.6 0-1.6-.8-2.8-.8-1.6 0-3.8 1.3-3.8 4.9 0 3.3 2.5 7.4 4.1 7.4 1 0 1.4-.6 2.8-.6 1.3 0 1.7.6 2.8.6 1.6 0 4-4 4-7.2 0-2.4-1.8-3.4-2.6-3.5Z"/><path d="M12.2 3.9c0-1.5 1.2-2.7 2.7-2.7.1 1.6-1.3 2.8-2.7 2.7Z"/></svg>',
-  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>',
-  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-  ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4 10 14"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
-  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
-  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>',
-  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>',
-  wifi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9a15 15 0 0 1 19 0M5.5 12.5a10.5 10.5 0 0 1 13 0M8.5 16a6 6 0 0 1 7 0M12 19.5h.01"/></svg>',
-  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 5 5L20 6.5"/></svg>',
-  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5.5v6c0 5 3.4 8.6 8 10.5 4.6-1.9 8-5.5 8-10.5v-6Z"/></svg>',
-  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/><path d="M12 13v7"/></svg>',
-  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>',
-  google:'<svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>'
-};
-
-const CATS = [
-  { id:"script", label:"Script", color:"var(--script)" },
-  { id:"apk",    label:"APK",    color:"var(--apk)" },
-  { id:"link",   label:"LINK",   color:"var(--link)" },
-  { id:"ios",    label:"iOS",    color:"var(--ios)" }
-];
-
-/* ---------- Trạng thái ---------- */
-const state = {
-  cat:"script", user:null, dev:false, maint:false,
-  data:{ script:null, apk:null, link:null, ios:null }, // null = đang tải
-  logs:[], net:{ ip:"—", vpn:"—" }
-};
-let db=null, auth=null, FB=null, unsubs=[], firstSyncDone=false;
-const firstSyncWaiters=[];
-function firstSync(){ return new Promise(res=>{ firstSyncDone ? res() : firstSyncWaiters.push(res); }); }
-function markSynced(){ if(!firstSyncDone){ firstSyncDone=true; firstSyncWaiters.forEach(f=>f()); } }
-
-/* ---------- Log nội bộ (chỉ Dev thấy) ---------- */
-function log(type, msg){
-  const d = new Date();
-  const t = [d.getHours(),d.getMinutes(),d.getSeconds()].map(n=>String(n).padStart(2,"0")).join(":");
-  state.logs.unshift({ t, type, msg });
-  if (state.logs.length > 80) state.logs.pop();
-  renderLog();
-}
-function renderLog(){
-  const el = $("#devLog"); if(!el) return;
-  el.innerHTML = state.logs.map(l=>`<div><span class="t">[${esc(l.t)}]</span> <span class="${l.type}">${esc(l.msg)}</span></div>`).join("") || '<div class="t">—</div>';
-}
-
-/* ---------- Toast ---------- */
-function toast(msg, icon="check"){
-  const wrap = $("#toasts");
-  const el = document.createElement("div");
+const vi = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+const validUrl = u => /^https?:\/\/.+/i.test(String(u || "").trim());
+const pad = n => String(n).padStart(2, "0");
+function fmtTime(ts) { if (!ts) return ""; const d = new Date(Number(ts)); if (isNaN(d)) return ""; return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+function toast(msg, kind) {
+  const w = $("#toasts"), el = document.createElement("div");
   el.className = "toast";
-  el.innerHTML = `${ICO[icon]||ICO.check}<span>${esc(msg)}</span>`;
-  wrap.appendChild(el);
-  setTimeout(()=>{ el.classList.add("out"); setTimeout(()=>el.remove(), 380); }, 2100);
+  const ic = kind === "err"
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 5 5L20 6.5"/></svg>';
+  if (kind === "err") el.style.setProperty("--tc", "var(--danger)");
+  el.innerHTML = ic + "<span>" + esc(msg) + "</span>";
+  w.appendChild(el);
+  setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 380); }, 2200);
+}
+function copyText(v) {
+  return (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject())
+    .catch(() => new Promise((res, rej) => {
+      const ta = document.createElement("textarea");
+      ta.value = v; ta.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); res(); } catch (e) { rej(e); }
+      ta.remove();
+    }));
 }
 
-/* ---------- Splash ---------- */
-(function buildSplash(){
-  const wrap = $("#spWord");
-  "SKIBIDI SCRIPT WEB".split(" ").forEach((word,wi,arr)=>{
-    const w = document.createElement("span"); w.className="w";
-    word.split("").forEach((ch,i)=>{
-      const s = document.createElement("span"); s.className="ch"; s.textContent = ch;
-      s.style.setProperty("--d", (260 + (wi*7+i)*42) + "ms");
-      w.appendChild(s);
+/* ═══════════════ ICONS ═══════════════ */
+const SW = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+const ICO = {
+  script: `<svg viewBox="0 0 24 24" ${SW}><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg>`,
+  apk: `<svg viewBox="0 0 24 24" ${SW}><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/><path d="M12 13v7"/></svg>`,
+  link: `<svg viewBox="0 0 24 24" ${SW}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  ios: `<svg viewBox="0 0 24 24" ${SW}><path d="M15.6 8.6c-.2-2 1.5-3 1.5-3-1-1.4-2.5-1.6-3.1-1.6-1.4-.1-2.3.8-2.9.8-.6 0-1.6-.8-2.8-.8-1.6 0-3.8 1.3-3.8 4.9 0 3.3 2.5 7.4 4.1 7.4 1 0 1.4-.6 2.8-.6 1.3 0 1.7.6 2.8.6 1.6 0 4-4 4-7.2 0-2.4-1.8-3.4-2.6-3.5Z"/><path d="M12.2 3.9c0-1.5 1.2-2.7 2.7-2.7.1 1.6-1.3 2.8-2.7 2.7Z"/></svg>`,
+  copy: `<svg viewBox="0 0 24 24" ${SW}><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+  ext: `<svg viewBox="0 0 24 24" ${SW}><path d="M14 4h6v6M20 4 10 14"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+  eye: `<svg viewBox="0 0 24 24" ${SW}><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  pencil: `<svg viewBox="0 0 24 24" ${SW}><path d="M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16Z"/><path d="m14 6 4 4"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" ${SW}><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>`,
+  box: `<svg viewBox="0 0 24 24" ${SW}><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/></svg>`,
+  warn: `<svg viewBox="0 0 24 24" ${SW}><path d="M12 3 2.5 20h19Z"/><path d="M12 10v4.5M12 17.5h.01"/></svg>`,
+  chev: `<svg class="ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>`
+};
+const CATS = [
+  { id:"script", label:"Script", node:"scripts", color:"var(--accent-primary)",  sub:"Kho script cập nhật realtime." },
+  { id:"apk",    label:"APK",    node:"apks",    color:"var(--warning)",         sub:"Kho APK và APK Vault." },
+  { id:"link",   label:"LINK",   node:"links",   color:"var(--accent-secondary)",sub:"Liên kết hữu ích." },
+  { id:"ios",    label:"iOS",    node:"ios",     color:"var(--cat-ios)",         sub:"Kho iOS và iOS Vault." }
+];
+const catOf = id => CATS.find(c => c.id === id);
+const nodePath = id => DATA_ROOT + "/" + catOf(id).node;
+
+/* ═══════════════ TRẠNG THÁI ═══════════════ */
+const state = {
+  route: "home", q: "", user: null, dev: false,
+  maint: null,
+  data: { script:null, apk:null, link:null, ios:null },   // null = đang tải
+  status: { script:"", apk:"", link:"", ios:"" },          // "" | "error"
+  editing: null, formCat: "script", logs: []
+};
+
+/* ═══════════════ LOG DEV (không hiển thị cho user thường) ═══════════════ */
+function dlog(type, msg) {
+  const d = new Date();
+  state.logs.unshift({ t: pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()), type, msg });
+  if (state.logs.length > 80) state.logs.pop();
+  const el = $("#devLog");
+  if (el) el.innerHTML = state.logs.map(l => `<div><span class="t">[${l.t}]</span> <span class="${l.type}">${esc(l.msg)}</span></div>`).join("");
+}
+window.addEventListener("error", e => dlog("er", "JS: " + (e.message || "lỗi không xác định")));
+
+/* ═══════════════ SPLASH ═══════════════ */
+(function buildWord() {
+  const w = $("#spWord");
+  "SKIBIDI SCRIPT WEB".split(" ").forEach((word, wi) => {
+    const sp = document.createElement("span");
+    sp.style.cssText = "display:flex" + (wi ? ";margin-left:.35em" : "");
+    word.split("").forEach((ch, i) => {
+      const c = document.createElement("span");
+      c.className = "ch"; c.textContent = ch;
+      c.style.setProperty("--d", (240 + (wi * 7 + i) * 40) + "ms");
+      sp.appendChild(c);
     });
-    wrap.appendChild(w);
+    w.appendChild(sp);
   });
 })();
-function spProgress(p){ $("#spBar").style.width = p + "%"; }
-function enterApp(){
+const spP = p => { $("#spBar").style.width = p + "%"; };
+let pendingCats = 4;
+function catSynced() {
+  pendingCats--;
+  spP(Math.min(92, 40 + (4 - pendingCats) * 14));
+  if (pendingCats <= 0) enterApp();
+}
+let splashDone = false;
+function enterApp() {
+  if (splashDone) return; splashDone = true;
+  spP(100);
   const sp = $("#splash");
-  if (RM){ sp.style.display="none"; document.body.classList.add("entered"); return; }
-  spProgress(100);
-  setTimeout(()=>{
-    sp.classList.add("out");
-    document.body.classList.add("entered");
-    setTimeout(()=>{ sp.style.display="none"; }, 620);
-  }, 320);
+  const fin = () => { sp.style.display = "none"; };
+  if (RM) { fin(); return; }
+  setTimeout(() => { sp.classList.add("out"); setTimeout(fin, 560); }, 260);
+}
+setTimeout(enterApp, 2800); // không bao giờ loading vô hạn
+
+/* ═══════════════ MODAL / DRAWER ═══════════════ */
+let openEl = null, lastFocus = null;
+function openLayer(el) {
+  closeLayer();
+  lastFocus = document.activeElement;
+  openEl = el;
+  el.classList.add("on");
+  $("#ov").classList.add("on");
+  document.body.classList.add("locked");
+  const f = el.querySelector("input,textarea,select,button:not([data-close])");
+  setTimeout(() => { try { (f || el).focus({ preventScroll:true }); } catch (_) {} }, 120);
+}
+function closeLayer() {
+  if (openEl) { openEl.classList.remove("on"); openEl = null; }
+  $("#ov").classList.remove("on");
+  if (!$("#maint").classList.contains("on")) document.body.classList.remove("locked");
+  if (lastFocus && lastFocus.focus) { try { lastFocus.focus({ preventScroll:true }); } catch (_) {} lastFocus = null; }
+}
+$("#ov").addEventListener("click", () => { if (openEl && openEl.id === "side") closeDrawer(); else closeLayer(); });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") {
+    if (e.key === "Tab" && openEl && openEl.classList.contains("modal")) { // focus trap
+      const fs = openEl.querySelectorAll('input,textarea,select,button,[href]');
+      if (!fs.length) return;
+      const first = fs[0], last = fs[fs.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+    return;
+  }
+  if (openEl && openEl.id === "side") closeDrawer();
+  else if (openEl) closeLayer();
+});
+document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeLayer(); });
+
+function openDrawer() { $("#side").classList.add("open"); $("#sideOv").classList.add("on"); document.body.classList.add("locked"); }
+function closeDrawer() { $("#side").classList.remove("open"); $("#sideOv").classList.remove("on"); if (!openEl && !$("#maint").classList.contains("on")) document.body.classList.remove("locked"); }
+$("#btnMenu").addEventListener("click", () => $("#side").classList.contains("open") ? closeDrawer() : openDrawer());
+$("#sideOv").addEventListener("click", closeDrawer);
+
+/* ═══════════════ ROUTER (hash — không hỏng refresh) ═══════════════ */
+function routeFromHash() {
+  const h = location.hash.replace(/^#\/?/, "").toLowerCase();
+  return ["script", "apk", "link", "ios"].includes(h) ? h : "home";
+}
+function renderRoute() {
+  state.route = routeFromHash();
+  if (state.q) { renderSearch(); return; }
+  const r = state.route;
+  const c = r === "home" ? null : catOf(r);
+  document.documentElement.style.setProperty("--cat", c ? c.color : "var(--accent-primary)");
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+  $("#v-" + (r === "home" ? "home" : r)).classList.add("on");
+  document.querySelectorAll(".navitem").forEach(a => a.classList.toggle("on", a.dataset.route === r));
+  if (r === "home") renderHome(); else renderCat(r);
+  window.scrollTo({ top: 0, behavior: "auto" });
+  if (window.innerWidth < 1024) closeDrawer();
+}
+window.addEventListener("hashchange", renderRoute);
+
+/* ═══════════════ CHUẨN HÓA ITEM (giữ đúng field thật) ═══════════════ */
+function normItem(key, o) {
+  if (o == null || typeof o !== "object") o = { name:String(o ?? "") };
+  return {
+    key,
+    name: pick(o, ["name", "title"]) || "(không tên)",
+    desc: pick(o, ["desc", "description", "note"]),
+    url:  pick(o, ["url", "link", "href"]),
+    code: pick(o, ["code", "script"]),
+    img:  pick(o, ["img", "image", "avatar", "thumb"]),
+    copies: o.copies != null ? Number(o.copies) || 0 : null,
+    vault: !!(o.vault || o.vaulted),
+    ts: Number(o.updatedAt || o.editedAt || o.createdAt || 0) || null,
+    created: Number(o.createdAt) || null
+  };
 }
 
-/* ---------- Nav ---------- */
-function buildNav(){
-  const side = $("#sideNav"), bot = $("#bottomNav");
-  CATS.forEach(c=>{
-    const b1 = document.createElement("button");
-    b1.className="navbtn"; b1.dataset.cat=c.id; b1.style.setProperty("--nc", c.color);
-    b1.innerHTML = `${ICO[c.id]}<span>${c.label}</span><span class="cnt" data-cnt="${c.id}" hidden></span>`;
-    side.appendChild(b1);
-    const b2 = document.createElement("button");
-    b2.className="navbtn-m"; b2.dataset.cat=c.id;
-    b2.innerHTML = `${ICO[c.id]}<span>${c.label}</span>`;
-    bot.appendChild(b2);
-  });
-}
-function goCat(id){
-  if (state.cat === id) return;
-  state.cat = id;
-  const meta = CATS.find(c=>c.id===id);
-  document.documentElement.style.setProperty("--cat", meta.color);
-  $$(".view").forEach(v=>v.classList.toggle("on", v.dataset.cat===id));
-  const idx = CATS.findIndex(c=>c.id===id);
-  $("#bnInd").style.setProperty("--idx", idx);
-  $$(".navbtn,.navbtn-m").forEach(b=>b.classList.toggle("on", b.dataset.cat===id));
-  window.scrollTo({ top:0, behavior: RM ? "auto" : "smooth" });
-}
-
-/* ---------- Render thẻ ---------- */
-const io = ("IntersectionObserver" in window) ? new IntersectionObserver(es=>{
-  es.forEach(en=>{
-    if(!en.isIntersecting) return;
+/* ═══════════════ RENDER THẺ ═══════════════ */
+const io = ("IntersectionObserver" in window) ? new IntersectionObserver(es => {
+  es.forEach(en => {
+    if (!en.isIntersecting) return;
     const el = en.target;
-    if (performance.now() - (+el.dataset.rt || 0) > 420) el.style.setProperty("--d","0ms");
+    if (performance.now() - (+el.dataset.rt || 0) > 450) el.style.setProperty("--d", "0ms");
     el.classList.add("in");
     io.unobserve(el);
   });
-},{ threshold:.08 }) : null;
+}, { threshold:.06, rootMargin:"40px" }) : null;
 
-function normItem(key, o){
-  if (o == null || typeof o !== "object") o = { value:o };
-  return {
-    key,
-    ten:  pick(o, ["ten","name","title","tieuDe"]) || "—",
-    moTa: pick(o, ["moTa","desc","description","note","ghiChu","noidung"]),
-    link: pick(o, ["link","url","href","lienKet","linkUrl"]),
-    vault: !!(o.vault || o.vaulted || o.khoa),
-    ts:   Number(o.ts || o.createdAt || 0)
-  };
+function cardHTML(it, catId, i, rt, showChip) {
+  const c = catOf(catId);
+  const hasUrl = validUrl(it.url);
+  const acts = [];
+  if (it.code) acts.push(`<button class="btn btn-p" data-act="copycode" data-cat="${catId}" data-key="${esc(it.key)}">${ICO.copy}<span>Sao chép code</span></button>`);
+  if (hasUrl) acts.push(`<a class="btn btn-p" href="${esc(it.url.trim())}" target="_blank" rel="noopener" data-stop>${ICO.ext}<span>Mở link</span></a>`);
+  acts.push(`<button class="btn btn-g" data-act="detail" data-cat="${catId}" data-key="${esc(it.key)}" data-stop>${ICO.eye}<span>Chi tiết</span></button>`);
+  return `<article class="card" style="--cat:${c.color};--d:${Math.min(i,10)*45}ms" data-rt="${rt}" data-cat="${catId}" data-key="${esc(it.key)}" tabindex="0" role="button" aria-label="Xem chi tiết ${esc(it.name)}">
+    <div class="ctop">
+      <span class="ico-tile">${ICO[catId]}</span>
+      ${showChip ? `<span class="chip">${c.label}</span>` : ""}
+      ${it.vault ? `<span class="chip" style="--cat:var(--warning)">VAULT</span>` : ""}
+      <span class="ctime">${it.ts ? esc(fmtTime(it.ts)) : ""}</span>
+    </div>
+    ${it.img ? `<img class="thumb" src="${esc(it.img)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+    <h3>${esc(it.name)}</h3>
+    ${it.desc ? `<p class="desc">${esc(it.desc)}</p>` : ""}
+    ${it.code ? `<pre class="codeprev">${esc(String(it.code).slice(0, 160))}</pre>` : ""}
+    <div class="cfoot">${acts.join("")}</div>
+  </article>`;
 }
-function shortLink(u){ return String(u).replace(/^https?:\/\//,"").replace(/\/$/,"").slice(0,42); }
+function observeCards(scope) {
+  const cards = scope.querySelectorAll(".card");
+  if (io && !RM) cards.forEach(c => io.observe(c));
+  else cards.forEach(c => c.classList.add("in"));
+}
+function skeletonHTML() {
+  return [0,1,2].map(() => `<div class="sk" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i></div>`).join("");
+}
+function emptyHTML(catId, label) {
+  return `<div class="statebox">${ICO.box}<p>${esc(label || ("Chưa có " + catOf(catId).label + "."))}</p></div>`;
+}
+function errorHTML(catId) {
+  return `<div class="statebox err">${ICO.warn}<p>Không tải được dữ liệu.</p><button class="btn btn-g" data-act="retry" data-cat="${catId}"><svg viewBox="0 0 24 24" ${SW}><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>Thử lại</button></div>`;
+}
 
-function renderCat(cat){
-  const view = document.querySelector(`.view[data-cat="${cat}"]`);
-  const grid = view.querySelector(".vgrid");
-  const cnt  = view.querySelector(".vcount");
-  const items = state.data[cat];
+/* ═══════════════ RENDER DANH MỤC ═══════════════ */
+function renderCat(catId) {
+  const view = $("#v-" + catId);
+  const grid = view.querySelector(".grid");
+  const cnt = view.querySelector(".vcount");
+  const items = state.data[catId];
   const rt = performance.now();
-
-  if (items === null){ // đang tải → skeleton
-    cnt.textContent = "…";
-    grid.innerHTML = [0,1,2].map(()=>`<div class="sk"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i></div>`).join("");
-    return;
-  }
+  if (state.status[catId] === "error" && items === null) { cnt.textContent = "—"; grid.innerHTML = errorHTML(catId); return; }
+  if (items === null) { cnt.textContent = "…"; grid.innerHTML = skeletonHTML(); return; }
   cnt.textContent = items.length + " mục";
-  if (!items.length){
-    grid.innerHTML = `<div class="empty">${ICO.box}<p>Chưa có dữ liệu.</p></div>`;
-    return;
-  }
-  grid.innerHTML = items.map((it,i)=>{
-    const d = Math.min(i,10)*48;
-    return `<article class="card" style="--d:${d}ms" data-rt="${rt}">
-      <div class="ctop">
-        <span class="cico">${ICO[cat]}</span>
-        ${it.vault ? `<span class="cbadge">${ICO.lock}VAULT</span>` : ""}
-      </div>
-      <h3>${esc(it.ten)}</h3>
-      ${it.moTa ? `<p class="cdesc">${esc(it.moTa)}</p>` : ""}
-      ${it.link ? `<div class="clink"><i></i><code>${esc(shortLink(it.link))}</code></div>` : ""}
-      <div class="cacts">
-        ${it.link ? `<a class="btn btn-cat" href="${esc(it.link)}" target="_blank" rel="noopener">${ICO.ext}<span>Mở</span></a>` : ""}
-        <button class="btn btn-icon" data-copy="${esc(it.link || it.ten)}" aria-label="Sao chép">${ICO.copy}</button>
-      </div>
-    </article>`;
-  }).join("");
-  const cards = grid.querySelectorAll(".card");
-  if (io && !RM) cards.forEach(c=>io.observe(c));
-  else cards.forEach(c=>c.classList.add("in"));
+  grid.innerHTML = items.length ? items.map((it, i) => cardHTML(it, catId, i, rt, false)).join("") : emptyHTML(catId);
+  observeCards(grid);
 }
-function renderCounts(){
-  CATS.forEach(c=>{
+function renderCounts() {
+  CATS.forEach(c => {
     const n = state.data[c.id];
-    const chip = document.querySelector(`[data-cnt="${c.id}"]`);
-    if (chip){ chip.hidden = !(n && n.length); chip.textContent = n ? n.length : ""; }
+    document.querySelectorAll(`[data-cnt="${c.id}"]`).forEach(el => {
+      if (n && n.length) { el.hidden = false; el.textContent = n.length; } else el.hidden = true;
+    });
   });
 }
 
-/* ---------- Sheets ---------- */
-let openSheetEl = null;
-function openSheet(el){ closeSheet(); openSheetEl = el; el.classList.add("on"); $("#backdrop").classList.add("on"); }
-function closeSheet(){ if(openSheetEl){ openSheetEl.classList.remove("on"); openSheetEl=null; } $("#backdrop").classList.remove("on"); }
-$("#backdrop").addEventListener("click", closeSheet);
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
-$$("[data-close]").forEach(b=>b.addEventListener("click", closeSheet));
-
-/* ---------- Ripple + copy (ủy quyền, đăng ký 1 lần) ---------- */
-document.addEventListener("pointerdown", e=>{
-  const b = e.target.closest(".btn,.gbtn");
-  if(!b || RM) return;
-  const r = b.getBoundingClientRect(), d = Math.max(r.width,r.height);
-  const s = document.createElement("span");
-  s.className="rip";
-  s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
-  b.appendChild(s); setTimeout(()=>s.remove(), 600);
-});
-document.addEventListener("click", e=>{
-  const cp = e.target.closest("[data-copy]");
-  if (cp){
-    const val = cp.getAttribute("data-copy") || "";
-    (navigator.clipboard ? navigator.clipboard.writeText(val) : Promise.reject())
-      .then(()=>toast("Đã sao chép"))
-      .catch(()=>{
-        const ta=document.createElement("textarea"); ta.value=val; document.body.appendChild(ta);
-        ta.select(); try{ document.execCommand("copy"); toast("Đã sao chép"); }catch(_){ toast("Không sao chép được","x"); }
-        ta.remove();
-      });
+/* ═══════════════ RENDER TRANG CHỦ (dữ liệu thật) ═══════════════ */
+function countUp(el, to) {
+  const from = parseInt(el.dataset.v || "0", 10);
+  el.dataset.v = to;
+  if (RM || from === to) { el.textContent = to; return; }
+  const t0 = performance.now(), dur = 550;
+  (function step(t) {
+    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * e);
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+function renderHome() {
+  const tiles = $("#tiles");
+  if (!tiles.children.length) {
+    tiles.innerHTML = CATS.map(c => `<a class="tile" href="#/${c.id}" style="--nc:${c.color}">
+      <span class="tico">${ICO[c.id]}</span><span class="num" data-tilenum="${c.id}">0</span>
+      <b>${c.label}</b><small>${esc(c.sub)}</small></a>`).join("");
   }
-  const nb = e.target.closest("[data-cat]");
-  if (nb) goCat(nb.dataset.cat);
-});
-
-/* ---------- Firebase ---------- */
-const cfgOk = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL && !FIREBASE_CONFIG.apiKey.includes("…"));
-async function initFirebase(){
-  spProgress(28);
-  if (!cfgOk){
-    log("er","Firebase chưa được cấu hình — dán firebaseConfig gốc vào đầu file.");
-    CATS.forEach(c=>state.data[c.id]=[]);
-    CATS.forEach(c=>renderCat(c.id)); renderCounts();
-    markSynced(); spProgress(70);
+  CATS.forEach(c => {
+    const n = state.data[c.id];
+    const el = tiles.querySelector(`[data-tilenum="${c.id}"]`);
+    if (el) countUp(el, n ? n.length : 0);
+  });
+  const all = [];
+  CATS.forEach(c => (state.data[c.id] || []).forEach(it => all.push({ ...it, cat: c.id })));
+  const latest = all.filter(x => x.ts).sort((a, b) => b.ts - a.ts).slice(0, 6);
+  const box = $("#latest");
+  if (!latest.length) {
+    box.innerHTML = `<div class="statebox" style="border-style:dashed">${ICO.box}<p>Chưa có dữ liệu.</p></div>`;
     return;
   }
-  try{
-    const [appM, dbM, auM] = await Promise.all([
-      import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"),
-      import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js"),
-      import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js")
-    ]);
-    FB = { ...appM, ...dbM, authM };
-    const app = appM.initializeApp(FIREBASE_CONFIG);
-    db = dbM.getDatabase(app);
-    auth = auM.getAuth(app);
-    log("ok","Firebase SDK sẵn sàng.");
-    $("#dvSdk").textContent = "OK"; $("#dvSdk").className = "ok";
-    spProgress(55);
-    attachListeners();
-    attachAuth(auM);
-  }catch(err){
-    log("er","Lỗi khởi tạo Firebase: " + (err && err.message ? err.message : err));
-    $("#dvSdk").textContent = "LỖI"; $("#dvSdk").className = "er";
-    CATS.forEach(c=>{ if(state.data[c.id]===null) state.data[c.id]=[]; });
-    CATS.forEach(c=>renderCat(c.id)); renderCounts();
-    markSynced(); spProgress(70);
-  }
+  box.innerHTML = latest.map(it => {
+    const c = catOf(it.cat);
+    return `<div class="lrow" style="--nc:${c.color}" data-act="detail" data-cat="${it.cat}" data-key="${esc(it.key)}" role="button" tabindex="0">
+      <span class="lico">${ICO[it.cat]}</span>
+      <span class="lt"><b>${esc(it.name)}</b><small>${esc(fmtTime(it.ts))}</small></span>
+      <span class="chip" style="--cat:${c.color}">${c.label}</span>
+    </div>`;
+  }).join("");
+  box.style.animation = "none"; void box.offsetWidth; box.style.animation = "";
 }
-function attachListeners(){
-  unsubs.forEach(u=>{ try{ u(); }catch(_){} }); unsubs = [];
-  CATS.forEach(c=>{
-    state.data[c.id] = null; renderCat(c.id);
-    const r = FB.ref(db, DB_NODES[c.id]);
-    const u = FB.onValue(r, snap=>{
-      const v = snap.val() || {};
-      const arr = Object.keys(v).map(k=>normItem(k, v[k]));
-      arr.sort((a,b)=> (b.ts||0) - (a.ts||0));
-      state.data[c.id] = arr;
-      renderCat(c.id); renderCounts(); renderDataList();
-      log("in",`Đồng bộ ${DB_NODES[c.id]}: ${arr.length} mục`);
-      markSynced(); spProgress(82);
-    }, err=>{
-      log("er",`Lỗi nghe ${DB_NODES[c.id]}: ` + (err && err.message ? err.message : err));
-      state.data[c.id] = []; renderCat(c.id); renderCounts();
-      markSynced(); spProgress(82);
+
+/* ═══════════════ TÌM KIẾM (lọc dữ liệu đã tải, debounce) ═══════════════ */
+function renderSearch() {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+  $("#v-search").classList.add("on");
+  const q = vi(state.q.trim());
+  const res = [];
+  CATS.forEach(c => (state.data[c.id] || []).forEach(it => {
+    if (!q || vi(it.name).includes(q) || vi(it.desc).includes(q) || vi(it.code).includes(q)) res.push({ ...it, cat: c.id });
+  }));
+  res.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  $("#srTitle").textContent = 'Tìm kiếm: "' + state.q.trim() + '"';
+  $("#srSub").textContent = "Lọc theo tên và mô tả · hỗ trợ tiếng Việt không dấu.";
+  $("#srCount").textContent = res.length + " kết quả";
+  const rt = performance.now();
+  const grid = $("#srGrid");
+  grid.innerHTML = res.length
+    ? res.map((it, i) => cardHTML(it, it.cat, i, rt, true)).join("")
+    : `<div class="statebox">${ICO.box}<p>Không tìm thấy kết quả.</p></div>`;
+  observeCards(grid);
+}
+function syncInputs(src) {
+  ["#q", "#qM"].forEach(sel => { const el = $(sel); if (el !== src) el.value = src.value; });
+  document.querySelectorAll(".searchbox").forEach(b => b.classList.toggle("has-q", !!src.value));
+}
+const onSearch = debounce(v => {
+  state.q = v;
+  if (v.trim()) renderSearch(); else renderRoute();
+}, 200);
+["#q", "#qM"].forEach(sel => {
+  $(sel).addEventListener("input", e => { syncInputs(e.target); onSearch(e.target.value); });
+});
+$("#qClr").addEventListener("click", () => { $("#q").value = ""; syncInputs($("#q")); state.q = ""; onSearch(""); $("#q").focus(); });
+$("#qClrM").addEventListener("click", () => { $("#qM").value = ""; syncInputs($("#qM")); state.q = ""; onSearch(""); $("#qM").focus(); });
+$("#btnSearchM").addEventListener("click", () => {
+  const row = $("#hdrSearch"), open = row.classList.toggle("open");
+  if (open) setTimeout(() => $("#qM").focus(), 260);
+});
+
+/* ═══════════════ MODAL CHI TIẾT ═══════════════ */
+function openDetail(catId, key) {
+  const it = (state.data[catId] || []).find(x => x.key === key);
+  if (!it) { toast("Mục này không tồn tại hoặc đã bị xóa.", "err"); return; }
+  const c = catOf(catId);
+  const hasUrl = validUrl(it.url);
+  const times = [];
+  if (it.created) times.push("Tạo lúc " + fmtTime(it.created));
+  if (it.ts && it.ts !== it.created) times.push("Cập nhật " + fmtTime(it.ts));
+  $("#dtBody").innerHTML = `
+    <div class="dt-meta" style="--cat:${c.color}">
+      <span class="chip">${c.label}</span>
+      ${it.vault ? `<span class="chip" style="--cat:var(--warning)">VAULT</span>` : ""}
+      ${it.copies != null ? `<span class="t">Đã sao chép: ${it.copies}</span>` : ""}
+      ${times.map(t => `<span class="t">${esc(t)}</span>`).join("")}
+    </div>
+    ${it.img ? `<img class="dt-img" src="${esc(it.img)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+    <h3 class="dt-title">${esc(it.name)}</h3>
+    ${it.desc ? `<p class="dt-desc">${esc(it.desc)}</p>` : ""}
+    ${it.code ? `<div style="--cat:${c.color}"><pre class="dt-code">${esc(it.code)}</pre></div>` : ""}
+    ${hasUrl ? `<div class="dt-url" style="--cat:${c.color}"><i></i><code>${esc(it.url.trim())}</code></div>` : ""}
+    <div class="dt-acts" style="--cat:${c.color}">
+      ${it.code ? `<button class="btn btn-p" data-act="copycode" data-cat="${catId}" data-key="${esc(it.key)}">${ICO.copy}Sao chép code</button>` : ""}
+      ${hasUrl ? `<a class="btn btn-p" href="${esc(it.url.trim())}" target="_blank" rel="noopener">${ICO.ext}Mở link</a>
+                  <button class="btn btn-g" data-act="copyurl" data-url="${esc(it.url.trim())}">${ICO.copy}Sao chép link</button>` : ""}
+      <button class="btn btn-g" data-close>Quay lại</button>
+    </div>`;
+  openLayer($("#mdDetail"));
+}
+
+/* ═══════════════ AUTH (Email/Mật khẩu — không Google) ═══════════════ */
+const AUTH_MSG = {
+  "auth/invalid-credential":"Email hoặc mật khẩu không đúng.",
+  "auth/wrong-password":"Email hoặc mật khẩu không đúng.",
+  "auth/user-not-found":"Tài khoản không tồn tại.",
+  "auth/invalid-email":"Email không hợp lệ.",
+  "auth/too-many-requests":"Quá nhiều lần thử. Vui lòng thử lại sau.",
+  "auth/network-request-failed":"Lỗi kết nối mạng."
+};
+function renderAuth() {
+  const u = state.user;
+  $("#btnAcc").classList.toggle("dev", state.dev);
+  const zoneHTML = u
+    ? `<div class="acc-card"><span class="mail">${esc(u.email || "")}</span>${state.dev ? '<span class="devtag">DEV</span>' : ""}</div>
+       ${state.dev ? '<button class="btn btn-p btn-wide" data-act="devopen" style="--cat:var(--accent-primary)">Bảng điều khiển DEV</button>' : ""}
+       <button class="btn btn-g btn-wide" data-act="signout">Đăng xuất</button>`
+    : `<button class="btn btn-g btn-wide" data-act="authopen"><svg viewBox="0 0 24 24" ${SW}><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Đăng nhập</button>`;
+  document.querySelectorAll(".auth-zone").forEach(z => z.innerHTML = zoneHTML);
+  // modal tài khoản
+  $("#loginForm").style.display = u ? "none" : "flex";
+  $("#accPane").style.display = u ? "flex" : "none";
+  $("#authTitle").textContent = u ? "Tài khoản" : "Đăng nhập";
+  if (u) { $("#accMail").textContent = u.email || ""; $("#accDev").hidden = !state.dev; $("#btnDev").style.display = state.dev ? "flex" : "none"; }
+}
+$("#btnAcc").addEventListener("click", () => openLayer($("#mdAuth")));
+$("#loginForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const errEl = $("#liErr"); errEl.textContent = "";
+  if (!auth) { errEl.textContent = "Hệ thống đăng nhập chưa sẵn sàng."; return; }
+  const email = $("#liEmail").value.trim(), pass = $("#liPass").value;
+  if (!email || !pass) { errEl.textContent = "Vui lòng nhập đủ email và mật khẩu."; return; }
+  const btn = $("#liBtn"); btn.disabled = true; btn.textContent = "Đang đăng nhập…";
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(() => { btn.disabled = false; btn.textContent = "Đăng nhập"; $("#liPass").value = ""; })
+    .catch(err => {
+      btn.disabled = false; btn.textContent = "Đăng nhập";
+      errEl.textContent = AUTH_MSG[err && err.code] || "Đăng nhập thất bại. Vui lòng thử lại.";
+      dlog("er", "Login: " + (err && err.code ? err.code : err));
     });
-    unsubs.push(u);
+});
+$("#btnDev").addEventListener("click", () => { if (state.dev) { renderDevList(); openLayer($("#mdDev")); } });
+if (auth) {
+  auth.onAuthStateChanged(u => {
+    state.user = u || null;
+    state.dev = !!(u && String(u.email || "").toLowerCase() === DEV_EMAIL);
+    dlog(state.dev ? "ok" : "in", u ? ("Auth: " + u.email + (state.dev ? " (DEV)" : "")) : "Auth: chưa đăng nhập");
+    renderAuth();
+    applyMaint();
   });
-  const u2 = FB.onValue(FB.ref(db, ".info/connected"), s=>{
-    $("#liveDot").classList.toggle("on", !!s.val());
-    $("#dvDb").textContent = s.val() ? "KẾT NỐI" : "MẤT KẾT NỐI";
-    $("#dvDb").className = s.val() ? "ok" : "er";
-  });
-  unsubs.push(u2);
-  const u3 = FB.onValue(FB.ref(db, DB_NODES.settings), s=>{
-    const v = s.val() || {};
-    setMaint(!!v.maintenance);
-  }, ()=>{});
-  unsubs.push(u3);
-}
+} else { renderAuth(); dlog("er", "Firebase SDK không khả dụng."); }
 
-/* ---------- Bảo trì ---------- */
-function setMaint(on){
-  state.maint = on;
-  $("#maintChip").classList.toggle("on", on && state.dev);
-  $("#tgMaint").checked = on;
-  const show = on && !state.dev;
-  $("#maint").classList.toggle("on", show);
-  document.body.style.overflow = show ? "hidden" : "";
+/* ═══════════════ BẢNG DEV — CRUD 4 DANH MỤC ═══════════════ */
+function setFormCat(c) {
+  state.formCat = c;
+  document.querySelectorAll("#catSeg button").forEach(b => b.classList.toggle("on", b.dataset.c === c));
+  const isScript = c === "script";
+  $("#wrapUrl").style.display = isScript ? "none" : "flex";
+  $("#wrapCode").style.display = isScript ? "flex" : "none";
 }
-
-/* ---------- Auth Google ---------- */
-function attachAuth(auM){
-  auM.onAuthStateChanged(auth, user=>{
-    state.user = user || null;
-    state.dev = !!(user && String(user.email||"").toLowerCase() === DEV_EMAIL);
-    log(state.dev ? "ok" : "in", state.dev ? ("Dev đăng nhập: "+user.email) : (user ? ("User đăng nhập: "+user.email) : "Chưa đăng nhập."));
-    renderAuthUI();
-    setMaint(state.maint);
-    if (state.dev && openSheetEl === $("#shLogin")) closeSheet();
-  });
+document.querySelectorAll("#catSeg button").forEach(b => b.addEventListener("click", () => { if (!state.editing) setFormCat(b.dataset.c); }));
+function resetForm() {
+  state.editing = null;
+  $("#itemForm").reset();
+  setFormCat(state.formCat);
+  $("#fErr").textContent = "";
+  $("#formSec").textContent = "Thêm dữ liệu";
+  $("#fSaveTxt").textContent = "Thêm";
+  $("#fCancel").style.display = "none";
+  document.querySelectorAll("#catSeg button").forEach(b => b.disabled = false);
 }
-function renderAuthUI(){
-  const b = $("#btnAuth");
-  if (state.user && state.user.photoURL){
-    b.innerHTML = `<img src="${esc(state.user.photoURL)}" alt="" referrerpolicy="no-referrer">`;
+$("#fCancel").addEventListener("click", resetForm);
+function startEdit(catId, key) {
+  const it = (state.data[catId] || []).find(x => x.key === key);
+  if (!it) { toast("Không tìm thấy mục này.", "err"); return; }
+  state.editing = { cat: catId, key };
+  setFormCat(catId);
+  document.querySelectorAll("#catSeg button").forEach(b => b.disabled = true);
+  $("#fName").value = it.name === "(không tên)" ? "" : it.name;
+  $("#fDesc").value = it.desc || "";
+  $("#fUrl").value = it.url || "";
+  $("#fCode").value = it.code || "";
+  $("#formSec").textContent = "Chỉnh sửa: " + it.name;
+  $("#fSaveTxt").textContent = "Lưu chỉnh sửa";
+  $("#fCancel").style.display = "inline-flex";
+  $("#fErr").textContent = "";
+  openLayer($("#mdDev"));
+  setTimeout(() => $("#fName").focus(), 200);
+}
+$("#itemForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const err = $("#fErr"); err.textContent = "";
+  if (!state.dev || !database) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
+  const cat = state.editing ? state.editing.cat : state.formCat;
+  const name = $("#fName").value.trim();
+  const desc = $("#fDesc").value.trim();
+  const url = $("#fUrl").value.trim();
+  const code = $("#fCode").value;
+  if (!name) { err.textContent = "Thiếu tên mục."; return; }
+  if (cat === "script" && !code.trim()) { err.textContent = "Thiếu code cho Script."; return; }
+  if (cat !== "script" && !validUrl(url)) { err.textContent = "Link không hợp lệ (bắt đầu bằng http/https)."; return; }
+  const payload = cat === "script" ? { name, desc, code } : { name, desc, url };
+  const btn = $("#fSave"); btn.disabled = true;
+  let p;
+  if (state.editing) {
+    payload.updatedAt = firebase.database.ServerValue.TIMESTAMP;
+    p = database.ref(nodePath(cat) + "/" + state.editing.key).update(payload); // update = giữ field cũ
   } else {
-    b.innerHTML = ICO.lock;
+    payload.createdAt = firebase.database.ServerValue.TIMESTAMP;
+    p = database.ref(nodePath(cat)).push(payload);
   }
-  const row = $("#uRow");
-  if (state.user){
-    row.innerHTML = `${state.user.photoURL ? `<img src="${esc(state.user.photoURL)}" referrerpolicy="no-referrer" alt="">` : `<span style="width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--glass2)">${ICO.lock}</span>`}
-      <div style="min-width:0;flex:1"><b>${esc(state.user.displayName || "Người dùng")}</b><small>${esc(state.user.email || "")}</small></div>
-      ${state.dev ? `<span class="devtag">DEV</span>` : ""}`;
-  } else row.innerHTML = `<small style="color:var(--mut)">Chưa đăng nhập.</small>`;
-  $("#btnDevOpen").style.display = state.dev ? "flex" : "none";
+  p.then(() => {
+    btn.disabled = false;
+    dlog("ok", (state.editing ? "Đã sửa " : "Đã thêm ") + nodePath(cat) + ": " + name);
+    toast(state.editing ? "Đã lưu chỉnh sửa." : "Đã thêm dữ liệu.");
+    resetForm();
+  }).catch(e2 => {
+    btn.disabled = false;
+    dlog("er", "Ghi dữ liệu lỗi: " + (e2 && e2.code ? e2.code + " — " : "") + (e2 && e2.message ? e2.message : e2));
+    err.textContent = (e2 && e2.code === "permission-denied")
+      ? "Bị từ chối quyền ghi (kiểm tra Database Rules / đăng nhập DEV)."
+      : "Thao tác thất bại. Vui lòng thử lại.";
+  });
+});
+function deleteItem(catId, key) {
+  if (!state.dev || !database) return;
+  database.ref(nodePath(catId) + "/" + key).remove()
+    .then(() => { dlog("ok", "Đã xóa " + nodePath(catId) + "/" + key); toast("Đã xóa."); })
+    .catch(e2 => {
+      dlog("er", "Xóa lỗi: " + (e2 && e2.code ? e2.code : e2));
+      toast((e2 && e2.code === "permission-denied") ? "Không có quyền xóa." : "Xóa thất bại.", "err");
+    });
 }
-async function googleSignIn(){
-  if (!auth || !FB || !FB.authM){ toast("Hệ thống chưa sẵn sàng","x"); log("er","Đăng nhập thất bại: SDK chưa sẵn sàng."); return; }
-  try{
-    await FB.authM.signInWithPopup(auth, new FB.authM.GoogleAuthProvider());
-  }catch(err){
-    if (err && /popup-closed|cancelled/.test(err.code||"")) return;
-    log("er","Đăng nhập Google lỗi: " + (err && err.message ? err.message : err));
-    toast("Đăng nhập thất bại","x");
-  }
-}
-
-/* ---------- Dev: danh sách dữ liệu + xóa ---------- */
-function renderDataList(){
-  const wrap = $("#dataList"); if(!wrap) return;
-  wrap.innerHTML = CATS.map(c=>{
+function renderDevList() {
+  const box = $("#devList"); if (!box) return;
+  box.innerHTML = CATS.map(c => {
     const items = state.data[c.id] || [];
-    return `<details class="dlist"><summary style="color:${c.color}">${ICO[c.id]}<span style="color:var(--ink)">${c.label}</span><span style="color:var(--mut2);font-size:11px">${items.length}</span><span class="ar">${ICO.chev}</span></summary>
-      ${items.length ? items.map(it=>`<div class="ditem"><span>${esc(it.ten)}</span><button data-del="${c.id}/${esc(it.key)}" aria-label="Xóa">${ICO.trash}</button></div>`).join("") : `<div class="ditem"><span>Trống</span></div>`}
+    return `<details class="dl" ${state.formCat === c.id ? "open" : ""}>
+      <summary><span class="ci" style="color:${c.color}">${ICO[c.id]}</span>${c.label}<span class="n">${items.length}</span>${ICO.chev}</summary>
+      ${items.length ? items.map(it => `<div class="drow"><span class="nm">${esc(it.name)}</span>
+        <button class="ed" data-act="edit" data-cat="${c.id}" data-key="${esc(it.key)}" aria-label="Chỉnh sửa ${esc(it.name)}">${ICO.pencil}</button>
+        <button class="de" data-act="del" data-cat="${c.id}" data-key="${esc(it.key)}" aria-label="Xóa ${esc(it.name)}">${ICO.trash}</button></div>`).join("")
+        : '<div class="drow"><span class="nm">Trống</span></div>'}
     </details>`;
   }).join("");
 }
-document.addEventListener("click", e=>{
-  const del = e.target.closest("[data-del]");
-  if(!del || !state.dev || !db) return;
-  if (!del.classList.contains("arm")){
-    del.classList.add("arm"); del.textContent = "Chắc?";
-    setTimeout(()=>{ del.classList.remove("arm"); del.innerHTML = ICO.trash; }, 2200);
-    return;
+/* Bảo trì — chức năng cũ, node thật nox_maintenance */
+function renderMaintPanel() {
+  const on = !!(state.maint && state.maint.enabled);
+  $("#mntDot").style.background = on ? "var(--warning)" : "var(--success)";
+  $("#mntTxt").textContent = on ? "Bảo trì: BẬT" : "Bảo trì: TẮT";
+  const b = $("#mntBtn");
+  b.textContent = on ? "MỞ WEBSITE" : "BẬT BẢO TRÌ";
+  b.className = "btn " + (on ? "btn-p" : "btn-g");
+  if (on) b.style.setProperty("--cat", "var(--success)");
+}
+$("#mntBtn").addEventListener("click", () => {
+  if (!state.dev || !database) return;
+  const next = !(state.maint && state.maint.enabled);
+  database.ref(MAINT_NODE).update({ enabled: next, by: "DEV", ts: firebase.database.ServerValue.TIMESTAMP })
+    .then(() => { dlog("ok", next ? "Bật bảo trì." : "Mở website."); toast(next ? "Đã bật bảo trì." : "Đã mở website."); })
+    .catch(e2 => {
+      dlog("er", "Maintenance lỗi: " + (e2 && e2.code ? e2.code : e2));
+      toast((e2 && e2.code === "permission-denied") ? "Không có quyền." : "Thao tác thất bại.", "err");
+    });
+});
+function applyMaint() {
+  const on = !!(state.maint && state.maint.enabled) && !state.dev;
+  $("#maint").classList.toggle("on", on);
+  $("#maintMsg").textContent = (state.maint && state.maint.message) ? state.maint.message : "Hệ thống đang tạm đóng. Vui lòng quay lại sau.";
+  document.body.classList.toggle("locked", on);
+  renderMaintPanel();
+}
+
+/* ═══════════════ FIREBASE LISTENERS (đăng ký 1 lần, có retry) ═══════════════ */
+const handlers = {};
+function attachCat(catId) {
+  if (!database) { state.status[catId] = "error"; if (state.route === catId) renderCat(catId); catSynced(); return; }
+  const ref = database.ref(nodePath(catId));
+  if (handlers[catId]) ref.off("value", handlers[catId]);
+  let first = true;
+  handlers[catId] = ref.on("value", snap => {
+    const v = snap.val() || {};
+    const arr = Object.keys(v).map(k => normItem(k, v[k])).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    state.data[catId] = arr; state.status[catId] = "";
+    dlog("in", "Sync " + nodePath(catId) + ": " + arr.length + " mục");
+    if (state.q) renderSearch();
+    else if (state.route === "home") renderHome();
+    else if (state.route === catId) renderCat(catId);
+    renderCounts();
+    if (openEl === $("#mdDev")) renderDevList();
+    if (first) { first = false; catSynced(); }
+  }, err => {
+    dlog("er", "Listener " + nodePath(catId) + ": " + (err && err.code ? err.code : err));
+    if (first) { first = false; state.data[catId] = null; state.status[catId] = "error"; if (state.route === catId) renderCat(catId); renderCounts(); catSynced(); }
+  });
+}
+function attachAll() { CATS.forEach(c => attachCat(c.id)); }
+if (database) {
+  database.ref(".info/connected").on("value", s => {
+    $("#connDot").classList.toggle("on", !!s.val());
+    dlog(s.val() ? "ok" : "er", "Database " + (s.val() ? "kết nối." : "mất kết nối."));
+  });
+  database.ref(MAINT_NODE).on("value", s => {
+    state.maint = s.val() || null;
+    applyMaint();
+  }, () => {});
+  attachAll();
+  spP(40);
+  dlog("ok", "Firebase sẵn sàng (noxgalaxy-2cd71).");
+} else {
+  CATS.forEach(c => { state.status[c.id] = "error"; });
+  dlog("er", "Không tải được Firebase SDK.");
+  renderRoute();
+  setTimeout(enterApp, 700);
+}
+
+/* ═══════════════ DELEGATION (đăng ký sự kiện 1 lần) ═══════════════ */
+document.addEventListener("click", e => {
+  /* ripple */
+  const b = e.target.closest(".btn");
+  if (b && !RM) {
+    const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height);
+    const s = document.createElement("span");
+    s.className = "rip";
+    s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px`;
+    b.appendChild(s); setTimeout(() => s.remove(), 580);
   }
-  const [cat, key] = del.getAttribute("data-del").split("/");
-  FB.remove(FB.ref(db, DB_NODES[cat] + "/" + key))
-    .then(()=>{ log("ok",`Đã xóa ${DB_NODES[cat]}/${key}`); toast("Đã xóa","trash"); })
-    .catch(err=>log("er","Xóa lỗi: " + (err && err.message ? err.message : err)));
+  const t = e.target.closest("[data-act]");
+  /* mở card → chi tiết (trừ khi bấm nút bên trong) */
+  if (!t && !e.target.closest("[data-stop]") && !e.target.closest("a")) {
+    const card = e.target.closest(".card");
+    if (card) { openDetail(card.dataset.cat, card.dataset.key); return; }
+  }
+  if (!t) return;
+  const act = t.dataset.act;
+  if (act === "detail") { openDetail(t.dataset.cat, t.dataset.key); }
+  else if (act === "copycode") {
+    const it = (state.data[t.dataset.cat] || []).find(x => x.key === t.dataset.key);
+    if (!it || !it.code) { toast("Không có code để sao chép.", "err"); return; }
+    copyText(it.code).then(() => {
+      toast("Đã sao chép code.");
+      if (database && it.copies != null) { // giữ bộ đếm copies thật, im lặng nếu rules chặn
+        database.ref(nodePath(t.dataset.cat) + "/" + it.key + "/copies").set(it.copies + 1).catch(() => {});
+      }
+    }).catch(() => toast("Không sao chép được.", "err"));
+  }
+  else if (act === "copyurl") {
+    copyText(t.dataset.url).then(() => toast("Đã sao chép link.")).catch(() => toast("Không sao chép được.", "err"));
+  }
+  else if (act === "retry") { state.status[t.dataset.cat] = ""; state.data[t.dataset.cat] = null; attachCat(t.dataset.cat); renderCat(t.dataset.cat); toast("Đang tải lại…"); }
+  else if (act === "authopen") { if (!state.user) openLayer($("#mdAuth")); }
+  else if (act === "devopen") { if (state.dev) { renderDevList(); openLayer($("#mdDev")); } }
+  else if (act === "signout") {
+    if (auth) auth.signOut().then(() => { closeLayer(); toast("Đã đăng xuất."); }).catch(() => toast("Đăng xuất thất bại.", "err"));
+  }
+  else if (act === "edit" && state.dev) { startEdit(t.dataset.cat, t.dataset.key); }
+  else if (act === "del" && state.dev) {
+    if (!t.classList.contains("arm")) {
+      t.classList.add("arm"); t.textContent = "Chắc?";
+      setTimeout(() => { t.classList.remove("arm"); t.innerHTML = ICO.trash; }, 2200);
+    } else deleteItem(t.dataset.cat, t.dataset.key);
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const el = document.activeElement;
+  if (el && el.classList.contains("card")) openDetail(el.dataset.cat, el.dataset.key);
+  if (el && el.classList.contains("lrow")) openDetail(el.dataset.cat, el.dataset.key);
 });
 
-/* ---------- Dev: kiểm tra mạng ---------- */
-async function netCheck(){
-  $("#dvIp").textContent = "…"; $("#dvVpn").textContent = "…";
-  try{
-    const r = await fetch("https://ipwho.is/"); const d = await r.json();
-    state.net.ip = d.ip || "—";
-    state.net.vpn = (d.connection && (d.connection.isProxy || d.connection.vpn)) ? "CÓ" : "KHÔNG";
-    log("in",`Mạng: IP=${state.net.ip}, VPN=${state.net.vpn}`);
-  }catch(err){
-    state.net.ip = "LỖI"; state.net.vpn = "LỖI";
-    log("er","Kiểm tra mạng lỗi: " + (err && err.message ? err.message : err));
-  }
-  $("#dvIp").textContent = state.net.ip;
-  $("#dvVpn").textContent = state.net.vpn;
-}
-
-/* ---------- Gắn sự kiện tĩnh (1 lần) ---------- */
-function bindUI(){
-  $("#btnAuth").innerHTML = ICO.lock;
-  $("#btnGoogle").innerHTML = ICO.google + "<span>Đăng nhập bằng Google</span>";
-  $("#btnMaintDev").innerHTML = ICO.shield + "<span>Dev</span>";
-  $("#btnDevOpen").innerHTML = ICO.shield + "<span>DEV CONTROL CENTER</span>";
-  $("#btnOut").innerHTML = ICO.x + "<span>Đăng xuất</span>";
-  $("#btnRefresh").innerHTML = ICO.refresh + "<span>Làm mới dữ liệu</span>";
-  $("#btnNet").innerHTML = ICO.wifi + "<span>Kiểm tra mạng</span>";
-  $("#addForm button[type=submit]").innerHTML = ICO.plus + "<span>Thêm</span>";
-  $$(".xbtn").forEach(b=>b.innerHTML = ICO.x);
-
-  $("#btnAuth").addEventListener("click", ()=>{
-    if (state.user) openSheet($("#shUser"));
-    else openSheet($("#shLogin"));
+/* ═══════════════ HIỆU ỨNG: tilt + glare (desktop), header scroll ═══════════ */
+if (!RM && matchMedia("(hover:hover) and (pointer:fine)").matches) {
+  let ticking = false, lastE = null;
+  $("#main").addEventListener("pointermove", e => {
+    lastE = e;
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const card = lastE.target.closest && lastE.target.closest(".card");
+      document.querySelectorAll(".card.tilt").forEach(c => { if (c !== card) { c.classList.remove("tilt"); c.style.transform = ""; } });
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      const x = (lastE.clientX - r.left) / r.width - .5, y = (lastE.clientY - r.top) / r.height - .5;
+      card.classList.add("tilt");
+      card.style.transform = `translateY(-4px) perspective(760px) rotateX(${(-y * 4.5).toFixed(2)}deg) rotateY(${(x * 5.5).toFixed(2)}deg)`;
+      card.style.setProperty("--gx", (x * 100 + 50).toFixed(1) + "%");
+      card.style.setProperty("--gy", (y * 100 + 50).toFixed(1) + "%");
+    });
   });
-  $("#btnMaintDev").addEventListener("click", ()=>openSheet($("#shLogin")));
-  $("#btnGoogle").addEventListener("click", googleSignIn);
-  $("#btnDevOpen").addEventListener("click", ()=>{ if(state.dev){ renderDataList(); renderLog(); openSheet($("#shDev")); } });
-  $("#btnOut").addEventListener("click", async ()=>{
-    closeSheet();
-    try{ await FB.authM.signOut(auth); }catch(_){}
-  });
-  $("#btnRefresh").addEventListener("click", ()=>{ if(db){ attachListeners(); toast("Đang làm mới","refresh"); } });
-  $("#btnNet").addEventListener("click", netCheck);
-  $("#tgMaint").addEventListener("change", e=>{
-    if(!state.dev || !db){ e.target.checked = state.maint; return; }
-    FB.set(FB.ref(db, DB_NODES.settings + "/maintenance"), e.target.checked)
-      .then(()=>log("ok", e.target.checked ? "Bật bảo trì." : "Mở website."))
-      .catch(err=>log("er","Bảo trì lỗi: " + (err&&err.message?err.message:err)));
-  });
-  $("#addForm").addEventListener("submit", e=>{
-    e.preventDefault();
-    if(!state.dev || !db) return;
-    const ten = $("#fTen").value.trim();
-    if(!ten){ toast("Thiếu tên mục","x"); return; }
-    const cat = $("#fCat").value;
-    const payload = { ten, moTa: $("#fMoTa").value.trim(), link: $("#fLink").value.trim(), vault: $("#fVault").checked, ts: FB.serverTimestamp() };
-    FB.push(FB.ref(db, DB_NODES[cat]), payload)
-      .then(()=>{ log("ok",`Đã thêm vào ${DB_NODES[cat]}: ${ten}`); toast("Đã thêm","plus");
-        $("#fTen").value=""; $("#fMoTa").value=""; $("#fLink").value=""; $("#fVault").checked=false; })
-      .catch(err=>log("er","Thêm lỗi: " + (err&&err.message?err.message:err)));
+  $("#main").addEventListener("pointerleave", () => {
+    document.querySelectorAll(".card.tilt").forEach(c => { c.classList.remove("tilt"); c.style.transform = ""; });
   });
 }
+let sTick = false;
+window.addEventListener("scroll", () => {
+  if (sTick) return; sTick = true;
+  requestAnimationFrame(() => { sTick = false; $("#hdr").classList.toggle("scrolled", window.scrollY > 8); });
+}, { passive:true });
 
-/* ---------- Khởi động ---------- */
-buildNav();
-bindUI();
-document.documentElement.style.setProperty("--cat", CATS[0].color);
-$$(".view").forEach(v=>v.classList.toggle("on", v.dataset.cat==="script"));
-$$(".navbtn,.navbtn-m").forEach(b=>b.classList.toggle("on", b.dataset.cat==="script"));
-$("#bnInd").style.setProperty("--idx", 0);
-CATS.forEach(c=>renderCat(c.id));
-renderAuthUI(); renderLog();
-log("in","Khởi động SKIBIDI SCRIPT WEB.");
-
-initFirebase();
-spProgress(40);
-Promise.race([ firstSync(), new Promise(r=>setTimeout(r, 2600)) ]).then(()=>{ spProgress(92); enterApp(); });
+/* ═══════════════ BOOT ═══════════════ */
+$("#yr").textContent = "© " + new Date().getFullYear() + " SKIBIDI SCRIPT WEB";
+setFormCat("script");
+renderAuth();
+renderMaintPanel();
+renderRoute();
 </script>
 </body>
 </html>
