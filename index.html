@@ -3,27 +3,31 @@
 <head>
 <!--
 ════════════════════════════════════════════════════════════════
- SKIBIDI SCRIPT WEB — index.html (nâng cấp lần 3)
+ SKIBIDI SCRIPT WEB — index.html (bản sửa lỗi đăng nhập + logo S mới)
 ════════════════════════════════════════════════════════════════
- • Firebase GIỮ NGUYÊN: project noxgalaxy-2cd71, compat SDK 10.12.2,
-   Realtime Database: nox_data/scripts|apks|links|ios (+ danh mục tùy
-   chỉnh do Dev tạo: nox_categories + nox_data/<slug>), nox_maintenance,
-   nox_notice (bảng thông báo).
- • Đăng nhập: Email/Mật khẩu (như cũ) + GOOGLE (Google Identity
-   Services, client ID: 971947846929-as186hmb8lmv293t79fgf4lrhp215kka
-   .apps.googleusercontent.com, signInWithCredential — không popup).
- • Bảo trì: giao diện mới + đếm ngược TỰ ĐỘNG MỞ. Dev đặt số phút;
-   nếu không đặt → tự mở sau 1 phút. Có nút Google ngay trên màn
-   hình bảo trì để Dev lỡ đăng xuất vẫn vào được.
- • Chữ kỹ thuật ("REALTIME DATABASE"…) chỉ hiển thị với tài khoản Dev.
- • Dev panel: THÊM/SỬA/XÓA dữ liệu mọi danh mục + TẠO DANH MỤC MỚI
-   + cập nhật BẢNG THÔNG BÁO + công tắc bảo trì.
- • Animation: splash, loadbar, stagger, tilt/glare, ripple, fly-check
-   khi sao chép, đếm số, reveal khi cuộn, modal spring, drawer,
-   countdown ring, prefers-reduced-motion.
- • Bảo mật ghi: client chỉ là lớp UI — khóa quyền ghi thật bằng
-   Database Rules (auth.token.email == 'hminhgalaxy@gmail.com').
- • Chat/AI/Gemini/Group: đã loại bỏ theo yêu cầu các phiên bản trước.
+ ĐÃ SỬA / NÂNG CẤP Ở BẢN NÀY:
+ 1. ĐĂNG NHẬP:
+    • Google: chuyển sang signInWithPopup(GoogleAuthProvider) của chính
+      Firebase (OAuth client do Firebase quản lý) + tự chuyển
+      signInWithRedirect nếu popup bị chặn + xử lý getRedirectResult.
+      (Cách cũ dùng GIS + client ID 971947846929-… dễ lỗi
+      auth/invalid-credential vì audience khác project noxgalaxy-2cd71.)
+    • Email/Mật khẩu: giữ nguyên signInWithEmailAndPassword, bổ sung
+      thông báo lỗi chính xác từng mã lỗi (operation-not-allowed,
+      unauthorized-domain, invalid-credential…) + log mã lỗi vào Dev panel.
+    • Nút Google có cả ở modal đăng nhập lẫn màn hình bảo trì.
+ 2. LOGO: chữ S mới (nét liền, gradient tím→xanh→hồng, stroke-draw
+    animation ở splash, shine sweep ở header, favicon đồng bộ).
+ 3. XÓA hoàn toàn dòng "REALTIME DATABASE · ĐANG HOẠT ĐỘNG" khỏi web.
+ 4. DEV PANEL: thêm công tắc "Hiển thị thông báo khi vào web"
+    (bật/tắt bảng thông báo — ghi field enabled vào nox_notice).
+ 5. THÊM ANIMATION: particles nền, glow pulse splash, shine sweep trên
+    card/hero/logo, view transition blur, nav icon wobble, spinner nút,
+    ripple/pop/fly-check giữ nguyên, prefers-reduced-motion đầy đủ.
+ Firebase GIỮ NGUYÊN: noxgalaxy-2cd71 · compat 10.12.2 · Realtime DB
+ (nox_data/scripts|apks|links|ios, nox_categories, nox_maintenance,
+ nox_notice). Bảo mật ghi thật sự phải khóa bằng Database Rules
+ (auth.token.email == 'hminhgalaxy@gmail.com').
 ════════════════════════════════════════════════════════════════
 -->
 <meta charset="UTF-8">
@@ -34,13 +38,12 @@
 <meta property="og:description" content="Kho Script, APK, LINK và iOS cập nhật realtime.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#080b12">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2329d6c5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='56' height='56' rx='16' fill='%230e1420'/%3E%3Cpath d='M36 10 18 36h11l-4 18 20-28H33Z' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='.55' stop-color='%2329d6c5'/%3E%3Cstop offset='1' stop-color='%23f471b5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230e1420'/%3E%3Cpath d='M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6' fill='none' stroke='url(%23g)' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/400.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/500.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/600.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/700.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/800.css">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ═══ 1. TOKENS ═══ */
 @property --cat { syntax:"<color>"; inherits:true; initial-value:#7c5cff }
@@ -67,7 +70,7 @@ a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--cat);outline-offset:2px;border-radius:6px}
 ::placeholder{color:#5d6b80}
 
-/* ═══ 2. NỀN ĐỘNG ═══ */
+/* ═══ 2. NỀN ĐỘNG + PARTICLES ═══ */
 #bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
 .o1{width:46vmax;height:46vmax;left:-16vmax;top:-18vmax;opacity:.16;background:radial-gradient(circle,var(--accent-primary),transparent 62%);animation:drift1 34s ease-in-out infinite alternate}
@@ -80,6 +83,8 @@ a{color:inherit;text-decoration:none}
   repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 48px),
   repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 1px,transparent 1px 48px);
   -webkit-mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%);mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%)}
+.ptcl{position:absolute;bottom:-12px;width:var(--sz,2px);height:var(--sz,2px);border-radius:50%;background:#cfe3ff;animation:rise linear infinite;will-change:transform}
+@keyframes rise{to{transform:translateY(-108vh)}}
 
 /* ═══ 3. LOADBAR ═══ */
 #loadbar{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:250;border-radius:99px;pointer-events:none;opacity:0;
@@ -87,17 +92,20 @@ a{color:inherit;text-decoration:none}
 #loadbar.run{animation:lbrun .75s var(--ez) forwards}
 @keyframes lbrun{0%{width:0;opacity:1}70%{width:82%;opacity:1}100%{width:100%;opacity:0}}
 
-/* ═══ 4. SPLASH ═══ */
-#splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
+/* ═══ 4. SPLASH + LOGO S ═══ */
+#splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
   background:radial-gradient(820px 560px at 50% 42%,#101828 0%,var(--bg-primary) 70%);
   transition:opacity .5s var(--ez),transform .5s var(--ez),filter .5s var(--ez)}
 #splash.out{opacity:0;transform:scale(1.05);filter:blur(8px);pointer-events:none}
-#spLogo{width:92px;height:92px}
-#spLogo .hex{fill:none;stroke:url(#spG);stroke-width:2.4;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;animation:draw 1s var(--ez) .05s forwards}
-#spLogo .bolt{fill:url(#spG);transform-origin:50% 50%;transform:scale(0);animation:pop .55s var(--spring) .7s forwards}
-#spLogo .ring{fill:none;stroke:rgba(255,255,255,.12);stroke-width:1;transform-origin:50% 50%;animation:spin 7s linear infinite}
+#spLogoWrap{position:relative;display:grid;place-items:center}
+#spGlow{position:absolute;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent-primary) 45%,transparent),transparent 65%);filter:blur(26px);animation:pulseGlow 2.6s ease-in-out infinite}
+@keyframes pulseGlow{50%{transform:scale(1.2);opacity:.65}}
+#spLogo{width:104px;height:104px;position:relative}
+#spLogo .hex{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;animation:draw 1s var(--ez) .05s forwards}
+#spLogo .ring{fill:none;stroke:rgba(255,255,255,.1);stroke-width:1;transform-origin:50% 50%;animation:spin 8s linear infinite}
+#spLogo .smark{fill:none;stroke:url(#spG);stroke-width:8.5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;
+  filter:drop-shadow(0 0 10px rgba(124,92,255,.55));animation:draw 1.1s var(--ez) .45s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
-@keyframes pop{60%{transform:scale(1.18)}to{transform:scale(1)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 #spWord{display:flex;gap:0 9px;font-weight:800;font-size:clamp(19px,5vw,28px);letter-spacing:.08em}
 #spWord .ch{display:inline-block;opacity:0;transform:translateY(16px) scale(.86);animation:chIn .5s var(--ez) forwards;animation-delay:var(--d)}
@@ -114,10 +122,12 @@ a{color:inherit;text-decoration:none}
 #btnMenu:hover{background:var(--bg-elevated)}
 #btnMenu svg{width:19px;height:19px;stroke:var(--text-primary)}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand .mark{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:var(--bg-secondary);border:1px solid var(--border-subtle);position:relative;overflow:hidden;transition:transform .4s var(--spring)}
-.brand:hover .mark{transform:rotate(-8deg) scale(1.06)}
-.brand .mark::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,color-mix(in srgb,var(--accent-primary) 30%,transparent),color-mix(in srgb,var(--accent-secondary) 30%,transparent));opacity:.8}
-.brand .mark svg{width:19px;height:19px;position:relative;z-index:1}
+.brand .mark{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--bg-secondary);border:1px solid var(--border-subtle);position:relative;overflow:hidden;transition:transform .4s var(--spring)}
+.brand:hover .mark{transform:rotate(-8deg) scale(1.07)}
+.brand .mark::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,color-mix(in srgb,var(--accent-primary) 26%,transparent),color-mix(in srgb,var(--accent-secondary) 26%,transparent));opacity:.9}
+.brand .mark::before{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.4) 50%,transparent 65%);background-size:250% 100%;background-position:150% 0;transition:background-position .8s var(--ez)}
+.brand:hover .mark::before{background-position:-60% 0}
+.brand .mark svg{width:24px;height:24px;position:relative;z-index:1}
 .brand b{font-size:14.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   background:linear-gradient(90deg,#c9bcff,#8de8dd 55%,#c9bcff);background-size:200% 100%;
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 7s linear infinite}
@@ -156,12 +166,13 @@ a{color:inherit;text-decoration:none}
 .navsec{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:#5d6b80;text-transform:uppercase;padding:12px 12px 6px}
 .navitem{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-md);color:var(--text-secondary);
   font-weight:600;font-size:14px;position:relative;transition:background .28s,color .28s,transform .28s var(--ez)}
-.navitem svg{width:19px;height:19px;flex:none;transition:transform .35s var(--spring)}
+.navitem svg{width:19px;height:19px;flex:none}
 .navitem:hover{background:var(--bg-elevated);color:var(--text-primary);transform:translateX(3px)}
 .navitem:active{transform:scale(.97)}
 .navitem.on{color:var(--text-primary);background:color-mix(in srgb,var(--nc,var(--cat)) 14%,transparent)}
 .navitem.on::before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:99px;background:var(--nc,var(--cat))}
-.navitem.on svg{stroke:var(--nc,var(--cat));transform:scale(1.1)}
+.navitem.on svg{stroke:var(--nc,var(--cat));animation:wob .65s var(--spring)}
+@keyframes wob{30%{transform:scale(1.18) rotate(-8deg)}60%{transform:scale(1.08) rotate(6deg)}to{transform:scale(1.12)}}
 .navitem .cnt{margin-left:auto;font-size:11px;font-weight:700;color:var(--text-secondary);background:var(--bg-elevated);padding:2px 8px;border-radius:99px}
 .navitem.on .cnt{color:var(--nc,var(--cat));background:color-mix(in srgb,var(--nc,var(--cat)) 16%,transparent)}
 .side-acc{margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px}
@@ -173,8 +184,8 @@ a{color:inherit;text-decoration:none}
 #main{position:relative;z-index:1;padding:calc(var(--head-h) + 22px) 16px 40px;max-width:1280px;margin:0 auto;min-height:100vh}
 @media(min-width:1024px){#main{margin-left:var(--side-w);padding:calc(var(--head-h) + 30px) 34px 48px;max-width:calc(1280px + var(--side-w))}}
 .view{display:none}
-.view.on{display:block;animation:viewIn .45s var(--ez)}
-@keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.view.on{display:block;animation:viewIn .5s var(--ez)}
+@keyframes viewIn{from{opacity:0;transform:translateY(14px);filter:blur(5px)}to{opacity:1;transform:none;filter:blur(0)}}
 .vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
 .vhead h2{font-size:clamp(24px,5.4vw,34px);font-weight:800;letter-spacing:-.01em;position:relative;padding-bottom:11px}
 .vhead h2::after{content:"";position:absolute;left:0;bottom:0;height:4px;width:56px;border-radius:99px;
@@ -196,15 +207,18 @@ a{color:inherit;text-decoration:none}
 .card:not(.in){opacity:0}
 .card.in{animation:cardIn .55s var(--ez) backwards;animation-delay:var(--d,0ms)}
 @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
-.card::before{content:"";position:absolute;top:0;left:0;height:2.5px;width:38%;border-radius:0 99px 99px 0;
+.card::before{content:"";position:absolute;top:0;left:0;height:2.5px;width:38%;border-radius:0 99px 99px 0;z-index:1;
   background:linear-gradient(90deg,var(--cat),color-mix(in srgb,var(--cat) 10%,transparent));transition:width .5s var(--ez)}
 .card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
   background:radial-gradient(340px circle at var(--gx,50%) var(--gy,0%),color-mix(in srgb,var(--cat) 12%,transparent),transparent 65%)}
+.card .sh{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.07) 46%,transparent 60%);background-size:260% 100%;background-position:160% 0}
 @media(hover:hover) and (pointer:fine){
   .card:hover{border-color:color-mix(in srgb,var(--cat) 42%,var(--border-subtle));box-shadow:0 16px 40px -18px color-mix(in srgb,var(--cat) 45%,transparent)}
   .card:hover::before{width:100%}
   .card:hover::after{opacity:1}
+  .card:hover .sh{animation:shsw .95s var(--ez)}
 }
+@keyframes shsw{from{background-position:160% 0}to{background-position:-60% 0}}
 .card:active{transform:scale(.985)}
 .card .ctop{display:flex;align-items:center;gap:10px}
 .ico-tile{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;
@@ -232,19 +246,21 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 .btn-p:hover{box-shadow:0 8px 22px -8px color-mix(in srgb,var(--cat) 65%,transparent);filter:brightness(1.08)}
 .btn-g{color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle)}
 .btn-g:hover{color:var(--text-primary);border-color:var(--border-strong)}
-.btn-d{color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent)}
-.btn-d:hover{background:color-mix(in srgb,var(--danger) 20%,transparent)}
-.btn-i{width:36px;height:36px;padding:0;border-radius:10px;color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle)}
-.btn-i:hover{color:var(--cat);border-color:color-mix(in srgb,var(--cat) 45%,transparent)}
-.btn-i svg{width:15px;height:15px}
 .btn-wide{width:100%;padding:12px}
-.btn[disabled]{opacity:.5;pointer-events:none}
+.btn[disabled]{opacity:.55;pointer-events:none}
 .btn.pop{animation:btnpop .45s var(--spring)}
 @keyframes btnpop{40%{transform:scale(1.12);filter:brightness(1.25)}to{transform:scale(1)}}
 .rip{position:absolute;border-radius:50%;background:currentColor;opacity:.22;transform:scale(0);animation:rip .55s var(--ez) forwards;pointer-events:none}
 @keyframes rip{to{transform:scale(2.6);opacity:0}}
 .flychk{position:fixed;z-index:400;color:var(--success);font-weight:800;font-size:20px;pointer-events:none;transform:translate(-50%,0);animation:fly .8s var(--ez) forwards;text-shadow:0 0 14px color-mix(in srgb,var(--success) 70%,transparent)}
 @keyframes fly{to{transform:translate(-50%,-52px) scale(1.5);opacity:0}}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border-radius:12px;background:#fff;color:#1f1f1f;font-weight:700;font-size:14px;position:relative;overflow:hidden;transition:transform .25s var(--spring),box-shadow .3s}
+.gbtn:hover{box-shadow:0 10px 28px -10px rgba(255,255,255,.45)}
+.gbtn:active{transform:scale(.97)}
+.gbtn svg{width:18px;height:18px;flex:none}
+.gbtn .spin{width:16px;height:16px;flex:none;border:2px solid rgba(0,0,0,.25);border-top-color:#1f1f1f;border-radius:50%;animation:spin .7s linear infinite}
+.divider{display:flex;align-items:center;gap:10px;color:#5d6b80;font-size:11px;font-weight:700;letter-spacing:.1em}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
 
 /* ═══ 10. SKELETON / EMPTY / ERROR ═══ */
 .sk{border-radius:var(--r-lg);border:1px solid var(--border-subtle);background:var(--bg-card);padding:16px;display:flex;flex-direction:column;gap:11px;overflow:hidden}
@@ -265,26 +281,23 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
   border:1px solid var(--border-subtle)}
 .hero::before{content:"";position:absolute;width:340px;height:340px;right:-90px;top:-140px;border-radius:50%;
   background:radial-gradient(circle,color-mix(in srgb,var(--accent-primary) 40%,transparent),transparent 65%);filter:blur(30px);animation:floaty 7s ease-in-out infinite}
-.hero .kicker{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--accent-secondary);
-  border:1px solid color-mix(in srgb,var(--accent-secondary) 35%,transparent);background:color-mix(in srgb,var(--accent-secondary) 10%,transparent);
-  padding:5px 12px;border-radius:99px;margin-bottom:14px}
-.hero .kicker::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent-secondary);animation:blink 1.6s ease-in-out infinite}
-@keyframes blink{50%{opacity:.25}}
-.hero h1{font-size:clamp(26px,6vw,42px);font-weight:800;letter-spacing:-.01em;line-height:1.12}
-.hero h1 span{background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:var(--text-secondary);font-size:14px;margin-top:12px;max-width:520px;line-height:1.7}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.045) 50%,transparent 58%);background-size:220% 100%;animation:herosh 7s var(--ez) infinite}
+@keyframes herosh{0%{background-position:150% 0}55%,100%{background-position:-60% 0}}
+.hero h1{font-size:clamp(26px,6vw,42px);font-weight:800;letter-spacing:-.01em;line-height:1.12;position:relative}
+.hero h1 span{background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary),var(--cat-ios),var(--accent-primary));background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 6s linear infinite}
+.hero p{color:var(--text-secondary);font-size:14px;margin-top:12px;max-width:520px;line-height:1.7;position:relative}
 .cattiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:26px}
 @media(min-width:900px){.cattiles{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
 .tile{position:relative;border-radius:var(--r-lg);padding:16px;overflow:hidden;text-align:left;
-  background:var(--bg-card);border:1px solid var(--border-subtle);
-  transition:transform .3s var(--ez),border-color .3s,box-shadow .3s}
+  background:var(--bg-card);border:1px solid var(--border-subtle);transition:transform .3s var(--ez),border-color .3s,box-shadow .3s}
 @media(hover:hover) and (pointer:fine){
   .tile:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--nc) 45%,var(--border-subtle));box-shadow:0 14px 34px -16px color-mix(in srgb,var(--nc) 50%,transparent)}
 }
 .tile:active{transform:scale(.97)}
 .tile .tico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;margin-bottom:12px;
   background:color-mix(in srgb,var(--nc) 13%,transparent);border:1px solid color-mix(in srgb,var(--nc) 30%,transparent);transition:transform .35s var(--spring)}
-.tile:hover .tico{transform:scale(1.1) rotate(-6deg)}
+.tile:hover .tico{transform:scale(1.12) rotate(-7deg)}
 .tile .tico svg{width:19px;height:19px;stroke:var(--nc)}
 .tile b{display:block;font-size:15px;font-weight:800}
 .tile small{display:block;color:var(--text-secondary);font-size:11.5px;margin-top:4px;line-height:1.5}
@@ -353,14 +366,17 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
   background:var(--bg-card);border:1px solid var(--border-subtle);transition:all .28s;position:relative;overflow:hidden}
 .seg button.on{color:var(--sc,var(--cat));border-color:color-mix(in srgb,var(--sc,var(--cat)) 50%,transparent);background:color-mix(in srgb,var(--sc,var(--cat)) 12%,transparent)}
 .seg button:disabled{opacity:.4;pointer-events:none}
-.divider{display:flex;align-items:center;gap:10px;color:#5d6b80;font-size:11px;font-weight:700;letter-spacing:.1em}
-.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
-.gwrap{display:flex;justify-content:center;min-height:44px}
-.gwrap iframe{border-radius:99px!important}
 .swatches{display:flex;gap:8px;flex-wrap:wrap}
 .swatches button{width:30px;height:30px;border-radius:9px;border:2px solid transparent;transition:transform .25s var(--spring),border-color .25s}
 .swatches button.on{border-color:#fff;transform:scale(1.14)}
 .swatches button:active{transform:scale(.9)}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:13px;font-weight:600}
+.sw{position:relative;width:46px;height:26px;flex:none}
+.sw input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:1;margin:0}
+.sw i{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.14);transition:background .3s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .35s var(--spring)}
+.sw input:checked + i{background:var(--success)}
+.sw input:checked + i::after{transform:translateX(20px)}
 
 /* ═══ 14. DETAIL / DEV ═══ */
 .dt-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
@@ -394,7 +410,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 .dsec::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
 .maint-state{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:13px;font-weight:600;flex-wrap:wrap}
 .maint-state .dot{width:9px;height:9px;border-radius:50%;flex:none}
-.mnt-mins{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary);font-weight:600}
+.mnt-mins{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary);font-weight:600;flex-wrap:wrap}
 .mnt-mins input{width:74px;padding:8px 10px;border-radius:10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:13px;outline:none}
 #devLog{background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;max-height:150px;overflow-y:auto;
   font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.7;display:flex;flex-direction:column;gap:2px}
@@ -411,21 +427,22 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 .nt-acts{display:flex;gap:9px;flex-wrap:wrap}
 .nt-acts .btn{flex:1;min-width:130px}
 
-/* ═══ 16. BẢO TRÌ (nâng cấp) ═══ */
+/* ═══ 16. BẢO TRÌ ═══ */
 #maint{position:fixed;inset:0;z-index:150;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:26px;overflow:hidden;
   background:radial-gradient(760px 520px at 50% 38%,#131c30,var(--bg-primary) 72%)}
 #maint.on{display:flex}
 #maint.on>*{animation:mntUp .6s var(--ez) backwards}
-#maint.on>*:nth-child(2){animation-delay:.08s}#maint.on>*:nth-child(3){animation-delay:.16s}
-#maint.on>*:nth-child(4){animation-delay:.24s}#maint.on>*:nth-child(5){animation-delay:.32s}
-#maint.on>*:nth-child(6){animation-delay:.4s}#maint.on>*:nth-child(7){animation-delay:.48s}
-#maint.on>*:nth-child(8){animation-delay:.56s}#maint.on>*:nth-child(9){animation-delay:.64s}
+#maint.on>*:nth-child(3){animation-delay:.08s}#maint.on>*:nth-child(4){animation-delay:.16s}
+#maint.on>*:nth-child(5){animation-delay:.24s}#maint.on>*:nth-child(6){animation-delay:.32s}
+#maint.on>*:nth-child(7){animation-delay:.4s}
 @keyframes mntUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 .mnt-orb{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none}
 .mo1{width:44vmax;height:44vmax;left:-14vmax;top:-16vmax;opacity:.2;background:radial-gradient(circle,var(--warning),transparent 62%);animation:drift1 24s ease-in-out infinite alternate}
 .mo2{width:38vmax;height:38vmax;right:-12vmax;bottom:-14vmax;opacity:.16;background:radial-gradient(circle,var(--accent-primary),transparent 62%);animation:drift2 30s ease-in-out infinite alternate}
 .mnt-ring{position:relative;width:128px;height:128px;display:grid;place-items:center}
-.mnt-ring svg.gear{width:64px;height:64px;stroke:var(--warning);animation:spin 7s linear infinite;position:relative;z-index:1}
+.mnt-ring svg.gear{width:74px;height:74px;position:relative;z-index:1}
+.mnt-ring .gear .sm{stroke:var(--warning);fill:none;stroke-width:8.5;stroke-linecap:round;filter:drop-shadow(0 0 10px rgba(255,191,91,.4));animation:spin 9s linear infinite;transform-origin:50% 50%}
+.mnt-ring .gear .hx{fill:none;stroke:rgba(255,255,255,.14);stroke-width:2;stroke-linejoin:round}
 .mnt-ring::before,.mnt-ring::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--warning) 45%,transparent);animation:wave 2.6s var(--ez) infinite}
 .mnt-ring::after{animation-delay:1.3s}
 @keyframes wave{from{transform:scale(.55);opacity:.9}to{transform:scale(1.25);opacity:0}}
@@ -439,7 +456,8 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 #mntBarWrap{width:min(300px,74vw);height:5px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
 #mntBar{height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--warning),var(--accent-secondary));transition:width .3s linear;position:relative}
 #mntBar::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shim 1.4s linear infinite}
-.mnt-login{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px;position:relative}
+.mnt-login{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px;position:relative;width:min(320px,90vw)}
+.mnt-login .gbtn,.mnt-login .btn{width:100%}
 .mnt-login small{font-size:11px;color:#5d6b80;font-weight:600}
 .spark{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:0;pointer-events:none;animation:spark linear infinite}
 @keyframes spark{0%{opacity:0;transform:translateY(0)}12%{opacity:.7}100%{opacity:0;transform:translateY(-46vh)}}
@@ -472,12 +490,17 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 
 <!-- SPLASH -->
 <div id="splash">
-  <svg id="spLogo" viewBox="0 0 100 100" aria-hidden="true">
-    <defs><linearGradient id="spG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#29d6c5"/></linearGradient></defs>
-    <circle class="ring" cx="50" cy="50" r="46"/>
-    <path class="hex" d="M50 6 88 28v44L50 94 12 72V28Z"/>
-    <path class="bolt" d="M55 24 34 55h13l-4 21 23-33H52Z"/>
-  </svg>
+  <div id="spLogoWrap">
+    <div id="spGlow"></div>
+    <svg id="spLogo" viewBox="0 0 100 100" aria-hidden="true">
+      <defs><linearGradient id="spG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/>
+      </linearGradient></defs>
+      <circle class="ring" cx="50" cy="50" r="46"/>
+      <path class="hex" d="M50 6 88 28v44L50 94 12 72V28Z"/>
+      <path class="smark" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/>
+    </svg>
+  </div>
   <div id="spWord" aria-label="SKIBIDI SCRIPT WEB"></div>
   <div id="spTrack"><div id="spBar"></div></div>
 </div>
@@ -485,7 +508,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 <!-- BẢO TRÌ -->
 <div id="maint" role="alertdialog" aria-label="Website đang bảo trì">
   <div class="mnt-orb mo1"></div><div class="mnt-orb mo2"></div>
-  <div class="mnt-ring"><svg class="gear" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg></div>
+  <div class="mnt-ring"><svg class="gear" viewBox="0 0 100 100" aria-hidden="true"><path class="hx" d="M50 6 88 28v44L50 94 12 72V28Z"/><path class="sm" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/></svg></div>
   <h2>Website đang bảo trì</h2>
   <p id="maintMsg">Hệ thống đang tạm đóng. Vui lòng quay lại sau.</p>
   <div class="mnt-count">
@@ -494,8 +517,8 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
     <div id="mntBarWrap"><div id="mntBar"></div></div>
   </div>
   <div class="mnt-login">
-    <div class="gwrap" id="gBtnMaint"></div>
-    <button class="btn btn-g" id="btnMaintEmail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Email / Mật khẩu</button>
+    <button class="gbtn" id="btnMaintG" type="button"></button>
+    <button class="btn btn-g" id="btnMaintEmail" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Email / Mật khẩu</button>
     <small>Dành cho Dev</small>
   </div>
 </div>
@@ -505,7 +528,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
   <div class="hdr-main">
     <button id="btnMenu" aria-label="Mở menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <a class="brand" href="#/" aria-label="SKIBIDI SCRIPT WEB — Trang chủ">
-      <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M13.4 2.5 5 13h5.2l-1.6 8.5L17 11h-5.2Z" fill="url(#bg1)"/><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#29d6c5"/></linearGradient></defs></svg></span>
+      <span class="mark"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/></linearGradient></defs><path d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6" fill="none" stroke="url(#bg1)" stroke-width="10" stroke-linecap="round"/></svg></span>
       <b>SKIBIDI SCRIPT WEB</b>
     </a>
     <span class="hdr-sp"></span>
@@ -540,7 +563,6 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 <main id="main">
   <section class="view" id="v-home" aria-label="Trang chủ">
     <div class="hero">
-      <span class="kicker" id="heroKicker" hidden>REALTIME DATABASE · ĐANG HOẠT ĐỘNG</span>
       <h1>SKIBIDI <span>SCRIPT WEB</span></h1>
       <p>Code · Share · Connect — Simple. Fast. Connected.</p>
     </div>
@@ -575,10 +597,8 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
       <div class="fld"><label for="liPass">Mật khẩu</label><input id="liPass" type="password" autocomplete="current-password" required></div>
       <p class="form-err" id="liErr" role="alert" aria-live="polite"></p>
       <button class="btn btn-p btn-wide" type="submit" id="liBtn" style="--cat:var(--accent-primary)">Đăng nhập</button>
-      <div id="gSec">
-        <div class="divider">HOẶC</div>
-        <div class="gwrap" id="gBtn" style="margin-top:12px"></div>
-      </div>
+      <div class="divider">HOẶC</div>
+      <button class="gbtn" type="button" id="btnGoogle"></button>
     </form>
     <div id="accPane" style="display:none;flex-direction:column;gap:12px">
       <div class="acc-card" style="padding:14px"><span class="mail" id="accMail" style="font-size:13.5px"></span><span class="devtag" id="accDev" hidden>DEV</span></div>
@@ -636,6 +656,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
     </form>
 
     <span class="dsec">Bảng thông báo khi vào web</span>
+    <div class="switch-row"><span>Hiển thị thông báo khi vào web</span><label class="sw"><input type="checkbox" id="ntEnabled"><i></i></label></div>
     <form id="noticeForm" style="display:flex;flex-direction:column;gap:12px" novalidate>
       <div class="fld"><label for="nfTitle">Tiêu đề</label><input id="nfTitle" autocomplete="off" placeholder="Thông báo"></div>
       <div class="fld"><label for="nfBody">Nội dung</label><textarea id="nfBody" style="font-family:inherit;font-size:13.5px" placeholder="Nội dung thông báo hiển thị khi người dùng vào web…"></textarea></div>
@@ -667,7 +688,6 @@ const firebaseConfig = {
   projectId: "noxgalaxy-2cd71",
   appId: "1:632801709671:web:d239eb4bc8e0f7acab4ec2"
 };
-const GOOGLE_CLIENT_ID = "971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
 const DEV_EMAIL = "hminhgalaxy@gmail.com";
 const DATA_ROOT = "nox_data";
 const CATS_NODE = "nox_categories";
@@ -675,13 +695,15 @@ const MAINT_NODE = "nox_maintenance";
 const NOTICE_NODE = "nox_notice";
 
 const FB_OK = (typeof firebase !== "undefined");
-let database = null, auth = null;
+let database = null, auth = null, googleProvider = null;
 if (FB_OK) {
   try {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     database = firebase.database();
     auth = firebase.auth();
-  } catch (e) { /* trạng thái lỗi hiển thị qua UI */ }
+    googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: "select_account" });
+  } catch (e) { /* hiển thị qua trạng thái lỗi UI */ }
 }
 
 /* ═══════════ TIỆN ÍCH ═══════════ */
@@ -692,7 +714,7 @@ const pick = (o, ks) => { for (const k of ks) if (o && o[k] != null && o[k] !== 
 const vi = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
 const validUrl = u => /^https?:\/\/.+/i.test(String(u || "").trim());
 const pad = n => String(n).padStart(2, "0");
-function fmtTime(ts) { if (!ts) return ""; const d = new Date(Number(ts)); if (isNaN(d)) return ""; return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function fmtTime(ts) { if (!ts) return ""; const d = new Date(Number(ts)); if (isNaN(d)) return ""; return pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 function toast(msg, kind) {
   const w = $("#toasts"), el = document.createElement("div");
@@ -703,7 +725,7 @@ function toast(msg, kind) {
   if (kind === "err") el.style.setProperty("--tc", "var(--danger)");
   el.innerHTML = ic + "<span>" + esc(msg) + "</span>";
   w.appendChild(el);
-  setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 380); }, 2200);
+  setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 380); }, 2400);
 }
 function copyText(v) {
   return (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject())
@@ -715,13 +737,13 @@ function copyText(v) {
       ta.remove();
     }));
 }
-function copyFx(btn) { // hiệu ứng sao chép: pop + dấu ✓ bay lên
+function copyFx(btn) {
   if (!btn || RM) return;
   btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop");
   const r = btn.getBoundingClientRect();
   const s = document.createElement("span");
   s.className = "flychk"; s.textContent = "✓";
-  s.style.left = (r.left + r.width / 2) + "px";
+  s.style.left = (r.left + r.width/2) + "px";
   s.style.top = (r.top - 4) + "px";
   document.body.appendChild(s);
   setTimeout(() => s.remove(), 850);
@@ -755,10 +777,11 @@ const ICO = {
   warn:`<svg viewBox="0 0 24 24" ${SW}><path d="M12 3 2.5 20h19Z"/><path d="M12 10v4.5M12 17.5h.01"/></svg>`,
   chev:`<svg class="ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>`
 };
+const G_SVG = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>';
 const PICK_ICONS = ["box","star","gift","game","cloud","music","film","bolt","shield","terminal","heart","crown"];
 const PICK_COLORS = ["#7c5cff","#29d6c5","#ffbf5b","#f471b5","#35d39a","#4cc9f0","#ff647c","#ff9f45"];
 
-/* ═══════════ DANH MỤC (4 gốc + tùy chỉnh từ Firebase) ═══════════ */
+/* ═══════════ DANH MỤC ═══════════ */
 const BASE_CATS = [
   { id:"script", label:"Script", node:"scripts", color:"var(--accent-primary)",  sub:"Kho script cập nhật realtime.", base:true },
   { id:"apk",    label:"APK",    node:"apks",    color:"var(--warning)",         sub:"Kho APK và APK Vault.",         base:true },
@@ -796,7 +819,7 @@ window.addEventListener("error", e => dlog("er", "JS: " + (e.message || "lỗi k
     word.split("").forEach((ch, i) => {
       const c = document.createElement("span");
       c.className = "ch"; c.textContent = ch;
-      c.style.setProperty("--d", (240 + (wi * 7 + i) * 40) + "ms");
+      c.style.setProperty("--d", (240 + (wi*7 + i) * 40) + "ms");
       sp.appendChild(c);
     });
     w.appendChild(sp);
@@ -820,7 +843,22 @@ function enterApp() {
 }
 setTimeout(enterApp, 2800); // không bao giờ loading vô hạn
 
-/* ═══════════ LAYER (modal + drawer) ═══════════ */
+/* ═══════════ PARTICLES NỀN ═══════════ */
+if (!RM) {
+  const bg = $("#bg");
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement("span");
+    s.className = "ptcl";
+    s.style.left = (Math.random()*100).toFixed(2) + "%";
+    s.style.setProperty("--sz", (1.5 + Math.random()*2.5).toFixed(1) + "px");
+    s.style.animationDuration = (12 + Math.random()*16).toFixed(1) + "s";
+    s.style.animationDelay = (-Math.random()*24).toFixed(1) + "s";
+    s.style.opacity = (0.12 + Math.random()*0.3).toFixed(2);
+    bg.appendChild(s);
+  }
+}
+
+/* ═══════════ LAYER ═══════════ */
 let openEl = null, lastFocus = null;
 function openLayer(el) {
   closeLayer();
@@ -898,21 +936,20 @@ function normItem(key, o) {
   };
 }
 
-/* ═══════════ RENDER: thẻ, nav, view, tiles ═══════════ */
+/* ═══════════ RENDER ═══════════ */
 const io = ("IntersectionObserver" in window) ? new IntersectionObserver(es => {
   es.forEach(en => {
     if (!en.isIntersecting) return;
     const el = en.target;
     if (performance.now() - (+el.dataset.rt || 0) > 450) el.style.setProperty("--d", "0ms");
-    el.classList.add(el.classList.contains("card") || el.hasAttribute("data-reveal") ? "in" : "in");
-    if (el.hasAttribute("data-reveal")) el.classList.add("rvin");
+    el.classList.add("in", "rvin");
     io.unobserve(el);
   });
 }, { threshold:.06, rootMargin:"40px" }) : null;
 function observeAnim(scope) {
   const els = scope.querySelectorAll(".card,[data-reveal]");
   if (io && !RM) els.forEach(c => io.observe(c));
-  else els.forEach(c => { c.classList.add("in"); c.classList.add("rvin"); });
+  else els.forEach(c => c.classList.add("in", "rvin"));
 }
 function cardHTML(it, catId, i, rt, showChip) {
   const c = catOf(catId); if (!c) return "";
@@ -922,6 +959,7 @@ function cardHTML(it, catId, i, rt, showChip) {
   if (hasUrl) acts.push(`<a class="btn btn-p" href="${esc(it.url.trim())}" target="_blank" rel="noopener" data-stop>${ICO.ext}<span>Mở link</span></a>`);
   acts.push(`<button class="btn btn-g" data-act="detail" data-cat="${catId}" data-key="${esc(it.key)}" data-stop>${ICO.eye}<span>Chi tiết</span></button>`);
   return `<article class="card" style="--cat:${c.color};--d:${Math.min(i,10)*45}ms" data-rt="${rt}" data-cat="${catId}" data-key="${esc(it.key)}" tabindex="0" role="button" aria-label="Xem chi tiết ${esc(it.name)}">
+    <span class="sh" aria-hidden="true"></span>
     <div class="ctop"><span class="ico-tile">${ICO[c.icon] || ICO[c.id] || ICO.box}</span>
       ${showChip ? `<span class="chip">${esc(c.label)}</span>` : ""}
       ${it.vault ? `<span class="chip" style="--cat:var(--warning)">VAULT</span>` : ""}
@@ -976,9 +1014,7 @@ function ensureViews() {
     v.querySelector("h2").textContent = c.label;
     v.querySelector(".vsub").textContent = c.sub || "";
   });
-  Array.from(document.querySelectorAll(".view[data-cat]")).forEach(v => {
-    if (!catOf(v.dataset.cat)) v.remove();
-  });
+  Array.from(document.querySelectorAll(".view[data-cat]")).forEach(v => { if (!catOf(v.dataset.cat)) v.remove(); });
 }
 function countUp(el, to) {
   const from = parseInt(el.dataset.v || "0", 10);
@@ -993,7 +1029,7 @@ function countUp(el, to) {
 }
 function renderHome() {
   const tiles = $("#tiles");
-  tiles.innerHTML = CATS.map((c,i) => `<a class="tile" href="#/${c.id}" style="--nc:${c.color}" data-reveal style2="">
+  tiles.innerHTML = CATS.map(c => `<a class="tile" href="#/${c.id}" data-reveal style="--nc:${c.color}">
       <span class="tico">${ICO[c.icon]||ICO[c.id]||ICO.box}</span><span class="num" data-tilenum="${c.id}">0</span>
       <b>${esc(c.label)}</b><small>${esc(c.sub||"")}</small></a>`).join("");
   tiles.querySelectorAll(".tile").forEach((t,i) => t.style.setProperty("--d", (i*50)+"ms"));
@@ -1008,7 +1044,7 @@ function renderHome() {
   const latest = all.filter(x => x.ts).sort((a,b) => b.ts - a.ts).slice(0, 6);
   const box = $("#latest");
   if (!latest.length) { box.innerHTML = `<div class="statebox">${ICO.box}<p>Chưa có dữ liệu.</p></div>`; return; }
-  box.innerHTML = latest.map((it,i) => {
+  box.innerHTML = latest.map(it => {
     const c = catOf(it.cat);
     return `<div class="lrow" style="--nc:${c.color}" data-reveal data-act="detail" data-cat="${it.cat}" data-key="${esc(it.key)}" role="button" tabindex="0">
       <span class="lico">${ICO[c.icon]||ICO[c.id]||ICO.box}</span>
@@ -1076,7 +1112,7 @@ function openDetail(catId, key) {
   openLayer($("#mdDetail"));
 }
 
-/* ═══════════ AUTH: EMAIL/PASS + GOOGLE (GIS) ═══════════ */
+/* ═══════════ AUTH — EMAIL/PASS + GOOGLE (POPUP/REDIRECT) ═══════════ */
 const AUTH_MSG = {
   "auth/invalid-credential":"Email hoặc mật khẩu không đúng.",
   "auth/wrong-password":"Email hoặc mật khẩu không đúng.",
@@ -1084,14 +1120,23 @@ const AUTH_MSG = {
   "auth/invalid-email":"Email không hợp lệ.",
   "auth/too-many-requests":"Quá nhiều lần thử. Vui lòng thử lại sau.",
   "auth/network-request-failed":"Lỗi kết nối mạng.",
-  "auth/operation-not-allowed":"Phương thức đăng nhập chưa được bật trong Firebase Auth.",
-  "auth/unauthorized-domain":"Domain chưa được cấp phép trong Firebase Auth."
+  "auth/operation-not-allowed":"Phương thức đăng nhập chưa được bật trong Firebase Auth (Authentication → Sign-in method).",
+  "auth/unauthorized-domain":"Domain này chưa được cấp phép trong Firebase Auth (Authentication → Settings → Authorized domains).",
+  "auth/popup-blocked":"Cửa sổ bật lên bị chặn. Đang thử cách khác…",
+  "auth/operation-not-supported-in-this-environment":"Trình duyệt không hỗ trợ popup. Đang thử cách khác…",
+  "auth/popup-closed-by-user":"Đã đóng cửa sổ đăng nhập Google.",
+  "auth/cancelled-popup-request":"Đã hủy cửa sổ đăng nhập Google.",
+  "auth/invalid-auth-configuration":"Cấu hình Auth chưa đúng (kiểm tra Authorized domains / provider).",
+  "auth/api-key-not-valid":"API key không hợp lệ.",
+  "auth/argument-error":"Thiếu cấu hình đăng nhập.",
+  "auth/invalid-continue-uri":"URI không hợp lệ.",
+  "auth/missing-client-identifier":"Thiếu cấu hình đăng nhập."
 };
-function authErrMsg(err) { return AUTH_MSG[err && err.code] || "Thao tác thất bại. Vui lòng thử lại."; }
+function authErrMsg(err) { return (err && AUTH_MSG[err.code]) || "Thao tác thất bại. Vui lòng thử lại."; }
+
 function renderAuth() {
   const u = state.user;
   $("#btnAcc").classList.toggle("dev", state.dev);
-  $("#heroKicker").hidden = !state.dev; // chữ kỹ thuật chỉ Dev thấy
   document.querySelectorAll(".auth-zone").forEach(z => {
     z.innerHTML = u
       ? `<div class="acc-card"><span class="mail">${esc(u.email || "")}</span>${state.dev ? '<span class="devtag">DEV</span>' : ""}</div>
@@ -1106,43 +1151,54 @@ function renderAuth() {
 }
 $("#btnAcc").addEventListener("click", () => openLayer($("#mdAuth")));
 $("#btnMaintEmail").addEventListener("click", () => openLayer($("#mdAuth")));
+
+/* Email / Mật khẩu */
 $("#loginForm").addEventListener("submit", e => {
   e.preventDefault();
   const errEl = $("#liErr"); errEl.textContent = "";
-  if (!auth) { errEl.textContent = "Hệ thống đăng nhập chưa sẵn sàng."; return; }
+  if (!auth) { errEl.textContent = "Hệ thống đăng nhập chưa sẵn sàng (Firebase SDK không tải được)."; return; }
   const email = $("#liEmail").value.trim(), pass = $("#liPass").value;
   if (!email || !pass) { errEl.textContent = "Vui lòng nhập đủ email và mật khẩu."; return; }
   const btn = $("#liBtn"); btn.disabled = true; btn.textContent = "Đang đăng nhập…";
   auth.signInWithEmailAndPassword(email, pass)
-    .then(() => { btn.disabled = false; btn.textContent = "Đăng nhập"; $("#liPass").value = ""; })
-    .catch(err => { btn.disabled = false; btn.textContent = "Đăng nhập"; errEl.textContent = authErrMsg(err); dlog("er", "Login: " + (err.code || err)); });
+    .then(() => { btn.disabled = false; btn.textContent = "Đăng nhập"; $("#liPass").value = ""; toast("Đăng nhập thành công."); })
+    .catch(err => {
+      btn.disabled = false; btn.textContent = "Đăng nhập";
+      let msg = authErrMsg(err);
+      if (err && err.code === "auth/invalid-credential") msg += " (Nếu chắc chắn đúng mật khẩu: kiểm tra Email/Password đã bật trong Firebase Auth chưa.)";
+      errEl.textContent = msg;
+      dlog("er", "Login email: " + (err.code || err.message || err));
+    });
 });
-/* Google — Google Identity Services + signInWithCredential (dùng client ID được cung cấp) */
-let gReady = false;
-function onGoogleCred(resp) {
-  if (!resp || !resp.credential) { toast("Đăng nhập Google bị hủy.", "err"); return; }
-  if (!auth) { toast("Hệ thống đăng nhập chưa sẵn sàng.", "err"); return; }
-  const cred = firebase.auth.GoogleAuthProvider.credential(resp.credential);
-  auth.signInWithCredential(cred)
-    .then(() => { toast("Đăng nhập Google thành công."); closeLayer(); })
-    .catch(err => { toast(authErrMsg(err), "err"); dlog("er", "Google credential: " + (err.code || err.message || err)); });
-}
-function initGoogle(tries) {
-  tries = tries == null ? 12 : tries;
-  if (window.google && google.accounts && google.accounts.id && auth) {
-    try {
-      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCred, auto_select:false, cancel_on_tap_outside:true });
-      const opt1 = { theme:"filled_black", size:"large", shape:"pill", text:"signin_with", logo_alignment:"left" };
-      if ($("#gBtn") && !$("#gBtn").hasChildNodes()) google.accounts.id.renderButton($("#gBtn"), Object.assign({ width:300 }, opt1));
-      if ($("#gBtnMaint") && !$("#gBtnMaint").hasChildNodes()) google.accounts.id.renderButton($("#gBtnMaint"), Object.assign({ width:240 }, opt1));
-      gReady = true;
-      dlog("ok", "Google Identity Services sẵn sàng.");
-    } catch (e) { dlog("er", "Google init: " + e.message); }
-    return;
+
+/* Google — popup, fallback redirect */
+function gBtnHTML() { return G_SVG + "<span>Đăng nhập bằng Google</span>"; }
+async function googleSignIn(btn) {
+  if (!auth || !googleProvider) { toast("Hệ thống đăng nhập chưa sẵn sàng.", "err"); dlog("er", "Google: Firebase Auth chưa khởi tạo."); return; }
+  const old = btn ? btn.innerHTML : null;
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span><span>Đang mở Google…</span>'; }
+  try {
+    await auth.signInWithPopup(googleProvider);
+    toast("Đăng nhập Google thành công.");
+    closeLayer();
+  } catch (err) {
+    const code = (err && err.code) || "";
+    dlog("er", "Google popup: " + code);
+    if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
+      try { await auth.signInWithRedirect(googleProvider); return; } // trang sẽ reload, xử lý ở getRedirectResult
+      catch (e2) { dlog("er", "Google redirect: " + (e2.code || e2.message)); toast(authErrMsg(e2), "err"); }
+    } else if (!/cancelled|closed/.test(code)) {
+      toast(authErrMsg(err), "err");
+    }
+  } finally {
+    if (btn && old) { btn.disabled = false; btn.innerHTML = old; }
   }
-  if (tries > 0) setTimeout(() => initGoogle(tries - 1), 400);
-  else dlog("er", "Không tải được Google Identity Services (kiểm tra mạng/chặn script).");
 }
+$("#btnGoogle").innerHTML = gBtnHTML();
+$("#btnMaintG").innerHTML = gBtnHTML();
+$("#btnGoogle").addEventListener("click", e => googleSignIn(e.currentTarget));
+$("#btnMaintG").addEventListener("click", e => googleSignIn(e.currentTarget));
+
 if (auth) {
   auth.onAuthStateChanged(u => {
     state.user = u || null;
@@ -1151,16 +1207,23 @@ if (auth) {
     renderAuth();
     applyMaint();
   });
-} else { renderAuth(); dlog("er", "Firebase SDK không khả dụng."); }
-initGoogle();
+  auth.getRedirectResult().then(res => {
+    if (res && res.user) { toast("Đăng nhập Google thành công."); dlog("ok", "Google redirect: " + res.user.email); }
+  }).catch(err => {
+    if (err && err.code && !/cancelled|closed/.test(err.code)) { dlog("er", "Google redirect result: " + err.code); toast(authErrMsg(err), "err"); }
+  });
+} else {
+  renderAuth();
+  dlog("er", "Firebase SDK không khả dụng.");
+}
 
-/* ═══════════ BẢO TRÌ: tự động mở + đếm ngược ═══════════ */
+/* ═══════════ BẢO TRÌ: tự mở + đếm ngược ═══════════ */
 function maintUntil(m) {
   if (m.until) return Number(m.until);
   const base = Number(m.ts) || 0;
-  if (base) return base + 60000;                 // dev không đặt thời gian → tự mở sau 1 phút
+  if (base) return base + 60000;
   if (!state.maintFirstSeen) state.maintFirstSeen = Date.now();
-  return state.maintFirstSeen + 60000;           // không có ts → 1 phút từ lúc web nhận được
+  return state.maintFirstSeen + 60000;
 }
 let mntTimer = null;
 function stopCountdown() { if (mntTimer) { clearInterval(mntTimer); mntTimer = null; } }
@@ -1186,7 +1249,7 @@ function applyMaint() {
   let on = !!(m && m.enabled), until = 0;
   if (on) {
     until = maintUntil(m);
-    if (Date.now() >= until) { // đã hết hạn → tự bỏ bảo trì
+    if (Date.now() >= until) {
       if (state.dev && database) database.ref(MAINT_NODE).update({ enabled:false, by:"DEV", ts:firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
       on = false;
     }
@@ -1197,16 +1260,15 @@ function applyMaint() {
   if (show) {
     const total = Math.max(1000, until - (Number(m.ts) || state.maintFirstSeen || (until - 60000)));
     startCountdown(until, total);
-    if (!$("#maint").dataset.sparked) { // hạt sáng trang trí (1 lần)
+    if (!$("#maint").dataset.sparked) {
       $("#maint").dataset.sparked = "1";
-      for (let i = 0; i < 14; i++) {
+      if (!RM) for (let i = 0; i < 14; i++) {
         const s = document.createElement("span");
         s.className = "spark";
-        s.style.left = (4 + Math.random() * 92) + "%";
+        s.style.left = (4 + Math.random()*92) + "%";
         s.style.bottom = "-6px";
-        s.style.animationDuration = (4 + Math.random() * 5) + "s";
-        s.style.animationDelay = (Math.random() * 6) + "s";
-        s.style.opacity = 0;
+        s.style.animationDuration = (4 + Math.random()*5) + "s";
+        s.style.animationDelay = (Math.random()*6) + "s";
         $("#maint").appendChild(s);
       }
     }
@@ -1218,10 +1280,7 @@ function renderMaintPanel() {
   const on = !!(state.maint && state.maint.enabled);
   $("#mntDot").style.background = on ? "var(--warning)" : "var(--success)";
   let txt = on ? "Bảo trì: BẬT" : "Bảo trì: TẮT";
-  if (on) {
-    const u = maintUntil(state.maint);
-    txt += " · tự mở lúc " + fmtTime(u);
-  }
+  if (on) txt += " · tự mở lúc " + fmtTime(maintUntil(state.maint));
   $("#mntTxt").textContent = txt;
   const b = $("#mntBtn");
   b.textContent = on ? "MỞ WEBSITE" : "BẬT BẢO TRÌ";
@@ -1237,19 +1296,20 @@ $("#mntBtn").addEventListener("click", () => {
       .catch(e2 => { dlog("er", "Maintenance: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
   } else {
     let mins = parseInt($("#mntMins").value, 10);
-    if (!isFinite(mins) || mins < 1) mins = 1; // không đặt → mặc định 1 phút
+    if (!isFinite(mins) || mins < 1) mins = 1;
     const now = Date.now();
-    database.ref(MAINT_NODE).update({ enabled:true, by:"DEV", ts:now, until: now + mins * 60000 })
+    database.ref(MAINT_NODE).update({ enabled:true, by:"DEV", ts:now, until: now + mins*60000 })
       .then(() => { dlog("ok", "Bật bảo trì, tự mở sau " + mins + " phút."); toast("Đã bật bảo trì (tự mở sau " + mins + " phút)."); })
       .catch(e2 => { dlog("er", "Maintenance: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
   }
 });
 
-/* ═══════════ BẢNG THÔNG BÁO (nox_notice) ═══════════ */
+/* ═══════════ BẢNG THÔNG BÁO (nox_notice) + công tắc Dev ═══════════ */
 let noticeShownSession = false;
 function maybeNotice() {
   const n = state.notice;
-  if (!n || (!(n.body || "").trim() && !(n.title || "").trim())) return;
+  if (!n || n.enabled === false) return;                       // Dev có thể tắt từ Dev panel
+  if (!(n.body || "").trim() && !(n.title || "").trim()) return;
   if (noticeShownSession || $("#maint").classList.contains("on")) return;
   const ver = String(n.updatedAt || n.ts || "");
   let rec = null;
@@ -1267,13 +1327,21 @@ $("#nt2h").addEventListener("click", () => {
   closeLayer();
   toast("Đã ẩn thông báo trong 2 giờ.");
 });
+$("#ntEnabled").addEventListener("change", e => {
+  const on = e.target.checked;
+  if (!state.dev || !database) { e.target.checked = !on; return; }
+  database.ref(NOTICE_NODE).update({ enabled: on, updatedAt: firebase.database.ServerValue.TIMESTAMP })
+    .then(() => { dlog("ok", on ? "Bật bảng thông báo." : "Tắt bảng thông báo."); toast(on ? "Đã bật thông báo." : "Đã tắt thông báo."); })
+    .catch(e2 => { e.target.checked = !on; dlog("er", "Notice toggle: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
+});
 $("#noticeForm").addEventListener("submit", e => {
   e.preventDefault();
   const err = $("#nfErr"); err.textContent = "";
   if (!state.dev || !database) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
   const title = $("#nfTitle").value.trim(), body = $("#nfBody").value.trim();
   if (!body) { err.textContent = "Nội dung thông báo không được để trống."; return; }
-  database.ref(NOTICE_NODE).set({ title, body, updatedAt: firebase.database.ServerValue.TIMESTAMP })
+  const cur = state.notice || {};
+  database.ref(NOTICE_NODE).update({ title, body, enabled: cur.enabled !== false, updatedAt: firebase.database.ServerValue.TIMESTAMP })
     .then(() => { dlog("ok", "Đã cập nhật thông báo."); toast("Đã cập nhật thông báo."); })
     .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : "Thao tác thất bại."; dlog("er", "Notice: " + (e2.code || e2.message)); });
 });
@@ -1291,7 +1359,7 @@ function setFormCat(c) {
   const cat = catOf(c);
   const isScript = c === "script";
   const isBase = !!(cat && cat.base);
-  $("#wrapUrl").style.display = (isScript) ? "none" : "flex";
+  $("#wrapUrl").style.display = isScript ? "none" : "flex";
   $("#wrapCode").style.display = (isScript || !isBase) ? "flex" : "none";
 }
 function resetForm() {
@@ -1341,7 +1409,7 @@ $("#itemForm").addEventListener("submit", e => {
   let p;
   if (state.editing) {
     payload.updatedAt = firebase.database.ServerValue.TIMESTAMP;
-    p = database.ref(nodePath(catId) + "/" + state.editing.key).update(payload); // giữ field cũ
+    p = database.ref(nodePath(catId) + "/" + state.editing.key).update(payload);
   } else {
     payload.createdAt = firebase.database.ServerValue.TIMESTAMP;
     p = database.ref(nodePath(catId)).push(payload);
@@ -1389,9 +1457,7 @@ function slugify(name) {
 function renderCatForm() {
   $("#cfIcon").innerHTML = PICK_ICONS.map(k => `<option value="${k}"${state.catForm.icon===k?" selected":""}>${k}</option>`).join("");
   $("#cfColors").innerHTML = PICK_COLORS.map(c => `<button type="button" data-col="${c}" class="${state.catForm.color===c?"on":""}" style="background:${c}" aria-label="Màu ${c}"></button>`).join("");
-  $("#cfColors").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-    state.catForm.color = b.dataset.col; renderCatForm();
-  }));
+  $("#cfColors").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { state.catForm.color = b.dataset.col; renderCatForm(); }));
   const customs = CATS.filter(c => !c.base);
   $("#catList").innerHTML = customs.length ? customs.map(c =>
     `<div class="drow"><span class="ci" style="color:${c.color};width:16px;height:16px;display:inline-flex">${ICO[c.icon]||ICO.box}</span><span class="nm">${esc(c.label)} <small style="color:#5d6b80">(${esc(c.node)})</small></span>
@@ -1405,16 +1471,15 @@ $("#catForm").addEventListener("submit", e => {
   const name = $("#cfName").value.trim();
   if (!name) { err.textContent = "Thiếu tên danh mục."; return; }
   if (CATS.some(c => vi(c.label) === vi(name))) { err.textContent = "Tên danh mục đã tồn tại."; return; }
-  const payload = { name, sub: $("#cfSub").value.trim(), icon: state.catForm.icon, color: state.catForm.color, node: slugify(name), createdAt: firebase.database.ServerValue.TIMESTAMP };
+  const payload = { name, sub:$("#cfSub").value.trim(), icon:state.catForm.icon, color:state.catForm.color, node:slugify(name), createdAt:firebase.database.ServerValue.TIMESTAMP };
   database.ref(CATS_NODE).push(payload)
     .then(() => { dlog("ok", "Đã thêm danh mục: " + name); toast("Đã thêm danh mục " + name + "."); $("#catForm").reset(); })
     .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : "Thao tác thất bại."; dlog("er", "Thêm danh mục: " + (e2.code || e2.message)); });
 });
 function deleteCat(catId) {
   if (!state.dev || !database) return;
-  const c = catOf(catId); if (!c || c.base) return;
-  const key = c.key;
-  database.ref(CATS_NODE + "/" + key).remove()
+  const c = catOf(catId); if (!c || c.base || !c.key) return;
+  database.ref(CATS_NODE + "/" + c.key).remove()
     .then(() => { dlog("ok", "Đã xóa danh mục: " + c.label); toast("Đã xóa danh mục."); if (state.route === catId) location.hash = "#/"; })
     .catch(e2 => { dlog("er", "Xóa danh mục: " + (e2.code || e2.message)); toast("Xóa thất bại.", "err"); });
 }
@@ -1469,10 +1534,14 @@ if (database) {
     $("#connDot").classList.toggle("on", !!s.val());
     dlog(s.val() ? "ok" : "er", "Database " + (s.val() ? "kết nối." : "mất kết nối."));
   });
-  database.ref(MAINT_NODE).on("value", s => { state.maint = s.val() || null; applyMaint(); }, () => {});
+  database.ref(MAINT_NODE).on("value", s => { state.maint = s.val() || null; state.maintFirstSeen = 0; applyMaint(); }, () => {});
   database.ref(NOTICE_NODE).on("value", s => {
     state.notice = s.val() || null;
-    if (state.dev && state.notice) { $("#nfTitle").value = state.notice.title || ""; $("#nfBody").value = state.notice.body || ""; }
+    if (state.dev && state.notice) {
+      $("#nfTitle").value = state.notice.title || "";
+      $("#nfBody").value = state.notice.body || "";
+    }
+    $("#ntEnabled").checked = !!(state.notice && state.notice.enabled !== false);
     maybeNotice();
   }, () => {});
   database.ref(CATS_NODE).on("value", s => { rebuildCats(s.val() || {}); dlog("in", "Danh mục tùy chỉnh: " + Object.keys(s.val() || {}).length); }, () => rebuildCats({}));
@@ -1509,7 +1578,7 @@ document.addEventListener("click", e => {
     const it = (state.data[t.dataset.cat] || []).find(x => x.key === t.dataset.key);
     if (!it || !it.code) { toast("Không có code để sao chép.", "err"); return; }
     copyText(it.code).then(() => {
-      toast("Đã sao chép code."); copyFx(t); t.classList.add("pop"); setTimeout(() => t.classList.remove("pop"), 500);
+      toast("Đã sao chép code."); copyFx(t);
       if (database && it.copies != null) database.ref(nodePath(t.dataset.cat) + "/" + it.key + "/copies").set(it.copies + 1).catch(() => {});
     }).catch(() => toast("Không sao chép được.", "err"));
   }
