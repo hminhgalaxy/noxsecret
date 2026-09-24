@@ -3,31 +3,36 @@
 <head>
 <!--
 ════════════════════════════════════════════════════════════════
- SKIBIDI SCRIPT WEB — index.html (bản nâng cấp: nền tùy chỉnh,
- âm thanh, menu lớn, dev panel full màn hình, dấu X đóng trang)
+ SKIBIDI SCRIPT WEB — index.html (bản fix lỗi toàn diện + nâng cấp animation)
 ════════════════════════════════════════════════════════════════
- • Firebase GIỮ NGUYÊN: noxgalaxy-2cd71 · compat 10.12.2 · RTDB:
-   nox_data/scripts|apks|links|ios, nox_categories, nox_maintenance,
-   nox_notice, nox_theme (MỚI: nền ảnh/video + âm thanh, data URL).
- • Đăng nhập: Email/Mật khẩu + Google (GIS, client ID gốc
-   971947846929-…, signInWithCredential → fallback xác minh RS256
-   trong trình duyệt). Phiên đăng nhập Google/Email LƯU LÂU DÀI
-   (Firebase persistence LOCAL + localStorage) — chỉ đăng xuất khi
-   người dùng bấm "Đăng xuất".
- • Nút X đóng trang danh mục/tìm kiếm (góc phải tiêu đề trang).
- • Sidebar/drawer to hơn (272px), chuyên nghiệp hơn, pill trượt,
-   stagger khi mở, nút ÂM THANH trong menu (trạng thái tắt lưu
-   localStorage — giữ qua khởi động lại/reset web).
- • Dev panel FULL MÀN HÌNH; thêm mục "Nền web" (ảnh/video từ máy,
-   ảnh tự nén, giới hạn ~9MB) và "Âm thanh" (tự phát khi vào web,
-   chặn autoplay thì phát ở chạm đầu tiên). Khi có nền tùy chỉnh:
-   các khung chuyển sang chế độ VIỀN + trong suốt (glass).
- • Nhạc nền: <audio loop>; video nền: autoplay muted loop.
- • Đã dò xung đột sự kiện: điều hướng dùng preventDefault + navTo()
-   (hết lỗi kẹt trang tìm kiếm khi bấm menu), ripple mở rộng cho
-   navitem/tile/lrow, mọi nút đều có hành vi thật.
- • Animation mới: ken-burns nền, sheen nút, equalizer, sweep chuyển
-   trang, welcome stagger, prefers-reduced-motion đầy đủ.
+ CÁC LỖI ĐÃ FIX TRONG BẢN NÀY:
+ 1. Không mở được Dev Panel trong phần Tài khoản → nút #btnDev bị
+    thiếu trình xử lý; đã gắn data-act="devopen" (dùng chung delegation).
+ 2. Nút "Đăng xuất" trong modal tài khoản (#btnOut) cũng bị thiếu
+    handler → đã gắn data-act="signout".
+ 3. PC không có menu → "vùng chết" 900–1023px (nút menu ẩn, sidebar
+    cũng ẩn). Đã đồng bộ MỘT breakpoint 960px: <960 = drawer + nút
+    menu; ≥960 = sidebar cố định. Hết lệch ở mọi khoảng宽度 (kể cả
+    khi zoom trình duyệt).
+ 4. Thanh pill (vạch sáng) trong menu bị lệch → chuyển sang đo bằng
+    getBoundingClientRect + scrollTop (chính xác tuyệt đối), gọi lại
+    sau khi font tải xong (document.fonts.ready), rAF kép sau khi
+    render nav, và khi mở drawer/resize.
+ 5. Ô tìm kiếm có 2 dấu X → ẩn nút xóa gốc của WebKit
+    (::-webkit-search-cancel-button) + appearance:none.
+ 6. Nút Google tràn màn hình nhỏ → width tính theo viewport,
+    iframe max-width:100%.
+ 7. Dọn listener Firebase khi danh mục tùy chỉnh bị xóa; guard
+    maybeNotice khi splash chưa xong; bắt unhandledrejection vào
+    Dev log; aria-current cho nav.
+ TÍNH NĂNG GIỮ NGUYÊN: Firebase noxgalaxy-2cd71 (compat 10.12.2),
+ nox_data/scripts|apks|links|ios, nox_categories, nox_maintenance,
+ nox_notice, nox_theme (nền ảnh/video + nhạc, chế độ viền trong suốt),
+ Google GIS client ID gốc, Email/Password, đăng nhập lưu lâu dài,
+ bảo trì tự mở, thông báo Đóng/Đóng trong 2h, Dev full màn hình.
+ ANIMATION NÂNG CẤP: lưới nền thở, chữ S logo vẽ lại khi vào web,
+ ảnh thẻ zoom khi hover, số đếm pop, toast icon pop, pill phát sáng,
+ ken-burns nền tùy chỉnh, sweep chuyển trang, particle, tilt/glare.
 ════════════════════════════════════════════════════════════════
 -->
 <meta charset="UTF-8">
@@ -50,6 +55,7 @@
 @property --cat { syntax:"<color>"; inherits:true; initial-value:#7c5cff }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
+  color-scheme:dark;
   --bg-primary:#080b12;--bg-secondary:#0e1420;--bg-card:#121a28;--bg-elevated:#182235;
   --text-primary:#f4f7fb;--text-secondary:#9ba9bd;
   --border-subtle:rgba(255,255,255,.08);--border-strong:rgba(255,255,255,.16);
@@ -70,8 +76,14 @@ a{color:inherit;text-decoration:none}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:99px}
 :focus-visible{outline:2px solid var(--cat);outline-offset:2px;border-radius:6px}
 ::placeholder{color:#5d6b80}
+/* FIX: ẩn dấu X gốc của input search (lỗi 2 dấu X) */
+input[type="search"]{-webkit-appearance:none;appearance:none}
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration{-webkit-appearance:none;appearance:none;display:none}
 
-/* ═══ 2. NỀN + THEME LAYER (nền tùy chỉnh của Dev) ═══ */
+/* ═══ 2. NỀN + THEME LAYER ═══ */
 #bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;transition:opacity .6s}
 body.custom-bg #bg{opacity:.18}
 .orb{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
@@ -84,7 +96,9 @@ body.custom-bg #bg{opacity:.18}
 #bg .grid{position:absolute;inset:0;opacity:.5;background:
   repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 48px),
   repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 1px,transparent 1px 48px);
-  -webkit-mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%);mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%)}
+  -webkit-mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%);mask-image:radial-gradient(75% 55% at 50% 26%,#000,transparent 78%);
+  animation:gridbreathe 9s ease-in-out infinite}
+@keyframes gridbreathe{0%,100%{opacity:.5}50%{opacity:.3}}
 .ptcl{position:absolute;bottom:-12px;width:var(--sz,2px);height:var(--sz,2px);border-radius:50%;background:#cfe3ff;animation:rise linear infinite;will-change:transform}
 @keyframes rise{to{transform:translateY(-108vh)}}
 #themeLayer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .8s var(--ez)}
@@ -94,14 +108,14 @@ body.custom-bg #bg{opacity:.18}
 @keyframes kb{from{transform:scale(1) translate(0,0)}to{transform:scale(1.09) translate(-1.5%,-1.5%)}}
 #themeLayer::after{content:"";position:absolute;inset:0;background:rgba(8,11,18,.42)}
 
-/* ═══ CHẾ ĐỘ GLASS (khi Dev đặt nền) — khung chỉ còn viền, trong suốt ═══ */
+/* ═══ GLASS (khi Dev đặt nền) ═══ */
 body.glassy{--border-subtle:rgba(255,255,255,.16);--border-strong:rgba(255,255,255,.26)}
 body.glassy .card{background:linear-gradient(180deg,rgba(18,26,40,.20),rgba(18,26,40,.08));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 body.glassy .tile,body.glassy .lrow,body.glassy .sk,body.glassy details.dl,body.glassy .maint-state,
-body.glassy .switch-row,body.glassy .acc-card,body.glassy .dt-url,body.glassy .fld input,
+body.glassy .switch-row,body.glassy .acc-card,body.glassy .dt-url,body.glassy .thstatus,body.glassy .fld input,
 body.glassy .fld select,body.glassy .fld textarea{background:rgba(18,26,40,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 body.glassy pre.codeprev,body.glassy pre.dt-code,body.glassy #devLog{background:rgba(8,11,18,.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-body.glassy .btn-g,body.glassy .btn-i,body.glassy .xbtn,body.glassy .drow button,body.glassy .seg button{background:rgba(24,34,53,.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+body.glassy .btn-g,body.glassy .xbtn,body.glassy .drow button,body.glassy .seg button,body.glassy .vclose{background:rgba(24,34,53,.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 body.glassy #hdr{background:rgba(8,11,18,.55)}
 body.glassy #side{background:rgba(10,14,22,.5)}
 body.glassy .modal{background:rgba(10,14,22,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
@@ -150,7 +164,7 @@ body.glassy .statebox{background:rgba(18,26,40,.12)}
   background:rgba(8,11,18,.78);border-bottom:1px solid transparent;transition:border-color .35s,box-shadow .35s,background .35s}
 #hdr.scrolled{border-bottom-color:var(--border-subtle);box-shadow:0 10px 34px rgba(0,0,0,.4);background:rgba(8,11,18,.9)}
 .hdr-main{display:flex;align-items:center;gap:10px;height:var(--head-h);padding:0 14px;max-width:1560px;margin:0 auto}
-#btnMenu{display:none;width:42px;height:42px;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
+#btnMenu{display:grid;width:42px;height:42px;flex:none;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
 #btnMenu:hover{background:var(--bg-elevated)}
 #btnMenu:active{transform:scale(.9)}
 #btnMenu svg{width:19px;height:19px;stroke:var(--text-primary)}
@@ -161,6 +175,7 @@ body.glassy .statebox{background:rgba(18,26,40,.12)}
 .brand .mark::before{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.4) 50%,transparent 65%);background-size:250% 100%;background-position:150% 0;transition:background-position .8s var(--ez)}
 .brand:hover .mark::before{background-position:-60% 0}
 .brand .mark svg{width:24px;height:24px;position:relative;z-index:1}
+body.welc .brand .mark svg path{stroke-dasharray:240;stroke-dashoffset:240;animation:draw 1s var(--ez) .35s forwards}
 .brand b{font-size:14.5px;font-weight:800;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   background:linear-gradient(90deg,#c9bcff,#8de8dd 55%,#c9bcff);background-size:200% 100%;
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 7s linear infinite}
@@ -170,14 +185,16 @@ body.glassy .statebox{background:rgba(18,26,40,.12)}
 .searchbox svg.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-secondary);pointer-events:none}
 .searchbox input{width:100%;height:42px;border-radius:12px;padding:0 38px;background:var(--bg-secondary);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:13.5px;outline:none;transition:border-color .3s,box-shadow .3s}
 .searchbox input:focus{border-color:color-mix(in srgb,var(--cat) 60%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--cat) 16%,transparent)}
-.searchbox .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:8px;display:none;place-items:center;color:var(--text-secondary)}
+.searchbox .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:8px;display:none;place-items:center;color:var(--text-secondary);transition:color .25s,transform .25s var(--spring)}
+.searchbox .clr:hover{color:var(--text-primary)}
+.searchbox .clr:active{transform:translateY(-50%) scale(.85)}
 .searchbox .clr svg{width:12px;height:12px}
 .searchbox.has-q .clr{display:grid}
-#btnSearchM{display:grid;width:42px;height:42px;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
+#btnSearchM{display:grid;width:42px;height:42px;flex:none;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
 #btnSearchM:active{transform:scale(.9)}
 #btnSearchM svg{width:17px;height:17px;stroke:var(--text-primary)}
 .hdr-search{max-height:0;overflow:hidden;transition:max-height .38s var(--ez);padding:0 14px}
-.hdr-search.open{max-height:72px}
+.hdr-search.open{max-height:74px}
 .hdr-search .searchbox{display:block;max-width:none;padding-bottom:12px}
 #btnAcc{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;border:1px solid var(--border-subtle);background:var(--bg-secondary);position:relative;overflow:hidden;transition:border-color .3s,transform .25s var(--spring)}
 #btnAcc:active{transform:scale(.9)}
@@ -187,18 +204,24 @@ body.glassy .statebox{background:rgba(18,26,40,.12)}
 #btnAcc.dev svg{stroke:var(--accent-primary)}
 #connDot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#5d6b80;border:2px solid var(--bg-primary);transition:background .4s;z-index:2}
 #connDot.on{background:var(--success)}
-@media(min-width:900px){.searchbox{display:block}#btnSearchM,.hdr-search{display:none}}
-@media(max-width:899px){#btnMenu{display:grid}}
+/* BREAKPOINT THỐNG NHẤT 960px */
+@media(min-width:960px){
+  .searchbox{display:block}
+  #btnSearchM,.hdr-search{display:none}
+  #btnMenu{display:none!important}
+}
 
-/* ═══ 6. SIDEBAR / DRAWER (to hơn, chuyên nghiệp hơn) ═══ */
+/* ═══ 6. SIDEBAR / DRAWER + NAV PILL ═══ */
 #side{position:fixed;z-index:90;top:var(--head-h);bottom:0;left:0;width:min(300px,86vw);display:flex;flex-direction:column;gap:5px;
   padding:16px 14px;overflow-y:auto;background:rgba(14,20,32,.94);border-right:1px solid var(--border-subtle);
   backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transform:translateX(-105%);transition:transform .42s var(--ez)}
 #side.open{transform:none;box-shadow:24px 0 60px rgba(0,0,0,.55)}
-@media(min-width:1024px){#side{width:var(--side-w);transform:none;background:rgba(14,20,32,.55);box-shadow:none}}
 #sideOv{position:fixed;inset:0;z-index:85;background:rgba(4,6,10,.6);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s}
 #sideOv.on{opacity:1;pointer-events:auto}
-@media(min-width:1024px){#sideOv{display:none}#btnMenu{display:none!important}}
+@media(min-width:960px){
+  #side{width:var(--side-w);transform:none;background:rgba(14,20,32,.55);box-shadow:none}
+  #sideOv{display:none}
+}
 #side.open>*:not(#navpill){animation:sideIn .45s var(--ez) backwards}
 #side.open>*:nth-child(2){animation-delay:.03s}#side.open>*:nth-child(3){animation-delay:.06s}
 #side.open>*:nth-child(4){animation-delay:.09s}#side.open>*:nth-child(5){animation-delay:.12s}
@@ -206,9 +229,11 @@ body.glassy .statebox{background:rgba(18,26,40,.12)}
 #side.open>*:nth-child(n+8){animation-delay:.21s}
 @keyframes sideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
 #navpill{position:absolute;left:14px;right:14px;top:0;height:48px;border-radius:14px;z-index:0;opacity:0;pointer-events:none;
-  background:color-mix(in srgb,var(--nc,var(--cat)) 14%,transparent);
-  transition:transform .45s var(--spring),height .3s var(--ez),opacity .3s,background .4s}
-#navpill::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:99px;background:var(--nc,var(--cat))}
+  background:color-mix(in srgb,var(--nc,var(--cat)) 16%,transparent);
+  border:1px solid color-mix(in srgb,var(--nc,var(--cat)) 24%,transparent);
+  box-shadow:0 8px 24px -12px color-mix(in srgb,var(--nc,var(--cat)) 60%,transparent);
+  transition:transform .4s cubic-bezier(.22,1.15,.36,1),height .3s var(--ez),opacity .3s,background .4s,border-color .4s}
+#navpill::before{content:"";position:absolute;left:-1px;top:22%;bottom:22%;width:3px;border-radius:99px;background:var(--nc,var(--cat));box-shadow:0 0 10px var(--nc,var(--cat))}
 .navsec{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:#5d6b80;text-transform:uppercase;padding:14px 13px 7px;position:relative;z-index:1;display:flex;align-items:center;gap:8px}
 .navsec::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
 .navitem{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:14px;color:var(--text-secondary);
@@ -222,7 +247,6 @@ body.glassy .statebox{background:rgba(18,26,40,.12)}
 @keyframes wob{30%{transform:scale(1.18) rotate(-8deg)}60%{transform:scale(1.08) rotate(6deg)}to{transform:scale(1.12)}}
 .navitem .cnt{margin-left:auto;font-size:11px;font-weight:700;color:var(--text-secondary);background:var(--bg-elevated);padding:3px 9px;border-radius:99px}
 .navitem.on .cnt{color:var(--nc,var(--cat));background:color-mix(in srgb,var(--nc,var(--cat)) 16%,transparent)}
-/* Equalizer âm thanh */
 .eq{display:inline-flex;align-items:flex-end;gap:2.5px;height:19px;width:20px;flex:none;padding-left:1px}
 .eq i{width:3.5px;height:6px;border-radius:2px;background:#5d6b80;transform-origin:bottom;transition:background .3s}
 body.snd-on .eq i{background:var(--accent-secondary);animation:eqb .9s ease-in-out infinite}
@@ -236,7 +260,7 @@ body.snd-on .eq i:nth-child(3){animation-delay:.3s}
 
 /* ═══ 7. MAIN / VIEW ═══ */
 #main{position:relative;z-index:1;padding:calc(var(--head-h) + 22px) 16px 40px;max-width:1280px;margin:0 auto;min-height:100vh}
-@media(min-width:1024px){#main{margin-left:var(--side-w);padding:calc(var(--head-h) + 30px) 36px 52px;max-width:calc(1280px + var(--side-w))}}
+@media(min-width:960px){#main{margin-left:var(--side-w);padding:calc(var(--head-h) + 30px) 36px 52px;max-width:calc(1280px + var(--side-w))}}
 .view{display:none}
 .view.on{display:block;animation:viewIn .5s var(--ez)}
 @keyframes viewIn{from{opacity:0;transform:translateY(14px);filter:blur(5px)}to{opacity:1;transform:none;filter:blur(0)}}
@@ -250,7 +274,7 @@ body.snd-on .eq i:nth-child(3){animation-delay:.3s}
 .vtools{display:flex;align-items:center;gap:9px;flex:none;padding-bottom:4px}
 .vcount{font-size:12px;font-weight:700;color:var(--cat);padding:6px 12px;border-radius:99px;
   background:color-mix(in srgb,var(--cat) 12%,transparent);border:1px solid color-mix(in srgb,var(--cat) 32%,transparent)}
-/* Nút X đóng trang */
+.vcount.popnum{animation:btnpop .5s var(--spring)}
 .vclose{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;color:var(--text-secondary);
   background:var(--bg-elevated);border:1px solid var(--border-subtle);position:relative;overflow:hidden;
   transition:color .3s,border-color .3s,transform .35s var(--spring),background .3s}
@@ -261,7 +285,7 @@ body.snd-on .eq i:nth-child(3){animation-delay:.3s}
 @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1180px){.grid{grid-template-columns:repeat(3,1fr)}}
 
-/* ═══ 8. CARD + SHINE ═══ */
+/* ═══ 8. CARD ═══ */
 .sh{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.07) 46%,transparent 60%);background-size:260% 100%;background-position:160% 0}
 .card{position:relative;border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;overflow:hidden;
   background:linear-gradient(180deg,var(--bg-card),color-mix(in srgb,var(--bg-card) 80%,var(--bg-primary)));
@@ -278,6 +302,7 @@ body.snd-on .eq i:nth-child(3){animation-delay:.3s}
   .card:hover::before{width:100%}
   .card:hover::after{opacity:1}
   .card:hover .sh{animation:shsw .95s var(--ez)}
+  .card:hover .thumb{transform:scale(1.05)}
 }
 @keyframes shsw{from{background-position:160% 0}to{background-position:-60% 0}}
 .card:active{transform:scale(.98)}
@@ -295,7 +320,7 @@ pre.codeprev{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1
   white-space:pre-wrap;word-break:break-all;max-height:66px;overflow:hidden;position:relative}
 pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(transparent,var(--bg-primary))}
 .card .cfoot{display:flex;gap:8px;margin-top:auto;padding-top:2px;flex-wrap:wrap}
-.thumb{width:100%;height:130px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--border-subtle);background:var(--bg-elevated)}
+.thumb{width:100%;height:130px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--border-subtle);background:var(--bg-elevated);transition:transform .5s var(--ez)}
 
 /* ═══ 9. NÚT ═══ */
 .btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:7px;
@@ -318,7 +343,7 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 .flychk{position:fixed;z-index:400;color:var(--success);font-weight:800;font-size:20px;pointer-events:none;transform:translate(-50%,0);animation:fly .8s var(--ez) forwards;text-shadow:0 0 14px color-mix(in srgb,var(--success) 70%,transparent)}
 @keyframes fly{to{transform:translate(-50%,-52px) scale(1.5);opacity:0}}
 .gwrap{display:flex;justify-content:center;min-height:44px;align-items:center}
-.gwrap iframe{border-radius:99px!important}
+.gwrap iframe{border-radius:99px!important;max-width:100%}
 .gnote{font-size:11px;color:#5d6b80;line-height:1.6;text-align:center}
 
 /* ═══ 10. SKELETON / EMPTY / ERROR ═══ */
@@ -412,7 +437,6 @@ body.welc .sech{animation:welcIn .7s var(--ez) both .35s}
   .modal{left:0;right:0;bottom:0;top:auto;width:100%;max-height:90vh;border-radius:22px 22px 0 0;transform:translateY(103%);opacity:1}
   .modal.on{transform:none}
 }
-/* Dev panel: FULL MÀN HÌNH */
 .modal.full{left:0;top:0;right:0;bottom:0;width:100%;height:100dvh;max-width:none;max-height:none;border-radius:0;border:none;
   transform:translateY(26px) scale(.995);opacity:0}
 .modal.full.on{transform:none;opacity:1}
@@ -554,7 +578,8 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 .toast{display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:99px;font-size:13px;font-weight:600;
   background:var(--bg-elevated);border:1px solid var(--border-strong);box-shadow:0 12px 34px rgba(0,0,0,.5);animation:tIn .45s var(--spring);max-width:92vw}
 .toast.out{animation:tOut .35s var(--ez) forwards}
-.toast svg{width:15px;height:15px;flex:none;stroke:var(--tc,var(--success))}
+.toast svg{width:15px;height:15px;flex:none;stroke:var(--tc,var(--success));animation:tpop .45s var(--spring)}
+@keyframes tpop{from{transform:scale(0)}60%{transform:scale(1.3)}to{transform:scale(1)}}
 @keyframes tIn{from{opacity:0;transform:translateY(16px) scale(.9)}}
 @keyframes tOut{to{opacity:0;transform:translateY(10px) scale(.94)}}
 
@@ -650,7 +675,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
   <span class="navsec">Danh mục</span>
   <div id="navCats" style="display:flex;flex-direction:column;gap:5px"></div>
   <span class="navsec">Âm thanh</span>
-  <button id="btnSound" class="navitem" type="button" aria-label="Bật tắt âm thanh">
+  <button id="btnSound" class="navitem" type="button" aria-label="Bật tắt nhạc nền">
     <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
     <span style="flex:1;text-align:left">Nhạc nền</span>
     <span class="cnt" id="sndState">—</span>
@@ -706,8 +731,8 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
     </form>
     <div id="accPane" style="display:none;flex-direction:column;gap:12px">
       <div class="acc-card" style="padding:14px"><span class="mail" id="accMail" style="font-size:13.5px"></span><span class="devtag" id="accDev" hidden>DEV</span></div>
-      <button class="btn btn-p btn-wide" id="btnDev" style="display:none;--cat:var(--accent-primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5.5v6c0 5 3.4 8.6 8 10.5 4.6-1.9 8-5.5 8-10.5v-6Z"/></svg>Bảng điều khiển DEV</button>
-      <button class="btn btn-g btn-wide" id="btnOut">Đăng xuất</button>
+      <button class="btn btn-p btn-wide" id="btnDev" data-act="devopen" style="display:none;--cat:var(--accent-primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5.5v6c0 5 3.4 8.6 8 10.5 4.6-1.9 8-5.5 8-10.5v-6Z"/></svg>Bảng điều khiển DEV</button>
+      <button class="btn btn-g btn-wide" id="btnOut" data-act="signout">Đăng xuất</button>
     </div>
   </div>
 </div>
@@ -816,8 +841,8 @@ const DATA_ROOT = "nox_data";
 const CATS_NODE = "nox_categories";
 const MAINT_NODE = "nox_maintenance";
 const NOTICE_NODE = "nox_notice";
-const THEME_NODE = "nox_theme";           // nền + âm thanh (data URL)
-const MAX_DATA_LEN = 9 * 1024 * 1024;     // giới hạn an toàn khi ghi RTDB
+const THEME_NODE = "nox_theme";
+const MAX_DATA_LEN = 9 * 1024 * 1024;
 
 const FB_OK = (typeof firebase !== "undefined");
 let database = null, auth = null, fbInitErr = null;
@@ -826,7 +851,7 @@ if (FB_OK) {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     database = firebase.database();
     auth = firebase.auth();
-    auth.setPersistence(firebase.auth.AuthPersistence.LOCAL).catch(() => {}); // giữ đăng nhập qua reload/reset
+    auth.setPersistence(firebase.auth.AuthPersistence.LOCAL).catch(() => {});
   } catch (e) { fbInitErr = e; }
 }
 
@@ -962,6 +987,9 @@ function dlog(type, msg) {
   if (el) el.innerHTML = state.logs.map(l => `<div><span class="t">[${l.t}]</span> <span class="${l.type}">${esc(l.msg)}</span></div>`).join("");
 }
 window.addEventListener("error", e => { try { dlog("er", "JS: " + (e.message || "lỗi không xác định")); } catch (_) {} });
+window.addEventListener("unhandledrejection", e => {
+  try { const r = e.reason; dlog("er", "Promise: " + ((r && (r.message || r.code)) || r || "không rõ")); } catch (_) {}
+});
 if (fbInitErr) dlog("er", "Firebase init: " + (fbInitErr.message || fbInitErr));
 
 /* ═══════════ SPLASH ═══════════ */
@@ -1019,6 +1047,7 @@ if (!RM) {
 /* ═══════════ LAYER ═══════════ */
 let openEl = null, lastFocus = null;
 function openLayer(el) {
+  if (openEl === el) return;
   closeLayer();
   lastFocus = document.activeElement;
   openEl = el;
@@ -1032,7 +1061,8 @@ function closeLayer() {
   if (openEl) { openEl.classList.remove("on"); openEl = null; }
   $("#ov").classList.remove("on");
   if (!$("#maint").classList.contains("on")) document.body.classList.remove("locked");
-  if (lastFocus && lastFocus.focus) { try { lastFocus.focus({ preventScroll:true }); } catch (_) {} lastFocus = null; }
+  if (lastFocus && lastFocus.focus && document.contains(lastFocus)) { try { lastFocus.focus({ preventScroll:true }); } catch (_) {} }
+  lastFocus = null;
 }
 $("#ov").addEventListener("click", () => { if (openEl && openEl.id === "side") closeDrawer(); else closeLayer(); });
 document.addEventListener("keydown", e => {
@@ -1055,7 +1085,7 @@ function closeDrawer() { $("#side").classList.remove("open"); $("#sideOv").class
 $("#btnMenu").addEventListener("click", () => $("#side").classList.contains("open") ? closeDrawer() : openDrawer());
 $("#sideOv").addEventListener("click", closeDrawer);
 
-/* ═══════════ ROUTER (chống kẹt trang tìm kiếm) ═══════════ */
+/* ═══════════ ROUTER ═══════════ */
 function routeFromHash() {
   const h = location.hash.replace(/^#\/?/, "").toLowerCase();
   return CATS.some(c => c.id === h) ? h : "home";
@@ -1081,11 +1111,15 @@ function renderRoute() {
   document.documentElement.style.setProperty("--cat", c ? c.color : "var(--accent-primary)");
   document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
   $("#v-" + r).classList.add("on");
-  document.querySelectorAll(".navitem[data-route]").forEach(a => a.classList.toggle("on", a.dataset.route === r));
+  document.querySelectorAll(".navitem[data-route]").forEach(a => {
+    const on = a.dataset.route === r;
+    a.classList.toggle("on", on);
+    if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
   movePill();
   if (r === "home") renderHome(); else renderCat(r);
   window.scrollTo({ top:0, behavior:"auto" });
-  if (window.innerWidth < 1024) closeDrawer();
+  if (window.innerWidth < 960) closeDrawer();
   $("#hdrSearch").classList.remove("open");
 }
 window.addEventListener("hashchange", () => { clearQ(); renderRoute(); });
@@ -1154,6 +1188,10 @@ function renderCat(catId) {
   if (state.status[catId] === "error" && items === null) { cnt.textContent = "—"; grid.innerHTML = errorHTML(catId); return; }
   if (items === null || items === undefined) { cnt.textContent = "…"; grid.innerHTML = skeletonHTML(); return; }
   cnt.textContent = items.length + " mục";
+  if (!RM && cnt.dataset.v !== String(items.length)) {
+    cnt.dataset.v = String(items.length);
+    cnt.classList.remove("popnum"); void cnt.offsetWidth; cnt.classList.add("popnum");
+  } else cnt.dataset.v = String(items.length);
   grid.innerHTML = items.length ? items.map((it,i) => cardHTML(it,catId,i,rt,false)).join("") : emptyHTML(catId);
   observeAnim(grid);
 }
@@ -1167,23 +1205,27 @@ function renderCounts() {
 }
 function renderNavCats() {
   $("#navCats").innerHTML = CATS.map(c =>
-    `<a class="navitem${state.route===c.id?" on":""}" href="#/${c.id}" data-route="${c.id}" style="--nc:${c.color}">${ICO[c.icon]||ICO[c.id]||ICO.box}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.label)}</span><span class="cnt" data-cnt="${c.id}" hidden></span></a>`
+    `<a class="navitem${state.route===c.id?" on":""}" href="#/${c.id}" data-route="${c.id}" style="--nc:${c.color}"${state.route===c.id?' aria-current="page"':""}>${ICO[c.icon]||ICO[c.id]||ICO.box}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.label)}</span><span class="cnt" data-cnt="${c.id}" hidden></span></a>`
   ).join("");
   renderCounts();
-  requestAnimationFrame(movePill);
+  requestAnimationFrame(() => requestAnimationFrame(movePill));
 }
+/* FIX: đo pill bằng rect + scrollTop → luôn căn chính xác */
 function movePill() {
-  const pill = $("#navpill"); if (!pill) return;
-  const active = document.querySelector("#side .navitem.on");
+  const pill = $("#navpill"), side = $("#side");
+  if (!pill || !side) return;
+  const active = side.querySelector(".navitem.on");
   if (!active) { pill.style.opacity = "0"; return; }
+  const sr = side.getBoundingClientRect(), ar = active.getBoundingClientRect();
+  pill.style.height = Math.round(ar.height) + "px";
+  pill.style.transform = "translateY(" + Math.round(ar.top - sr.top + side.scrollTop) + "px)";
   const nc = active.style.getPropertyValue("--nc");
   if (nc) pill.style.setProperty("--nc", nc.trim());
-  pill.style.height = active.offsetHeight + "px";
-  pill.style.transform = "translateY(" + active.offsetTop + "px)";
   pill.style.opacity = "1";
 }
 window.addEventListener("resize", debounce(movePill, 150));
 window.addEventListener("load", () => setTimeout(movePill, 300));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => setTimeout(movePill, 60));
 function ensureViews() {
   CATS.forEach(c => {
     let v = $("#v-" + c.id);
@@ -1273,6 +1315,7 @@ function openDetail(catId, key) {
   const it = (state.data[catId] || []).find(x => x.key === key);
   if (!it) { toast("Mục này không tồn tại hoặc đã bị xóa.", "err"); return; }
   const c = catOf(catId);
+  if (!c) { toast("Danh mục không tồn tại.", "err"); return; }
   const hasUrl = validUrl(it.url);
   const times = [];
   if (it.created) times.push("Tạo lúc " + fmtTime(it.created));
@@ -1356,11 +1399,11 @@ async function verifyGoogleIdToken(idToken) {
   return payload;
 }
 
-/* Phiên cục bộ LƯU LÂU DÀI (localStorage) — chỉ mất khi bấm Đăng xuất */
+/* Phiên cục bộ lưu LÂU DÀI — chỉ mất khi bấm Đăng xuất */
 function loadLocalUser() {
   try {
     const s = JSON.parse(localStorage.getItem("ssw_local_user") || "null");
-    if (s && s.email) state.localUser = s; // không tự hết hạn — người dùng tự đăng xuất
+    if (s && s.email) state.localUser = s;
   } catch (_) {}
 }
 function localSignIn(payload) {
@@ -1391,9 +1434,10 @@ function initGIS(tries) {
         auto_select: false,
         cancel_on_tap_outside: true
       });
-      const opts = { theme:"filled_black", size:"large", shape:"pill", text:"continue_with", logo_alignment:"left", width:292 };
+      const wBtn = Math.min(292, Math.max(200, Math.floor(window.innerWidth * 0.94) - 60));
+      const opts = { theme:"filled_black", size:"large", shape:"pill", text:"continue_with", logo_alignment:"left", width:wBtn };
       if ($("#gBtn")) google.accounts.id.renderButton($("#gBtn"), opts);
-      if ($("#gBtnMaint")) google.accounts.id.renderButton($("#gBtnMaint"), Object.assign({}, opts, { width:272 }));
+      if ($("#gBtnMaint")) google.accounts.id.renderButton($("#gBtnMaint"), Object.assign({}, opts, { width:Math.min(272, wBtn) }));
       dlog("ok", "Google Identity Services sẵn sàng.");
     } catch (e) { dlog("er", "GIS init: " + (e.message || e)); gisFail(); }
     return;
@@ -1725,6 +1769,7 @@ $("#auClear").addEventListener("click", () => {
 /* ═══════════ BẢNG THÔNG BÁO ═══════════ */
 let noticeShownSession = false;
 function maybeNotice() {
+  if (!splashDone) return;
   const n = state.notice;
   if (!n || n.enabled === false) return;
   if (!(n.body || "").trim() && !(n.title || "").trim()) return;
@@ -1942,6 +1987,11 @@ function rebuildCats(customMap) {
     const o = customMap[k];
     return { id:String(o.node || k).toLowerCase(), label:String(o.name || k), node:String(o.node || k), color:o.color || "#7c5cff", icon:o.icon || "box", sub:o.sub || "", key:k, custom:true };
   }).filter(c => /^[a-z0-9-]+$/.test(c.id) && !BASE_CATS.some(b => b.id === c.id));
+  const newIds = new Set(customs.map(c => c.id));
+  CATS.filter(c => !c.base && !newIds.has(c.id)).forEach(old => {
+    if (database && handlers[old.id]) { try { database.ref(DATA_ROOT + "/" + old.node).off("value", handlers[old.id]); } catch (_) {} }
+    delete handlers[old.id]; delete state.data[old.id]; delete state.status[old.id];
+  });
   CATS = BASE_CATS.concat(customs);
   customs.forEach(c => { if (state.data[c.id] === undefined) attachCat(c.id); });
   ensureViews(); renderNavCats(); renderCatSeg(); renderCatForm();
@@ -1977,7 +2027,6 @@ if (database) {
 
 /* ═══════════ DELEGATION (1 lần — đã dò xung đột) ═══════════ */
 document.addEventListener("click", e => {
-  /* ripple cho mọi phần tử bấm được */
   const b = e.target.closest(".btn,.navitem,.tile,.lrow,.seg button,.vclose");
   if (b && !RM) {
     const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height);
@@ -1987,7 +2036,6 @@ document.addEventListener("click", e => {
     if (getComputedStyle(b).position === "static") b.style.position = "relative";
     b.appendChild(s); setTimeout(() => s.remove(), 580);
   }
-  /* điều hướng qua nav/tile/brand: preventDefault + navTo (chống kẹt search) */
   const nav = e.target.closest(".navitem[data-route],.tile[data-route]");
   if (nav) { e.preventDefault(); navTo(nav.dataset.route); return; }
   if (e.target.closest(".brand")) { e.preventDefault(); navTo("home"); return; }
