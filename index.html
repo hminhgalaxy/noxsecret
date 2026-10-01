@@ -3,39 +3,32 @@
 <head>
 <!--
 ════════════════════════════════════════════════════════════════
- SKIBIDI SCRIPT WEB — BẢN NÂNG CẤP TOÀN DIỆN (Perf + API)
+ SKIBIDI SCRIPT WEB — NÂNG CẤP LỚN (Fix Firebase + GFX Engine)
 ════════════════════════════════════════════════════════════════
- ĐÃ FIX LAG / CHỚP CHỚP:
- • Bỏ backdrop-filter trên card/tile/lrow ở chế độ glass (chỉ giữ
-   trên header + modal) → giảm mạnh chi phí repaint.
- • Bỏ animation “gridbreathe” (nguồn nhấp nháy chính của lưới nền).
- • viewIn không còn dùng filter:blur → hết nhòe/nhấp nháy khi đổi trang.
- • Gộp tilt + magnetic vào MỘT handler pointermove, cache phần tử đang
-   tương tác (không querySelectorAll mỗi frame), throttle bằng rAF.
- • Giảm hạt nền còn 12, dùng transform3d để chạy trên GPU.
- • Hover shadow dùng màu pha sẵn thay vì color-mix ở hot-path.
-
- NÂNG CẤP MÀU / ANIMATION:
- • Bảng màu tinh chỉnh, độ tương phản chữ tốt hơn, gradient mạch lạc.
- • Splash mượt, chuyển trang 1 lớp sweep duy nhất (bỏ veil chồng lấn).
- • Micro-interaction giữ nguyên: ripple, count-up, pop, shine…
-
- TÍNH NĂNG MỚI — KHUNG API (CHỈ DEV):
- • Mục “Kết nối API · baconbypass.xyz” trong Dev panel.
- • Nhập API Key + Endpoint, lưu vào Firebase (nox_theme.api).
- • Nút Kiểm tra kết nối: fetch thật tới endpoint, báo trạng thái
-   TRUNG THỰC (kết nối / lỗi HTTP / lỗi mạng-CORS), không giả lập.
- • Ngắt kết nối + hiện trạng thái. Không dev nào khác thấy được.
-
- GIỮ NGUYÊN: Firebase noxgalaxy-2cd71, compat 10.12.2, dữ liệu thật,
- Google/Email login, DEV=hminhgalaxy@gmail.com, CRUD, nền+nạc,
- thông báo, bảo trì. Không AI/chat.
+ 1) FIX FIREBASE: tách API/Bypass thành danh mục riêng nox_data/bypass
+    (bỏ panel baconbypass cũ dễ lỗi), mọi read/write có catch, splash
+    chỉ hoàn tất KHI Firebase đồng bộ xong (chạy song song, có timeout).
+ 2) MỤC BYPASS (mới): Dev thêm/sửa/xóa {name, url, apiKey}. Người dùng
+    xem + Copy Key + Mở link. Node: nox_data/bypass.
+ 3) MENU FULL MÀN HÌNH: không còn sidebar dính → hết lỗi cắt trên.
+ 4) THANH ĐỒ HỌA / XỬ LÝ — 5 MỨC (lưu localStorage, không trả mặc định):
+    1 Fast     : tối giản, KHÔNG animation/màu/hiệu ứng; Script/APK/iOS/
+                 LINK/Bypass thu gọn vào 1 khung trên.
+    2 Normal   : màu nhẹ, animation nhẹ.
+    3 Hard     : UI chuyên nghiệp, nút to, thêm nút bấm.
+    4 Ultra    : đổi toàn bộ UI, dùng NỀN dev thêm, slider xanh nước biển
+                 + hạt trắng bay mượt.
+    5 Extreme  : cosmic animation tối đa, mạnh gấp bội Ultra.
+    Nền dev chỉ áp dụng ở Ultra/Extreme; âm thanh dev áp dụng mọi mức.
+ 5) GIỮ NGUYÊN: Firebase noxgalaxy-2cd71 (compat 10.12.2), Google/Email
+    login, DEV=hminhgalaxy@gmail.com, CRUD 5 danh mục, danh mục tùy chỉnh,
+    nền+nhạc, thông báo (Đóng/Đóng 2h), bảo trì tự mở. Không AI/chat.
 ════════════════════════════════════════════════════════════════
 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SKIBIDI SCRIPT WEB</title>
-<meta name="description" content="SKIBIDI SCRIPT WEB — Kho Script, APK, LINK và iOS cập nhật realtime. Simple. Fast. Connected.">
+<meta name="description" content="SKIBIDI SCRIPT WEB — Kho Script, APK, LINK, iOS & Bypass cập nhật realtime.">
 <meta name="theme-color" content="#0a0e16">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='.55' stop-color='%2329d6c5'/%3E%3Cstop offset='1' stop-color='%23f471b5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230e1420'/%3E%3Cpath d='M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6' fill='none' stroke='url(%23g)' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/400.css">
@@ -45,7 +38,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/800.css">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* ═══ TOKENS ═══ */
 @property --cat { syntax:"<color>"; inherits:true; initial-value:#7c5cff }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -54,10 +46,11 @@
   --text-primary:#f5f7fb;--text-secondary:#a3aec2;--text-muted:#6b7689;
   --border-subtle:rgba(255,255,255,.09);--border-strong:rgba(255,255,255,.18);
   --accent-primary:#7c5cff;--accent-secondary:#29d6c5;
-  --success:#35d39a;--warning:#ffbf5b;--danger:#ff647c;--cat-ios:#f471b5;
+  --success:#35d39a;--warning:#ffbf5b;--danger:#ff647c;--cat-ios:#f471b5;--cat-bypass:#ff9f45;
+  --sea:#1e90ff;--sea-deep:#0b3d66;
   --cat:var(--accent-primary);
   --ez:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);
-  --head-h:64px;--side-w:272px;--r-lg:18px;--r-md:13px;--r-sm:9px;
+  --head-h:64px;--r-lg:18px;--r-md:13px;--r-sm:9px;
 }
 html{scroll-behavior:smooth;transition:--cat .6s ease}
 body{font-family:"Be Vietnam Pro",system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
@@ -73,7 +66,7 @@ a{color:inherit;text-decoration:none}
 input[type="search"]{-webkit-appearance:none;appearance:none}
 input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
 
-/* ═══ NỀN (tối ưu GPU, không nhấp nháy) ═══ */
+/* ═══ NỀN ═══ */
 #bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;transition:opacity .6s}
 body.custom-bg #bg{opacity:.14}
 .orb{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform;transform:translate3d(0,0,0)}
@@ -96,20 +89,20 @@ body.custom-bg #bg{opacity:.14}
 @keyframes kb{from{transform:scale(1) translate3d(0,0,0)}to{transform:scale(1.09) translate3d(-1.5%,-1.5%,0)}}
 #themeLayer::after{content:"";position:absolute;inset:0;background:rgba(10,14,22,.42)}
 
-/* GLASS — KHÔNG dùng backdrop-filter trên phần tử lặp lại (chống lag) */
+/* GLASS (chỉ Ultra/Extreme khi có nền) */
 body.glassy{--border-subtle:rgba(255,255,255,.16);--border-strong:rgba(255,255,255,.28)}
-body.glassy .card{background:linear-gradient(180deg,rgba(19,26,40,.55),rgba(19,26,40,.32))}
-body.glassy .tile,body.glassy .lrow,body.glassy .sk,body.glassy details.dl,body.glassy .maint-state,
+body.glassy .card{background:linear-gradient(180deg,rgba(19,26,40,.6),rgba(19,26,40,.35));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+body.glassy .tile,body.glassy .lrow,body.glassy details.dl,body.glassy .maint-state,
 body.glassy .switch-row,body.glassy .acc-card,body.glassy .dt-url,body.glassy .thstatus,
-body.glassy .fld input,body.glassy .fld select,body.glassy .fld textarea{background:rgba(19,26,40,.45)}
-body.glassy pre.codeprev,body.glassy pre.dt-code,body.glassy #devLog{background:rgba(10,14,22,.55)}
-body.glassy .btn-g,body.glassy .xbtn,body.glassy .drow button,body.glassy .seg button,body.glassy .vclose{background:rgba(26,35,51,.5)}
+body.glassy .fld input,body.glassy .fld select,body.glassy .fld textarea{background:rgba(19,26,40,.5)}
+body.glassy pre.codeprev,body.glassy pre.dt-code,body.glassy #devLog{background:rgba(10,14,22,.6)}
+body.glassy .btn-g,body.glassy .xbtn,body.glassy .drow button,body.glassy .seg button,body.glassy .vclose{background:rgba(26,35,51,.55)}
 body.glassy #hdr{background:rgba(10,14,22,.6)}
-body.glassy #side{background:rgba(15,20,32,.62)}
 body.glassy .modal{background:rgba(15,20,32,.85)}
-body.glassy .statebox{background:rgba(19,26,40,.35)}
+body.glassy #menuPanel{background:rgba(10,14,22,.82)}
+body.glassy .statebox{background:rgba(19,26,40,.4)}
 
-/* ═══ BARS + SWEEP (1 lớp duy nhất) ═══ */
+/* ═══ BARS + SWEEP ═══ */
 #loadbar{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:250;border-radius:99px;pointer-events:none;opacity:0;
   background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary),var(--cat-ios));box-shadow:0 0 14px color-mix(in srgb,var(--accent-primary) 75%,transparent)}
 #loadbar.run{animation:lbrun .8s var(--ez) forwards}
@@ -122,7 +115,7 @@ body.glassy .statebox{background:rgba(19,26,40,.35)}
 @keyframes swp{0%{opacity:1;transform:translate3d(-55%,0,0)}100%{opacity:0;transform:translate3d(55%,0,0)}}
 
 /* ═══ SPLASH ═══ */
-#splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+#splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
   background:radial-gradient(820px 560px at 50% 42%,#131a28 0%,var(--bg-primary) 70%);
   clip-path:circle(150% at 50% 45%);transition:clip-path .85s var(--ez)}
 #splash.out{clip-path:circle(0% at 50% 45%);pointer-events:none}
@@ -131,33 +124,30 @@ body.glassy .statebox{background:rgba(19,26,40,.35)}
 #spGlow{position:absolute;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent-primary) 45%,transparent),transparent 65%);filter:blur(28px);animation:pulseGlow 2.6s ease-in-out infinite}
 @keyframes pulseGlow{50%{transform:scale(1.2);opacity:.65}}
 #spLogo{width:116px;height:116px;position:relative}
-#spLogo .hex{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;transform-origin:50% 50%;
-  animation:draw 1s var(--ez) .05s forwards, hexspin 20s linear 1.1s infinite}
+#spLogo .hex{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2;stroke-linejoin:round;stroke-dasharray:320;stroke-dashoffset:320;transform-origin:50% 50%;animation:draw 1s var(--ez) .05s forwards,hexspin 20s linear 1.1s infinite}
 @keyframes hexspin{to{transform:rotate(360deg)}}
 #spLogo .ring{fill:none;stroke:rgba(255,255,255,.1);stroke-width:1;transform-origin:50% 50%;animation:spin 9s linear infinite}
 #spLogo .ring2{fill:none;stroke:color-mix(in srgb,var(--accent-secondary) 55%,transparent);stroke-width:1.2;stroke-dasharray:4 11;transform-origin:50% 50%;animation:spin 14s linear infinite reverse}
-#spLogo .smark{fill:none;stroke:url(#spG);stroke-width:8.5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;
-  filter:drop-shadow(0 0 12px rgba(124,92,255,.6));animation:draw 1.15s var(--ez) .45s forwards}
+#spLogo .smark{fill:none;stroke:url(#spG);stroke-width:8.5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;filter:drop-shadow(0 0 12px rgba(124,92,255,.6));animation:draw 1.15s var(--ez) .45s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
 #spWord{display:flex;flex-wrap:wrap;justify-content:center;gap:0 9px;font-weight:800;font-size:clamp(19px,5vw,28px);letter-spacing:.08em}
-#spWord .ch{display:inline-block;opacity:0;transform:translateY(20px) scale(.7) rotateX(60deg);transform-origin:50% 100%;
-  animation:chIn .6s var(--spring) forwards;animation-delay:var(--d)}
+#spWord .ch{display:inline-block;opacity:0;transform:translateY(20px) scale(.7) rotateX(60deg);transform-origin:50% 100%;animation:chIn .6s var(--spring) forwards;animation-delay:var(--d)}
 @keyframes chIn{to{opacity:1;transform:none}}
-#spStage{font-size:12px;font-weight:600;color:var(--text-secondary);letter-spacing:.12em;text-transform:uppercase;opacity:0;animation:fadein .6s var(--ez) .9s forwards}
+#spStage{font-size:12px;font-weight:600;color:var(--text-secondary);letter-spacing:.1em;text-transform:uppercase;opacity:0;animation:fadein .6s var(--ez) .6s forwards;text-align:center;min-height:16px}
 @keyframes fadein{to{opacity:1}}
-#spTrack{width:min(210px,56vw);height:3px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
-#spBar{height:100%;width:6%;border-radius:99px;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));transition:width .45s var(--ez)}
+#spTrack{width:min(230px,60vw);height:4px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+#spBar{height:100%;width:6%;border-radius:99px;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));transition:width .4s var(--ez)}
 
 /* ═══ HEADER ═══ */
 #hdr{position:fixed;top:0;left:0;right:0;z-index:80;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   background:rgba(10,14,22,.78);border-bottom:1px solid transparent;transition:border-color .35s,box-shadow .35s,background .35s}
 #hdr.scrolled{border-bottom-color:var(--border-subtle);box-shadow:0 10px 34px rgba(0,0,0,.4);background:rgba(10,14,22,.9)}
 .hdr-main{display:flex;align-items:center;gap:10px;height:var(--head-h);padding:0 14px;max-width:1560px;margin:0 auto}
-#btnMenu{display:grid;width:42px;height:42px;flex:none;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
+#btnMenu{display:grid;width:44px;height:44px;flex:none;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
 #btnMenu:hover{background:var(--bg-elevated)}
 #btnMenu:active{transform:scale(.9)}
-#btnMenu svg{width:19px;height:19px;stroke:var(--text-primary)}
+#btnMenu svg{width:20px;height:20px;stroke:var(--text-primary)}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand .mark{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--bg-secondary);border:1px solid var(--border-subtle);position:relative;overflow:hidden;transition:transform .4s var(--spring)}
 .brand:hover .mark{transform:rotate(-8deg) scale(1.07)}
@@ -170,83 +160,98 @@ body.glassy .statebox{background:rgba(19,26,40,.35)}
 .hdr-sp{flex:1}
 .searchbox{position:relative;flex:1;max-width:430px;display:none}
 .searchbox svg.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--text-secondary);pointer-events:none}
-.searchbox input{width:100%;height:42px;border-radius:12px;padding:0 38px;background:var(--bg-secondary);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:13.5px;outline:none;transition:border-color .3s,box-shadow .3s}
+.searchbox input{width:100%;height:44px;border-radius:12px;padding:0 38px;background:var(--bg-secondary);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:13.5px;outline:none;transition:border-color .3s,box-shadow .3s}
 .searchbox input:focus{border-color:color-mix(in srgb,var(--cat) 60%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--cat) 16%,transparent)}
-.searchbox .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:8px;display:none;place-items:center;color:var(--text-secondary);transition:color .25s,transform .25s var(--spring)}
+.searchbox .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:8px;display:none;place-items:center;color:var(--text-secondary)}
 .searchbox .clr:hover{color:var(--text-primary)}
-.searchbox .clr:active{transform:translateY(-50%) scale(.85)}
 .searchbox .clr svg{width:12px;height:12px}
 .searchbox.has-q .clr{display:grid}
-#btnSearchM{display:grid;width:42px;height:42px;flex:none;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
+#btnSearchM{display:grid;width:44px;height:44px;flex:none;border-radius:12px;place-items:center;border:1px solid var(--border-subtle);transition:background .3s,transform .25s var(--spring)}
 #btnSearchM:active{transform:scale(.9)}
-#btnSearchM svg{width:17px;height:17px;stroke:var(--text-primary)}
+#btnSearchM svg{width:18px;height:18px;stroke:var(--text-primary)}
 .hdr-search{max-height:0;overflow:hidden;transition:max-height .38s var(--ez);padding:0 14px}
-.hdr-search.open{max-height:74px}
+.hdr-search.open{max-height:76px}
 .hdr-search .searchbox{display:block;max-width:none;padding-bottom:12px}
-#btnAcc{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;border:1px solid var(--border-subtle);background:var(--bg-secondary);position:relative;overflow:hidden;transition:border-color .3s,transform .25s var(--spring)}
+#btnAcc{width:44px;height:44px;flex:none;border-radius:12px;display:grid;place-items:center;border:1px solid var(--border-subtle);background:var(--bg-secondary);position:relative;overflow:hidden;transition:border-color .3s,transform .25s var(--spring)}
 #btnAcc:active{transform:scale(.9)}
-#btnAcc svg{width:18px;height:18px;stroke:var(--text-secondary)}
+#btnAcc svg{width:19px;height:19px;stroke:var(--text-secondary)}
 #btnAcc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px}
 #btnAcc.dev{border-color:color-mix(in srgb,var(--accent-primary) 60%,transparent);box-shadow:0 0 14px -4px var(--accent-primary)}
 #btnAcc.dev svg{stroke:var(--accent-primary)}
 #connDot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#5d6b80;border:2px solid var(--bg-primary);transition:background .4s;z-index:2}
 #connDot.on{background:var(--success)}
-@media(min-width:960px){
-  .searchbox{display:block}
-  #btnSearchM,.hdr-search{display:none}
-  #btnMenu{display:none!important}
-}
+@media(min-width:900px){.searchbox{display:block}#btnSearchM,.hdr-search{display:none}}
 
-/* ═══ SIDEBAR / DRAWER ═══ */
-#side{position:fixed;z-index:90;top:var(--head-h);bottom:0;left:0;width:min(300px,86vw);display:flex;flex-direction:column;gap:5px;
-  padding:16px 14px;overflow-y:auto;background:rgba(15,20,32,.94);border-right:1px solid var(--border-subtle);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transform:translateX(-105%);transition:transform .42s var(--ez);will-change:transform}
-#side.open{transform:none;box-shadow:24px 0 60px rgba(0,0,0,.55)}
-#sideOv{position:fixed;inset:0;z-index:85;background:rgba(4,6,10,.6);opacity:0;pointer-events:none;transition:opacity .35s}
-#sideOv.on{opacity:1;pointer-events:auto}
-@media(min-width:960px){
-  #side{width:var(--side-w);transform:none;background:rgba(15,20,32,.6);box-shadow:none}
-  #sideOv{display:none}
-}
-#side.open>*:not(#navpill){animation:sideIn .45s var(--ez) backwards}
-#side.open>*:nth-child(2){animation-delay:.03s}#side.open>*:nth-child(3){animation-delay:.06s}
-#side.open>*:nth-child(4){animation-delay:.09s}#side.open>*:nth-child(5){animation-delay:.12s}
-#side.open>*:nth-child(6){animation-delay:.15s}#side.open>*:nth-child(7){animation-delay:.18s}
-#side.open>*:nth-child(n+8){animation-delay:.21s}
-@keyframes sideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
-#navpill{position:absolute;left:14px;right:14px;top:0;height:48px;border-radius:14px;z-index:0;opacity:0;pointer-events:none;
-  background:color-mix(in srgb,var(--nc,var(--cat)) 16%,transparent);
-  border:1px solid color-mix(in srgb,var(--nc,var(--cat)) 24%,transparent);
-  box-shadow:0 8px 24px -12px color-mix(in srgb,var(--nc,var(--cat)) 60%,transparent);
-  transition:transform .4s cubic-bezier(.22,1.15,.36,1),height .3s var(--ez),opacity .3s,background .4s,border-color .4s}
-#navpill::before{content:"";position:absolute;left:-1px;top:22%;bottom:22%;width:3px;border-radius:99px;background:var(--nc,var(--cat));box-shadow:0 0 10px var(--nc,var(--cat))}
-.navsec{font-size:10.5px;font-weight:800;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;padding:14px 13px 7px;position:relative;z-index:1;display:flex;align-items:center;gap:8px}
-.navsec::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
-.navitem{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:14px;color:var(--text-secondary);
-  font-weight:600;font-size:14.5px;position:relative;z-index:1;overflow:hidden;
-  transition:background .28s,color .28s,transform .28s var(--ez)}
-.navitem svg{width:20px;height:20px;flex:none}
-.navitem:hover{background:var(--bg-elevated);color:var(--text-primary);transform:translateX(3px)}
-.navitem:active{transform:scale(.97)}
-.navitem.on{color:var(--text-primary)}
-.navitem.on svg{stroke:var(--nc,var(--cat));animation:wob .65s var(--spring)}
-@keyframes wob{30%{transform:scale(1.18) rotate(-8deg)}60%{transform:scale(1.08) rotate(6deg)}to{transform:scale(1.12)}}
-.navitem .cnt{margin-left:auto;font-size:11px;font-weight:700;color:var(--text-secondary);background:var(--bg-elevated);padding:3px 9px;border-radius:99px}
-.navitem.on .cnt{color:var(--nc,var(--cat));background:color-mix(in srgb,var(--nc,var(--cat)) 16%,transparent)}
-.eq{display:inline-flex;align-items:flex-end;gap:2.5px;height:19px;width:20px;flex:none;padding-left:1px}
-.eq i{width:3.5px;height:6px;border-radius:2px;background:#5d6b80;transform-origin:bottom;transition:background .3s}
+/* ═══ MENU FULL MÀN HÌNH ═══ */
+#menuOv{position:fixed;inset:0;z-index:95;background:rgba(4,6,10,.5);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .35s}
+#menuOv.on{opacity:1;pointer-events:auto}
+#menuPanel{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;gap:6px;overflow-y:auto;
+  background:rgba(10,14,22,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:calc(env(safe-area-inset-top) + 16px) 18px 40px;
+  transform:translateY(-4%) scale(.98);opacity:0;pointer-events:none;transition:transform .4s var(--ez),opacity .35s}
+#menuPanel.on{transform:none;opacity:1;pointer-events:auto}
+.mp-top{display:flex;align-items:center;gap:12px;padding:4px 2px 14px;border-bottom:1px solid var(--border-subtle);margin-bottom:10px}
+.mp-title{font-weight:800;font-size:17px;letter-spacing:.04em;flex:1;
+  background:linear-gradient(90deg,#c9bcff,#8de8dd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.mp-nav{display:flex;flex-direction:column;gap:8px}
+.mnav{display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:16px;font-weight:700;font-size:16.5px;
+  color:var(--text-secondary);background:var(--bg-card);border:1px solid var(--border-subtle);position:relative;overflow:hidden;
+  transition:background .3s,color .3s,transform .3s var(--ez),border-color .3s}
+.mnav svg{width:24px;height:24px;flex:none}
+.mnav .cnt{margin-left:auto;font-size:12px;font-weight:700;color:var(--text-secondary);background:var(--bg-elevated);padding:3px 10px;border-radius:99px}
+.mnav:hover{background:var(--bg-elevated);color:var(--text-primary);transform:translateX(4px)}
+.mnav:active{transform:scale(.98)}
+.mnav.on{color:var(--text-primary);border-color:color-mix(in srgb,var(--nc,var(--cat)) 45%,transparent);background:color-mix(in srgb,var(--nc,var(--cat)) 14%,transparent)}
+.mnav.on svg{stroke:var(--nc,var(--cat))}
+.mnav.on .cnt{color:var(--nc,var(--cat));background:color-mix(in srgb,var(--nc,var(--cat)) 18%,transparent)}
+.mp-sec{margin-top:14px;padding:16px;border-radius:16px;background:var(--bg-card);border:1px solid var(--border-subtle)}
+.mp-sec h4{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.mp-sec h4::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
+
+/* ═══ THANH ĐỒ HỌA / XỬ LÝ ═══ */
+.gfx-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.gfx-name{font-weight:800;font-size:15px;color:var(--text-primary);padding:4px 12px;border-radius:99px;background:color-mix(in srgb,var(--cat) 16%,transparent);border:1px solid color-mix(in srgb,var(--cat) 32%,transparent)}
+.gfx-track-wrap{position:relative;height:44px;border-radius:99px;overflow:hidden;background:linear-gradient(90deg,#232f47,#2b3a58);border:1px solid var(--border-strong);transition:background .5s,box-shadow .5s}
+#gfxFill{position:absolute;left:0;top:0;bottom:0;width:25%;border-radius:99px;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));opacity:.55;transition:width .4s var(--ez)}
+#gfxParticles{position:absolute;inset:0;display:none;pointer-events:none}
+.gfx-p{position:absolute;top:var(--t,50%);left:-8px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.95;box-shadow:0 0 8px #fff,0 0 16px rgba(255,255,255,.7);animation:gp var(--dur,3s) linear infinite;animation-delay:var(--del,0s)}
+@keyframes gp{from{left:-8px;opacity:0}10%{opacity:1}90%{opacity:1}to{left:calc(100% + 8px);opacity:0}}
+#gfxCosmic{position:absolute;inset:0;display:none;background:linear-gradient(120deg,#12043a,#3a0ca3,#7209b7,#f72585,#4cc9f0,#12043a);background-size:500% 500%;animation:cosmic 5s ease infinite}
+@keyframes cosmic{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+#gfxStars{position:absolute;inset:0;display:none;pointer-events:none}
+.gfx-star{position:absolute;top:var(--t,50%);left:var(--l,50%);width:3px;height:3px;border-radius:50%;background:#fff;animation:tw var(--dur,1.6s) ease-in-out infinite;animation-delay:var(--del,0s)}
+@keyframes tw{0%,100%{opacity:.1;transform:scale(.6)}50%{opacity:1;transform:scale(1.3)}}
+#gfxRange{position:absolute;inset:0;width:100%;height:100%;margin:0;-webkit-appearance:none;appearance:none;background:transparent;z-index:6;cursor:pointer}
+#gfxRange::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid var(--accent-primary);box-shadow:0 0 14px color-mix(in srgb,var(--accent-primary) 70%,transparent);cursor:pointer;transition:transform .2s,border-color .3s,box-shadow .3s}
+#gfxRange::-webkit-slider-thumb:hover{transform:scale(1.12)}
+#gfxRange::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid var(--accent-primary);box-shadow:0 0 14px var(--accent-primary);cursor:pointer}
+body.gfx-4 #gfxTrack #gfxFill, body.gfx-4 .gfx-track-wrap{background:linear-gradient(90deg,var(--sea-deep),var(--sea),#29d6c5)}
+body.gfx-4 .gfx-track-wrap{box-shadow:0 0 22px -4px var(--sea)}
+body.gfx-4 #gfxRange::-webkit-slider-thumb{border-color:var(--sea);box-shadow:0 0 16px var(--sea)}
+body.gfx-4 #gfxParticles{display:block}
+body.gfx-5 .gfx-track-wrap{box-shadow:0 0 30px -4px #b537f2}
+body.gfx-5 #gfxCosmic{display:block}
+body.gfx-5 #gfxStars{display:block}
+body.gfx-5 #gfxParticles{display:block}
+body.gfx-5 #gfxRange::-webkit-slider-thumb{border-color:#fff;box-shadow:0 0 18px #b537f2,0 0 30px #4cc9f0}
+.gfx-ticks{display:flex;justify-content:space-between;margin-top:12px}
+.gfx-tick{font-size:12px;font-weight:700;color:var(--text-muted);padding:6px 10px;border-radius:8px;transition:color .3s,background .3s;cursor:pointer}
+.gfx-tick.on{color:var(--text-primary);background:color-mix(in srgb,var(--cat) 16%,transparent)}
+.gfx-desc{margin-top:10px;font-size:13px;color:var(--text-secondary);line-height:1.5}
+
+/* ═══ SOUND ROW ═══ */
+.sound-row{display:flex;align-items:center;gap:14px;padding:4px 2px}
+.sound-row .lbl{flex:1;font-weight:600;color:var(--text-secondary)}
+.eq{display:inline-flex;align-items:flex-end;gap:3px;height:22px;width:24px}
+.eq i{width:4px;height:7px;border-radius:2px;background:#5d6b80;transform-origin:bottom;transition:background .3s}
 body.snd-on .eq i{background:var(--accent-secondary);animation:eqb .9s ease-in-out infinite}
-body.snd-on .eq i:nth-child(2){animation-delay:.15s;height:11px}
+body.snd-on .eq i:nth-child(2){animation-delay:.15s;height:13px}
 body.snd-on .eq i:nth-child(3){animation-delay:.3s}
 @keyframes eqb{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1.5)}}
-.side-acc{margin-top:auto;padding-top:14px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:9px;position:relative;z-index:1}
-.acc-card{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:12.5px;min-width:0}
-.acc-card .mail{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)}
-.devtag{font-size:9.5px;font-weight:800;letter-spacing:.1em;color:#fff;background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary));padding:3px 7px;border-radius:99px;flex:none}
 
 /* ═══ MAIN / VIEW ═══ */
-#main{position:relative;z-index:1;padding:calc(var(--head-h) + 22px) 16px 40px;max-width:1280px;margin:0 auto;min-height:100vh}
-@media(min-width:960px){#main{margin-left:var(--side-w);padding:calc(var(--head-h) + 30px) 36px 52px;max-width:calc(1280px + var(--side-w))}}
+#main{position:relative;z-index:1;padding:calc(var(--head-h) + 22px) 16px 40px;max-width:1280px;margin:0 auto;min-height:100vh;width:100%}
+@media(min-width:960px){#main{padding:calc(var(--head-h) + 30px) 32px 52px}}
 .view{display:none}
 .view.on{display:block;animation:viewIn .45s var(--ez)}
 @keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -255,28 +260,34 @@ body.snd-on .eq i:nth-child(3){animation-delay:.3s}
 .vhead h2::after{content:"";position:absolute;left:0;bottom:0;height:4px;width:56px;border-radius:99px;
   background:linear-gradient(90deg,var(--cat),color-mix(in srgb,var(--cat) 15%,transparent));
   transform:scaleX(0);transform-origin:left;animation:sweep .65s var(--ez) .1s forwards}
-@keyframes sweep{to{transform:scaleX(1)}}
 .vsub{color:var(--text-secondary);font-size:13px;margin-top:8px;font-weight:500}
 .vtools{display:flex;align-items:center;gap:9px;flex:none;padding-bottom:4px}
 .vcount{font-size:12px;font-weight:700;color:var(--cat);padding:6px 12px;border-radius:99px;
   background:color-mix(in srgb,var(--cat) 12%,transparent);border:1px solid color-mix(in srgb,var(--cat) 32%,transparent)}
 .vcount.popnum{animation:btnpop .5s var(--spring)}
-.vclose{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;color:var(--text-secondary);
+.vclose{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:var(--text-secondary);
   background:var(--bg-elevated);border:1px solid var(--border-subtle);position:relative;overflow:hidden;
   transition:color .3s,border-color .3s,transform .35s var(--spring),background .3s}
-.vclose svg{width:15px;height:15px}
+.vclose svg{width:16px;height:16px}
 .vclose:hover{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 55%,transparent);background:color-mix(in srgb,var(--danger) 10%,transparent);transform:rotate(90deg)}
 .vclose:active{transform:rotate(90deg) scale(.85)}
 .grid{display:grid;grid-template-columns:1fr;gap:14px}
 @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1180px){.grid{grid-template-columns:repeat(3,1fr)}}
 
+/* COMPACT STRIP (Fast) */
+#compactStrip{display:none;flex-direction:column;gap:8px;padding:16px;border-radius:16px;background:var(--bg-card);border:1px solid var(--border-subtle);margin-bottom:20px}
+body.gfx-1 #compactStrip{display:flex}
+.cs-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);cursor:pointer}
+.cs-item .nm{flex:1;min-width:0;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cs-item svg{width:18px;height:18px;flex:none}
+body.gfx-1 .cattiles{display:none}
+
 /* ═══ CARD ═══ */
 .sh{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.07) 46%,transparent 60%);background-size:260% 100%;background-position:160% 0}
 .card{position:relative;border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;overflow:hidden;
   background:linear-gradient(180deg,var(--bg-card),color-mix(in srgb,var(--bg-card) 80%,var(--bg-primary)));
-  border:1px solid var(--border-subtle);
-  transition:transform .3s var(--ez),border-color .3s,box-shadow .3s,background .4s;will-change:transform}
+  border:1px solid var(--border-subtle);transition:transform .3s var(--ez),border-color .3s,box-shadow .3s,background .4s;will-change:transform}
 .card:not(.in){opacity:0}
 .card.in{animation:cardIn .55s var(--ez) backwards;animation-delay:var(--d,0ms)}
 @keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
@@ -311,7 +322,7 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 
 /* ═══ NÚT ═══ */
 .btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  font-weight:700;font-size:13px;padding:10px 16px;border-radius:11px;
+  font-weight:700;font-size:13px;padding:11px 16px;border-radius:11px;
   transition:transform .25s var(--spring),background .3s,border-color .3s,box-shadow .3s,color .3s,filter .3s}
 .btn:active{transform:scale(.94)}
 .btn svg{width:15px;height:15px;flex:none}
@@ -321,7 +332,7 @@ pre.codeprev::after{content:"";position:absolute;left:0;right:0;bottom:0;height:
 .btn-p:hover::after{background-position:-60% 0}
 .btn-g{color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle)}
 .btn-g:hover{color:var(--text-primary);border-color:var(--border-strong)}
-.btn-wide{width:100%;padding:12px}
+.btn-wide{width:100%;padding:13px}
 .btn[disabled]{opacity:.5;pointer-events:none}
 .btn.pop{animation:btnpop .45s var(--spring)}
 @keyframes btnpop{40%{transform:scale(1.12);filter:brightness(1.25)}to{transform:scale(1)}}
@@ -436,16 +447,16 @@ body.welc .sech{animation:welcIn .7s var(--ez) both .35s}
 @media(min-width:641px){.m-grab{display:none}}
 .m-head{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;flex:none}
 .m-head h3{font-size:16px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.xbtn{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-secondary);transition:transform .3s var(--spring),color .3s}
+.xbtn{width:40px;height:40px;flex:none;border-radius:11px;display:grid;place-items:center;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-secondary);transition:transform .3s var(--spring),color .3s}
 .xbtn:hover{color:var(--text-primary)}
 .xbtn:active{transform:rotate(90deg) scale(.85)}
-.xbtn svg{width:14px;height:14px}
+.xbtn svg{width:16px;height:16px}
 .m-body{overflow-y:auto;padding:4px 20px 22px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
 
 /* ═══ FORM ═══ */
 .fld{display:flex;flex-direction:column;gap:7px}
 .fld label{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text-secondary);text-transform:uppercase}
-.fld input,.fld select,.fld textarea{width:100%;padding:11.5px 13px;border-radius:12px;font-size:14px;color:var(--text-primary);
+.fld input,.fld select,.fld textarea{width:100%;padding:12px 13px;border-radius:12px;font-size:14px;color:var(--text-primary);
   background:var(--bg-card);border:1px solid var(--border-subtle);outline:none;transition:border-color .3s,box-shadow .3s}
 .fld textarea{min-height:100px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.6}
 .fld select option{background:var(--bg-secondary)}
@@ -479,18 +490,7 @@ body.welc .sech{animation:welcIn .7s var(--ez) both .35s}
 .thstatus{padding:12px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:12.5px;font-weight:600;color:var(--text-secondary)}
 .thpreview img,.thpreview video{max-height:130px;width:100%;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--border-subtle);animation:viewIn .4s var(--ez)}
 
-/* ═══ API PANEL (dev-only) ═══ */
-.api-status{display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:13px;font-weight:600;flex-wrap:wrap}
-.api-status .dot{width:10px;height:10px;border-radius:50%;flex:none;background:#5d6b80;transition:background .3s}
-.api-status .dot.ok{background:var(--success);box-shadow:0 0 10px var(--success)}
-.api-status .dot.err{background:var(--danger);box-shadow:0 0 10px var(--danger)}
-.api-status .dot.load{background:var(--warning);animation:blink 1s ease-in-out infinite}
-@keyframes blink{50%{opacity:.3}}
-.api-status .stx{flex:1;min-width:0}
-.api-res{padding:12px 14px;border-radius:var(--r-md);background:var(--bg-primary);border:1px solid var(--border-subtle);font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.7;color:var(--text-secondary);word-break:break-word;min-height:20px}
-.api-res .ok{color:var(--success)}.api-res .er{color:var(--danger)}.api-res .in{color:var(--accent-secondary)}
-
-/* ═══ DETAIL / DEV ═══ */
+/* ═══ DETAIL / DEV (hệ thống phóng to trên mobile) ═══ */
 .dt-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .dt-meta .t{font-size:11.5px;color:var(--text-muted);font-weight:600}
 .dt-title{font-size:19px;font-weight:800;line-height:1.35;word-break:break-word}
@@ -505,27 +505,28 @@ pre.dt-code{font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:
 .dt-acts .btn{flex:1;min-width:140px}
 .dt-img{width:100%;max-height:240px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--border-subtle)}
 details.dl{border:1px solid var(--border-subtle);border-radius:var(--r-md);overflow:hidden;background:var(--bg-card)}
-details.dl summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 15px;font-weight:700;font-size:13.5px;user-select:none}
+details.dl summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 15px;font-weight:700;font-size:14px;user-select:none}
 details.dl summary::-webkit-details-marker{display:none}
-details.dl summary svg.ci{width:16px;height:16px}
-details.dl summary .n{color:var(--text-muted);font-size:11px;font-weight:700}
-details.dl summary .ar{margin-left:auto;width:14px;height:14px;color:var(--text-muted);transition:transform .3s var(--ez)}
+details.dl summary svg.ci{width:18px;height:18px}
+details.dl summary .n{color:var(--text-muted);font-size:12px;font-weight:700}
+details.dl summary .ar{margin-left:auto;width:16px;height:16px;color:var(--text-muted);transition:transform .3s var(--ez)}
 details.dl[open] summary .ar{transform:rotate(90deg)}
-.drow{display:flex;align-items:center;gap:9px;padding:10px 14px;border-top:1px solid var(--border-subtle);font-size:13px;animation:viewIn .3s var(--ez)}
+.drow{display:flex;align-items:center;gap:9px;padding:11px 14px;border-top:1px solid var(--border-subtle);font-size:13.5px;animation:viewIn .3s var(--ez)}
 .drow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)}
-.drow button{width:32px;height:32px;flex:none;border-radius:9px;display:grid;place-items:center;color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle);transition:all .25s}
-.drow button svg{width:13.5px;height:13.5px}
+.drow button{width:36px;height:36px;flex:none;border-radius:9px;display:grid;place-items:center;color:var(--text-secondary);background:var(--bg-elevated);border:1px solid var(--border-subtle);transition:all .25s}
+.drow button svg{width:15px;height:15px}
 .drow button.ed:hover{color:var(--cat);border-color:color-mix(in srgb,var(--cat) 50%,transparent)}
 .drow button.de:hover{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 50%,transparent)}
-.drow button.de.arm{color:#fff;background:var(--danger);border-color:var(--danger);font-size:9.5px;font-weight:800}
-.dsec{font-size:10.5px;font-weight:800;letter-spacing:.14em;color:var(--text-muted);text-transform:uppercase;display:flex;align-items:center;gap:9px}
+.drow button.de.arm{color:#fff;background:var(--danger);border-color:var(--danger);font-size:10px;font-weight:800}
+.dsec{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--text-muted);text-transform:uppercase;display:flex;align-items:center;gap:9px}
 .dsec::after{content:"";flex:1;height:1px;background:var(--border-subtle)}
-.maint-state{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:13px;font-weight:600;flex-wrap:wrap}
-.maint-state .dot{width:9px;height:9px;border-radius:50%;flex:none}
-.mnt-mins{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary);font-weight:600;flex-wrap:wrap}
-.mnt-mins input{width:74px;padding:8px 10px;border-radius:10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:13px;outline:none}
-#devLog{background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:10px 12px;max-height:170px;overflow-y:auto;
-  font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.7;display:flex;flex-direction:column;gap:2px}
+.maint-state{display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r-md);background:var(--bg-card);border:1px solid var(--border-subtle);font-size:13.5px;font-weight:600;flex-wrap:wrap}
+.maint-state .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.mnt-mins{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);font-weight:600;flex-wrap:wrap}
+.mnt-mins input{width:80px;padding:9px 10px;border-radius:10px;background:var(--bg-elevated);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:14px;outline:none}
+#devLog{background:var(--bg-primary);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:12px 14px;max-height:200px;overflow-y:auto;
+  font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.7;display:flex;flex-direction:column;gap:3px}
+@media(max-width:640px){#devLog{font-size:13.5px}.dsec{font-size:13px}}
 #devLog div{word-break:break-word;animation:viewIn .25s var(--ez)}
 #devLog .t{color:var(--text-muted)}#devLog .ok{color:var(--success)}#devLog .er{color:var(--danger)}#devLog .in{color:var(--accent-secondary)}
 
@@ -576,13 +577,40 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 
 /* ═══ TOAST ═══ */
 #toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:300;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:max-content;max-width:92vw}
-.toast{display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:99px;font-size:13px;font-weight:600;
+.toast{display:flex;align-items:center;gap:9px;padding:12px 18px;border-radius:99px;font-size:13.5px;font-weight:600;
   background:var(--bg-elevated);border:1px solid var(--border-strong);box-shadow:0 12px 34px rgba(0,0,0,.5);animation:tIn .45s var(--spring);max-width:92vw}
 .toast.out{animation:tOut .35s var(--ez) forwards}
-.toast svg{width:15px;height:15px;flex:none;stroke:var(--tc,var(--success));animation:tpop .45s var(--spring)}
+.toast svg{width:16px;height:16px;flex:none;stroke:var(--tc,var(--success));animation:tpop .45s var(--spring)}
 @keyframes tpop{from{transform:scale(0)}60%{transform:scale(1.3)}to{transform:scale(1)}}
 @keyframes tIn{from{opacity:0;transform:translateY(16px) scale(.9)}}
 @keyframes tOut{to{opacity:0;transform:translateY(10px) scale(.94)}}
+
+/* ═══ GFX LEVEL OVERRIDES ═══ */
+/* FAST (1): tối giản, không animation, thu gọn */
+body.gfx-1 *,body.gfx-1 *::before,body.gfx-1 *::after{animation:none!important;transition:none!important}
+body.gfx-1 #bg,body.gfx-1 #themeLayer,body.gfx-1 .sh,body.gfx-1 .hero::after,body.gfx-1 .hero::before,body.gfx-1 #scrollProg{display:none!important}
+body.gfx-1 .hero{background:var(--bg-card)}
+body.gfx-1 .card{box-shadow:none}
+body.gfx-1 .card .cfoot .btn:not(:first-child){display:none}
+body.gfx-1 .tile .tico{transition:none}
+/* NORMAL (2): nhẹ */
+body.gfx-2 .orb{opacity:.07}
+body.gfx-2 .ptcl{opacity:.15}
+/* HARD (3): chuyên nghiệp, nút to, thêm nút */
+body.gfx-3 .btn{padding:13px 20px;font-size:14px}
+body.gfx-3 .card .cfoot .btn{flex:1}
+body.gfx-3 .mnav{padding:18px}
+body.gfx-3 .tile{padding:20px}
+body.gfx-3 .card{padding:18px}
+/* ULTRA (4): nền + nét */
+body.gfx-4 .orb{opacity:.22}
+body.gfx-4 .card{border-color:color-mix(in srgb,var(--cat) 20%,var(--border-subtle))}
+/* EXTREME (5): cosmic, tối đa */
+body.gfx-5 .orb{opacity:.3}
+body.gfx-5 .card{box-shadow:0 0 34px -10px color-mix(in srgb,var(--cat) 45%,transparent)}
+body.gfx-5 .btn-p{box-shadow:0 0 20px -4px var(--cat)}
+body.gfx-5 .hero{box-shadow:0 0 50px -16px color-mix(in srgb,var(--accent-primary) 55%,transparent)}
+body.gfx-5 .tile{box-shadow:0 0 26px -12px color-mix(in srgb,var(--nc) 50%,transparent)}
 
 /* ═══ REDUCED MOTION ═══ */
 @media (prefers-reduced-motion: reduce){
@@ -596,7 +624,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
 }
 </style>
 </head>
-<body>
+<body class="gfx-2">
 
 <div id="bg" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
 <div id="themeLayer" aria-hidden="true"></div>
@@ -620,7 +648,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
     </svg>
   </div>
   <div id="spWord" aria-label="SKIBIDI SCRIPT WEB"></div>
-  <div id="spStage">Đang khởi tạo…</div>
+  <div id="spStage">Đang kết nối Firebase…</div>
   <div id="spTrack"><div id="spBar"></div></div>
 </div>
 
@@ -668,21 +696,52 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
   </div>
 </header>
 
-<!-- SIDEBAR -->
-<div id="sideOv"></div>
-<aside id="side" aria-label="Điều hướng">
-  <span id="navpill" aria-hidden="true"></span>
-  <span class="navsec">Menu</span>
-  <a class="navitem" href="#/" data-route="home" style="--nc:var(--accent-secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21.5v-6.5h6v6.5"/></svg>Trang chủ</a>
-  <span class="navsec">Danh mục</span>
-  <div id="navCats" style="display:flex;flex-direction:column;gap:5px"></div>
-  <span class="navsec">Âm thanh</span>
-  <button id="btnSound" class="navitem" type="button" aria-label="Bật tắt nhạc nền">
-    <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span style="flex:1;text-align:left">Nhạc nền</span>
-    <span class="cnt" id="sndState">—</span>
-  </button>
-  <div class="side-acc auth-zone"></div>
+<!-- MENU FULL MÀN HÌNH -->
+<div id="menuOv"></div>
+<aside id="menuPanel" aria-label="Menu">
+  <div class="mp-top">
+    <span class="mp-title">SKIBIDI SCRIPT WEB</span>
+    <button class="xbtn" id="menuClose" aria-label="Đóng menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <nav class="mp-nav" id="mpNav"></nav>
+
+  <div class="mp-sec">
+    <h4>Đồ họa / Xử lý</h4>
+    <div class="gfx-head">
+      <span style="color:var(--text-secondary);font-weight:600">Mức hiệu ứng</span>
+      <span class="gfx-name" id="gfxName">Normal</span>
+    </div>
+    <div class="gfx-track-wrap" id="gfxTrack">
+      <div id="gfxCosmic"></div>
+      <div id="gfxFill"></div>
+      <div id="gfxParticles"></div>
+      <div id="gfxStars"></div>
+      <input type="range" id="gfxRange" min="1" max="5" step="1" value="2" aria-label="Chọn mức đồ họa">
+    </div>
+    <div class="gfx-ticks">
+      <span class="gfx-tick" data-g="1">Fast</span>
+      <span class="gfx-tick" data-g="2">Normal</span>
+      <span class="gfx-tick" data-g="3">Hard</span>
+      <span class="gfx-tick" data-g="4">Ultra</span>
+      <span class="gfx-tick" data-g="5">Extreme</span>
+    </div>
+    <div class="gfx-desc" id="gfxDesc">Hiệu ứng nhẹ.</div>
+  </div>
+
+  <div class="mp-sec">
+    <h4>Âm thanh</h4>
+    <div class="sound-row">
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="lbl">Nhạc nền</span>
+      <span class="cnt" id="sndState">—</span>
+      <button class="btn btn-g" id="btnSound">Bật / Tắt</button>
+    </div>
+  </div>
+
+  <div class="mp-sec">
+    <h4>Tài khoản</h4>
+    <div class="auth-zone"></div>
+  </div>
 </aside>
 
 <!-- MAIN -->
@@ -693,6 +752,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
       <h1>SKIBIDI <span>SCRIPT WEB</span></h1>
       <p>Code · Share · Connect — Simple. Fast. Connected.</p>
     </div>
+    <div id="compactStrip"></div>
     <div class="cattiles" id="tiles"></div>
     <h2 class="sech">Mới được thêm</h2>
     <div class="latest" id="latest"></div>
@@ -762,7 +822,12 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
       <div class="fld"><label>Danh mục</label><div class="seg" id="catSeg"></div></div>
       <div class="fld"><label for="fName">Tên</label><input id="fName" autocomplete="off" required></div>
       <div class="fld"><label for="fDesc">Mô tả</label><input id="fDesc" autocomplete="off"></div>
-      <div class="fld" id="wrapUrl"><label for="fUrl">Link</label><input id="fUrl" type="url" placeholder="https://…" autocomplete="off" inputmode="url"></div>
+      <div class="fld" id="wrapUrl"><label for="fUrl">Link / URL</label><input id="fUrl" type="url" placeholder="https://…" autocomplete="off" inputmode="url"></div>
+      <div class="fld" id="wrapKey" style="display:none"><label for="fApiKey">API Key (Bypass)</label>
+        <div class="pw"><input id="fApiKey" type="password" placeholder="Nhập API key…" autocomplete="off">
+        <button class="eye" type="button" id="fKeyEye" aria-label="Hiện/ẩn key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+      </div>
       <div class="fld" id="wrapCode" style="display:none"><label for="fCode">Code</label><textarea id="fCode" spellcheck="false"></textarea></div>
       <p class="form-err" id="fErr" role="alert" aria-live="polite"></p>
       <div style="display:flex;gap:9px">
@@ -785,26 +850,7 @@ details.dl[open] summary .ar{transform:rotate(90deg)}
       <div id="catList" style="display:flex;flex-direction:column;gap:8px"></div>
     </form>
 
-    <span class="dsec">Kết nối API · baconbypass.xyz (chỉ Dev)</span>
-    <div class="api-status">
-      <span class="dot" id="apiDot"></span>
-      <span class="stx" id="apiStateTxt">Chưa cấu hình</span>
-    </div>
-    <div class="fld"><label for="apiEndpoint">Endpoint</label><input id="apiEndpoint" type="url" placeholder="https://baconbypass.xyz" value="https://baconbypass.xyz" autocomplete="off" inputmode="url"></div>
-    <div class="fld"><label for="apiKey">API Key</label>
-      <div class="pw">
-        <input id="apiKey" type="password" placeholder="Nhập API key…" autocomplete="off">
-        <button class="eye" type="button" id="apiEye" aria-label="Hiện/ẩn key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-    </div>
-    <div class="uprow">
-      <button class="btn btn-p" type="button" id="apiSave" style="--cat:var(--accent-primary)">Lưu cấu hình</button>
-      <button class="btn btn-g" type="button" id="apiTest">Kiểm tra kết nối</button>
-      <button class="btn btn-g" type="button" id="apiClear">Ngắt kết nối</button>
-    </div>
-    <div class="api-res" id="apiRes">Chưa kiểm tra. Nhấn “Kiểm tra kết nối” để thử kết nối tới endpoint.</div>
-
-    <span class="dsec">Nền web (ảnh / video)</span>
+    <span class="dsec">Nền web (ảnh / video) — áp dụng ở Ultra/Extreme</span>
     <div class="thstatus" id="thStatus">Nền: mặc định</div>
     <div class="uprow">
       <label class="btn btn-g upbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.8"/><path d="m4 17 5-4.5 4.5 4L16.5 14l3.5 3"/></svg>Chọn ảnh / video<input type="file" id="thFile" accept="image/*,video/*" hidden></label>
@@ -862,7 +908,7 @@ const DATA_ROOT = "nox_data";
 const CATS_NODE = "nox_categories";
 const MAINT_NODE = "nox_maintenance";
 const NOTICE_NODE = "nox_notice";
-const THEME_NODE = "nox_theme";           // chứa api (dev-only) + nền + âm thanh
+const THEME_NODE = "nox_theme";
 const MAX_DATA_LEN = 9 * 1024 * 1024;
 
 const FB_OK = (typeof firebase !== "undefined");
@@ -947,6 +993,16 @@ function compressImage(file) {
   });
 }
 
+/* ═══════════ GFX ENGINE — 5 MỨC ═══════════ */
+const GFX_LEVELS = [
+  { n:1, name:"Fast",    desc:"Tối giản — không animation, không màu mè. Mọi danh mục thu gọn vào 1 khung." },
+  { n:2, name:"Normal",  desc:"Màu nhẹ, animation nhẹ, hiệu ứng động nhẹ." },
+  { n:3, name:"Hard",    desc:"UI chuyên nghiệp, nút to hơn, thêm nút bấm, dễ thao tác." },
+  { n:4, name:"Ultra",   desc:"Đổi toàn bộ UI, dùng nền dev thêm, hiệu ứng siêu nét. Slider xanh nước biển." },
+  { n:5, name:"Extreme", desc:"Cosmic animation tối đa — mạnh và đẹp gấp bội Ultra." }
+];
+function loadGfx(){ try{ const v=parseInt(localStorage.getItem("ssw_gfx")||"2",10); return (v>=1&&v<=5)?v:2; }catch(_){ return 2; } }
+
 /* ═══════════ ICONS ═══════════ */
 const SW = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
 const ICO = {
@@ -954,6 +1010,7 @@ const ICO = {
   apk:`<svg viewBox="0 0 24 24" ${SW}><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/><path d="M12 13v7"/></svg>`,
   link:`<svg viewBox="0 0 24 24" ${SW}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
   ios:`<svg viewBox="0 0 24 24" ${SW}><path d="M15.6 8.6c-.2-2 1.5-3 1.5-3-1-1.4-2.5-1.6-3.1-1.6-1.4-.1-2.3.8-2.9.8-.6 0-1.6-.8-2.8-.8-1.6 0-3.8 1.3-3.8 4.9 0 3.3 2.5 7.4 4.1 7.4 1 0 1.4-.6 2.8-.6 1.3 0 1.7.6 2.8.6 1.6 0 4-4 4-7.2 0-2.4-1.8-3.4-2.6-3.5Z"/><path d="M12.2 3.9c0-1.5 1.2-2.7 2.7-2.7.1 1.6-1.3 2.8-2.7 2.7Z"/></svg>`,
+  bypass:`<svg viewBox="0 0 24 24" ${SW}><path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5Z"/></svg>`,
   box:`<svg viewBox="0 0 24 24" ${SW}><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/></svg>`,
   star:`<svg viewBox="0 0 24 24" ${SW}><path d="m12 3 2.7 5.8 6.3.8-4.6 4.4 1.2 6.2L12 17.2 6.4 20.2l1.2-6.2L3 9.6l6.3-.8Z"/></svg>`,
   gift:`<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12"/><path d="M12 9S10.5 4 8 4a2.5 2.5 0 0 0 0 5Zm0 0s1.5-5 4-5a2.5 2.5 0 0 1 0 5Z"/></svg>`,
@@ -975,15 +1032,16 @@ const ICO = {
   chev:`<svg class="ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>`,
   x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`
 };
-const PICK_ICONS = ["box","star","gift","game","cloud","music","film","bolt","shield","terminal","heart","crown"];
+const PICK_ICONS = ["box","star","gift","game","cloud","music","film","bolt","shield","terminal","heart","crown","bypass"];
 const PICK_COLORS = ["#7c5cff","#29d6c5","#ffbf5b","#f471b5","#35d39a","#4cc9f0","#ff647c","#ff9f45"];
 
-/* ═══════════ DANH MỤC ═══════════ */
+/* ═══════════ DANH MỤC (5 mục gốc, gồm BYPASS) ═══════════ */
 const BASE_CATS = [
   { id:"script", label:"Script", node:"scripts", color:"var(--accent-primary)",  sub:"Kho script cập nhật realtime.", base:true },
   { id:"apk",    label:"APK",    node:"apks",    color:"var(--warning)",         sub:"Kho APK và APK Vault.",         base:true },
   { id:"link",   label:"LINK",   node:"links",   color:"var(--accent-secondary)",sub:"Liên kết hữu ích.",             base:true },
-  { id:"ios",    label:"iOS",    node:"ios",     color:"var(--cat-ios)",         sub:"Kho iOS và iOS Vault.",         base:true }
+  { id:"ios",    label:"iOS",    node:"ios",     color:"var(--cat-ios)",         sub:"Kho iOS và iOS Vault.",         base:true },
+  { id:"bypass", label:"Bypass", node:"bypass",  color:"var(--cat-bypass)",      sub:"API key & URL do Dev cung cấp.",base:true }
 ];
 let CATS = BASE_CATS.slice();
 const catOf = id => CATS.find(c => c.id === id);
@@ -993,7 +1051,7 @@ const nodePath = id => DATA_ROOT + "/" + catOf(id).node;
 const state = {
   route:"home", q:"", user:null, localUser:null, dev:false,
   maint:null, maintFirstSeen:0, notice:null, theme:null, hasMusic:false,
-  api:{ key:"", endpoint:"https://baconbypass.xyz" },
+  gfx:loadGfx(),
   data:{}, status:{}, editing:null, formCat:"script", logs:[],
   catForm:{ icon:"box", color:PICK_COLORS[0] },
   pendingBg:null, pendingAu:null
@@ -1014,7 +1072,7 @@ window.addEventListener("unhandledrejection", e => {
 });
 if (fbInitErr) dlog("er", "Firebase init: " + (fbInitErr.message || fbInitErr));
 
-/* ═══════════ SPLASH ═══════════ */
+/* ═══════════ SPLASH + FIREBASE LOAD ĐỒNG BỘ ═══════════ */
 (function buildWord() {
   const w = $("#spWord");
   "SKIBIDI SCRIPT WEB".split(" ").forEach((word, wi) => {
@@ -1030,16 +1088,25 @@ if (fbInitErr) dlog("er", "Firebase init: " + (fbInitErr.message || fbInitErr));
   });
 })();
 const spP = p => { $("#spBar").style.width = p + "%"; };
-let pendingCats = BASE_CATS.length;
-function catSynced() {
-  pendingCats--;
-  spP(Math.min(92, 40 + (BASE_CATS.length - pendingCats) * 13));
-  if (pendingCats <= 0) enterApp();
+let loadTotal = BASE_CATS.length, loadDone = 0, loadFinished = false, splashDone = false;
+function spStage(t){ const el=$("#spStage"); if(el) el.textContent=t; }
+function markLoaded(){
+  if (loadFinished) return;
+  loadDone++;
+  const pct = Math.min(100, Math.round(loadDone/loadTotal*100));
+  spP(pct);
+  spStage(`Đang đồng bộ dữ liệu Firebase… (${loadDone}/${loadTotal})`);
+  if (loadDone >= loadTotal) finishLoad(true);
 }
-let splashDone = false;
-function enterApp() {
-  if (splashDone) return; splashDone = true;
+function finishLoad(ok){
+  if (loadFinished) return;
+  loadFinished = true;
+  spStage(ok ? "Hoàn tất." : "Firebase lỗi — vào chế độ giới hạn.");
   spP(100);
+  enterApp();
+}
+function enterApp(){
+  if (splashDone) return; splashDone = true;
   const sp = $("#splash");
   const fin = () => { sp.style.display = "none"; maybeNotice(); };
   if (RM) { document.body.classList.add("welc"); fin(); return; }
@@ -1047,11 +1114,11 @@ function enterApp() {
     sp.classList.add("out");
     document.body.classList.add("welc");
     setTimeout(fin, 900);
-  }, 300);
+  }, 250);
 }
-setTimeout(enterApp, 3000);
+setTimeout(() => finishLoad(false), 9000); // an toàn
 
-/* ═══════════ PARTICLES (giảm còn 12 cho nhẹ) ═══════════ */
+/* ═══════════ PARTICLES ═══════════ */
 if (!RM) {
   const bg = $("#bg");
   for (let i = 0; i < 12; i++) {
@@ -1065,10 +1132,32 @@ if (!RM) {
     bg.appendChild(s);
   }
 }
+/* Slider particles + stars (Ultra/Extreme) */
+(function buildSliderFx(){
+  const p = $("#gfxParticles");
+  for (let i=0;i<14;i++){
+    const s=document.createElement("span");
+    s.className="gfx-p";
+    s.style.setProperty("--t",(15+Math.random()*70).toFixed(0)+"%");
+    s.style.setProperty("--dur",(2.2+Math.random()*2.2).toFixed(2)+"s");
+    s.style.setProperty("--del",(-Math.random()*4).toFixed(2)+"s");
+    p.appendChild(s);
+  }
+  const st = $("#gfxStars");
+  for (let i=0;i<22;i++){
+    const s=document.createElement("span");
+    s.className="gfx-star";
+    s.style.setProperty("--t",(10+Math.random()*80).toFixed(0)+"%");
+    s.style.setProperty("--l",(Math.random()*100).toFixed(0)+"%");
+    s.style.setProperty("--dur",(1+Math.random()*1.6).toFixed(2)+"s");
+    s.style.setProperty("--del",(Math.random()*2).toFixed(2)+"s");
+    st.appendChild(s);
+  }
+})();
 
-/* ═══════════ LAYER ═══════════ */
+/* ═══════════ LAYER / MENU ═══════════ */
 let openEl = null, lastFocus = null;
-function openLayer(el) {
+function openLayer(el){
   if (openEl === el) return;
   closeLayer();
   lastFocus = document.activeElement;
@@ -1079,81 +1168,82 @@ function openLayer(el) {
   const f = el.querySelector("input:not([type=hidden]):not([type=file]),textarea,select,button:not([data-close])");
   setTimeout(() => { try { (f || el).focus({ preventScroll:true }); } catch (_) {} }, 120);
 }
-function closeLayer() {
+function closeLayer(){
   if (openEl) { openEl.classList.remove("on"); openEl = null; }
   $("#ov").classList.remove("on");
-  if (!$("#maint").classList.contains("on")) document.body.classList.remove("locked");
+  if (!$("#maint").classList.contains("on") && !$("#menuPanel").classList.contains("on")) document.body.classList.remove("locked");
   if (lastFocus && lastFocus.focus && document.contains(lastFocus)) { try { lastFocus.focus({ preventScroll:true }); } catch (_) {} }
   lastFocus = null;
 }
-$("#ov").addEventListener("click", () => { if (openEl && openEl.id === "side") closeDrawer(); else closeLayer(); });
+function openMenu(){ $("#menuPanel").classList.add("on"); $("#menuOv").classList.add("on"); document.body.classList.add("locked"); }
+function closeMenu(){ $("#menuPanel").classList.remove("on"); $("#menuOv").classList.remove("on"); if(!openEl && !$("#maint").classList.contains("on")) document.body.classList.remove("locked"); }
+$("#btnMenu").addEventListener("click", () => $("#menuPanel").classList.contains("on") ? closeMenu() : openMenu());
+$("#menuClose").addEventListener("click", closeMenu);
+$("#menuOv").addEventListener("click", closeMenu);
+$("#ov").addEventListener("click", () => closeLayer());
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    if (openEl && openEl.id === "side") closeDrawer();
+  if (e.key === "Escape"){
+    if ($("#menuPanel").classList.contains("on")) closeMenu();
     else if (openEl) closeLayer();
     return;
   }
-  if (e.key === "Tab" && openEl && openEl.classList.contains("modal")) {
+  if (e.key === "Tab" && openEl && openEl.classList.contains("modal")){
     const fs = openEl.querySelectorAll('input,textarea,select,button,[href]');
     if (!fs.length) return;
-    const first = fs[0], last = fs[fs.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    const first = fs[0], last = fs[fs.length-1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
   }
 });
 document.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeLayer(); });
-function openDrawer() { $("#side").classList.add("open"); $("#sideOv").classList.add("on"); document.body.classList.add("locked"); requestAnimationFrame(movePill); }
-function closeDrawer() { $("#side").classList.remove("open"); $("#sideOv").classList.remove("on"); if (!openEl && !$("#maint").classList.contains("on")) document.body.classList.remove("locked"); }
-$("#btnMenu").addEventListener("click", () => $("#side").classList.contains("open") ? closeDrawer() : openDrawer());
-$("#sideOv").addEventListener("click", closeDrawer);
 
 /* ═══════════ ROUTER ═══════════ */
-function routeFromHash() {
+function routeFromHash(){
   const h = location.hash.replace(/^#\/?/, "").toLowerCase();
   return CATS.some(c => c.id === h) ? h : "home";
 }
-function clearQ() {
+function clearQ(){
   state.q = "";
-  ["#q","#qM"].forEach(s => { const el = $(s); if (el) el.value = ""; });
+  ["#q","#qM"].forEach(s => { const el=$(s); if(el) el.value=""; });
   document.querySelectorAll(".searchbox").forEach(b => b.classList.remove("has-q"));
 }
-function navTo(r) {
+function navTo(r){
   if (state.q) clearQ();
   const target = "#/" + (r === "home" ? "" : r);
   const cur = location.hash || "#/";
   if (cur === target || (r === "home" && (cur === "#" || cur === "#/"))) renderRoute();
   else location.hash = target;
 }
-function renderRoute() {
+function renderRoute(){
   state.route = routeFromHash();
   pulseLoad(); sweepFx();
-  if (state.q) { renderSearch(); movePill(); return; }
+  if (state.q){ renderSearch(); return; }
   const r = state.route;
   const c = r === "home" ? null : catOf(r);
   document.documentElement.style.setProperty("--cat", c ? c.color : "var(--accent-primary)");
   document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
   $("#v-" + r).classList.add("on");
-  document.querySelectorAll(".navitem[data-route]").forEach(a => {
+  document.querySelectorAll("#mpNav [data-route]").forEach(a => {
     const on = a.dataset.route === r;
     a.classList.toggle("on", on);
-    if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    if (on) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
   });
-  movePill();
   if (r === "home") renderHome(); else renderCat(r);
   window.scrollTo({ top:0, behavior:"auto" });
-  if (window.innerWidth < 960) closeDrawer();
+  if (window.innerWidth < 1024) closeMenu();
   $("#hdrSearch").classList.remove("open");
 }
 window.addEventListener("hashchange", () => { clearQ(); renderRoute(); });
 
-/* ═══════════ CHUẨN HÓA ITEM ═══════════ */
-function normItem(key, o) {
+/* ═══════════ CHUẨN HÓA ITEM (hỗ trợ apiKey) ═══════════ */
+function normItem(key, o){
   if (o == null || typeof o !== "object") o = { name:String(o ?? "") };
   return {
     key,
     name: pick(o, ["name","title"]) || "(không tên)",
     desc: pick(o, ["desc","description","note"]),
     url:  pick(o, ["url","link","href"]),
+    apiKey: pick(o, ["apiKey","apikey","key","api_key"]),
     code: pick(o, ["code","script"]),
     img:  pick(o, ["img","image","avatar","thumb"]),
     copies: o.copies != null ? Number(o.copies) || 0 : null,
@@ -1168,91 +1258,79 @@ const io = ("IntersectionObserver" in window) ? new IntersectionObserver(es => {
   es.forEach(en => {
     if (!en.isIntersecting) return;
     const el = en.target;
-    if (performance.now() - (+el.dataset.rt || 0) > 450) el.style.setProperty("--d", "0ms");
-    el.classList.add("in", "rvin");
+    if (performance.now() - (+el.dataset.rt || 0) > 450) el.style.setProperty("--d","0ms");
+    el.classList.add("in","rvin");
     io.unobserve(el);
   });
-}, { threshold:.06, rootMargin:"40px" }) : null;
-function observeAnim(scope) {
+},{threshold:.06,rootMargin:"40px"}) : null;
+function observeAnim(scope){
   const els = scope.querySelectorAll(".card,[data-reveal]");
   if (io && !RM) els.forEach(c => io.observe(c));
-  else els.forEach(c => c.classList.add("in", "rvin"));
+  else els.forEach(c => c.classList.add("in","rvin"));
 }
-function cardHTML(it, catId, i, rt, showChip) {
-  const c = catOf(catId); if (!c) return "";
+function maskKey(k){ if(!k) return ""; return k.length<=8 ? "••••" : k.slice(0,3)+"•••"+k.slice(-3); }
+function cardHTML(it, catId, i, rt, showChip){
+  const c = catOf(catId); if(!c) return "";
   const hasUrl = validUrl(it.url);
   const acts = [];
   if (it.code) acts.push(`<button class="btn btn-p" data-act="copycode" data-cat="${catId}" data-key="${esc(it.key)}" data-stop>${ICO.copy}<span>Sao chép code</span></button>`);
+  if (it.apiKey) acts.push(`<button class="btn btn-p" data-act="copykey" data-kv="${esc(it.apiKey)}" data-stop>${ICO.copy}<span>Copy Key</span></button>`);
   if (hasUrl) acts.push(`<a class="btn btn-p" href="${esc(it.url.trim())}" target="_blank" rel="noopener" data-stop>${ICO.ext}<span>Mở link</span></a>`);
   acts.push(`<button class="btn btn-g" data-act="detail" data-cat="${catId}" data-key="${esc(it.key)}" data-stop>${ICO.eye}<span>Chi tiết</span></button>`);
   return `<article class="card" style="--cat:${c.color};--d:${Math.min(i,10)*45}ms" data-rt="${rt}" data-cat="${catId}" data-key="${esc(it.key)}" tabindex="0" role="button" aria-label="Xem chi tiết ${esc(it.name)}">
     <span class="sh" aria-hidden="true"></span>
     <div class="ctop"><span class="ico-tile">${ICO[c.icon] || ICO[c.id] || ICO.box}</span>
       ${showChip ? `<span class="chip">${esc(c.label)}</span>` : ""}
+      ${catId==="bypass" ? `<span class="chip" style="--cat:var(--cat-bypass)">KEY</span>` : ""}
       ${it.vault ? `<span class="chip" style="--cat:var(--warning)">VAULT</span>` : ""}
       <span class="ctime">${it.ts ? esc(fmtTime(it.ts)) : ""}</span></div>
     ${it.img ? `<img class="thumb" src="${esc(it.img)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
     <h3>${esc(it.name)}</h3>
     ${it.desc ? `<p class="desc">${esc(it.desc)}</p>` : ""}
+    ${it.apiKey ? `<pre class="codeprev">Key: ${esc(maskKey(it.apiKey))}</pre>` : ""}
     ${it.code ? `<pre class="codeprev">${esc(String(it.code).slice(0,160))}</pre>` : ""}
     <div class="cfoot">${acts.join("")}</div>
   </article>`;
 }
-function skeletonHTML() { return [0,1,2].map(() => `<div class="sk" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i></div>`).join(""); }
-function emptyHTML(catId) { return `<div class="statebox">${ICO.box}<p>Chưa có ${esc((catOf(catId)||{label:"dữ liệu"}).label)}.</p></div>`; }
-function errorHTML(catId) {
+function skeletonHTML(){ return [0,1,2].map(() => `<div class="sk" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><i class="e"></i></div>`).join(""); }
+function emptyHTML(catId){ return `<div class="statebox">${ICO.box}<p>Chưa có ${esc((catOf(catId)||{label:"dữ liệu"}).label)}.</p></div>`; }
+function errorHTML(catId){
   return `<div class="statebox err">${ICO.warn}<p>Không tải được dữ liệu.</p><button class="btn btn-g" data-act="retry" data-cat="${catId}"><svg viewBox="0 0 24 24" ${SW}><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>Thử lại</button></div>`;
 }
-function renderCat(catId) {
-  const view = $("#v-" + catId); if (!view) return;
+function renderCat(catId){
+  const view = $("#v-" + catId); if(!view) return;
   const grid = view.querySelector(".grid"), cnt = view.querySelector(".vcount");
   const items = state.data[catId], rt = performance.now();
-  if (state.status[catId] === "error" && items === null) { cnt.textContent = "—"; grid.innerHTML = errorHTML(catId); return; }
-  if (items === null || items === undefined) { cnt.textContent = "…"; grid.innerHTML = skeletonHTML(); return; }
+  if (state.status[catId] === "error" && items === null){ cnt.textContent="—"; grid.innerHTML = errorHTML(catId); return; }
+  if (items === null || items === undefined){ cnt.textContent="…"; grid.innerHTML = skeletonHTML(); return; }
   cnt.textContent = items.length + " mục";
-  if (!RM && cnt.dataset.v !== String(items.length)) {
+  if (!RM && cnt.dataset.v !== String(items.length)){
     cnt.dataset.v = String(items.length);
     cnt.classList.remove("popnum"); void cnt.offsetWidth; cnt.classList.add("popnum");
   } else cnt.dataset.v = String(items.length);
   grid.innerHTML = items.length ? items.map((it,i) => cardHTML(it,catId,i,rt,false)).join("") : emptyHTML(catId);
   observeAnim(grid);
 }
-function renderCounts() {
+function renderCounts(){
   CATS.forEach(c => {
     const n = state.data[c.id];
     document.querySelectorAll(`[data-cnt="${c.id}"]`).forEach(el => {
-      if (n && n.length) { el.hidden = false; el.textContent = n.length; } else el.hidden = true;
+      if (n && n.length){ el.hidden=false; el.textContent=n.length; } else el.hidden=true;
     });
   });
 }
-function renderNavCats() {
-  $("#navCats").innerHTML = CATS.map(c =>
-    `<a class="navitem${state.route===c.id?" on":""}" href="#/${c.id}" data-route="${c.id}" style="--nc:${c.color}"${state.route===c.id?' aria-current="page"':""}>${ICO[c.icon]||ICO[c.id]||ICO.box}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.label)}</span><span class="cnt" data-cnt="${c.id}" hidden></span></a>`
-  ).join("");
+function buildMenuNav(){
+  $("#mpNav").innerHTML = `
+    <a class="mnav" href="#/" data-route="home" style="--nc:var(--accent-secondary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21.5v-6.5h6v6.5"/></svg><span style="flex:1">Trang chủ</span></a>` +
+    CATS.map(c => `<a class="mnav" href="#/${c.id}" data-route="${c.id}" style="--nc:${c.color}">${ICO[c.icon]||ICO[c.id]||ICO.box}<span style="flex:1">${esc(c.label)}</span><span class="cnt" data-cnt="${c.id}" hidden></span></a>`).join("");
   renderCounts();
-  requestAnimationFrame(() => requestAnimationFrame(movePill));
 }
-function movePill() {
-  const pill = $("#navpill"), side = $("#side");
-  if (!pill || !side) return;
-  const active = side.querySelector(".navitem.on");
-  if (!active) { pill.style.opacity = "0"; return; }
-  const sr = side.getBoundingClientRect(), ar = active.getBoundingClientRect();
-  pill.style.height = Math.round(ar.height) + "px";
-  pill.style.transform = "translateY(" + Math.round(ar.top - sr.top + side.scrollTop) + "px)";
-  const nc = active.style.getPropertyValue("--nc");
-  if (nc) pill.style.setProperty("--nc", nc.trim());
-  pill.style.opacity = "1";
-}
-window.addEventListener("resize", debounce(movePill, 150));
-window.addEventListener("load", () => setTimeout(movePill, 300));
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => setTimeout(movePill, 60));
-function ensureViews() {
+function ensureViews(){
   CATS.forEach(c => {
     let v = $("#v-" + c.id);
-    if (!v) {
+    if (!v){
       v = document.createElement("section");
-      v.className = "view"; v.id = "v-" + c.id; v.dataset.cat = c.id;
+      v.className="view"; v.id="v-"+c.id; v.dataset.cat=c.id;
       v.setAttribute("aria-label", c.label);
       v.innerHTML = `<div class="vhead"><div><h2></h2><p class="vsub"></p></div>
         <div class="vtools"><span class="vcount"></span><a class="vclose" href="#/" aria-label="Đóng trang này">${ICO.x}</a></div></div><div class="grid"></div>`;
@@ -1262,37 +1340,51 @@ function ensureViews() {
     v.querySelector("h2").textContent = c.label;
     v.querySelector(".vsub").textContent = c.sub || "";
   });
-  Array.from(document.querySelectorAll(".view[data-cat]")).forEach(v => { if (!catOf(v.dataset.cat)) v.remove(); });
+  Array.from(document.querySelectorAll(".view[data-cat]")).forEach(v => { if(!catOf(v.dataset.cat)) v.remove(); });
 }
-function countUp(el, to) {
-  const from = parseInt(el.dataset.v || "0", 10);
+function countUp(el, to){
+  const from = parseInt(el.dataset.v || "0",10);
   el.dataset.v = to;
-  if (RM || from === to) { el.textContent = to; return; }
+  if (RM || from === to){ el.textContent = to; return; }
   const t0 = performance.now(), dur = 550;
-  (function step(t) {
-    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(from + (to - from) * e);
-    if (p < 1) requestAnimationFrame(step);
+  (function step(t){
+    const p = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(from + (to-from)*e);
+    if (p<1) requestAnimationFrame(step);
   })(t0);
 }
-function renderHome() {
+function allRecent(){
+  const all=[];
+  CATS.forEach(c => (state.data[c.id]||[]).forEach(it => all.push({...it, cat:c.id})));
+  return all.filter(x=>x.ts).sort((a,b)=>b.ts-a.ts);
+}
+function renderCompact(){
+  const strip = $("#compactStrip");
+  const items = allRecent().slice(0,10);
+  strip.innerHTML = items.length
+    ? items.map(it => { const c=catOf(it.cat); return `<div class="cs-item" data-act="detail" data-cat="${it.cat}" data-key="${esc(it.key)}" role="button" tabindex="0">
+        <span style="color:${c.color}">${ICO[c.icon]||ICO[c.id]||ICO.box}</span>
+        <span class="nm">${esc(it.name)}</span>
+        <span class="chip" style="--cat:${c.color}">${esc(c.label)}</span></div>`; }).join("")
+    : `<div style="color:var(--text-muted);font-size:13px;text-align:center">Chưa có dữ liệu.</div>`;
+}
+function renderHome(){
+  renderCompact();
   const tiles = $("#tiles");
   tiles.innerHTML = CATS.map(c => `<a class="tile" href="#/${c.id}" data-route="${c.id}" data-reveal style="--nc:${c.color}">
       <span class="sh" aria-hidden="true"></span>
       <span class="tico">${ICO[c.icon]||ICO[c.id]||ICO.box}</span><span class="num" data-tilenum="${c.id}">0</span>
       <b>${esc(c.label)}</b><small>${esc(c.sub||"")}</small></a>`).join("");
-  tiles.querySelectorAll(".tile").forEach((t,i) => t.style.setProperty("--d", (i*50)+"ms"));
+  tiles.querySelectorAll(".tile").forEach((t,i)=>t.style.setProperty("--d",(i*50)+"ms"));
   CATS.forEach(c => {
     const n = state.data[c.id];
     const el = tiles.querySelector(`[data-tilenum="${c.id}"]`);
     if (el) countUp(el, n ? n.length : 0);
   });
   observeAnim(tiles);
-  const all = [];
-  CATS.forEach(c => (state.data[c.id] || []).forEach(it => all.push({ ...it, cat:c.id })));
-  const latest = all.filter(x => x.ts).sort((a,b) => b.ts - a.ts).slice(0, 6);
+  const latest = allRecent().slice(0,6);
   const box = $("#latest");
-  if (!latest.length) { box.innerHTML = `<div class="statebox">${ICO.box}<p>Chưa có dữ liệu.</p></div>`; return; }
+  if (!latest.length){ box.innerHTML = `<div class="statebox">${ICO.box}<p>Chưa có dữ liệu.</p></div>`; return; }
   box.innerHTML = latest.map(it => {
     const c = catOf(it.cat);
     return `<div class="lrow" style="--nc:${c.color}" data-reveal data-act="detail" data-cat="${it.cat}" data-key="${esc(it.key)}" role="button" tabindex="0">
@@ -1300,69 +1392,72 @@ function renderHome() {
       <span class="lt"><b>${esc(it.name)}</b><small>${esc(fmtTime(it.ts))}</small></span>
       <span class="chip" style="--cat:${c.color}">${esc(c.label)}</span></div>`;
   }).join("");
-  box.querySelectorAll("[data-reveal]").forEach((el,i) => el.style.setProperty("--d", (i*55)+"ms"));
+  box.querySelectorAll("[data-reveal]").forEach((el,i)=>el.style.setProperty("--d",(i*55)+"ms"));
   observeAnim(box);
 }
 
 /* ═══════════ TÌM KIẾM ═══════════ */
-function renderSearch() {
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+function renderSearch(){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
   $("#v-search").classList.add("on");
   const q = vi(state.q.trim());
-  const res = [];
-  CATS.forEach(c => (state.data[c.id] || []).forEach(it => {
-    if (!q || vi(it.name).includes(q) || vi(it.desc).includes(q) || vi(it.code).includes(q)) res.push({ ...it, cat:c.id });
+  const res=[];
+  CATS.forEach(c => (state.data[c.id]||[]).forEach(it => {
+    if (!q || vi(it.name).includes(q) || vi(it.desc).includes(q) || vi(it.code).includes(q) || vi(it.apiKey).includes(q)) res.push({...it, cat:c.id});
   }));
-  res.sort((a,b) => (b.ts||0) - (a.ts||0));
+  res.sort((a,b)=>(b.ts||0)-(a.ts||0));
   $("#srTitle").textContent = 'Tìm kiếm: "' + state.q.trim() + '"';
-  $("#srSub").textContent = "Lọc theo tên và mô tả · hỗ trợ tiếng Việt không dấu.";
+  $("#srSub").textContent = "Lọc theo tên, mô tả, key · hỗ trợ tiếng Việt không dấu.";
   $("#srCount").textContent = res.length + " kết quả";
-  const rt = performance.now(), grid = $("#srGrid");
-  grid.innerHTML = res.length ? res.map((it,i) => cardHTML(it,it.cat,i,rt,true)).join("") : `<div class="statebox">${ICO.box}<p>Không tìm thấy kết quả.</p></div>`;
+  const rt=performance.now(), grid=$("#srGrid");
+  grid.innerHTML = res.length ? res.map((it,i)=>cardHTML(it,it.cat,i,rt,true)).join("") : `<div class="statebox">${ICO.box}<p>Không tìm thấy kết quả.</p></div>`;
   observeAnim(grid);
 }
-function syncInputs(src) {
-  ["#q","#qM"].forEach(sel => { const el = $(sel); if (el !== src) el.value = src.value; });
-  document.querySelectorAll(".searchbox").forEach(b => b.classList.toggle("has-q", !!src.value));
+function syncInputs(src){
+  ["#q","#qM"].forEach(sel=>{ const el=$(sel); if(el!==src) el.value=src.value; });
+  document.querySelectorAll(".searchbox").forEach(b=>b.classList.toggle("has-q",!!src.value));
 }
-const onSearch = debounce(v => { state.q = v; if (v.trim()) renderSearch(); else renderRoute(); }, 200);
-["#q","#qM"].forEach(sel => $(sel).addEventListener("input", e => { syncInputs(e.target); onSearch(e.target.value); }));
-$("#qClr").addEventListener("click", () => { $("#q").value = ""; syncInputs($("#q")); state.q = ""; onSearch(""); $("#q").focus(); });
-$("#qClrM").addEventListener("click", () => { $("#qM").value = ""; syncInputs($("#qM")); state.q = ""; onSearch(""); $("#qM").focus(); });
-$("#btnSearchM").addEventListener("click", () => { const open = $("#hdrSearch").classList.toggle("open"); if (open) setTimeout(() => $("#qM").focus(), 260); });
+const onSearch = debounce(v=>{ state.q=v; if(v.trim()) renderSearch(); else renderRoute(); },200);
+["#q","#qM"].forEach(sel=>$(sel).addEventListener("input",e=>{ syncInputs(e.target); onSearch(e.target.value); }));
+$("#qClr").addEventListener("click",()=>{ $("#q").value=""; syncInputs($("#q")); state.q=""; onSearch(""); $("#q").focus(); });
+$("#qClrM").addEventListener("click",()=>{ $("#qM").value=""; syncInputs($("#qM")); state.q=""; onSearch(""); $("#qM").focus(); });
+$("#btnSearchM").addEventListener("click",()=>{ const open=$("#hdrSearch").classList.toggle("open"); if(open) setTimeout(()=>$("#qM").focus(),260); });
 
 /* ═══════════ MODAL CHI TIẾT ═══════════ */
-function openDetail(catId, key) {
-  const it = (state.data[catId] || []).find(x => x.key === key);
-  if (!it) { toast("Mục này không tồn tại hoặc đã bị xóa.", "err"); return; }
+function openDetail(catId, key){
+  const it = (state.data[catId]||[]).find(x=>x.key===key);
+  if (!it){ toast("Mục này không tồn tại hoặc đã bị xóa.","err"); return; }
   const c = catOf(catId);
-  if (!c) { toast("Danh mục không tồn tại.", "err"); return; }
+  if (!c){ toast("Danh mục không tồn tại.","err"); return; }
   const hasUrl = validUrl(it.url);
-  const times = [];
-  if (it.created) times.push("Tạo lúc " + fmtTime(it.created));
-  if (it.ts && it.ts !== it.created) times.push("Cập nhật " + fmtTime(it.ts));
+  const times=[];
+  if (it.created) times.push("Tạo lúc "+fmtTime(it.created));
+  if (it.ts && it.ts!==it.created) times.push("Cập nhật "+fmtTime(it.ts));
   $("#dtBody").innerHTML = `
     <div class="dt-meta" style="--cat:${c.color}">
       <span class="chip">${esc(c.label)}</span>
-      ${it.vault ? `<span class="chip" style="--cat:var(--warning)">VAULT</span>` : ""}
-      ${it.copies != null ? `<span class="t">Đã sao chép: ${it.copies}</span>` : ""}
-      ${times.map(t => `<span class="t">${esc(t)}</span>`).join("")}
+      ${catId==="bypass"?`<span class="chip" style="--cat:var(--cat-bypass)">KEY</span>`:""}
+      ${it.vault?`<span class="chip" style="--cat:var(--warning)">VAULT</span>`:""}
+      ${it.copies!=null?`<span class="t">Đã sao chép: ${it.copies}</span>`:""}
+      ${times.map(t=>`<span class="t">${esc(t)}</span>`).join("")}
     </div>
-    ${it.img ? `<img class="dt-img" src="${esc(it.img)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+    ${it.img?`<img class="dt-img" src="${esc(it.img)}" alt="" loading="lazy" onerror="this.remove()">`:""}
     <h3 class="dt-title">${esc(it.name)}</h3>
-    ${it.desc ? `<p class="dt-desc">${esc(it.desc)}</p>` : ""}
-    ${it.code ? `<div style="--cat:${c.color}"><pre class="dt-code">${esc(it.code)}</pre></div>` : ""}
-    ${hasUrl ? `<div class="dt-url" style="--cat:${c.color}"><i></i><code>${esc(it.url.trim())}</code></div>` : ""}
+    ${it.desc?`<p class="dt-desc">${esc(it.desc)}</p>`:""}
+    ${it.apiKey?`<div class="dt-url" style="--cat:var(--cat-bypass)"><i></i><code>API Key: ${esc(it.apiKey)}</code></div>`:""}
+    ${it.code?`<div style="--cat:${c.color}"><pre class="dt-code">${esc(it.code)}</pre></div>`:""}
+    ${hasUrl?`<div class="dt-url" style="--cat:${c.color}"><i></i><code>${esc(it.url.trim())}</code></div>`:""}
     <div class="dt-acts" style="--cat:${c.color}">
-      ${it.code ? `<button class="btn btn-p" data-act="copycode" data-cat="${catId}" data-key="${esc(it.key)}">${ICO.copy}Sao chép code</button>` : ""}
-      ${hasUrl ? `<a class="btn btn-p" href="${esc(it.url.trim())}" target="_blank" rel="noopener">${ICO.ext}Mở link</a>
-                  <button class="btn btn-g" data-act="copyurl" data-url="${esc(it.url.trim())}">${ICO.copy}Sao chép link</button>` : ""}
+      ${it.apiKey?`<button class="btn btn-p" data-act="copykey" data-kv="${esc(it.apiKey)}">${ICO.copy}Copy Key</button>`:""}
+      ${it.code?`<button class="btn btn-p" data-act="copycode" data-cat="${catId}" data-key="${esc(it.key)}">${ICO.copy}Sao chép code</button>`:""}
+      ${hasUrl?`<a class="btn btn-p" href="${esc(it.url.trim())}" target="_blank" rel="noopener">${ICO.ext}Mở link</a>
+                <button class="btn btn-g" data-act="copyurl" data-url="${esc(it.url.trim())}">${ICO.copy}Sao chép link</button>`:""}
       <button class="btn btn-g" data-close>Quay lại</button>
     </div>`;
   openLayer($("#mdDetail"));
 }
 
-/* ═══════════ ĐĂNG NHẬP — EMAIL/PASS + GOOGLE (GIS) ═══════════ */
+/* ═══════════ ĐĂNG NHẬP ═══════════ */
 const AUTH_MSG = {
   "auth/invalid-credential":"Email hoặc mật khẩu không đúng.",
   "auth/wrong-password":"Email hoặc mật khẩu không đúng.",
@@ -1371,872 +1466,799 @@ const AUTH_MSG = {
   "auth/too-many-requests":"Quá nhiều lần thử. Vui lòng thử lại sau.",
   "auth/network-request-failed":"Lỗi kết nối mạng.",
   "auth/operation-not-allowed":"Phương thức đăng nhập chưa được bật trong Firebase Auth (Authentication → Sign-in method).",
-  "auth/unauthorized-domain":"Domain này chưa được cấp phép trong Firebase Auth (Authentication → Settings → Authorized domains).",
+  "auth/unauthorized-domain":"Domain này chưa được cấp phép trong Firebase Auth.",
   "auth/invalid-auth-configuration":"Cấu hình Auth chưa đúng.",
   "auth/api-key-not-valid":"API key không hợp lệ.",
   "auth/configuration-not-found":"Chưa cấu hình Firebase Auth.",
   "auth/argument-error":"Thiếu cấu hình đăng nhập."
 };
-function authErrMsg(err) {
-  const code = (err && err.code) || "";
-  return AUTH_MSG[code] || ("Thao tác thất bại" + (code ? " (" + code + ")" : ". Vui lòng thử lại."));
+function authErrMsg(err){
+  const code=(err&&err.code)||"";
+  return AUTH_MSG[code] || ("Thao tác thất bại" + (code ? " ("+code+")" : ". Vui lòng thử lại."));
 }
-
-let googleCertsCache = null;
-function b64urlToBuf(s) {
-  s = s.replace(/-/g, "+").replace(/_/g, "/");
-  if (s.length % 4) s += "=".repeat(4 - s.length % 4);
-  const bin = atob(s), buf = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+let googleCertsCache=null;
+function b64urlToBuf(s){
+  s=s.replace(/-/g,"+").replace(/_/g,"/");
+  if(s.length%4) s+="=".repeat(4-s.length%4);
+  const bin=atob(s), buf=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
   return buf.buffer;
 }
-function decodeJwtPart(p) { return JSON.parse(new TextDecoder().decode(b64urlToBuf(p))); }
-async function getGoogleCerts() {
-  if (googleCertsCache) return googleCertsCache;
-  const r = await fetch("https://www.googleapis.com/oauth2/v3/certs");
-  if (!r.ok) throw new Error("không tải được JWKS (HTTP " + r.status + ")");
-  googleCertsCache = await r.json();
+function decodeJwtPart(p){ return JSON.parse(new TextDecoder().decode(b64urlToBuf(p))); }
+async function getGoogleCerts(){
+  if(googleCertsCache) return googleCertsCache;
+  const r=await fetch("https://www.googleapis.com/oauth2/v3/certs");
+  if(!r.ok) throw new Error("không tải được JWKS (HTTP "+r.status+")");
+  googleCertsCache=await r.json();
   return googleCertsCache;
 }
-async function verifyGoogleIdToken(idToken) {
-  const parts = String(idToken).split(".");
-  if (parts.length !== 3) throw new Error("token sai định dạng");
-  const header = decodeJwtPart(parts[0]), payload = decodeJwtPart(parts[1]);
-  if (payload.aud !== GOOGLE_CLIENT_ID) throw new Error("token không cấp cho client ID này");
-  if (payload.iss !== "https://accounts.google.com" && payload.iss !== "accounts.google.com") throw new Error("nguồn phát hành không hợp lệ");
-  const now = Math.floor(Date.now() / 1000);
-  if (payload.exp && payload.exp < now - 30) throw new Error("token hết hạn");
-  if (!payload.email) throw new Error("token không chứa email");
-  if (!(window.crypto && crypto.subtle)) throw new Error("trình duyệt không hỗ trợ WebCrypto (cần HTTPS)");
-  const certs = await getGoogleCerts();
-  const jwk = (certs.keys || []).find(k => k.kid === header.kid);
-  if (!jwk) { googleCertsCache = null; throw new Error("không tìm thấy khóa xác minh"); }
-  const key = await crypto.subtle.importKey("jwk", { kty:jwk.kty, n:jwk.n, e:jwk.e, alg:"RS256", ext:true },
-    { name:"RSASSA-PKCS1-v1_5", hash:"SHA-256" }, false, ["verify"]);
-  const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlToBuf(parts[2]),
-    new TextEncoder().encode(parts[0] + "." + parts[1]));
-  if (!ok) throw new Error("chữ ký token không hợp lệ");
+async function verifyGoogleIdToken(idToken){
+  const parts=String(idToken).split(".");
+  if(parts.length!==3) throw new Error("token sai định dạng");
+  const header=decodeJwtPart(parts[0]), payload=decodeJwtPart(parts[1]);
+  if(payload.aud!==GOOGLE_CLIENT_ID) throw new Error("token không cấp cho client ID này");
+  if(payload.iss!=="https://accounts.google.com" && payload.iss!=="accounts.google.com") throw new Error("nguồn phát hành không hợp lệ");
+  const now=Math.floor(Date.now()/1000);
+  if(payload.exp && payload.exp<now-30) throw new Error("token hết hạn");
+  if(!payload.email) throw new Error("token không chứa email");
+  if(!(window.crypto&&crypto.subtle)) throw new Error("trình duyệt không hỗ trợ WebCrypto (cần HTTPS)");
+  const certs=await getGoogleCerts();
+  const jwk=(certs.keys||[]).find(k=>k.kid===header.kid);
+  if(!jwk){ googleCertsCache=null; throw new Error("không tìm thấy khóa xác minh"); }
+  const key=await crypto.subtle.importKey("jwk",{kty:jwk.kty,n:jwk.n,e:jwk.e,alg:"RS256",ext:true},{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
+  const ok=await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,b64urlToBuf(parts[2]),new TextEncoder().encode(parts[0]+"."+parts[1]));
+  if(!ok) throw new Error("chữ ký token không hợp lệ");
   return payload;
 }
-
-function loadLocalUser() {
-  try {
-    const s = JSON.parse(localStorage.getItem("ssw_local_user") || "null");
-    if (s && s.email) state.localUser = s;
-  } catch (_) {}
+function loadLocalUser(){
+  try{ const s=JSON.parse(localStorage.getItem("ssw_local_user")||"null"); if(s&&s.email) state.localUser=s; }catch(_){}
 }
-function localSignIn(payload) {
-  state.localUser = { email:payload.email, name:payload.name || payload.email, picture:payload.picture || "" };
-  try { localStorage.setItem("ssw_local_user", JSON.stringify(state.localUser)); } catch (_) {}
-  dlog("ok", "Google → xác thực trong trình duyệt: " + payload.email);
+function localSignIn(payload){
+  state.localUser={ email:payload.email, name:payload.name||payload.email, picture:payload.picture||"" };
+  try{ localStorage.setItem("ssw_local_user",JSON.stringify(state.localUser)); }catch(_){}
+  dlog("ok","Google → xác thực trong trình duyệt: "+payload.email);
   applyUser();
 }
-function clearLocalUser() {
-  state.localUser = null;
-  try { localStorage.removeItem("ssw_local_user"); } catch (_) {}
+function clearLocalUser(){
+  state.localUser=null;
+  try{ localStorage.removeItem("ssw_local_user"); }catch(_){}
 }
-
-function gisFail() {
-  ["#gBtn","#gBtnMaint"].forEach(sel => {
-    const el = $(sel);
-    if (el && !el.childElementCount) el.innerHTML = '<span class="gnote">Không tải được nút Google. Kiểm tra kết nối mạng.</span>';
+function gisFail(){
+  ["#gBtn","#gBtnMaint"].forEach(sel=>{
+    const el=$(sel);
+    if(el && !el.childElementCount) el.innerHTML='<span class="gnote">Không tải được nút Google. Kiểm tra kết nối mạng.</span>';
   });
 }
-function initGIS(tries) {
-  tries = tries == null ? 15 : tries;
-  if (window.google && google.accounts && google.accounts.id) {
-    try {
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: onGoogleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-      const wBtn = Math.min(292, Math.max(200, Math.floor(window.innerWidth * 0.94) - 60));
-      const opts = { theme:"filled_black", size:"large", shape:"pill", text:"continue_with", logo_alignment:"left", width:wBtn };
-      if ($("#gBtn")) google.accounts.id.renderButton($("#gBtn"), opts);
-      if ($("#gBtnMaint")) google.accounts.id.renderButton($("#gBtnMaint"), Object.assign({}, opts, { width:Math.min(272, wBtn) }));
-      dlog("ok", "Google Identity Services sẵn sàng.");
-    } catch (e) { dlog("er", "GIS init: " + (e.message || e)); gisFail(); }
+function initGIS(tries){
+  tries = tries==null?15:tries;
+  if(window.google && google.accounts && google.accounts.id){
+    try{
+      google.accounts.id.initialize({ client_id:GOOGLE_CLIENT_ID, callback:onGoogleCredential, auto_select:false, cancel_on_tap_outside:true });
+      const wBtn=Math.min(292,Math.max(200,Math.floor(window.innerWidth*0.94)-60));
+      const opts={ theme:"filled_black", size:"large", shape:"pill", text:"continue_with", logo_alignment:"left", width:wBtn };
+      if($("#gBtn")) google.accounts.id.renderButton($("#gBtn"),opts);
+      if($("#gBtnMaint")) google.accounts.id.renderButton($("#gBtnMaint"),Object.assign({},opts,{width:Math.min(272,wBtn)}));
+      dlog("ok","Google Identity Services sẵn sàng.");
+    }catch(e){ dlog("er","GIS init: "+(e.message||e)); gisFail(); }
     return;
   }
-  if (tries > 0) setTimeout(() => initGIS(tries - 1), 400);
-  else { dlog("er", "Không tải được accounts.google.com/gsi/client."); gisFail(); }
+  if(tries>0) setTimeout(()=>initGIS(tries-1),400);
+  else { dlog("er","Không tải được accounts.google.com/gsi/client."); gisFail(); }
 }
-async function onGoogleCredential(resp) {
-  if (!resp || !resp.credential) { dlog("er", "Google: không nhận được credential."); return; }
-  const idToken = resp.credential;
-  if (auth) {
-    try {
-      const cred = firebase.auth.GoogleAuthProvider.credential(idToken);
+async function onGoogleCredential(resp){
+  if(!resp||!resp.credential){ dlog("er","Google: không nhận được credential."); return; }
+  const idToken=resp.credential;
+  if(auth){
+    try{
+      const cred=firebase.auth.GoogleAuthProvider.credential(idToken);
       await auth.signInWithCredential(cred);
-      dlog("ok", "Google → Firebase Auth thành công.");
+      dlog("ok","Google → Firebase Auth thành công.");
       toast("Đăng nhập Google thành công.");
-      closeLayer();
+      closeLayer(); closeMenu();
       return;
-    } catch (err) {
-      dlog("er", "signInWithCredential: " + (err.code || err.message) + " → chuyển sang xác thực trong trình duyệt.");
+    }catch(err){
+      dlog("er","signInWithCredential: "+(err.code||err.message)+" → xác thực trong trình duyệt.");
     }
   }
-  try {
-    const payload = await verifyGoogleIdToken(idToken);
+  try{
+    const payload=await verifyGoogleIdToken(idToken);
     localSignIn(payload);
     toast("Đăng nhập Google thành công.");
-    closeLayer();
-  } catch (e) {
-    dlog("er", "Xác minh token: " + e.message);
-    toast("Đăng nhập Google thất bại: " + e.message, "err");
+    closeLayer(); closeMenu();
+  }catch(e){
+    dlog("er","Xác minh token: "+e.message);
+    toast("Đăng nhập Google thất bại: "+e.message,"err");
   }
 }
 initGIS();
-
-$("#btnAcc").addEventListener("click", () => openLayer($("#mdAuth")));
-$("#btnMaintEmail").addEventListener("click", () => openLayer($("#mdAuth")));
-$("#loginForm").addEventListener("submit", e => {
+$("#btnAcc").addEventListener("click",()=>openLayer($("#mdAuth")));
+$("#btnMaintEmail").addEventListener("click",()=>openLayer($("#mdAuth")));
+$("#loginForm").addEventListener("submit",e=>{
   e.preventDefault();
-  const errEl = $("#liErr"); errEl.textContent = "";
-  if (!auth) { errEl.textContent = "Hệ thống đăng nhập chưa sẵn sàng (Firebase SDK không tải được)."; return; }
-  const email = $("#liEmail").value.trim(), pass = $("#liPass").value;
-  if (!email || !pass) { errEl.textContent = "Vui lòng nhập đủ email và mật khẩu."; return; }
-  const btn = $("#liBtn"); btn.disabled = true; btn.textContent = "Đang đăng nhập…";
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(() => { btn.disabled = false; btn.textContent = "Đăng nhập"; $("#liPass").value = ""; toast("Đăng nhập thành công."); })
-    .catch(err => {
-      btn.disabled = false; btn.textContent = "Đăng nhập";
-      let msg = authErrMsg(err);
-      if (err && err.code === "auth/invalid-credential") msg += " (Nếu chắc chắn đúng mật khẩu: kiểm tra Email/Password đã bật trong Firebase Auth chưa.)";
-      errEl.textContent = msg;
-      dlog("er", "Login email: " + (err.code || err.message || err));
+  const errEl=$("#liErr"); errEl.textContent="";
+  if(!auth){ errEl.textContent="Hệ thống đăng nhập chưa sẵn sàng (Firebase SDK không tải được)."; return; }
+  const email=$("#liEmail").value.trim(), pass=$("#liPass").value;
+  if(!email||!pass){ errEl.textContent="Vui lòng nhập đủ email và mật khẩu."; return; }
+  const btn=$("#liBtn"); btn.disabled=true; btn.textContent="Đang đăng nhập…";
+  auth.signInWithEmailAndPassword(email,pass)
+    .then(()=>{ btn.disabled=false; btn.textContent="Đăng nhập"; $("#liPass").value=""; toast("Đăng nhập thành công."); })
+    .catch(err=>{
+      btn.disabled=false; btn.textContent="Đăng nhập";
+      let msg=authErrMsg(err);
+      if(err&&err.code==="auth/invalid-credential") msg+=" (Nếu chắc chắn đúng mật khẩu: kiểm tra Email/Password đã bật trong Firebase Auth chưa.)";
+      errEl.textContent=msg;
+      dlog("er","Login email: "+(err.code||err.message||err));
     });
 });
-
-function applyUser() {
-  const u = currentUser();
-  state.dev = !!(u && String(u.email || "").toLowerCase() === DEV_EMAIL);
+function applyUser(){
+  const u=currentUser();
+  state.dev=!!(u && String(u.email||"").toLowerCase()===DEV_EMAIL);
   renderAuth();
   applyMaint();
 }
-function renderAuth() {
-  const u = currentUser();
-  $("#btnAcc").classList.toggle("dev", state.dev);
-  const acc = $("#btnAcc");
-  let img = acc.querySelector("img");
-  if (u && u.picture) {
-    if (!img) { img = document.createElement("img"); img.alt = ""; img.referrerPolicy = "no-referrer"; acc.appendChild(img); }
-    img.src = u.picture;
-  } else if (img) img.remove();
-  document.querySelectorAll(".auth-zone").forEach(z => {
+function renderAuth(){
+  const u=currentUser();
+  $("#btnAcc").classList.toggle("dev",state.dev);
+  const acc=$("#btnAcc");
+  let img=acc.querySelector("img");
+  if(u&&u.picture){ if(!img){ img=document.createElement("img"); img.alt=""; img.referrerPolicy="no-referrer"; acc.appendChild(img);} img.src=u.picture; }
+  else if(img) img.remove();
+  document.querySelectorAll(".auth-zone").forEach(z=>{
     z.innerHTML = u
-      ? `<div class="acc-card"><span class="mail">${esc(u.name ? u.name + " · " : "")}${esc(u.email || "")}</span>${state.dev ? '<span class="devtag">DEV</span>' : ""}</div>
-         ${state.dev ? '<button class="btn btn-p btn-wide" data-act="devopen" style="--cat:var(--accent-primary)">Bảng điều khiển DEV</button>' : ""}
+      ? `<div class="acc-card"><span class="mail">${esc(u.name?u.name+" · ":"")}${esc(u.email||"")}</span>${state.dev?'<span class="devtag">DEV</span>':""}</div>
+         ${state.dev?'<button class="btn btn-p btn-wide" data-act="devopen" style="--cat:var(--accent-primary)">Bảng điều khiển DEV</button>':""}
          <button class="btn btn-g btn-wide" data-act="signout">Đăng xuất</button>`
       : `<button class="btn btn-g btn-wide" data-act="authopen"><svg viewBox="0 0 24 24" ${SW}><rect x="4" y="10.5" width="16" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Đăng nhập</button>`;
   });
   $("#loginForm").style.display = u ? "none" : "flex";
   $("#accPane").style.display = u ? "flex" : "none";
   $("#authTitle").textContent = u ? "Tài khoản" : "Đăng nhập";
-  if (u) { $("#accMail").textContent = (u.name ? u.name + " · " : "") + (u.email || ""); $("#accDev").hidden = !state.dev; $("#btnDev").style.display = state.dev ? "flex" : "none"; }
+  if(u){ $("#accMail").textContent=(u.name?u.name+" · ":"")+(u.email||""); $("#accDev").hidden=!state.dev; $("#btnDev").style.display=state.dev?"flex":"none"; }
 }
-if (auth) {
-  auth.onAuthStateChanged(u => {
-    state.user = u || null;
-    if (u) clearLocalUser();
-    dlog(u ? "ok" : "in", u ? ("Auth: " + u.email) : "Auth: chưa đăng nhập Firebase.");
+if(auth){
+  auth.onAuthStateChanged(u=>{
+    state.user=u||null;
+    if(u) clearLocalUser();
+    dlog(u?"ok":"in",u?("Auth: "+u.email):"Auth: chưa đăng nhập Firebase.");
     applyUser();
   });
-} else {
-  dlog("er", "Firebase SDK không khả dụng.");
-}
+}else{ dlog("er","Firebase SDK không khả dụng."); }
 loadLocalUser();
 
 /* ═══════════ BẢO TRÌ ═══════════ */
-function maintUntil(m) {
-  if (m.until) return Number(m.until);
-  const base = Number(m.ts) || 0;
-  if (base) return base + 60000;
-  if (!state.maintFirstSeen) state.maintFirstSeen = Date.now();
-  return state.maintFirstSeen + 60000;
+function maintUntil(m){
+  if(m.until) return Number(m.until);
+  const base=Number(m.ts)||0;
+  if(base) return base+60000;
+  if(!state.maintFirstSeen) state.maintFirstSeen=Date.now();
+  return state.maintFirstSeen+60000;
 }
-let mntTimer = null;
-function stopCountdown() { if (mntTimer) { clearInterval(mntTimer); mntTimer = null; } }
-function fmtCount(ms) {
-  const s = Math.max(0, Math.ceil(ms / 1000));
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
-  return (h ? h + ":" : "") + pad(m) + ":" + pad(ss);
+let mntTimer=null;
+function stopCountdown(){ if(mntTimer){ clearInterval(mntTimer); mntTimer=null; } }
+function fmtCount(ms){
+  const s=Math.max(0,Math.ceil(ms/1000));
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+  return (h?h+":":"")+pad(m)+":"+pad(ss);
 }
-function startCountdown(until, total) {
+function startCountdown(until,total){
   stopCountdown();
-  const tick = () => {
-    const left = until - Date.now();
-    $("#mntClock").textContent = fmtCount(left);
-    const p = total > 0 ? Math.max(0, Math.min(1, left / total)) : 0;
-    $("#mntBar").style.width = (p * 100).toFixed(1) + "%";
-    if (left <= 0) { stopCountdown(); applyMaint(); }
+  const tick=()=>{
+    const left=until-Date.now();
+    $("#mntClock").textContent=fmtCount(left);
+    const p=total>0?Math.max(0,Math.min(1,left/total)):0;
+    $("#mntBar").style.width=(p*100).toFixed(1)+"%";
+    if(left<=0){ stopCountdown(); applyMaint(); }
   };
   tick();
-  mntTimer = setInterval(tick, 250);
+  mntTimer=setInterval(tick,250);
 }
-function applyMaint() {
-  const m = state.maint;
-  let on = !!(m && m.enabled), until = 0;
-  if (on) {
-    until = maintUntil(m);
-    if (Date.now() >= until) {
-      if (state.dev && database) database.ref(MAINT_NODE).update({ enabled:false, by:"DEV", ts:firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
-      on = false;
+function applyMaint(){
+  const m=state.maint;
+  let on=!!(m&&m.enabled), until=0;
+  if(on){
+    until=maintUntil(m);
+    if(Date.now()>=until){
+      if(state.dev&&database) database.ref(MAINT_NODE).update({enabled:false,by:"DEV",ts:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{});
+      on=false;
     }
   }
-  const show = on && !state.dev;
-  $("#maint").classList.toggle("on", show);
+  const show=on&&!state.dev;
+  $("#maint").classList.toggle("on",show);
   renderMaintPanel();
-  if (show) {
-    const total = Math.max(1000, until - (Number(m.ts) || state.maintFirstSeen || (until - 60000)));
-    startCountdown(until, total);
-    if (!$("#maint").dataset.sparked) {
-      $("#maint").dataset.sparked = "1";
-      if (!RM) for (let i = 0; i < 14; i++) {
-        const s = document.createElement("span");
-        s.className = "spark";
-        s.style.left = (4 + Math.random()*92) + "%";
-        s.style.bottom = "-6px";
-        s.style.animationDuration = (4 + Math.random()*5) + "s";
-        s.style.animationDelay = (Math.random()*6) + "s";
+  if(show){
+    const total=Math.max(1000,until-(Number(m.ts)||state.maintFirstSeen||(until-60000)));
+    startCountdown(until,total);
+    if(!$("#maint").dataset.sparked){
+      $("#maint").dataset.sparked="1";
+      if(!RM) for(let i=0;i<14;i++){
+        const s=document.createElement("span");
+        s.className="spark";
+        s.style.left=(4+Math.random()*92)+"%";
+        s.style.bottom="-6px";
+        s.style.animationDuration=(4+Math.random()*5)+"s";
+        s.style.animationDelay=(Math.random()*6)+"s";
         $("#maint").appendChild(s);
       }
     }
-  } else stopCountdown();
-  if (show) document.body.classList.add("locked");
-  else if (!openEl) document.body.classList.remove("locked");
+  }else stopCountdown();
+  if(show) document.body.classList.add("locked");
+  else if(!openEl && !$("#menuPanel").classList.contains("on")) document.body.classList.remove("locked");
 }
-function renderMaintPanel() {
-  const on = !!(state.maint && state.maint.enabled);
-  $("#mntDot").style.background = on ? "var(--warning)" : "var(--success)";
-  let txt = on ? "Bảo trì: BẬT" : "Bảo trì: TẮT";
-  if (on) txt += " · tự mở lúc " + fmtTime(maintUntil(state.maint));
-  $("#mntTxt").textContent = txt;
-  const b = $("#mntBtn");
-  b.textContent = on ? "MỞ WEBSITE" : "BẬT BẢO TRÌ";
-  b.className = "btn " + (on ? "btn-p" : "btn-g");
-  if (on) b.style.setProperty("--cat", "var(--success)");
+function renderMaintPanel(){
+  const on=!!(state.maint&&state.maint.enabled);
+  $("#mntDot").style.background=on?"var(--warning)":"var(--success)";
+  let txt=on?"Bảo trì: BẬT":"Bảo trì: TẮT";
+  if(on) txt+=" · tự mở lúc "+fmtTime(maintUntil(state.maint));
+  $("#mntTxt").textContent=txt;
+  const b=$("#mntBtn");
+  b.textContent=on?"MỞ WEBSITE":"BẬT BẢO TRÌ";
+  b.className="btn "+(on?"btn-p":"btn-g");
+  if(on) b.style.setProperty("--cat","var(--success)");
 }
-$("#mntBtn").addEventListener("click", () => {
-  if (!state.dev || !database) return;
-  const on = !!(state.maint && state.maint.enabled);
-  if (on) {
-    database.ref(MAINT_NODE).update({ enabled:false, by:"DEV", ts:firebase.database.ServerValue.TIMESTAMP })
-      .then(() => { dlog("ok", "Mở website."); toast("Đã mở website."); })
-      .catch(e2 => { dlog("er", "Maintenance: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
-  } else {
-    let mins = parseInt($("#mntMins").value, 10);
-    if (!isFinite(mins) || mins < 1) mins = 1;
-    const now = Date.now();
-    database.ref(MAINT_NODE).update({ enabled:true, by:"DEV", ts:now, until: now + mins*60000 })
-      .then(() => { dlog("ok", "Bật bảo trì, tự mở sau " + mins + " phút."); toast("Đã bật bảo trì (tự mở sau " + mins + " phút)."); })
-      .catch(e2 => { dlog("er", "Maintenance: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
+$("#mntBtn").addEventListener("click",()=>{
+  if(!state.dev||!database) return;
+  const on=!!(state.maint&&state.maint.enabled);
+  if(on){
+    database.ref(MAINT_NODE).update({enabled:false,by:"DEV",ts:firebase.database.ServerValue.TIMESTAMP})
+      .then(()=>{ dlog("ok","Mở website."); toast("Đã mở website."); })
+      .catch(e2=>{ dlog("er","Maintenance: "+(e2.code||e2.message)); toast(e2.code==="permission-denied"?"Không có quyền.":"Thao tác thất bại.","err"); });
+  }else{
+    let mins=parseInt($("#mntMins").value,10);
+    if(!isFinite(mins)||mins<1) mins=1;
+    const now=Date.now();
+    database.ref(MAINT_NODE).update({enabled:true,by:"DEV",ts:now,until:now+mins*60000})
+      .then(()=>{ dlog("ok","Bật bảo trì, tự mở sau "+mins+" phút."); toast("Đã bật bảo trì (tự mở sau "+mins+" phút)."); })
+      .catch(e2=>{ dlog("er","Maintenance: "+(e2.code||e2.message)); toast(e2.code==="permission-denied"?"Không có quyền.":"Thao tác thất bại.","err"); });
   }
 });
 
-/* ═══════════ THEME + ÂM THANH ═══════════ */
-const bgm = $("#bgm");
-bgm.volume = 0.55;
-function isMuted() { try { return localStorage.getItem("ssw_muted") === "1"; } catch (_) { return false; } }
-function setMuted(m) { try { m ? localStorage.setItem("ssw_muted", "1") : localStorage.removeItem("ssw_muted"); } catch (_) {} }
-function renderSound() {
-  const playing = !isMuted() && state.hasMusic && !bgm.paused;
-  document.body.classList.toggle("snd-on", playing);
-  $("#sndState").textContent = isMuted() ? "TẮT" : (state.hasMusic ? "BẬT" : "—");
-}
-let gestureArmed = false;
-function armGesture() {
-  if (gestureArmed) return; gestureArmed = true;
-  const h = () => {
-    gestureArmed = false;
-    document.removeEventListener("pointerdown", h, true);
-    document.removeEventListener("keydown", h, true);
-    tryPlay();
-  };
-  document.addEventListener("pointerdown", h, true);
-  document.addEventListener("keydown", h, true);
-}
-function tryPlay() {
-  if (isMuted() || !state.hasMusic) { bgm.pause(); renderSound(); return; }
-  const p = bgm.play();
-  if (p && p.catch) p.catch(() => { armGesture(); renderSound(); });
-}
-function toggleSound() {
-  const m = isMuted();
-  setMuted(!m);
-  if (m) { tryPlay(); if (state.hasMusic) toast("Đã bật âm thanh."); }
-  else { bgm.pause(); toast("Đã tắt âm thanh."); }
-  renderSound();
-}
-$("#btnSound").addEventListener("click", toggleSound);
-bgm.addEventListener("play", renderSound);
-bgm.addEventListener("pause", renderSound);
-
-/* ═══════════ API baconbypass.xyz (CHỈ DEV) ═══════════ */
-function renderApiStatus(api) {
-  const dot = $("#apiDot"), txt = $("#apiStateTxt");
-  if (!dot || !txt) return;
-  const has = api && (api.key || api.endpoint);
-  dot.className = "dot" + (has ? " ok" : "");
-  txt.textContent = has
-    ? ("Đã cấu hình · " + (api.endpoint || "https://baconbypass.xyz") + (api.key ? " · có key" : ""))
-    : "Chưa cấu hình";
-}
-function setApiTesting(on) {
-  const dot = $("#apiDot");
-  if (on) dot.className = "dot load";
-}
-function apiResult(html) { const r = $("#apiRes"); if (r) r.innerHTML = html; }
-async function testBaconApi() {
-  if (!state.dev) return;
-  const endpoint = ($("#apiEndpoint").value || "https://baconbypass.xyz").trim();
-  const key = ($("#apiKey").value || "").trim();
-  if (!validUrl(endpoint)) { apiResult('<span class="er">Endpoint không hợp lệ (cần bắt đầu bằng http/https).</span>'); return; }
-  setApiTesting(true);
-  apiResult('<span class="in">Đang thử kết nối tới ' + esc(endpoint) + ' …</span>');
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 8000);
-  const headers = {};
-  if (key) { headers["Authorization"] = "Bearer " + key; headers["X-API-Key"] = key; }
-  try {
-    const res = await fetch(endpoint, { method:"GET", mode:"cors", signal:ctrl.signal, headers });
-    clearTimeout(timer);
-    const ct = res.headers.get("content-type") || "";
-    if (res.ok) {
-      apiResult('<span class="ok">✓ Kết nối thành công.</span> HTTP ' + res.status + (ct ? ' · ' + esc(ct) : ''));
-      dlog("ok", "API baconbypass: OK " + res.status + " @ " + endpoint);
-    } else {
-      apiResult('<span class="er">✗ Lỗi HTTP ' + res.status + ' (' + esc(res.statusText || "status") + ').</span> Server phản hồi nhưng không thành công.');
-      dlog("er", "API baconbypass: HTTP " + res.status + " @ " + endpoint);
-    }
-  } catch (e) {
-    clearTimeout(timer);
-    const aborted = e && e.name === "AbortError";
-    apiResult('<span class="er">✗ ' + (aborted ? "Hết thời gian chờ (timeout 8s)." : "Không kết nối được (lỗi mạng hoặc CORS).") + '</span><br>' +
-      '<span class="in">Gợi ý:</span> endpoint có thể không cho phép gọi từ trình duyệt (CORS), hoặc đang offline. Điều này do phía server quyết định.');
-    dlog("er", "API baconbypass: " + (aborted ? "timeout" : "network/CORS") + " @ " + endpoint);
-  }
-  const dot = $("#apiDot");
-  if (dot && dot.classList.contains("load")) dot.className = "dot" + (state.api.key || state.api.endpoint ? " ok" : "");
-}
-$("#apiSave").addEventListener("click", () => {
-  if (!state.dev || !database) { toast("Bạn không có quyền này.", "err"); return; }
-  const endpoint = ($("#apiEndpoint").value || "https://baconbypass.xyz").trim();
-  const key = ($("#apiKey").value || "").trim();
-  database.ref(THEME_NODE + "/api").set({ endpoint, key, updatedAt: firebase.database.ServerValue.TIMESTAMP })
-    .then(() => { state.api = { endpoint, key }; renderApiStatus(state.api); dlog("ok", "Đã lưu cấu hình API."); toast("Đã lưu cấu hình API."); })
-    .catch(e2 => { dlog("er", "Lưu API: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Lưu thất bại.", "err"); });
-});
-$("#apiTest").addEventListener("click", testBaconApi);
-$("#apiClear").addEventListener("click", () => {
-  if (!state.dev || !database) { toast("Bạn không có quyền này.", "err"); return; }
-  database.ref(THEME_NODE + "/api").remove()
-    .then(() => { state.api = { key:"", endpoint:"https://baconbypass.xyz" }; $("#apiKey").value = ""; renderApiStatus(state.api); apiResult("Đã ngắt kết nối / xóa cấu hình API."); dlog("ok", "Đã xóa cấu hình API."); toast("Đã ngắt kết nối API."); })
-    .catch(e2 => { dlog("er", "Xóa API: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Xóa thất bại.", "err"); });
-});
-$("#apiEye").addEventListener("click", () => {
-  const inp = $("#apiKey");
-  inp.type = inp.type === "password" ? "text" : "password";
-});
-
-function applyTheme(t) {
-  state.theme = t || null;
-  // API (dev-only) — đọc từ cùng node theme
-  state.api = (t && t.api) ? { key:t.api.key || "", endpoint:t.api.endpoint || "https://baconbypass.xyz" } : { key:"", endpoint:"https://baconbypass.xyz" };
-  if (state.dev) {
-    $("#apiKey").value = state.api.key || "";
-    $("#apiEndpoint").value = state.api.endpoint || "https://baconbypass.xyz";
-  }
-  renderApiStatus(state.api);
-
-  const layer = $("#themeLayer");
-  const hasBg = !!(t && t.bgData && t.bgType && t.bgType !== "none");
-  document.body.classList.toggle("custom-bg", hasBg);
-  document.body.classList.toggle("glassy", hasBg);
-  if (hasBg) {
-    const sig = t.bgType + "|" + String(t.bgData).length + "|" + String(t.bgData).slice(-40);
-    if (layer.dataset.sig !== sig) {
-      layer.dataset.sig = sig;
-      layer.innerHTML = t.bgType === "video"
-        ? `<video src="${esc(t.bgData)}" autoplay muted loop playsinline></video>`
-        : `<img src="${esc(t.bgData)}" alt="">`;
+/* ═══════════ GFX APPLY ═══════════ */
+function refreshThemeBg(){
+  const t=state.theme;
+  const hasBg=!!(t&&t.bgData&&t.bgType&&t.bgType!=="none");
+  const allowBg=state.gfx>=4;
+  const layer=$("#themeLayer");
+  document.body.classList.toggle("custom-bg",hasBg&&allowBg);
+  document.body.classList.toggle("glassy",hasBg&&allowBg);
+  if(hasBg&&allowBg){
+    const sig=t.bgType+"|"+String(t.bgData).length+"|"+String(t.bgData).slice(-40);
+    if(layer.dataset.sig!==sig){ layer.dataset.sig=sig;
+      layer.innerHTML=t.bgType==="video"?`<video src="${esc(t.bgData)}" autoplay muted loop playsinline></video>`:`<img src="${esc(t.bgData)}" alt="">`;
     }
     layer.classList.add("on");
-  } else {
+  }else{
     layer.classList.remove("on");
-    setTimeout(() => { if (!layer.classList.contains("on")) { layer.innerHTML = ""; layer.dataset.sig = ""; } }, 800);
+    setTimeout(()=>{ if(!layer.classList.contains("on")){ layer.innerHTML=""; layer.dataset.sig=""; } },800);
   }
-  if (t && t.audioData) {
-    if (bgm.dataset.src !== t.audioData) { bgm.src = t.audioData; bgm.dataset.src = t.audioData; bgm.load(); }
-    state.hasMusic = true;
+}
+function applyGfx(n,save){
+  n=Math.max(1,Math.min(5,n|0));
+  state.gfx=n;
+  document.body.classList.remove("gfx-1","gfx-2","gfx-3","gfx-4","gfx-5");
+  document.body.classList.add("gfx-"+n);
+  if(save!==false){ try{ localStorage.setItem("ssw_gfx",String(n)); }catch(_){} }
+  const r=$("#gfxRange"); if(r) r.value=n;
+  const fill=$("#gfxFill"); if(fill) fill.style.width=((n-1)/4*100)+"%";
+  const name=$("#gfxName"); if(name) name.textContent=GFX_LEVELS[n-1].name;
+  const desc=$("#gfxDesc"); if(desc) desc.textContent=GFX_LEVELS[n-1].desc;
+  document.querySelectorAll(".gfx-tick").forEach(t=>t.classList.toggle("on",+t.dataset.g===n));
+  refreshThemeBg();
+  if(state.route==="home") renderHome();
+  if(state.q) renderSearch(); else if(state.route!=="home") renderCat(state.route);
+}
+$("#gfxRange").addEventListener("input",e=>applyGfx(parseInt(e.target.value,10),true));
+document.querySelectorAll(".gfx-tick").forEach(t=>t.addEventListener("click",()=>applyGfx(+t.dataset.g,true)));
+
+/* ═══════════ THEME + ÂM THANH ═══════════ */
+const bgm=$("#bgm"); bgm.volume=0.55;
+function isMuted(){ try{ return localStorage.getItem("ssw_muted")==="1"; }catch(_){ return false; } }
+function setMuted(m){ try{ m?localStorage.setItem("ssw_muted","1"):localStorage.removeItem("ssw_muted"); }catch(_){} }
+function renderSound(){
+  const playing=!isMuted()&&state.hasMusic&&!bgm.paused;
+  document.body.classList.toggle("snd-on",playing);
+  $("#sndState").textContent=isMuted()?"TẮT":(state.hasMusic?"BẬT":"—");
+}
+let gestureArmed=false;
+function armGesture(){
+  if(gestureArmed) return; gestureArmed=true;
+  const h=()=>{ gestureArmed=false; document.removeEventListener("pointerdown",h,true); document.removeEventListener("keydown",h,true); tryPlay(); };
+  document.addEventListener("pointerdown",h,true);
+  document.addEventListener("keydown",h,true);
+}
+function tryPlay(){
+  if(isMuted()||!state.hasMusic){ bgm.pause(); renderSound(); return; }
+  const p=bgm.play();
+  if(p&&p.catch) p.catch(()=>{ armGesture(); renderSound(); });
+}
+function toggleSound(){
+  const m=isMuted();
+  setMuted(!m);
+  if(m){ tryPlay(); if(state.hasMusic) toast("Đã bật âm thanh."); }
+  else{ bgm.pause(); toast("Đã tắt âm thanh."); }
+  renderSound();
+}
+$("#btnSound").addEventListener("click",toggleSound);
+bgm.addEventListener("play",renderSound);
+bgm.addEventListener("pause",renderSound);
+
+function applyTheme(t){
+  state.theme=t||null;
+  refreshThemeBg();
+  if(t&&t.audioData){
+    if(bgm.dataset.src!==t.audioData){ bgm.src=t.audioData; bgm.dataset.src=t.audioData; bgm.load(); }
+    state.hasMusic=true;
     tryPlay();
-  } else {
-    state.hasMusic = false;
+  }else{
+    state.hasMusic=false;
     bgm.pause();
-    if (bgm.dataset.src) { bgm.removeAttribute("src"); bgm.dataset.src = ""; }
+    if(bgm.dataset.src){ bgm.removeAttribute("src"); bgm.dataset.src=""; }
   }
   renderSound();
-  const th = $("#thStatus");
-  if (th) th.textContent = hasBg ? ("Nền: đang dùng " + (t.bgType === "video" ? "video" : "ảnh")) : "Nền: mặc định";
-  const au = $("#auStatus");
-  if (au) au.textContent = (t && t.audioData) ? ("Âm thanh: " + (t.audioName || "đang bật")) : "Âm thanh: không có";
+  const th=$("#thStatus");
+  if(th){ const hasBg=!!(t&&t.bgData&&t.bgType&&t.bgType!=="none");
+    th.textContent=hasBg?("Nền: đang dùng "+(t.bgType==="video"?"video":"ảnh")+(state.gfx>=4?"":" (chỉ hiện ở Ultra/Extreme)")):"Nền: mặc định"; }
+  const au=$("#auStatus");
+  if(au) au.textContent=(t&&t.audioData)?("Âm thanh: "+(t.audioName||"đang bật")):"Âm thanh: không có";
 }
+$("#thFile").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0];
+  e.target.value="";
+  const err=$("#thErr"); err.textContent="";
+  if(!f) return;
+  try{
+    if(f.type.startsWith("image/")){
+      const data=await compressImage(f);
+      if(data.length>MAX_DATA_LEN){ err.textContent="Ảnh sau khi nén vẫn quá lớn (giới hạn ~9MB)."; return; }
+      state.pendingBg={type:"image",data,name:f.name};
+      $("#thPreview").innerHTML=`<img src="${esc(data)}" alt="Xem trước nền">`;
+    }else if(f.type.startsWith("video/")){
+      if(f.size>6.5*1024*1024){ err.textContent="Video quá lớn. Giới hạn ~6.5MB."; return; }
+      const data=await readAsDataURL(f);
+      if(data.length>MAX_DATA_LEN){ err.textContent="Video quá lớn (giới hạn ~9MB)."; return; }
+      state.pendingBg={type:"video",data,name:f.name};
+      $("#thPreview").innerHTML=`<video src="${esc(data)}" muted loop autoplay playsinline></video>`;
+    }else{ err.textContent="Chỉ hỗ trợ ảnh hoặc video."; return; }
+    $("#thApply").disabled=false;
+    dlog("in","Đã chọn nền: "+f.name);
+  }catch(e2){ err.textContent=e2.message||"Không đọc được tệp."; }
+});
+$("#thApply").addEventListener("click",()=>{
+  const err=$("#thErr"); err.textContent="";
+  if(!state.dev||!database){ err.textContent="Bạn không có quyền thực hiện thao tác này."; return; }
+  if(!state.pendingBg) return;
+  const b=$("#thApply"); b.disabled=true; b.textContent="Đang áp dụng…";
+  database.ref(THEME_NODE).update({bgType:state.pendingBg.type,bgData:state.pendingBg.data,updatedAt:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{ dlog("ok","Đã áp dụng nền "+state.pendingBg.type+": "+state.pendingBg.name); toast("Đã áp dụng nền."); state.pendingBg=null; $("#thPreview").innerHTML=""; })
+    .catch(e2=>{ err.textContent=e2.code==="permission-denied"?"Bị từ chối quyền ghi (kiểm tra Database Rules).":("Thao tác thất bại ("+(e2.code||e2.message)+")."); dlog("er","Theme: "+(e2.code||e2.message)); })
+    .finally(()=>{ b.disabled=!state.pendingBg; b.textContent="Áp dụng nền"; });
+});
+$("#thClear").addEventListener("click",()=>{
+  if(!state.dev||!database) return;
+  database.ref(THEME_NODE).update({bgType:"none",bgData:"",updatedAt:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{ dlog("ok","Đã xóa nền."); toast("Đã xóa nền."); state.pendingBg=null; $("#thPreview").innerHTML=""; $("#thApply").disabled=true; })
+    .catch(e2=>{ dlog("er","Xóa nền: "+(e2.code||e2.message)); toast(e2.code==="permission-denied"?"Không có quyền.":"Thao tác thất bại.","err"); });
+});
+$("#auFile").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0];
+  e.target.value="";
+  const err=$("#auErr"); err.textContent="";
+  if(!f) return;
+  if(!f.type.startsWith("audio/")){ err.textContent="Tệp không phải âm thanh."; return; }
+  if(f.size>6.5*1024*1024){ err.textContent="Tệp âm thanh quá lớn. Giới hạn ~6.5MB."; return; }
+  try{
+    const data=await readAsDataURL(f);
+    if(data.length>MAX_DATA_LEN){ err.textContent="Tệp âm thanh quá lớn (giới hạn ~9MB)."; return; }
+    state.pendingAu={data,name:f.name};
+    $("#auApply").disabled=false;
+    $("#auStatus").textContent="Âm thanh: sẵn sàng áp dụng — "+f.name;
+    dlog("in","Đã chọn âm thanh: "+f.name);
+  }catch(e2){ err.textContent=e2.message||"Không đọc được tệp."; }
+});
+$("#auApply").addEventListener("click",()=>{
+  const err=$("#auErr"); err.textContent="";
+  if(!state.dev||!database){ err.textContent="Bạn không có quyền thực hiện thao tác này."; return; }
+  if(!state.pendingAu) return;
+  const b=$("#auApply"); b.disabled=true; b.textContent="Đang áp dụng…";
+  database.ref(THEME_NODE).update({audioData:state.pendingAu.data,audioName:state.pendingAu.name,updatedAt:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{ dlog("ok","Đã áp dụng âm thanh: "+state.pendingAu.name); toast("Đã áp dụng âm thanh."); state.pendingAu=null; })
+    .catch(e2=>{ err.textContent=e2.code==="permission-denied"?"Bị từ chối quyền ghi (kiểm tra Database Rules).":("Thao tác thất bại ("+(e2.code||e2.message)+")."); dlog("er","Audio: "+(e2.code||e2.message)); })
+    .finally(()=>{ b.disabled=!state.pendingAu; b.textContent="Áp dụng âm thanh"; });
+});
+$("#auClear").addEventListener("click",()=>{
+  if(!state.dev||!database) return;
+  database.ref(THEME_NODE).update({audioData:"",audioName:"",updatedAt:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{ dlog("ok","Đã xóa âm thanh."); toast("Đã xóa âm thanh."); state.pendingAu=null; $("#auApply").disabled=true; })
+    .catch(e2=>{ dlog("er","Xóa âm thanh: "+(e2.code||e2.message)); toast(e2.code==="permission-denied"?"Không có quyền.":"Thao tác thất bại.","err"); });
+});
 
-$("#thFile").addEventListener("change", async e => {
-  const f = e.target.files && e.target.files[0];
-  e.target.value = "";
-  const err = $("#thErr"); err.textContent = "";
-  if (!f) return;
-  try {
-    if (f.type.startsWith("image/")) {
-      const data = await compressImage(f);
-      if (data.length > MAX_DATA_LEN) { err.textContent = "Ảnh sau khi nén vẫn quá lớn (giới hạn ~9MB)."; return; }
-      state.pendingBg = { type:"image", data, name:f.name };
-      $("#thPreview").innerHTML = `<img src="${esc(data)}" alt="Xem trước nền">`;
-    } else if (f.type.startsWith("video/")) {
-      if (f.size > 6.5 * 1024 * 1024) { err.textContent = "Video quá lớn. Giới hạn ~6.5MB (Realtime Database)."; return; }
-      const data = await readAsDataURL(f);
-      if (data.length > MAX_DATA_LEN) { err.textContent = "Video quá lớn (giới hạn ~9MB)."; return; }
-      state.pendingBg = { type:"video", data, name:f.name };
-      $("#thPreview").innerHTML = `<video src="${esc(data)}" muted loop autoplay playsinline></video>`;
-    } else { err.textContent = "Chỉ hỗ trợ ảnh hoặc video."; return; }
-    $("#thApply").disabled = false;
-    dlog("in", "Đã chọn nền: " + f.name);
-  } catch (e2) { err.textContent = e2.message || "Không đọc được tệp."; }
-});
-$("#thApply").addEventListener("click", () => {
-  const err = $("#thErr"); err.textContent = "";
-  if (!state.dev || !database) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
-  if (!state.pendingBg) return;
-  const b = $("#thApply"); b.disabled = true; b.textContent = "Đang áp dụng…";
-  database.ref(THEME_NODE).update({ bgType: state.pendingBg.type, bgData: state.pendingBg.data, updatedAt: firebase.database.ServerValue.TIMESTAMP })
-    .then(() => { dlog("ok", "Đã áp dụng nền " + state.pendingBg.type + ": " + state.pendingBg.name); toast("Đã áp dụng nền."); state.pendingBg = null; $("#thPreview").innerHTML = ""; })
-    .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : ("Thao tác thất bại (" + (e2.code || e2.message) + ")."); dlog("er", "Theme: " + (e2.code || e2.message)); })
-    .finally(() => { b.disabled = !state.pendingBg; b.textContent = "Áp dụng nền"; });
-});
-$("#thClear").addEventListener("click", () => {
-  if (!state.dev || !database) return;
-  database.ref(THEME_NODE).update({ bgType:"none", bgData:"", updatedAt: firebase.database.ServerValue.TIMESTAMP })
-    .then(() => { dlog("ok", "Đã xóa nền."); toast("Đã xóa nền."); state.pendingBg = null; $("#thPreview").innerHTML = ""; $("#thApply").disabled = true; })
-    .catch(e2 => { dlog("er", "Xóa nền: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
-});
-$("#auFile").addEventListener("change", async e => {
-  const f = e.target.files && e.target.files[0];
-  e.target.value = "";
-  const err = $("#auErr"); err.textContent = "";
-  if (!f) return;
-  if (!f.type.startsWith("audio/")) { err.textContent = "Tệp không phải âm thanh."; return; }
-  if (f.size > 6.5 * 1024 * 1024) { err.textContent = "Tệp âm thanh quá lớn. Giới hạn ~6.5MB."; return; }
-  try {
-    const data = await readAsDataURL(f);
-    if (data.length > MAX_DATA_LEN) { err.textContent = "Tệp âm thanh quá lớn (giới hạn ~9MB)."; return; }
-    state.pendingAu = { data, name:f.name };
-    $("#auApply").disabled = false;
-    $("#auStatus").textContent = "Âm thanh: sẵn sàng áp dụng — " + f.name;
-    dlog("in", "Đã chọn âm thanh: " + f.name);
-  } catch (e2) { err.textContent = e2.message || "Không đọc được tệp."; }
-});
-$("#auApply").addEventListener("click", () => {
-  const err = $("#auErr"); err.textContent = "";
-  if (!state.dev || !database) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
-  if (!state.pendingAu) return;
-  const b = $("#auApply"); b.disabled = true; b.textContent = "Đang áp dụng…";
-  database.ref(THEME_NODE).update({ audioData: state.pendingAu.data, audioName: state.pendingAu.name, updatedAt: firebase.database.ServerValue.TIMESTAMP })
-    .then(() => { dlog("ok", "Đã áp dụng âm thanh: " + state.pendingAu.name); toast("Đã áp dụng âm thanh."); state.pendingAu = null; })
-    .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : ("Thao tác thất bại (" + (e2.code || e2.message) + ")."); dlog("er", "Audio: " + (e2.code || e2.message)); })
-    .finally(() => { b.disabled = !state.pendingAu; b.textContent = "Áp dụng âm thanh"; });
-});
-$("#auClear").addEventListener("click", () => {
-  if (!state.dev || !database) return;
-  database.ref(THEME_NODE).update({ audioData:"", audioName:"", updatedAt: firebase.database.ServerValue.TIMESTAMP })
-    .then(() => { dlog("ok", "Đã xóa âm thanh."); toast("Đã xóa âm thanh."); state.pendingAu = null; $("#auApply").disabled = true; })
-    .catch(e2 => { dlog("er", "Xóa âm thanh: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
-});
-
-/* ═══════════ BẢNG THÔNG BÁO ═══════════ */
-let noticeShownSession = false;
-function maybeNotice() {
-  if (!splashDone) return;
-  const n = state.notice;
-  if (!n || n.enabled === false) return;
-  if (!(n.body || "").trim() && !(n.title || "").trim()) return;
-  if (noticeShownSession || $("#maint").classList.contains("on")) return;
-  const ver = String(n.updatedAt || n.ts || "");
-  let rec = null;
-  try { rec = JSON.parse(localStorage.getItem("ssw_notice") || "null"); } catch (_) {}
-  if (rec && rec.until > Date.now() && rec.ver === ver) return;
-  noticeShownSession = true;
-  $("#ntTitle").textContent = (n.title || "").trim() || "Thông báo";
-  $("#ntBody").textContent = (n.body || "").trim();
+/* ═══════════ THÔNG BÁO ═══════════ */
+let noticeShownSession=false;
+function maybeNotice(){
+  if(!splashDone) return;
+  const n=state.notice;
+  if(!n||n.enabled===false) return;
+  if(!(n.body||"").trim()&&!(n.title||"").trim()) return;
+  if(noticeShownSession||$("#maint").classList.contains("on")) return;
+  const ver=String(n.updatedAt||n.ts||"");
+  let rec=null;
+  try{ rec=JSON.parse(localStorage.getItem("ssw_notice")||"null"); }catch(_){}
+  if(rec&&rec.until>Date.now()&&rec.ver===ver) return;
+  noticeShownSession=true;
+  $("#ntTitle").textContent=(n.title||"").trim()||"Thông báo";
+  $("#ntBody").textContent=(n.body||"").trim();
   openLayer($("#mdNotice"));
 }
-$("#ntClose").addEventListener("click", () => closeLayer());
-$("#nt2h").addEventListener("click", () => {
-  const n = state.notice || {};
-  try { localStorage.setItem("ssw_notice", JSON.stringify({ until: Date.now() + 7200000, ver: String(n.updatedAt || n.ts || "") })); } catch (_) {}
+$("#ntClose").addEventListener("click",()=>closeLayer());
+$("#nt2h").addEventListener("click",()=>{
+  const n=state.notice||{};
+  try{ localStorage.setItem("ssw_notice",JSON.stringify({until:Date.now()+7200000,ver:String(n.updatedAt||n.ts||"")})); }catch(_){}
   closeLayer();
   toast("Đã ẩn thông báo trong 2 giờ.");
 });
-$("#ntEnabled").addEventListener("change", e => {
-  const on = e.target.checked;
-  if (!state.dev || !database) { e.target.checked = !on; return; }
-  database.ref(NOTICE_NODE).update({ enabled: on, updatedAt: firebase.database.ServerValue.TIMESTAMP })
-    .then(() => { dlog("ok", on ? "Bật bảng thông báo." : "Tắt bảng thông báo."); toast(on ? "Đã bật thông báo." : "Đã tắt thông báo."); })
-    .catch(e2 => { e.target.checked = !on; dlog("er", "Notice toggle: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền." : "Thao tác thất bại.", "err"); });
+$("#ntEnabled").addEventListener("change",e=>{
+  const on=e.target.checked;
+  if(!state.dev||!database){ e.target.checked=!on; return; }
+  database.ref(NOTICE_NODE).update({enabled:on,updatedAt:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{ dlog("ok",on?"Bật bảng thông báo.":"Tắt bảng thông báo."); toast(on?"Đã bật thông báo.":"Đã tắt thông báo."); })
+    .catch(e2=>{ e.target.checked=!on; dlog("er","Notice toggle: "+(e2.code||e2.message)); toast(e2.code==="permission-denied"?"Không có quyền.":"Thao tác thất bại.","err"); });
 });
-$("#noticeForm").addEventListener("submit", e => {
+$("#noticeForm").addEventListener("submit",e=>{
   e.preventDefault();
-  const err = $("#nfErr"); err.textContent = "";
-  if (!state.dev || !database) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
-  const title = $("#nfTitle").value.trim(), body = $("#nfBody").value.trim();
-  if (!body) { err.textContent = "Nội dung thông báo không được để trống."; return; }
-  const cur = state.notice || {};
-  database.ref(NOTICE_NODE).update({ title, body, enabled: cur.enabled !== false, updatedAt: firebase.database.ServerValue.TIMESTAMP })
-    .then(() => { dlog("ok", "Đã cập nhật thông báo."); toast("Đã cập nhật thông báo."); })
-    .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : "Thao tác thất bại."; dlog("er", "Notice: " + (e2.code || e2.message)); });
+  const err=$("#nfErr"); err.textContent="";
+  if(!state.dev||!database){ err.textContent="Bạn không có quyền thực hiện thao tác này."; return; }
+  const title=$("#nfTitle").value.trim(), body=$("#nfBody").value.trim();
+  if(!body){ err.textContent="Nội dung thông báo không được để trống."; return; }
+  const cur=state.notice||{};
+  database.ref(NOTICE_NODE).update({title,body,enabled:cur.enabled!==false,updatedAt:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{ dlog("ok","Đã cập nhật thông báo."); toast("Đã cập nhật thông báo."); })
+    .catch(e2=>{ err.textContent=e2.code==="permission-denied"?"Bị từ chối quyền ghi (kiểm tra Database Rules).":"Thao tác thất bại."; dlog("er","Notice: "+(e2.code||e2.message)); });
 });
 
-/* ═══════════ DEV: CRUD ═══════════ */
-function renderCatSeg() {
-  $("#catSeg").innerHTML = CATS.map(c =>
-    `<button type="button" data-c="${c.id}" class="${state.formCat===c.id?"on":""}" style="--sc:${c.color}">${esc(c.label)}</button>`
-  ).join("");
-  $("#catSeg").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { if (!state.editing) setFormCat(b.dataset.c); }));
+/* ═══════════ DEV CRUD (hỗ trợ Bypass apiKey) ═══════════ */
+function renderCatSeg(){
+  $("#catSeg").innerHTML=CATS.map(c=>`<button type="button" data-c="${c.id}" class="${state.formCat===c.id?"on":""}" style="--sc:${c.color}">${esc(c.label)}</button>`).join("");
+  $("#catSeg").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ if(!state.editing) setFormCat(b.dataset.c); }));
 }
-function setFormCat(c) {
-  state.formCat = c;
-  document.querySelectorAll("#catSeg button").forEach(b => b.classList.toggle("on", b.dataset.c === c));
-  const cat = catOf(c);
-  const isScript = c === "script";
-  const isBase = !!(cat && cat.base);
-  $("#wrapUrl").style.display = isScript ? "none" : "flex";
-  $("#wrapCode").style.display = (isScript || !isBase) ? "flex" : "none";
+function setFormCat(c){
+  state.formCat=c;
+  document.querySelectorAll("#catSeg button").forEach(b=>b.classList.toggle("on",b.dataset.c===c));
+  const isScript=c==="script";
+  const isBypass=c==="bypass";
+  const cat=catOf(c);
+  const isBase=!!(cat&&cat.base);
+  $("#wrapUrl").style.display=(isScript)?"none":"flex";
+  $("#wrapKey").style.display=(isBypass)?"flex":"none";
+  $("#wrapCode").style.display=(isScript||(!isBase&&!isBypass))?"flex":"none";
 }
-function resetForm() {
-  state.editing = null;
+function resetForm(){
+  state.editing=null;
   $("#itemForm").reset();
-  document.querySelectorAll("#catSeg button").forEach(b => b.disabled = false);
+  document.querySelectorAll("#catSeg button").forEach(b=>b.disabled=false);
   setFormCat(state.formCat);
-  $("#fErr").textContent = "";
-  $("#formSec").textContent = "Thêm dữ liệu";
-  $("#fSaveTxt").textContent = "Thêm";
-  $("#fCancel").style.display = "none";
+  $("#fErr").textContent="";
+  $("#formSec").textContent="Thêm dữ liệu";
+  $("#fSaveTxt").textContent="Thêm";
+  $("#fCancel").style.display="none";
 }
-$("#fCancel").addEventListener("click", resetForm);
-function startEdit(catId, key) {
-  const it = (state.data[catId] || []).find(x => x.key === key);
-  if (!it) { toast("Không tìm thấy mục này.", "err"); return; }
-  state.editing = { cat:catId, key };
+$("#fCancel").addEventListener("click",resetForm);
+$("#fKeyEye").addEventListener("click",()=>{ const i=$("#fApiKey"); i.type=i.type==="password"?"text":"password"; });
+function startEdit(catId,key){
+  const it=(state.data[catId]||[]).find(x=>x.key===key);
+  if(!it){ toast("Không tìm thấy mục này.","err"); return; }
+  state.editing={cat:catId,key};
   setFormCat(catId);
-  document.querySelectorAll("#catSeg button").forEach(b => b.disabled = true);
-  $("#fName").value = it.name === "(không tên)" ? "" : it.name;
-  $("#fDesc").value = it.desc || "";
-  $("#fUrl").value = it.url || "";
-  $("#fCode").value = it.code || "";
-  $("#formSec").textContent = "Chỉnh sửa: " + it.name;
-  $("#fSaveTxt").textContent = "Lưu chỉnh sửa";
-  $("#fCancel").style.display = "inline-flex";
-  $("#fErr").textContent = "";
+  document.querySelectorAll("#catSeg button").forEach(b=>b.disabled=true);
+  $("#fName").value=it.name==="(không tên)"?"":it.name;
+  $("#fDesc").value=it.desc||"";
+  $("#fUrl").value=it.url||"";
+  $("#fApiKey").value=it.apiKey||"";
+  $("#fCode").value=it.code||"";
+  $("#formSec").textContent="Chỉnh sửa: "+it.name;
+  $("#fSaveTxt").textContent="Lưu chỉnh sửa";
+  $("#fCancel").style.display="inline-flex";
+  $("#fErr").textContent="";
   openLayer($("#mdDev"));
-  setTimeout(() => $("#fName").focus(), 200);
+  setTimeout(()=>$("#fName").focus(),200);
 }
-$("#itemForm").addEventListener("submit", e => {
+$("#itemForm").addEventListener("submit",e=>{
   e.preventDefault();
-  const err = $("#fErr"); err.textContent = "";
-  if (!state.dev || !database) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
-  const catId = state.editing ? state.editing.cat : state.formCat;
-  const cat = catOf(catId); if (!cat) { err.textContent = "Danh mục không tồn tại."; return; }
-  const name = $("#fName").value.trim(), desc = $("#fDesc").value.trim();
-  const url = $("#fUrl").value.trim(), code = $("#fCode").value;
-  if (!name) { err.textContent = "Thiếu tên mục."; return; }
-  if (catId === "script" && !code.trim()) { err.textContent = "Thiếu code cho Script."; return; }
-  if (cat.base && catId !== "script" && !validUrl(url)) { err.textContent = "Link không hợp lệ (bắt đầu bằng http/https)."; return; }
-  if (!cat.base && !(validUrl(url) || code.trim())) { err.textContent = "Cần ít nhất link hợp lệ hoặc code."; return; }
-  const payload = { name, desc };
-  if (validUrl(url)) payload.url = url;
-  if (code.trim()) payload.code = code;
-  const btn = $("#fSave"); btn.disabled = true;
+  const err=$("#fErr"); err.textContent="";
+  if(!state.dev||!database){ err.textContent="Bạn không có quyền thực hiện thao tác này."; return; }
+  const catId=state.editing?state.editing.cat:state.formCat;
+  const cat=catOf(catId); if(!cat){ err.textContent="Danh mục không tồn tại."; return; }
+  const name=$("#fName").value.trim(), desc=$("#fDesc").value.trim();
+  const url=$("#fUrl").value.trim(), apiKey=$("#fApiKey").value.trim(), code=$("#fCode").value;
+  if(!name){ err.textContent="Thiếu tên mục."; return; }
+  if(catId==="script"&&!code.trim()){ err.textContent="Thiếu code cho Script."; return; }
+  if(catId==="bypass"&&!validUrl(url)&&!apiKey){ err.textContent="Bypass cần link hợp lệ hoặc API key."; return; }
+  if(["apk","link","ios"].includes(catId)&&!validUrl(url)){ err.textContent="Link không hợp lệ (bắt đầu bằng http/https)."; return; }
+  if(!cat.base&&!["bypass"].includes(catId)&&!(validUrl(url)||code.trim())){ err.textContent="Cần ít nhất link hợp lệ hoặc code."; return; }
+  const payload={name,desc};
+  if(validUrl(url)) payload.url=url;
+  if(catId==="bypass"&&apiKey) payload.apiKey=apiKey;
+  if(code.trim()&&(catId==="script"||!cat.base)) payload.code=code;
+  const btn=$("#fSave"); btn.disabled=true;
   let p;
-  if (state.editing) {
-    payload.updatedAt = firebase.database.ServerValue.TIMESTAMP;
-    p = database.ref(nodePath(catId) + "/" + state.editing.key).update(payload);
-  } else {
-    payload.createdAt = firebase.database.ServerValue.TIMESTAMP;
-    p = database.ref(nodePath(catId)).push(payload);
+  if(state.editing){
+    payload.updatedAt=firebase.database.ServerValue.TIMESTAMP;
+    p=database.ref(nodePath(catId)+"/"+state.editing.key).update(payload);
+  }else{
+    payload.createdAt=firebase.database.ServerValue.TIMESTAMP;
+    p=database.ref(nodePath(catId)).push(payload);
   }
-  p.then(() => {
-    btn.disabled = false;
-    dlog("ok", (state.editing ? "Đã sửa " : "Đã thêm ") + nodePath(catId) + ": " + name);
-    toast(state.editing ? "Đã lưu chỉnh sửa." : "Đã thêm dữ liệu.");
+  p.then(()=>{
+    btn.disabled=false;
+    dlog("ok",(state.editing?"Đã sửa ":"Đã thêm ")+nodePath(catId)+": "+name);
+    toast(state.editing?"Đã lưu chỉnh sửa.":"Đã thêm dữ liệu.");
     resetForm();
-  }).catch(e2 => {
-    btn.disabled = false;
-    dlog("er", "Ghi dữ liệu: " + (e2.code || e2.message));
-    err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules / đăng nhập DEV)." : "Thao tác thất bại (" + (e2.code || "lỗi không rõ") + ").";
+  }).catch(e2=>{
+    btn.disabled=false;
+    dlog("er","Ghi dữ liệu: "+(e2.code||e2.message));
+    err.textContent=e2.code==="permission-denied"?"Bị từ chối quyền ghi (kiểm tra Database Rules / đăng nhập DEV).":"Thao tác thất bại ("+(e2.code||"lỗi không rõ")+").";
   });
 });
-function deleteItem(catId, key) {
-  if (!state.dev || !database) return;
-  database.ref(nodePath(catId) + "/" + key).remove()
-    .then(() => { dlog("ok", "Đã xóa " + nodePath(catId) + "/" + key); toast("Đã xóa."); })
-    .catch(e2 => { dlog("er", "Xóa: " + (e2.code || e2.message)); toast(e2.code === "permission-denied" ? "Không có quyền xóa." : "Xóa thất bại.", "err"); });
+function deleteItem(catId,key){
+  if(!state.dev||!database) return;
+  database.ref(nodePath(catId)+"/"+key).remove()
+    .then(()=>{ dlog("ok","Đã xóa "+nodePath(catId)+"/"+key); toast("Đã xóa."); })
+    .catch(e2=>{ dlog("er","Xóa: "+(e2.code||e2.message)); toast(e2.code==="permission-denied"?"Không có quyền xóa.":"Xóa thất bại.","err"); });
 }
-function renderDevList() {
-  const box = $("#devList"); if (!box) return;
-  box.innerHTML = CATS.map(c => {
-    const items = state.data[c.id] || [];
+function renderDevList(){
+  const box=$("#devList"); if(!box) return;
+  box.innerHTML=CATS.map(c=>{
+    const items=state.data[c.id]||[];
     return `<details class="dl"${state.formCat===c.id?" open":""}>
       <summary><span class="ci" style="color:${c.color}">${ICO[c.icon]||ICO[c.id]||ICO.box}</span>${esc(c.label)}<span class="n">${items.length}</span>${ICO.chev}</summary>
-      ${items.length ? items.map(it => `<div class="drow"><span class="nm">${esc(it.name)}</span>
+      ${items.length?items.map(it=>`<div class="drow"><span class="nm">${esc(it.name)}</span>
         <button class="ed" data-act="edit" data-cat="${c.id}" data-key="${esc(it.key)}" aria-label="Chỉnh sửa ${esc(it.name)}">${ICO.pencil}</button>
         <button class="de" data-act="del" data-cat="${c.id}" data-key="${esc(it.key)}" aria-label="Xóa ${esc(it.name)}">${ICO.trash}</button></div>`).join("")
-        : '<div class="drow"><span class="nm">Trống</span></div>'}
+        :'<div class="drow"><span class="nm">Trống</span></div>'}
     </details>`;
   }).join("");
 }
 
 /* ═══════════ DEV: DANH MỤC TÙY CHỈNH ═══════════ */
-function slugify(name) {
-  let s = vi(name).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24);
-  if (!s) s = "muc-" + Date.now().toString(36);
-  if (["home","search"].includes(s)) s = s + "-1";
-  let out = s, n = 2;
-  while (CATS.some(c => c.node === out)) out = s + "-" + (n++);
+function slugify(name){
+  let s=vi(name).replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,24);
+  if(!s) s="muc-"+Date.now().toString(36);
+  if(["home","search"].includes(s)) s=s+"-1";
+  let out=s,n=2;
+  while(CATS.some(c=>c.node===out)) out=s+"-"+(n++);
   return out;
 }
-function renderCatForm() {
-  $("#cfIcon").innerHTML = PICK_ICONS.map(k => `<option value="${k}"${state.catForm.icon===k?" selected":""}>${k}</option>`).join("");
-  $("#cfColors").innerHTML = PICK_COLORS.map(c => `<button type="button" data-col="${c}" class="${state.catForm.color===c?"on":""}" style="background:${c}" aria-label="Màu ${c}"></button>`).join("");
-  $("#cfColors").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { state.catForm.color = b.dataset.col; renderCatForm(); }));
-  const customs = CATS.filter(c => !c.base);
-  $("#catList").innerHTML = customs.length ? customs.map(c =>
+function renderCatForm(){
+  $("#cfIcon").innerHTML=PICK_ICONS.map(k=>`<option value="${k}"${state.catForm.icon===k?" selected":""}>${k}</option>`).join("");
+  $("#cfColors").innerHTML=PICK_COLORS.map(c=>`<button type="button" data-col="${c}" class="${state.catForm.color===c?"on":""}" style="background:${c}" aria-label="Màu ${c}"></button>`).join("");
+  $("#cfColors").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ state.catForm.color=b.dataset.col; renderCatForm(); }));
+  const customs=CATS.filter(c=>!c.base);
+  $("#catList").innerHTML=customs.length?customs.map(c=>
     `<div class="drow"><span class="ci" style="color:${c.color};width:16px;height:16px;display:inline-flex">${ICO[c.icon]||ICO.box}</span><span class="nm">${esc(c.label)} <small style="color:var(--text-muted)">(${esc(c.node)})</small></span>
-    <button class="de" data-act="delcat" data-cat="${c.id}" aria-label="Xóa danh mục ${esc(c.label)}">${ICO.trash}</button></div>`).join("") : "";
+    <button class="de" data-act="delcat" data-cat="${c.id}" aria-label="Xóa danh mục ${esc(c.label)}">${ICO.trash}</button></div>`).join(""):"";
 }
-$("#cfIcon").addEventListener("change", e => { state.catForm.icon = e.target.value; });
-$("#catForm").addEventListener("submit", e => {
+$("#cfIcon").addEventListener("change",e=>{ state.catForm.icon=e.target.value; });
+$("#catForm").addEventListener("submit",e=>{
   e.preventDefault();
-  const err = $("#cfErr"); err.textContent = "";
-  if (!state.dev || !database) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
-  const name = $("#cfName").value.trim();
-  if (!name) { err.textContent = "Thiếu tên danh mục."; return; }
-  if (CATS.some(c => vi(c.label) === vi(name))) { err.textContent = "Tên danh mục đã tồn tại."; return; }
-  const payload = { name, sub:$("#cfSub").value.trim(), icon:state.catForm.icon, color:state.catForm.color, node:slugify(name), createdAt:firebase.database.ServerValue.TIMESTAMP };
+  const err=$("#cfErr"); err.textContent="";
+  if(!state.dev||!database){ err.textContent="Bạn không có quyền thực hiện thao tác này."; return; }
+  const name=$("#cfName").value.trim();
+  if(!name){ err.textContent="Thiếu tên danh mục."; return; }
+  if(CATS.some(c=>vi(c.label)===vi(name))){ err.textContent="Tên danh mục đã tồn tại."; return; }
+  const payload={name,sub:$("#cfSub").value.trim(),icon:state.catForm.icon,color:state.catForm.color,node:slugify(name),createdAt:firebase.database.ServerValue.TIMESTAMP};
   database.ref(CATS_NODE).push(payload)
-    .then(() => { dlog("ok", "Đã thêm danh mục: " + name); toast("Đã thêm danh mục " + name + "."); $("#catForm").reset(); })
-    .catch(e2 => { err.textContent = e2.code === "permission-denied" ? "Bị từ chối quyền ghi (kiểm tra Database Rules)." : "Thao tác thất bại (" + (e2.code || "lỗi không rõ") + ")."; dlog("er", "Thêm danh mục: " + (e2.code || e2.message)); });
+    .then(()=>{ dlog("ok","Đã thêm danh mục: "+name); toast("Đã thêm danh mục "+name+"."); $("#catForm").reset(); })
+    .catch(e2=>{ err.textContent=e2.code==="permission-denied"?"Bị từ chối quyền ghi (kiểm tra Database Rules).":"Thao tác thất bại ("+(e2.code||"lỗi không rõ")+")."; dlog("er","Thêm danh mục: "+(e2.code||e2.message)); });
 });
-function deleteCat(catId) {
-  if (!state.dev || !database) return;
-  const c = catOf(catId); if (!c || c.base || !c.key) return;
-  database.ref(CATS_NODE + "/" + c.key).remove()
-    .then(() => { dlog("ok", "Đã xóa danh mục: " + c.label); toast("Đã xóa danh mục."); if (state.route === catId) location.hash = "#/"; })
-    .catch(e2 => { dlog("er", "Xóa danh mục: " + (e2.code || e2.message)); toast("Xóa thất bại.", "err"); });
+function deleteCat(catId){
+  if(!state.dev||!database) return;
+  const c=catOf(catId); if(!c||c.base||!c.key) return;
+  database.ref(CATS_NODE+"/"+c.key).remove()
+    .then(()=>{ dlog("ok","Đã xóa danh mục: "+c.label); toast("Đã xóa danh mục."); if(state.route===catId) location.hash="#/"; })
+    .catch(e2=>{ dlog("er","Xóa danh mục: "+(e2.code||e2.message)); toast("Xóa thất bại.","err"); });
 }
 
 /* ═══════════ FIREBASE LISTENERS ═══════════ */
-const handlers = {};
-function attachCat(catId) {
-  if (!database) {
-    state.status[catId] = "error";
-    if (state.route === catId) renderCat(catId);
-    if (BASE_CATS.some(c => c.id === catId)) catSynced();
+const handlers={};
+function attachCat(catId){
+  if(!database){
+    state.status[catId]="error";
+    if(state.route===catId) renderCat(catId);
+    if(BASE_CATS.some(c=>c.id===catId)) markLoaded();
     return;
   }
-  state.data[catId] = null;
-  const ref = database.ref(nodePath(catId));
-  if (handlers[catId]) ref.off("value", handlers[catId]);
-  let first = true;
-  handlers[catId] = ref.on("value", snap => {
-    const v = snap.val() || {};
-    const arr = Object.keys(v).map(k => normItem(k, v[k])).sort((a,b) => (b.ts||0) - (a.ts||0));
-    state.data[catId] = arr; state.status[catId] = "";
-    dlog("in", "Sync " + nodePath(catId) + ": " + arr.length + " mục");
-    if (state.q) renderSearch();
-    else if (state.route === "home") renderHome();
-    else if (state.route === catId) renderCat(catId);
+  state.data[catId]=null;
+  const ref=database.ref(nodePath(catId));
+  if(handlers[catId]) ref.off("value",handlers[catId]);
+  let first=true;
+  handlers[catId]=ref.on("value",snap=>{
+    const v=snap.val()||{};
+    const arr=Object.keys(v).map(k=>normItem(k,v[k])).sort((a,b)=>(b.ts||0)-(a.ts||0));
+    state.data[catId]=arr; state.status[catId]="";
+    dlog("in","Sync "+nodePath(catId)+": "+arr.length+" mục");
+    if(state.q) renderSearch();
+    else if(state.route==="home") renderHome();
+    else if(state.route===catId) renderCat(catId);
     renderCounts();
-    if (openEl === $("#mdDev")) renderDevList();
-    if (first) { first = false; if (BASE_CATS.some(c => c.id === catId)) catSynced(); }
-  }, err => {
-    dlog("er", "Listener " + nodePath(catId) + ": " + (err.code || err.message));
-    if (first) {
-      first = false;
-      state.data[catId] = null; state.status[catId] = "error";
-      if (state.route === catId) renderCat(catId);
+    if(openEl===$("#mdDev")) renderDevList();
+    if(first){ first=false; if(BASE_CATS.some(c=>c.id===catId)) markLoaded(); }
+  },err=>{
+    dlog("er","Listener "+nodePath(catId)+": "+(err.code||err.message));
+    if(first){
+      first=false;
+      state.data[catId]=null; state.status[catId]="error";
+      if(state.route===catId) renderCat(catId);
       renderCounts();
-      if (BASE_CATS.some(c => c.id === catId)) catSynced();
+      if(BASE_CATS.some(c=>c.id===catId)) markLoaded();
     }
   });
 }
-function rebuildCats(customMap) {
-  const customs = Object.keys(customMap || {}).map(k => {
-    const o = customMap[k];
-    return { id:String(o.node || k).toLowerCase(), label:String(o.name || k), node:String(o.node || k), color:o.color || "#7c5cff", icon:o.icon || "box", sub:o.sub || "", key:k, custom:true };
-  }).filter(c => /^[a-z0-9-]+$/.test(c.id) && !BASE_CATS.some(b => b.id === c.id));
-  const newIds = new Set(customs.map(c => c.id));
-  CATS.filter(c => !c.base && !newIds.has(c.id)).forEach(old => {
-    if (database && handlers[old.id]) { try { database.ref(DATA_ROOT + "/" + old.node).off("value", handlers[old.id]); } catch (_) {} }
+function rebuildCats(customMap){
+  const customs=Object.keys(customMap||{}).map(k=>{
+    const o=customMap[k];
+    return {id:String(o.node||k).toLowerCase(),label:String(o.name||k),node:String(o.node||k),color:o.color||"#7c5cff",icon:o.icon||"box",sub:o.sub||"",key:k,custom:true};
+  }).filter(c=>/^[a-z0-9-]+$/.test(c.id)&&!BASE_CATS.some(b=>b.id===c.id));
+  const newIds=new Set(customs.map(c=>c.id));
+  CATS.filter(c=>!c.base&&!newIds.has(c.id)).forEach(old=>{
+    if(database&&handlers[old.id]){ try{ database.ref(DATA_ROOT+"/"+old.node).off("value",handlers[old.id]); }catch(_){} }
     delete handlers[old.id]; delete state.data[old.id]; delete state.status[old.id];
   });
-  CATS = BASE_CATS.concat(customs);
-  customs.forEach(c => { if (state.data[c.id] === undefined) attachCat(c.id); });
-  ensureViews(); renderNavCats(); renderCatSeg(); renderCatForm();
-  if (state.q) renderSearch(); else renderRoute();
+  CATS=BASE_CATS.concat(customs);
+  customs.forEach(c=>{ if(state.data[c.id]===undefined) attachCat(c.id); });
+  ensureViews(); buildMenuNav(); renderCatSeg(); renderCatForm();
+  if(state.q) renderSearch(); else renderRoute();
 }
-if (database) {
-  database.ref(".info/connected").on("value", s => {
-    $("#connDot").classList.toggle("on", !!s.val());
-    dlog(s.val() ? "ok" : "er", "Database " + (s.val() ? "kết nối." : "mất kết nối."));
+if(database){
+  database.ref(".info/connected").on("value",s=>{
+    $("#connDot").classList.toggle("on",!!s.val());
+    dlog(s.val()?"ok":"er","Database "+(s.val()?"kết nối.":"mất kết nối."));
   });
-  database.ref(MAINT_NODE).on("value", s => { state.maint = s.val() || null; state.maintFirstSeen = 0; applyMaint(); }, () => {});
-  database.ref(NOTICE_NODE).on("value", s => {
-    state.notice = s.val() || null;
-    if (state.dev && state.notice) {
-      $("#nfTitle").value = state.notice.title || "";
-      $("#nfBody").value = state.notice.body || "";
-    }
-    $("#ntEnabled").checked = !!(state.notice && state.notice.enabled !== false);
+  database.ref(MAINT_NODE).on("value",s=>{ state.maint=s.val()||null; state.maintFirstSeen=0; applyMaint(); },()=>{});
+  database.ref(NOTICE_NODE).on("value",s=>{
+    state.notice=s.val()||null;
+    if(state.dev&&state.notice){ $("#nfTitle").value=state.notice.title||""; $("#nfBody").value=state.notice.body||""; }
+    $("#ntEnabled").checked=!!(state.notice&&state.notice.enabled!==false);
     maybeNotice();
-  }, () => {});
-  database.ref(THEME_NODE).on("value", s => { applyTheme(s.val() || null); }, () => { applyTheme(null); });
-  database.ref(CATS_NODE).on("value", s => { rebuildCats(s.val() || {}); dlog("in", "Danh mục tùy chỉnh: " + Object.keys(s.val() || {}).length); }, () => rebuildCats({}));
-  BASE_CATS.forEach(c => attachCat(c.id));
-  spP(40);
-  dlog("ok", "Firebase sẵn sàng (noxgalaxy-2cd71).");
-} else {
-  CATS.forEach(c => { state.status[c.id] = "error"; state.data[c.id] = null; });
-  ensureViews(); renderNavCats(); renderCatSeg(); renderCatForm(); applyTheme(null);
-  dlog("er", "Không tải được Firebase SDK.");
+  },()=>{});
+  database.ref(THEME_NODE).on("value",s=>{ applyTheme(s.val()||null); },()=>{ applyTheme(null); });
+  database.ref(CATS_NODE).on("value",s=>{ rebuildCats(s.val()||{}); dlog("in","Danh mục tùy chỉnh: "+Object.keys(s.val()||{}).length); },()=>rebuildCats({}));
+  BASE_CATS.forEach(c=>attachCat(c.id));
+  spP(8);
+  dlog("ok","Firebase sẵn sàng (noxgalaxy-2cd71).");
+}else{
+  CATS.forEach(c=>{ state.status[c.id]="error"; state.data[c.id]=null; });
+  ensureViews(); buildMenuNav(); renderCatSeg(); renderCatForm(); applyTheme(null);
+  dlog("er","Không tải được Firebase SDK.");
   renderRoute();
-  setTimeout(enterApp, 700);
+  finishLoad(false);
 }
 
-/* ═══════════ DELEGATION (1 lần — đã dọn xung đột) ═══════════ */
-document.addEventListener("click", e => {
-  const b = e.target.closest(".btn,.navitem,.tile,.lrow,.seg button,.vclose");
-  if (b && !RM) {
-    const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height);
-    const s = document.createElement("span");
-    s.className = "rip";
-    s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px`;
-    if (getComputedStyle(b).position === "static") b.style.position = "relative";
-    b.appendChild(s); setTimeout(() => s.remove(), 580);
+/* ═══════════ DELEGATION (1 lần) ═══════════ */
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".btn,.mnav,.tile,.lrow,.seg button,.vclose,.cs-item");
+  if(b&&!RM){
+    const r=b.getBoundingClientRect(), d=Math.max(r.width,r.height);
+    const s=document.createElement("span");
+    s.className="rip";
+    s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+    if(getComputedStyle(b).position==="static") b.style.position="relative";
+    b.appendChild(s); setTimeout(()=>s.remove(),580);
   }
-  const nav = e.target.closest(".navitem[data-route],.tile[data-route]");
-  if (nav) { e.preventDefault(); navTo(nav.dataset.route); return; }
-  if (e.target.closest(".brand")) { e.preventDefault(); navTo("home"); return; }
-
-  const t = e.target.closest("[data-act]");
-  if (!t && !e.target.closest("[data-stop]") && !e.target.closest("a")) {
-    const card = e.target.closest(".card");
-    if (card) { openDetail(card.dataset.cat, card.dataset.key); return; }
+  const nav=e.target.closest(".mnav[data-route],.tile[data-route]");
+  if(nav){ e.preventDefault(); navTo(nav.dataset.route); return; }
+  if(e.target.closest(".brand")){ e.preventDefault(); navTo("home"); return; }
+  const t=e.target.closest("[data-act]");
+  if(!t&&!e.target.closest("[data-stop]")&&!e.target.closest("a")){
+    const card=e.target.closest(".card");
+    if(card){ openDetail(card.dataset.cat,card.dataset.key); return; }
   }
-  if (!t) return;
-  const act = t.dataset.act;
-  if (act === "detail") openDetail(t.dataset.cat, t.dataset.key);
-  else if (act === "clearq") { clearQ(); renderRoute(); }
-  else if (act === "copycode") {
-    const it = (state.data[t.dataset.cat] || []).find(x => x.key === t.dataset.key);
-    if (!it || !it.code) { toast("Không có code để sao chép.", "err"); return; }
-    copyText(it.code).then(() => {
+  if(!t) return;
+  const act=t.dataset.act;
+  if(act==="detail") openDetail(t.dataset.cat,t.dataset.key);
+  else if(act==="clearq"){ clearQ(); renderRoute(); }
+  else if(act==="copycode"){
+    const it=(state.data[t.dataset.cat]||[]).find(x=>x.key===t.dataset.key);
+    if(!it||!it.code){ toast("Không có code để sao chép.","err"); return; }
+    copyText(it.code).then(()=>{
       toast("Đã sao chép code."); copyFx(t);
-      if (database && it.copies != null) database.ref(nodePath(t.dataset.cat) + "/" + it.key + "/copies").set(it.copies + 1).catch(() => {});
-    }).catch(() => toast("Không sao chép được.", "err"));
+      if(database&&it.copies!=null) database.ref(nodePath(t.dataset.cat)+"/"+it.key+"/copies").set(it.copies+1).catch(()=>{});
+    }).catch(()=>toast("Không sao chép được.","err"));
   }
-  else if (act === "copyurl") {
-    copyText(t.dataset.url).then(() => { toast("Đã sao chép link."); copyFx(t); }).catch(() => toast("Không sao chép được.", "err"));
+  else if(act==="copykey"){
+    const kv=t.dataset.kv||"";
+    if(!kv){ toast("Không có key.","err"); return; }
+    copyText(kv).then(()=>{ toast("Đã sao chép API key."); copyFx(t); }).catch(()=>toast("Không sao chép được.","err"));
   }
-  else if (act === "retry") { state.status[t.dataset.cat] = ""; attachCat(t.dataset.cat); renderCat(t.dataset.cat); pulseLoad(); toast("Đang tải lại…"); }
-  else if (act === "authopen") { if (!currentUser()) openLayer($("#mdAuth")); }
-  else if (act === "devopen") { if (state.dev) { renderDevList(); renderCatForm(); openLayer($("#mdDev")); } }
-  else if (act === "signout") {
-    const hadFb = !!(auth && state.user);
+  else if(act==="copyurl"){
+    copyText(t.dataset.url).then(()=>{ toast("Đã sao chép link."); copyFx(t); }).catch(()=>toast("Không sao chép được.","err"));
+  }
+  else if(act==="retry"){ state.status[t.dataset.cat]=""; attachCat(t.dataset.cat); renderCat(t.dataset.cat); pulseLoad(); toast("Đang tải lại…"); }
+  else if(act==="authopen"){ if(!currentUser()){ closeMenu(); openLayer($("#mdAuth")); } }
+  else if(act==="devopen"){ if(state.dev){ renderDevList(); renderCatForm(); closeMenu(); openLayer($("#mdDev")); } }
+  else if(act==="signout"){
+    const hadFb=!!(auth&&state.user);
     clearLocalUser();
-    if (hadFb) {
-      auth.signOut().then(() => { closeLayer(); toast("Đã đăng xuất."); applyUser(); })
-               .catch(() => toast("Đăng xuất thất bại.", "err"));
-    } else { closeLayer(); toast("Đã đăng xuất."); applyUser(); }
+    if(hadFb){
+      auth.signOut().then(()=>{ closeLayer(); closeMenu(); toast("Đã đăng xuất."); applyUser(); })
+               .catch(()=>toast("Đăng xuất thất bại.","err"));
+    }else{ closeLayer(); closeMenu(); toast("Đã đăng xuất."); applyUser(); }
   }
-  else if (act === "edit" && state.dev) startEdit(t.dataset.cat, t.dataset.key);
-  else if (act === "del" && state.dev) {
-    if (!t.classList.contains("arm")) { t.classList.add("arm"); t.textContent = "Chắc?"; setTimeout(() => { t.classList.remove("arm"); t.innerHTML = ICO.trash; }, 2200); }
-    else deleteItem(t.dataset.cat, t.dataset.key);
+  else if(act==="edit"&&state.dev) startEdit(t.dataset.cat,t.dataset.key);
+  else if(act==="del"&&state.dev){
+    if(!t.classList.contains("arm")){ t.classList.add("arm"); t.textContent="Chắc?"; setTimeout(()=>{ t.classList.remove("arm"); t.innerHTML=ICO.trash; },2200); }
+    else deleteItem(t.dataset.cat,t.dataset.key);
   }
-  else if (act === "delcat" && state.dev) {
-    if (!t.classList.contains("arm")) { t.classList.add("arm"); t.textContent = "Chắc?"; setTimeout(() => { t.classList.remove("arm"); t.innerHTML = ICO.trash; }, 2200); }
+  else if(act==="delcat"&&state.dev){
+    if(!t.classList.contains("arm")){ t.classList.add("arm"); t.textContent="Chắc?"; setTimeout(()=>{ t.classList.remove("arm"); t.innerHTML=ICO.trash; },2200); }
     else deleteCat(t.dataset.cat);
   }
 });
-document.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
-  const el = document.activeElement;
-  if (el && (el.classList.contains("card") || el.classList.contains("lrow"))) openDetail(el.dataset.cat, el.dataset.key);
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+  const el=document.activeElement;
+  if(el&&(el.classList.contains("card")||el.classList.contains("lrow")||el.classList.contains("cs-item"))) openDetail(el.dataset.cat,el.dataset.key);
 });
 
-/* ═══════════ HIỆU ỨNG POINTER (1 handler duy nhất, cache phần tử) ═══════════ */
-let curTiltCard = null, curMagTile = null;
-function clearTilt() { if (curTiltCard) { curTiltCard.classList.remove("tilt"); curTiltCard.style.transform = ""; curTiltCard = null; } }
-function clearMag() { if (curMagTile) { curMagTile.classList.remove("mag"); curMagTile.style.transform = ""; curMagTile = null; } }
-if (!RM && matchMedia("(hover:hover) and (pointer:fine)").matches) {
-  let ticking = false, lastE = null;
-  $("#main").addEventListener("pointermove", e => {
-    lastE = e;
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      ticking = false;
-      const hero = lastE.target.closest(".hero");
-      if (hero) {
-        const hr = hero.getBoundingClientRect();
-        hero.style.setProperty("--mx", ((lastE.clientX - hr.left) / hr.width * 100).toFixed(1) + "%");
-        hero.style.setProperty("--my", ((lastE.clientY - hr.top) / hr.height * 100).toFixed(1) + "%");
+/* ═══════════ HIỆU ỨNG POINTER (gọn theo mức GFX) ═══════════ */
+let curTiltCard=null, curMagTile=null;
+function clearTilt(){ if(curTiltCard){ curTiltCard.classList.remove("tilt"); curTiltCard.style.transform=""; curTiltCard=null; } }
+function clearMag(){ if(curMagTile){ curMagTile.classList.remove("mag"); curMagTile.style.transform=""; curMagTile=null; } }
+if(!RM&&matchMedia("(hover:hover) and (pointer:fine)").matches){
+  let ticking=false,lastE=null;
+  $("#main").addEventListener("pointermove",e=>{
+    if(state.gfx<=2){ clearTilt(); clearMag(); return; } // Fast/Normal bỏ tilt
+    lastE=e;
+    if(ticking) return;
+    ticking=true;
+    requestAnimationFrame(()=>{
+      ticking=false;
+      const hero=lastE.target.closest(".hero");
+      if(hero){
+        const hr=hero.getBoundingClientRect();
+        hero.style.setProperty("--mx",((lastE.clientX-hr.left)/hr.width*100).toFixed(1)+"%");
+        hero.style.setProperty("--my",((lastE.clientY-hr.top)/hr.height*100).toFixed(1)+"%");
       }
-      const card = lastE.target.closest(".card");
-      if (card !== curTiltCard) { clearTilt(); curTiltCard = card; }
-      if (curTiltCard) {
-        const r = curTiltCard.getBoundingClientRect();
-        const x = (lastE.clientX - r.left) / r.width - .5, y = (lastE.clientY - r.top) / r.height - .5;
+      const card=lastE.target.closest(".card");
+      if(card!==curTiltCard){ clearTilt(); curTiltCard=card; }
+      if(curTiltCard){
+        const r=curTiltCard.getBoundingClientRect();
+        const x=(lastE.clientX-r.left)/r.width-.5, y=(lastE.clientY-r.top)/r.height-.5;
         curTiltCard.classList.add("tilt");
-        curTiltCard.style.transform = `translateY(-4px) perspective(760px) rotateX(${(-y*4.5).toFixed(2)}deg) rotateY(${(x*5.5).toFixed(2)}deg)`;
-        curTiltCard.style.setProperty("--gx", (x*100+50).toFixed(1) + "%");
-        curTiltCard.style.setProperty("--gy", (y*100+50).toFixed(1) + "%");
+        curTiltCard.style.transform=`translateY(-4px) perspective(760px) rotateX(${(-y*4.5).toFixed(2)}deg) rotateY(${(x*5.5).toFixed(2)}deg)`;
+        curTiltCard.style.setProperty("--gx",(x*100+50).toFixed(1)+"%");
+        curTiltCard.style.setProperty("--gy",(y*100+50).toFixed(1)+"%");
       }
-      const tile = lastE.target.closest(".tile");
-      if (tile !== curMagTile) { clearMag(); curMagTile = tile; }
-      if (curMagTile) {
-        const r = curMagTile.getBoundingClientRect();
-        const x = (lastE.clientX - r.left - r.width/2) / r.width;
-        const y = (lastE.clientY - r.top - r.height/2) / r.height;
+      const tile=lastE.target.closest(".tile");
+      if(tile!==curMagTile){ clearMag(); curMagTile=tile; }
+      if(curMagTile&&state.gfx>=4){
+        const r=curMagTile.getBoundingClientRect();
+        const x=(lastE.clientX-r.left-r.width/2)/r.width;
+        const y=(lastE.clientY-r.top-r.height/2)/r.height;
         curMagTile.classList.add("mag");
-        curMagTile.style.transform = `translateY(-4px) translate(${(x*7).toFixed(1)}px, ${(y*7).toFixed(1)}px)`;
+        curMagTile.style.transform=`translateY(-4px) translate(${(x*7).toFixed(1)}px,${(y*7).toFixed(1)}px)`;
       }
     });
   });
-  $("#main").addEventListener("pointerleave", () => { clearTilt(); clearMag(); });
+  $("#main").addEventListener("pointerleave",()=>{ clearTilt(); clearMag(); });
 }
-let sTick = false;
-window.addEventListener("scroll", () => {
-  if (sTick) return; sTick = true;
-  requestAnimationFrame(() => {
-    sTick = false;
-    $("#hdr").classList.toggle("scrolled", window.scrollY > 8);
-    const h = document.documentElement;
-    const max = h.scrollHeight - window.innerHeight;
-    $("#scrollProg").style.width = (max > 0 ? Math.min(100, window.scrollY / max * 100) : 0).toFixed(2) + "%";
+let sTick=false;
+window.addEventListener("scroll",()=>{
+  if(sTick) return; sTick=true;
+  requestAnimationFrame(()=>{
+    sTick=false;
+    $("#hdr").classList.toggle("scrolled",window.scrollY>8);
+    const h=document.documentElement;
+    const max=h.scrollHeight-window.innerHeight;
+    $("#scrollProg").style.width=(max>0?Math.min(100,window.scrollY/max*100):0).toFixed(2)+"%";
   });
-}, { passive:true });
+},{passive:true});
 
 /* ═══════════ BOOT ═══════════ */
-$("#yr").textContent = "© " + new Date().getFullYear() + " SKIBIDI SCRIPT WEB";
+$("#yr").textContent="© "+new Date().getFullYear()+" SKIBIDI SCRIPT WEB";
 ensureViews();
-renderNavCats();
+buildMenuNav();
 setFormCat("script");
 renderCatSeg();
 renderCatForm();
-renderApiStatus(state.api);
+applyGfx(state.gfx,false);
 applyUser();
 renderMaintPanel();
 renderSound();
