@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://skibidisc​ript.vercel.app/sitemap.xml
