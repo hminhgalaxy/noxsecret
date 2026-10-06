@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta name="google-site-verification" content="lELvfKbgHsdt_70r9Qs7Ndo272RJqsul9tWkOZfmS8Y" />
+ <meta name="google-site-verification" content="lELvfKbgHsdt_70r9Qs7Ndo272RJqsul9tWkOZfmS8Y" />
 ════════════════════════════════════════════════════════════════════════════
  SKIBIDI SCRIPT WEB — BẢN BIG UPGRADE (FIX TOÀN DIỆN + FIREBASE MỚI)
 ════════════════════════════════════════════════════════════════════════════
@@ -39,7 +39,84 @@
     - Không AI/chat.
 
 ════════════════════════════════════════════════════════════════════════════
--->
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-size: 14px;
+  }
+
+  .container,
+  .main-container,
+  .content {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  /* Không cho các khối PC ép chiều rộng */
+  * {
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ẩn sidebar PC */
+  .sideNav,
+  #sideNav {
+    display: none;
+  }
+
+  /* Menu mobile */
+  .bottomNav,
+  #bottomNav {
+    display: flex;
+  }
+
+  /* Các layout nhiều cột → 1 cột */
+  .grid,
+  .cards,
+  .content-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Font và khoảng cách nhỏ hơn */
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 17px;
+  }
+
+  button {
+    max-width: 100%;
+  }
+}
+
+/* ===== PC ===== */
+@media (min-width: 769px) {
+  .bottomNav,
+  #bottomNav {
+    display: none;
+  }
+}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SKIBIDI SCRIPT WEB</title>
