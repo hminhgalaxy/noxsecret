@@ -1,3254 +1,533 @@
 <!DOCTYPE html>
-<!-- ==========================================================================
-     FILE: index.html - SKIBIDI SCRIPT WEB (ULTIMATE COMPREHENSIVE EDITION)
-     Phiên bản đại tu toàn diện:
-     - Kính lỏng Liquid Glass trong suốt hoàn hảo, không đục mờ
-     - Sửa lỗi vệt trắng trên núi, thứ tự lớp cây và đồi núi chính xác
-     - Halloween nâng cấp: Bí ngô khắc mặt 3D, tơ nhện, mặt trăng máu, đàn dơi
-     - Sinh vật theo thời tiết: Mưa/bão/đêm ẩn chim, Halloween biến thành dơi
-     - Menu tối giản tên rõ ràng (Home, Âm thanh, Tài khoản, Dev)
-     - Pop-up Tiện ích dạng Tabs chuyển mượt (Mặc định mở mục Script)
-     - Khắc phục lỗi bo 4 góc trên Chrome & xung đột Dev Panel/Profile
-     - Hơn 2000 dòng code tối ưu, chi tiết từng module
-     ========================================================================== -->
+<!-- FILE: index.html — SKIBIDI SCRIPT WEB v2 -->
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>SKIBIDI SCRIPT - Nền tảng Tiện ích & Script Tối Thượng</title>
-  <meta name="description" content="SKIBIDI SCRIPT - Nền tảng tiện ích Script, APK, iOS, Link thế hệ mới. Môi trường thiên nhiên sống động, Liquid Glass pha lê trong suốt, hệ thống thời tiết thời gian thực.">
-  <meta name="theme-color" content="#080c14">
-  <link rel="canonical" href="https://skibidiscript.vercel.app/">
-
-  <!-- Open Graph / Meta -->
-  <meta property="og:title" content="SKIBIDI SCRIPT - Nền tảng Tiện ích & Script">
-  <meta property="og:description" content="Khám phá hệ sinh thái tiện ích, script mượt mà trong giao diện Liquid Glass pha lê sống động.">
-  <meta property="og:type" content="website">
-
-  <!-- Favicon SVG -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%238a63ff'/%3E%3Cstop offset='100%25' stop-color='%2319e5c9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='28' fill='%23080d1a'/%3E%3Cpath d='M50 12 L84 31 L84 69 L50 88 L16 69 L16 31 Z' fill='rgba(255,255,255,0.04)' stroke='url(%23g)' stroke-width='4'/%3E%3Cpath d='M62 34 C58 28 51 26 44 26 C35 26 29 31 29 38 C29 51 68 44 68 62 C68 71 60 76 50 76 C42 76 35 72 31 66' fill='none' stroke='url(%23g)' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
-
-  <!-- Fonts: Be Vietnam Pro -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/400.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/600.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/700.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/800.css">
-
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-  <!-- ======================================================================
-       PHẦN STYLESHEET (CSS TOÀN DIỆN)
-       ====================================================================== -->
-  <style>
-    /* --- CSS RESET & ROOT VARIABLES --- */
-    :root {
-      /* Sky & Natural Palette (Mặc định: Đêm huyền bí) */
-      --sky-top: #060914;
-      --sky-mid: #0d1424;
-      --sky-bot: #152238;
-      --m-back: #101a2f;
-      --m-mid: #0b1323;
-      --m-front: #080d19;
-      --grass-back: #183824;
-      --grass-mid: #122b1c;
-      --grass-front: #0a1b11;
-      --tree-foliage: #0c2015;
-      --tree-trunk: #07130c;
-      --silhouette: #050a14;
-      --star-color: rgba(255, 255, 255, 0.85);
-
-      /* Accent & Brand Colors */
-      --brand-primary: #7c5cff;
-      --brand-secondary: #24dfc8;
-      --brand-gradient: linear-gradient(135deg, #7c5cff 0%, #24dfc8 100%);
-      --brand-glow: rgba(124, 92, 255, 0.35);
-      --danger: #ff4769;
-      --warning: #ffb338;
-      --success: #26e7a6;
-
-      /* Typography Tokens */
-      --txt-primary: #f5f8fc;
-      --txt-secondary: #a6b4c9;
-      --txt-muted: #67758d;
-      --border-subtle: rgba(255, 255, 255, 0.12);
-
-      /* Motion Curves */
-      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-      --ease-snappy: cubic-bezier(0.4, 0, 0.2, 1);
-
-      /* ------------------------------------------------------------------
-         HỆ THỐNG KÍNH LỎNG (LIQUID GLASS 2.0) - TRONG SUỐT PHA LÊ KHÔNG MỜ ĐỤC
-         ------------------------------------------------------------------ */
-      --lg-bg: linear-gradient(
-        140deg,
-        rgba(255, 255, 255, 0.08) 0%,
-        rgba(255, 255, 255, 0.02) 40%,
-        rgba(255, 255, 255, 0.05) 100%
-      );
-      --lg-backdrop-blur: 14px;
-      --lg-backdrop-saturate: 180%;
-      --lg-border-top: rgba(255, 255, 255, 0.42);
-      --lg-border-side: rgba(255, 255, 255, 0.16);
-      --lg-border-bottom: rgba(255, 255, 255, 0.08);
-      --lg-shadow-ambient: 0 16px 40px -10px rgba(0, 0, 0, 0.45);
-      --lg-shadow-glow: 0 0 20px 0 rgba(124, 92, 255, 0.12);
-      --lg-specular-highlight: rgba(255, 255, 255, 0.65);
-    }
-
-    /* Ban ngày rực rỡ */
-    body.is-daytime {
-      --txt-primary: #0a1120;
-      --txt-secondary: #2f3e58;
-      --txt-muted: #5e7090;
-      --border-subtle: rgba(10, 25, 50, 0.12);
-      --lg-bg: linear-gradient(
-        140deg,
-        rgba(255, 255, 255, 0.32) 0%,
-        rgba(255, 255, 255, 0.12) 40%,
-        rgba(255, 255, 255, 0.22) 100%
-      );
-      --lg-border-top: rgba(255, 255, 255, 0.85);
-      --lg-border-side: rgba(255, 255, 255, 0.38);
-      --lg-border-bottom: rgba(255, 255, 255, 0.2);
-      --lg-shadow-ambient: 0 16px 36px -12px rgba(25, 45, 80, 0.2);
-      --lg-specular-highlight: rgba(255, 255, 255, 0.95);
-    }
-
-    /* Global Resets */
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      height: 100%;
-    }
-
-    body {
-      font-family: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--txt-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 50%, var(--sky-bot) 100%);
-      background-attachment: fixed;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 1.2s ease, color 0.6s ease;
-      position: relative;
-    }
-
-    button, input, select, textarea {
-      font-family: inherit;
-      color: inherit;
-      outline: none;
-      border: none;
-      background: none;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    /* Scrollbar pha lê */
-    ::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.18);
-      border-radius: 99px;
-      border: 2px solid transparent;
-      background-clip: content-box;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.35);
-      border: 2px solid transparent;
-      background-clip: content-box;
-    }
-
-    /* ------------------------------------------------------------------
-       FIX LỖI BO 4 GÓC TRÊN CHROME:
-       Thay thế hộp viền đen 2000px cũ bằng hiệu ứng Ambient Vignette
-       nhẹ nhàng, không cắt gọt màn hình, hoàn hảo trên mọi kích thước.
-       ------------------------------------------------------------------ */
-    #ambientFrame {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 990;
-      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45);
-      transition: box-shadow 0.8s ease;
-    }
-
-    /* ------------------------------------------------------------------
-       LIQUID GLASS CLASS (.lg) - THIẾT KẾ PHA LÊ KHÔNG MỜ ĐỤC
-       ------------------------------------------------------------------ */
-    .lg {
-      position: relative;
-      border-radius: 24px;
-      background: var(--lg-bg);
-      -webkit-backdrop-filter: blur(var(--lg-backdrop-blur)) saturate(var(--lg-backdrop-saturate));
-      backdrop-filter: blur(var(--lg-backdrop-blur)) saturate(var(--lg-backdrop-saturate));
-      border: 1px solid var(--lg-border-side);
-      border-top-color: var(--lg-border-top);
-      border-bottom-color: var(--lg-border-bottom);
-      box-shadow: var(--lg-shadow-ambient), var(--lg-shadow-glow);
-      transition: transform 0.32s var(--ease-fluid), box-shadow 0.32s var(--ease-fluid), border-color 0.32s ease;
-      overflow: hidden;
-    }
-
-    /* Đảm bảo toàn bộ nội dung bên trong kính hiển thị rõ ràng, không bị chìm/ẩn */
-    .lg > * {
-      position: relative;
-      z-index: 2;
-    }
-
-    /* Ánh lướt caustics lỏng tự nhiên */
-    .lg::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      pointer-events: none;
-      z-index: 1;
-      background: radial-gradient(
-        circle at 20% 0%,
-        rgba(255, 255, 255, 0.18) 0%,
-        rgba(255, 255, 255, 0.04) 45%,
-        transparent 70%
-      );
-      opacity: 0.8;
-      transition: opacity 0.4s ease;
-    }
-
-    /* Đường phản quang vát mép kim cương trên cùng */
-    .lg::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 12%;
-      right: 12%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--lg-specular-highlight), transparent);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .lg:hover {
-      box-shadow: var(--lg-shadow-ambient), 0 0 28px rgba(124, 92, 255, 0.22);
-      border-top-color: rgba(255, 255, 255, 0.65);
-    }
-
-    /* Hiệu ứng đàn hồi click nhẹ cho thẻ */
-    .press-action {
-      transition: transform 0.2s var(--ease-snappy);
-    }
-    .press-action:active {
-      transform: scale(0.965);
-    }
-
-    /* ------------------------------------------------------------------
-       MÔI TRƯỜNG THIÊN NHIÊN (ENVIRONMENT ENGINE 3.0)
-       ------------------------------------------------------------------ */
-    #envWrapper {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-      user-select: none;
-    }
-
-    /* Bầu trời sao đêm */
-    #starfield {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 65vh;
-      opacity: 0;
-      transition: opacity 1.5s var(--ease-fluid);
-    }
-    body.is-night #starfield {
-      opacity: 1;
-    }
-
-    /* Mặt trời và Mặt trăng */
-    #sunBody, #moonBody {
-      position: absolute;
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      will-change: transform, left, top;
-      transition: opacity 1s var(--ease-fluid);
-      pointer-events: none;
-    }
-
-    #sunBody {
-      background: radial-gradient(circle at 35% 35%, #fffdf0 0%, #ffd452 45%, #ff9800 100%);
-      box-shadow: 0 0 70px 25px rgba(255, 200, 70, 0.45), 0 0 120px 50px rgba(255, 140, 0, 0.25);
-      opacity: 0;
-    }
-
-    #moonBody {
-      background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d8e2f3 50%, #9cb2d6 100%);
-      box-shadow: 0 0 50px 18px rgba(185, 210, 255, 0.35);
-      opacity: 0;
-    }
-    /* Vết lõm thiên thạch trên trăng */
-    #moonBody::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: radial-gradient(circle at 60% 40%, rgba(110, 130, 165, 0.35) 0%, transparent 22%),
-                  radial-gradient(circle at 40% 68%, rgba(110, 130, 165, 0.28) 0%, transparent 18%),
-                  radial-gradient(circle at 75% 70%, rgba(110, 130, 165, 0.22) 0%, transparent 14%);
-    }
-
-    /* Mặt trăng máu trong sự kiện Halloween */
-    body.theme-halloween #moonBody {
-      background: radial-gradient(circle at 35% 35%, #ffd4d4 0%, #ff4b4b 45%, #940a0a 100%);
-      box-shadow: 0 0 65px 22px rgba(255, 50, 50, 0.5), 0 0 110px 45px rgba(180, 0, 0, 0.3);
-    }
-
-    /* Mây bồng bềnh */
-    .sky-cloud {
-      position: absolute;
-      filter: blur(5px);
-      animation: animCloudDrift linear infinite;
-      will-change: transform;
-      opacity: 0.45;
-    }
-    body.is-daytime .sky-cloud {
-      opacity: 0.75;
-    }
-    .sky-cloud span {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.55);
-      border-radius: 50%;
-    }
-    body.is-daytime .sky-cloud span {
-      background: rgba(255, 255, 255, 0.88);
-    }
-    .sky-cloud span:nth-child(1) { width: 140px; height: 42px; left: 0; top: 12px; }
-    .sky-cloud span:nth-child(2) { width: 85px; height: 50px; left: 32px; top: -10px; }
-    .sky-cloud span:nth-child(3) { width: 95px; height: 38px; left: 82px; top: 16px; }
-
-    @keyframes animCloudDrift {
-      from { transform: translateX(-30vw); }
-      to { transform: translateX(125vw); }
-    }
-
-    /* Gió thổi ngang */
-    #windStreaks {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-    }
-    .w-streak {
-      position: absolute;
-      height: 1.5px;
-      border-radius: 99px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-      animation: animWindStreak linear infinite;
-    }
-    @keyframes animWindStreak {
-      from { transform: translateX(-40vw); }
-      to { transform: translateX(120vw); }
-    }
-
-    /* Chớp bão */
-    #stormFlash {
-      position: absolute;
-      inset: 0;
-      background: #ffffff;
-      opacity: 0;
-      pointer-events: none;
-    }
-    body.wx-storm #stormFlash {
-      animation: animStormLightning 8s infinite;
-    }
-    @keyframes animStormLightning {
-      0%, 91%, 95%, 100% { opacity: 0; }
-      92% { opacity: 0.65; }
-      94% { opacity: 0.85; }
-    }
-
-    /* ------------------------------------------------------------------
-       SVG THẾ GIỚI TỰ NHIÊN (NÚI, ĐỒI CỎ, CÂY CỐI & ĐẠO CỤ HALLOWEEN)
-       Khắc phục vệt trắng trên núi & chiều sâu cây bị che
-       ------------------------------------------------------------------ */
-    #natureScene {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100%;
-      height: 64vh;
-      min-height: 480px;
-      display: block;
-      vertical-align: bottom;
-    }
-
-    /* Đu đưa cỏ tự nhiên */
-    #gGrassLayerBack {
-      animation: animGrassSway 5s ease-in-out infinite alternate;
-      transform-origin: bottom center;
-    }
-    #gGrassLayerMid {
-      animation: animGrassSway 4s ease-in-out infinite alternate-reverse;
-      transform-origin: bottom center;
-    }
-    #gGrassLayerFront {
-      animation: animGrassSway 3.2s ease-in-out infinite alternate;
-      transform-origin: bottom center;
-    }
-    @keyframes animGrassSway {
-      from { transform: skewX(-1.5deg); }
-      to { transform: skewX(1.8deg); }
-    }
-
-    /* Cây cối đung đưa theo gió */
-    .scene-tree {
-      transform-origin: bottom center;
-      animation: animTreeWind 4.8s ease-in-out infinite alternate;
-    }
-    .scene-tree:nth-child(2n) {
-      animation-delay: -1.6s;
-      animation-duration: 5.4s;
-    }
-    .scene-tree:nth-child(3n) {
-      animation-delay: -2.8s;
-      animation-duration: 4.2s;
-    }
-    @keyframes animTreeWind {
-      from { transform: rotate(-1.2deg); }
-      to { transform: rotate(1.4deg); }
-    }
-
-    /* ------------------------------------------------------------------
-       HỆ THỐNG SINH VẬT TRÊN KHÔNG (CHIM & DƠI)
-       - Ban ngày đẹp trời: Chim tung cánh
-       - Ban đêm, bão, mưa: Chim ẩn
-       - Halloween: Tự động đổi thành dơi
-       ------------------------------------------------------------------ */
-    .air-creature {
-      position: absolute;
-      animation: animCreatureFlight linear infinite;
-      will-change: transform;
-      z-index: 10;
-    }
-
-    /* Cánh chim vỗ */
-    .bird-wing-left {
-      transform-origin: 20px 10px;
-      animation: animBirdFlapLeft 0.42s ease-in-out infinite alternate;
-    }
-    .bird-wing-right {
-      transform-origin: 20px 10px;
-      animation: animBirdFlapRight 0.42s ease-in-out infinite alternate;
-    }
-    @keyframes animBirdFlapLeft {
-      from { transform: rotate(24deg); }
-      to { transform: rotate(-20deg); }
-    }
-    @keyframes animBirdFlapRight {
-      from { transform: rotate(-24deg); }
-      to { transform: rotate(20deg); }
-    }
-
-    /* Cánh dơi vỗ */
-    .bat-wing-left {
-      transform-origin: 24px 12px;
-      animation: animBatFlapLeft 0.32s ease-in-out infinite alternate;
-    }
-    .bat-wing-right {
-      transform-origin: 24px 12px;
-      animation: animBatFlapRight 0.32s ease-in-out infinite alternate;
-    }
-    @keyframes animBatFlapLeft {
-      from { transform: rotate(32deg) scaleY(1.1); }
-      to { transform: rotate(-28deg) scaleY(0.85); }
-    }
-    @keyframes animBatFlapRight {
-      from { transform: rotate(-32deg) scaleY(1.1); }
-      to { transform: rotate(28deg) scaleY(0.85); }
-    }
-
-    @keyframes animCreatureFlight {
-      0% { transform: translate(-15vw, 0); }
-      50% { transform: translate(50vw, -4vh); }
-      100% { transform: translate(115vw, 0); }
-    }
-
-    /* ------------------------------------------------------------------
-       SỰ KIỆN HALLOWEEN ĐẶC BIỆT: TƠ NHỆN & BÍ NGÔ PHÁT SÁNG 3D
-       ------------------------------------------------------------------ */
-    #halloweenDecorLayer {
-      display: none;
-    }
-    body.theme-halloween #halloweenDecorLayer {
-      display: block;
-    }
-
-    /* Tơ nhện giăng góc màn hình */
-    .corner-web {
-      position: fixed;
-      width: 140px;
-      height: 140px;
-      pointer-events: none;
-      z-index: 985;
-      opacity: 0.72;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
-    }
-    .corner-web.top-left { top: 0; left: 0; }
-    .corner-web.top-right { top: 0; right: 0; transform: scaleX(-1); }
-
-    /* Con nhện đung đưa */
-    .hanging-spider {
-      transform-origin: top center;
-      animation: animSpiderBob 4s ease-in-out infinite alternate;
-    }
-    @keyframes animSpiderBob {
-      0% { transform: translateY(0) rotate(-3deg); }
-      50% { transform: translateY(18px) rotate(4deg); }
-      100% { transform: translateY(0) rotate(-3deg); }
-    }
-
-    /* Bí ngô nhấp nháy ánh nến ma quái */
-    .pumpkin-carving {
-      fill: #ffdf40;
-      filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.95)) drop-shadow(0 0 14px rgba(255, 90, 0, 0.7));
-      animation: animPumpkinFlicker 2.5s ease-in-out infinite alternate;
-    }
-    @keyframes animPumpkinFlicker {
-      0%, 100% { opacity: 0.95; filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.95)) drop-shadow(0 0 12px rgba(255, 90, 0, 0.65)); }
-      50% { opacity: 0.75; filter: drop-shadow(0 0 3px rgba(255, 140, 0, 0.75)) drop-shadow(0 0 8px rgba(255, 60, 0, 0.45)); }
-      75% { opacity: 1; filter: drop-shadow(0 0 9px rgba(255, 200, 0, 1)) drop-shadow(0 0 18px rgba(255, 90, 0, 0.9)); }
-    }
-
-    /* Canvas hiệu ứng thời tiết (Mưa, Tuyết, Sương mù, Đom đóm...) */
-    #weatherCanvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    /* ------------------------------------------------------------------
-       HEADER NAVIGATION TRÊN CÙNG
-       ------------------------------------------------------------------ */
-    #mainHeader {
-      position: fixed;
-      top: 14px;
-      left: 18px;
-      right: 18px;
-      z-index: 800;
-      max-width: 1320px;
-      margin: 0 auto;
-    }
-
-    .header-inner {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 14px;
-      border-radius: 20px;
-    }
-
-    /* Logo thương hiệu */
-    .brand-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: 0.04em;
-    }
-    .brand-badge {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: var(--brand-gradient);
-      box-shadow: 0 4px 14px var(--brand-glow);
-    }
-    .brand-badge svg {
-      width: 22px;
-      height: 22px;
-      fill: #ffffff;
-    }
-    .brand-title {
-      background: linear-gradient(135deg, #ffffff 40%, var(--brand-secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-spacer {
-      flex: 1;
-    }
-
-    /* Nút icon tròn trên header */
-    .hdr-btn {
-      height: 40px;
-      padding: 0 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      border-radius: 14px;
-      font-size: 12.5px;
-      font-weight: 700;
-      color: var(--txt-primary);
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .hdr-btn.icon-only {
-      width: 40px;
-      padding: 0;
-    }
-    .hdr-btn svg {
-      width: 18px;
-      height: 18px;
-      stroke-width: 2;
-    }
-    .hdr-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    /* Trạng thái âm thanh sóng nhạc */
-    .sound-bars {
-      display: inline-flex;
-      align-items: flex-end;
-      gap: 2.5px;
-      height: 14px;
-    }
-    .sound-bar {
-      width: 2.5px;
-      height: 4px;
-      border-radius: 99px;
-      background: var(--brand-secondary);
-      transition: height 0.2s ease;
-    }
-    body.sound-active .sound-bar:nth-child(1) { animation: animAudioBar 0.6s infinite alternate ease-in-out; }
-    body.sound-active .sound-bar:nth-child(2) { animation: animAudioBar 0.9s infinite alternate 0.2s ease-in-out; }
-    body.sound-active .sound-bar:nth-child(3) { animation: animAudioBar 0.7s infinite alternate 0.4s ease-in-out; }
-    @keyframes animAudioBar {
-      from { height: 3px; }
-      to { height: 14px; }
-    }
-
-    @media (max-width: 680px) {
-      .hdr-text { display: none; }
-      .brand-title { display: none; }
-    }
-
-    /* ------------------------------------------------------------------
-       NÚT TIỆN ÍCH TRUNG TÂM (FAB CHÍNH DƯỚI ĐÁY)
-       ------------------------------------------------------------------ */
-    #fabUtilities {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%);
-      z-index: 750;
-      padding: 14px 34px;
-      border-radius: 99px;
-      font-size: 14.5px;
-      font-weight: 800;
-      letter-spacing: 0.03em;
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, rgba(124, 92, 255, 0.75) 0%, rgba(36, 223, 200, 0.75) 100%);
-      box-shadow: 0 12px 36px -6px rgba(124, 92, 255, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.35);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: transform 0.28s var(--ease-bounce), box-shadow 0.28s ease;
-    }
-    #fabUtilities svg {
-      width: 19px;
-      height: 19px;
-    }
-    #fabUtilities:hover {
-      transform: translateX(-50%) translateY(-3px) scale(1.02);
-      box-shadow: 0 18px 44px -6px rgba(124, 92, 255, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.5);
-    }
-    #fabUtilities:active {
-      transform: translateX(-50%) scale(0.96);
-    }
-
-    /* ------------------------------------------------------------------
-       MENU GÓC PHẢI (ĐÃ LOẠI BỎ SCRIPT, APK, IOS, LINK; GIỮ CÁC MỤC CÓ TÊN)
-       ------------------------------------------------------------------ */
-    #flyoutMenu {
-      position: fixed;
-      top: 68px;
-      right: 18px;
-      width: 250px;
-      z-index: 850;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      transform: translateY(-10px) scale(0.92);
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.3s var(--ease-bounce), opacity 0.25s ease;
-      border-radius: 22px;
-    }
-    #flyoutMenu.is-open {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 14px;
-      border-radius: 14px;
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--txt-secondary);
-      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-    }
-    .menu-item svg {
-      width: 19px;
-      height: 19px;
-      stroke-width: 2;
-    }
-    .menu-item:hover {
-      color: var(--txt-primary);
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateX(3px);
-    }
-    .menu-divider {
-      height: 1px;
-      background: var(--border-subtle);
-      margin: 4px 6px;
-    }
-
-    /* ------------------------------------------------------------------
-       KHU VỰC NỘI DUNG CHÍNH (MAIN VIEWPORT)
-       ------------------------------------------------------------------ */
-    #mainContent {
-      position: relative;
-      z-index: 10;
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 96px 20px 120px;
-      min-height: 80vh;
-    }
-
-    .app-view {
-      display: none;
-    }
-    .app-view.active-view {
-      display: block;
-      animation: animViewEntry 0.42s var(--ease-fluid) forwards;
-    }
-    @keyframes animViewEntry {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Hero Banner trang chủ */
-    .hero-card {
-      padding: 38px 30px;
-      border-radius: 30px;
-      margin-bottom: 24px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
-    }
-    .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 99px;
-      font-size: 11.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      background: rgba(124, 92, 255, 0.2);
-      color: var(--brand-secondary);
-      border: 1px solid rgba(124, 92, 255, 0.35);
-      margin-bottom: 14px;
-    }
-    .hero-card h1 {
-      font-size: clamp(26px, 5vw, 44px);
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 10px;
-    }
-    .hero-card p {
-      font-size: 15px;
-      color: var(--txt-secondary);
-      max-width: 680px;
-      line-height: 1.6;
-    }
-
-    /* Lưới các thẻ hiển thị (Cards Grid) */
-    .items-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    @media (min-width: 640px) {
-      .items-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (min-width: 1040px) {
-      .items-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-
-    /* Thẻ nội dung Liquid Glass */
-    .item-card {
-      padding: 18px;
-      border-radius: 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      cursor: pointer;
-    }
-    .item-card:hover {
-      transform: translateY(-4px);
-    }
-    .item-card-title {
-      font-size: 15.5px;
-      font-weight: 700;
-      color: var(--txt-primary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .item-badge {
-      font-size: 10px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 99px;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--brand-secondary);
-      text-transform: uppercase;
-    }
-    .item-desc {
-      font-size: 13px;
-      color: var(--txt-secondary);
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .code-preview-box {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 11.5px;
-      color: #92ffe8;
-      background: rgba(0, 0, 0, 0.32);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 10px;
-      max-height: 70px;
-      overflow: hidden;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-    .item-footer-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: auto;
-      padding-top: 6px;
-    }
-
-    /* Các kiểu nút bấm */
-    .btn-act {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 12.5px;
-      font-weight: 700;
-      transition: transform 0.2s var(--ease-snappy), background 0.2s ease, box-shadow 0.2s ease;
-    }
-    .btn-act.primary {
-      background: var(--brand-gradient);
-      color: #ffffff;
-      box-shadow: 0 4px 14px var(--brand-glow);
-    }
-    .btn-act.primary:hover {
-      box-shadow: 0 6px 20px rgba(124, 92, 255, 0.5);
-    }
-    .btn-act.ghost {
-      background: rgba(255, 255, 255, 0.07);
-      color: var(--txt-secondary);
-      border: 1px solid var(--border-subtle);
-    }
-    .btn-act.ghost:hover {
-      color: var(--txt-primary);
-      background: rgba(255, 255, 255, 0.12);
-    }
-    .btn-act:active {
-      transform: scale(0.95);
-    }
-    .btn-act svg {
-      width: 15px;
-      height: 15px;
-      stroke-width: 2;
-    }
-
-    /* ------------------------------------------------------------------
-       LỚP PHỦ MỜ NỀN (GLOBAL BACKDROP OVERLAY)
-       ------------------------------------------------------------------ */
-    #globalOverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 820;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    #globalOverlay.is-visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* ------------------------------------------------------------------
-       POP-UP TIỆN ÍCH DẠNG TAB TRUNG TÂM (ĐÃ NÂNG CẤP HOÀN TOÀN)
-       - Mở ra là tab Script đầu tiên
-       - Chuyển tab mượt mà sang APK, iOS, Link
-       - Tích hợp tìm kiếm nhanh & badge số lượng
-       ------------------------------------------------------------------ */
-    #utilityModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.93);
-      width: min(860px, 94vw);
-      max-height: 86vh;
-      z-index: 860;
-      display: flex;
-      flex-direction: column;
-      border-radius: 28px;
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.34s var(--ease-bounce), opacity 0.28s ease;
-    }
-    #utilityModal.is-open {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 24px 14px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .modal-head-title {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-    .modal-close-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--txt-secondary);
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-    .modal-close-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: var(--txt-primary);
-    }
-
-    /* Thanh chọn Tab trong Tiện ích */
-    .util-tab-nav {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 24px 6px;
-      overflow-x: auto;
-    }
-    .util-tab-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 9px 18px;
-      border-radius: 99px;
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--txt-secondary);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      transition: all 0.22s ease;
-      white-space: nowrap;
-    }
-    .util-tab-btn:hover {
-      color: var(--txt-primary);
-      background: rgba(255, 255, 255, 0.1);
-    }
-    .util-tab-btn.tab-active {
-      color: #ffffff;
-      background: var(--brand-gradient);
-      border-color: transparent;
-      box-shadow: 0 4px 16px var(--brand-glow);
-    }
-    .util-tab-count {
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 99px;
-      background: rgba(0, 0, 0, 0.25);
-    }
-
-    /* Ô tìm kiếm trong Tiện ích */
-    .util-search-box {
-      padding: 8px 24px 14px;
-      position: relative;
-    }
-    .util-search-input {
-      width: 100%;
-      padding: 12px 16px 12px 42px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-subtle);
-      font-size: 13.5px;
-      color: var(--txt-primary);
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-    .util-search-input:focus {
-      border-color: var(--brand-secondary);
-      background: rgba(255, 255, 255, 0.09);
-    }
-    .util-search-icon {
-      position: absolute;
-      left: 36px;
-      top: 21px;
-      width: 17px;
-      height: 17px;
-      stroke: var(--txt-muted);
-      pointer-events: none;
-    }
-
-    /* Nội dung các danh mục tiện ích */
-    .modal-scroll-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 6px 24px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* Thông báo ghim nhỏ trong Tiện ích */
-    .util-broadcast-banner {
-      padding: 11px 16px;
-      border-radius: 14px;
-      font-size: 13px;
-      color: var(--txt-secondary);
-      background: rgba(124, 92, 255, 0.08);
-      border: 1px dashed rgba(124, 92, 255, 0.35);
-      line-height: 1.5;
-    }
-
-    /* ------------------------------------------------------------------
-       MODAL CHI TIẾT DỮ LIỆU
-       ------------------------------------------------------------------ */
-    #detailModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.92);
-      width: min(620px, 94vw);
-      max-height: 82vh;
-      z-index: 870;
-      display: flex;
-      flex-direction: column;
-      border-radius: 26px;
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.3s var(--ease-bounce), opacity 0.25s ease;
-    }
-    #detailModal.is-open {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* ------------------------------------------------------------------
-       MODAL ĐĂNG NHẬP & HỒ SƠ TÀI KHOẢN (ĐÃ TÁCH KHỎI DEV PANEL)
-       ------------------------------------------------------------------ */
-    #authModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.92);
-      width: min(440px, 92vw);
-      z-index: 865;
-      display: flex;
-      flex-direction: column;
-      border-radius: 26px;
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.3s var(--ease-bounce), opacity 0.25s ease;
-    }
-    #authModal.is-open {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-    .form-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--txt-secondary);
-    }
-    .form-input {
-      padding: 12px 14px;
-      border-radius: 13px;
-      font-size: 13.5px;
-      color: var(--txt-primary);
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-subtle);
-      transition: border-color 0.2s ease;
-    }
-    .form-input:focus {
-      border-color: var(--brand-secondary);
-    }
-
-    /* ------------------------------------------------------------------
-       DEV CONTROL CENTER (TOÀN QUYỀN ĐIỀU KHIỂN & ĐỘC LẬP)
-       Khắc phục hoàn toàn lỗi xung đột gây gián đoạn
-       ------------------------------------------------------------------ */
-    #devControlStudio {
-      position: fixed;
-      inset: 0;
-      z-index: 950;
-      display: none;
-      flex-direction: column;
-      background: rgba(8, 12, 22, 0.96);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-    #devControlStudio.is-active {
-      display: flex;
-    }
-
-    .dev-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .dev-tab-header {
-      display: flex;
-      gap: 6px;
-      padding: 10px 24px;
-      overflow-x: auto;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .dev-tab-chip {
-      padding: 8px 16px;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--txt-secondary);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-    .dev-tab-chip.chip-active {
-      color: #ffffff;
-      background: var(--brand-gradient);
-      border-color: transparent;
-    }
-
-    .dev-viewport-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-width: 980px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    .dev-pane-content {
-      display: none;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .dev-pane-content.pane-visible {
-      display: flex;
-    }
-
-    .dev-row-card {
-      padding: 16px 18px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-
-    /* Switch toggle */
-    .switch-toggle {
-      position: relative;
-      width: 46px;
-      height: 26px;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-    .switch-toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .switch-slider {
-      position: absolute;
-      inset: 0;
-      border-radius: 99px;
-      background: rgba(255, 255, 255, 0.16);
-      transition: background 0.3s ease;
-      cursor: pointer;
-    }
-    .switch-slider::before {
-      content: "";
-      position: absolute;
-      height: 20px;
-      width: 20px;
-      left: 3px;
-      bottom: 3px;
-      border-radius: 50%;
-      background: #ffffff;
-      transition: transform 0.3s var(--ease-bounce);
-    }
-    .switch-toggle input:checked + .switch-slider {
-      background: var(--brand-secondary);
-    }
-    .switch-toggle input:checked + .switch-slider::before {
-      transform: translateX(20px);
-    }
-
-    /* Toast Notifications */
-    #toastContainer {
-      position: fixed;
-      bottom: 96px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-      max-width: 90vw;
-    }
-    .toast-msg {
-      padding: 11px 20px;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #ffffff;
-      background: rgba(15, 22, 38, 0.92);
-      border: 1px solid var(--lg-border-top);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(12px);
-      animation: animToastIn 0.35s var(--ease-bounce) forwards;
-    }
-    .toast-msg.toast-out {
-      animation: animToastOut 0.28s ease forwards;
-    }
-    @keyframes animToastIn {
-      from { opacity: 0; transform: translateY(18px) scale(0.9); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @keyframes animToastOut {
-      to { opacity: 0; transform: translateY(14px) scale(0.9); }
-    }
-
-    /* Màn hình tải trang ban đầu */
-    #appLoader {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(180deg, #060914 0%, #0d1424 100%);
-      transition: opacity 0.5s ease;
-    }
-    #appLoader.loader-done {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .loader-spinner-wrap {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      display: grid;
-      place-items: center;
-    }
-    .loader-ring {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-top-color: var(--brand-secondary);
-      animation: animLoaderSpin 1.1s linear infinite;
-    }
-    @keyframes animLoaderSpin {
-      to { transform: rotate(360deg); }
-    }
-    .loader-emblem {
-      font-size: 42px;
-      font-weight: 800;
-      background: var(--brand-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: animEmblemPulse 1.6s ease-in-out infinite alternate;
-    }
-    @keyframes animEmblemPulse {
-      from { transform: scale(0.92); }
-      to { transform: scale(1.08); }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SKIBIDI SCRIPT — Scripts, APK, iOS & Utilities</title>
+<meta name="description" content="SKIBIDI SCRIPT — nền tảng tiện ích Script, APK, iOS, Link trong môi trường thiên nhiên sống động với kính lỏng trong suốt.">
+<link rel="canonical" href="https://skibidiscript.vercel.app/">
+<meta property="og:title" content="SKIBIDI SCRIPT">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0a0e16">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%230e1420'/%3E%3Cpath d='M60 32c-2-5-7-8-12-8-7 0-12 4-12 9 0 11 25 7 25 19 0 6-6 10-13 10-6 0-11-3-13-7' fill='none' stroke='%2329d6c5' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--sky-top:#0a0e16;--sky-bot:#14203c;--m1:#16223c;--m2:#101a30;--grassB:#2a5f38;--grass:#1d4a2c;--grassF:#12301f;--tree:#0e2418;--sil:#0a1226;--ap:#7c5cff;--as:#29d6c5;--danger:#ff7b7b;--t1:#f4f7fb;--t2:#c8d1e3;--bs:rgba(255,255,255,.2);--tint:rgba(12,20,38,.3);--ez:cubic-bezier(.22,1,.36,1);--sp:cubic-bezier(.34,1.56,.64,1)}
+body.day{--t1:#0f1a2e;--t2:#33405c;--bs:rgba(20,30,60,.22);--tint:rgba(255,255,255,.28)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#0a0e16}
+body{font-family:"Be Vietnam Pro",system-ui,sans-serif;color:var(--t1);min-height:100vh;overflow-x:hidden;background:linear-gradient(var(--sky-top),var(--sky-bot)) fixed;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select,textarea{font-family:inherit}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(128,140,170,.4);border-radius:99px}
+:focus-visible{outline:2px solid var(--as);outline-offset:2px}
+/* LIQUID GLASS: trong suốt, KHÔNG blur nền — chỉ viền sáng, ánh phản chiếu, bóng trong */
+.lg{position:relative;border-radius:24px;
+ background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.02) 42%,rgba(255,255,255,.08)),var(--tint);
+ -webkit-backdrop-filter:saturate(1.4) brightness(1.1);backdrop-filter:saturate(1.4) brightness(1.1);
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -1px 1px rgba(255,255,255,.2),inset 0 0 22px rgba(255,255,255,.06),0 8px 22px rgba(0,0,0,.18)}
+.lg::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+ background:linear-gradient(140deg,rgba(255,255,255,.95),rgba(255,255,255,.06) 32%,rgba(255,255,255,.06) 66%,rgba(255,255,255,.6));
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.lg::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+ background:radial-gradient(110% 55% at 18% -8%,rgba(255,255,255,.3),transparent 56%),linear-gradient(180deg,transparent 72%,rgba(255,255,255,.1))}
+.lg>*{position:relative;z-index:1}
+body:not(.day) .lg{text-shadow:0 1px 3px rgba(0,0,0,.35)}
+.pressed{animation:press .35s var(--sp)}
+@keyframes press{40%{transform:scale(1.045)}}
+/* MÔI TRƯỜNG */
+#envWrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#stars{position:absolute;width:2px;height:2px;border-radius:50%;opacity:0;transition:opacity 1.2s}
+body.tod-night #stars,body.tod-deepnight #stars,body.tod-twilight #stars{opacity:1}
+#sun,#moon{position:absolute;width:64px;height:64px;border-radius:50%;will-change:left,top;transition:opacity .8s,width .6s,height .6s}
+#sun{background:radial-gradient(circle at 35% 35%,#fff6d8,#ffd76a);box-shadow:0 0 60px 20px rgba(255,220,130,.35)}
+#moon{background:radial-gradient(circle at 35% 35%,#f4f7fb,#b9c4dd);box-shadow:0 0 46px 14px rgba(190,205,255,.3)}
+body.theme-halloween #moon{width:96px;height:96px;background:radial-gradient(circle at 38% 36%,#ffe2a8,#ff8a2a 75%);box-shadow:0 0 90px 30px rgba(255,130,30,.4)}
+.cloud{position:absolute;filter:blur(6px);animation:cl linear infinite}
+.cloud i{position:absolute;background:rgba(255,255,255,.35);border-radius:50%}
+body.day .cloud i{background:rgba(255,255,255,.75)}
+.cloud i:nth-child(1){width:120px;height:34px;left:0;top:10px}.cloud i:nth-child(2){width:70px;height:40px;left:26px;top:-8px}.cloud i:nth-child(3){width:80px;height:30px;left:70px;top:14px}
+@keyframes cl{from{transform:translateX(-25%)}to{transform:translateX(120vw)}}
+#flash{position:absolute;inset:0;background:#fff;opacity:0}
+body.wx-storm #flash{animation:fl 7s infinite}
+@keyframes fl{0%,92%,96%,100%{opacity:0}93%,95%{opacity:.4}}
+#wind{position:absolute;inset:0;overflow:hidden}
+.wstreak{position:absolute;height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:wst linear infinite;opacity:0;transition:opacity 1s}
+body.wx-wind .wstreak,body.wx-storm .wstreak{opacity:.4}
+@keyframes wst{from{transform:translateX(-30%)}to{transform:translateX(130%)}}
+#envSvg{position:absolute;left:0;right:0;bottom:0;width:100%;height:62vh}
+#gGrassBack,#gGrassMid,#gGrassFront{transform-box:fill-box;transform-origin:50% 100%}
+#gGrassBack{animation:gsway 4.6s ease-in-out infinite alternate}
+#gGrassMid{animation:gsway 3.6s ease-in-out infinite alternate-reverse}
+#gGrassFront{animation:gsway 3s ease-in-out infinite alternate}
+@keyframes gsway{from{transform:skewX(-1.5deg)}to{transform:skewX(1.5deg)}}
+.tree{transform-box:fill-box;transform-origin:50% 100%;animation:tw 4.5s ease-in-out infinite alternate}
+@keyframes tw{from{transform:rotate(-1deg)}to{transform:rotate(1deg)}}
+.bird,.bat{position:absolute;opacity:0;transition:opacity 1.2s;animation:fly linear infinite}
+.bird .wl,.bat .wl{transform-origin:20px 10px;animation:flap .5s ease-in-out infinite alternate}
+.bird .wr,.bat .wr{transform-origin:20px 10px;animation:flapR .5s ease-in-out infinite alternate}
+.bat .wl,.bat .wr{transform-origin:23px 12px;animation-duration:.22s}
+@keyframes flap{from{transform:rotate(14deg)}to{transform:rotate(-10deg)}}
+@keyframes flapR{from{transform:rotate(-14deg)}to{transform:rotate(10deg)}}
+@keyframes fly{0%{transform:translate(-12vw,0)}50%{transform:translate(50vw,-5vh)}100%{transform:translate(112vw,0)}}
+body.birds-on .bird{opacity:1}body.theme-halloween .bat{opacity:1}
+.pf{animation:flick 2.6s infinite;filter:drop-shadow(0 0 5px #ffb000)}
+@keyframes flick{0%,100%{opacity:1}45%{opacity:.82}50%{opacity:.6}55%{opacity:.95}}
+#gTHallow,#gTXmas,#gTTet{display:none}
+body.theme-halloween #gTHallow{display:block}body.theme-christmas #gTXmas{display:block}body.theme-tet #gTTet{display:block}
+#webL,#webR{display:none;position:fixed;top:0;z-index:2;width:min(46vmin,340px);height:min(46vmin,340px);pointer-events:none;overflow:hidden}
+#webL{left:0}#webR{right:0;transform:scaleX(-1)}
+body.theme-halloween #webL,body.theme-halloween #webR{display:block}
+.bobg{animation:bob 3.4s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(16px)}}
+#fog{position:absolute;inset:0;opacity:0;transition:opacity 1s;background:linear-gradient(180deg,transparent,rgba(200,210,225,.18),transparent)}
+body.wx-rain #fog,body.wx-snow #fog{opacity:.5}body.wx-fog #fog{opacity:.8}body.theme-halloween #fog{opacity:.6;background:linear-gradient(180deg,transparent 40%,rgba(255,140,60,.16),transparent)}
+#fx{position:absolute;inset:0}
+body.devopen #envWrap *{animation-play-state:paused!important}
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:700;display:grid;place-items:center;background:linear-gradient(#0a0e16,#14203c);transition:opacity .5s}
+#loader.hide{opacity:0;pointer-events:none}
+.lwrap{position:relative;width:130px;height:130px;display:grid;place-items:center}
+.lring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.15);border-top-color:#fff;animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lS{font-size:48px;font-weight:800;color:#fff;animation:lp 1.6s ease-in-out infinite}
+@keyframes lp{50%{transform:scale(1.08)}}
+/* HEADER / FAB / MENU */
+#hdr{position:fixed;top:16px;left:18px;right:18px;z-index:100}
+#hdr .in{display:flex;align-items:center;gap:8px;padding:8px 10px}
+.ibtn{width:40px;height:40px;flex:none;border-radius:14px;display:grid;place-items:center}
+.ibtn svg{width:19px;height:19px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;letter-spacing:.03em}
+.brand .lg-sm{width:34px;height:34px;border-radius:11px;display:grid;place-items:center}
+.brand .lg-sm svg{width:22px;height:22px}
+.sp{flex:1}
+.mod{display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:14px;font-size:12px;font-weight:600}
+.mod svg{width:15px;height:15px}
+@media(max-width:560px){.brand .tx{display:none}}
+#fabUtil{position:fixed;left:0;right:0;margin:0 auto;width:max-content;bottom:26px;z-index:120;padding:15px 38px;border-radius:99px;font-weight:800;font-size:15px}
+#fabUtil:active{transform:scale(.95)}
+#menu{position:fixed;top:72px;right:18px;z-index:175;width:230px;padding:10px;display:flex;flex-direction:column;gap:4px;transform:scale(.9) translateY(-8px);transform-origin:top right;opacity:0;pointer-events:none;transition:transform .3s var(--sp),opacity .25s}
+#menu.on{transform:none;opacity:1;pointer-events:auto}
+.mlink{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:14px;font-weight:600;font-size:14px;color:var(--t1);text-align:left;width:100%}
+.mlink:hover{background:rgba(255,255,255,.12)}
+.mlink svg{width:19px;height:19px;flex:none}
+#main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:100px 18px 120px}
+.hero{position:fixed;top:82px;left:24px;z-index:1;max-width:min(380px,72vw);pointer-events:none;text-shadow:0 2px 10px rgba(0,0,0,.45)}
+.hero h1{font-size:clamp(18px,4.2vw,28px);font-weight:800;line-height:1.15}
+.hero p{color:var(--t1);opacity:.85;margin-top:6px;font-size:12.5px}
+body.day .hero{text-shadow:0 1px 8px rgba(255,255,255,.6)}
+#ov{position:fixed;inset:0;z-index:170;background:rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .3s}
+#ov.on{opacity:1;pointer-events:auto}
+/* POPUP */
+.pop{--tint:rgba(10,16,30,.5);position:fixed;left:50%;top:50%;z-index:180;width:min(560px,94vw);max-height:84vh;display:flex;flex-direction:column;border-radius:28px;transform:translate(-50%,-50%) scale(.94);opacity:0;pointer-events:none;transition:opacity .35s var(--ez),transform .35s var(--ez)}
+body.day .pop{--tint:rgba(255,255,255,.5)}
+.pop.on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+#shUtil{width:min(980px,96vw);height:min(88vh,800px);max-height:none}
+#shUtil .p-b{flex:1;min-height:0}
+#shUtil .p-h h3{font-size:20px}
+#shUtil .utab{padding:13px 16px;font-size:14px}
+.p-h{display:flex;align-items:center;gap:10px;padding:16px 18px 10px}
+.p-h h3{flex:1;font-size:17px;font-weight:800}
+.p-b{overflow-y:auto;padding:6px 18px 20px;display:flex;flex-direction:column;gap:12px}
+.utabs{position:relative;display:flex;gap:4px;margin:0 18px 8px;padding:5px;border-radius:18px;background:rgba(255,255,255,.08);overflow-x:auto;flex:none}
+.utab{position:relative;z-index:1;flex:1;min-width:max-content;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:14px;font-size:13px;font-weight:700;color:var(--t2);transition:color .25s}
+.utab svg{width:16px;height:16px}.utab small{opacity:.7;font-size:11px}
+.utab.on{color:#fff}
+.uind{position:absolute;top:5px;bottom:5px;left:0;border-radius:14px;background:linear-gradient(120deg,var(--ap),var(--as));box-shadow:0 4px 14px rgba(124,92,255,.4);transition:transform .45s var(--ez),width .45s var(--ez)}
+#ulist{display:grid;grid-template-columns:1fr;gap:12px;transition:opacity .16s,transform .16s}
+@media(min-width:620px){#ulist{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){#ulist{grid-template-columns:repeat(3,1fr)}}
+#ulist.out{opacity:0;transform:translateY(8px)}
+#ulist>*{animation:cin .45s var(--ez) backwards;animation-delay:calc(var(--i,0)*45ms)}
+@keyframes cin{from{opacity:0;transform:translateY(14px) scale(.97)}}
+.utilNote{border-radius:14px;padding:12px 14px;font-size:13px;color:var(--t2);background:rgba(255,255,255,.07);border:1px dashed var(--bs)}
+.card{border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.card h3{font-size:14.5px;font-weight:700}
+.card .desc{color:var(--t2);font-size:12.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cfoot{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+pre.cprev{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#8de8dd;background:rgba(0,0,0,.3);border:1px solid var(--bs);border-radius:12px;padding:8px;max-height:60px;overflow:hidden;white-space:pre-wrap;word-break:break-all}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:12.5px;padding:9px 14px;border-radius:14px;transition:transform .25s var(--sp)}
+.btn:active{transform:scale(.94)}.btn svg{width:14px;height:14px}
+.btn-p{color:#fff;background:linear-gradient(120deg,var(--ap),var(--as));box-shadow:0 4px 16px rgba(124,92,255,.35)}
+.btn-g{color:var(--t1);background:rgba(255,255,255,.1);border:1px solid var(--bs)}
+.empty{grid-column:1/-1;padding:22px;text-align:center;color:var(--t2);font-size:13px}
+/* DEV PANEL: nền đặc, không blur → không lag */
+#dev{position:fixed;inset:0;z-index:300;display:none;flex-direction:column;background:#0b1020;color:#f4f7fb}
+#dev.on{display:flex}
+#dev .m-h{display:flex;align-items:center;gap:10px;padding:16px 18px 10px}
+#dev .m-h h3{flex:1;font-size:16px;font-weight:800}
+#dev .ibtn{background:rgba(255,255,255,.08)}#dev .ibtn svg{stroke:#fff}
+#dev .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.12)}
+#dev .tab{flex:none;padding:9px 16px;border-radius:99px;font-size:13px;font-weight:700;color:#a3aec2;background:rgba(255,255,255,.06)}
+#dev .tab.on{color:#fff;background:linear-gradient(120deg,var(--ap),var(--as))}
+#dev .body{flex:1;overflow-y:auto;padding:18px}
+#dev .pane{display:none}#dev .pane.on{display:flex;flex-direction:column;gap:12px;max-width:760px;margin:0 auto}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:11px;font-weight:700;color:#a3aec2;text-transform:uppercase}
+.fld input,.fld select,.fld textarea{padding:12px 13px;border-radius:12px;font-size:14px;color:inherit;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);outline:none;min-height:44px}
+.fld textarea{min-height:90px}.fld select option{color:#000}
+.fld input:focus,.fld textarea:focus{border-color:var(--as)}
+#mdAuth .fld input{color:var(--t1);background:rgba(255,255,255,.12);border:1px solid var(--bs)}
+#mdAuth .fld label{color:var(--t2)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{padding:9px 14px;border-radius:11px;font-size:12.5px;font-weight:700;color:#a3aec2;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14)}
+.seg button.on{color:#fff;background:linear-gradient(120deg,var(--ap),var(--as))}
+.sw{position:relative;width:44px;height:25px;flex:none}
+.sw input{position:absolute;inset:0;opacity:0;z-index:1;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.2)}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#fff;transition:transform .3s var(--sp)}
+.sw input:checked+i{background:var(--as)}.sw input:checked+i::after{transform:translateX(19px)}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:13px;font-weight:600}
+#mdAuth .srow{background:rgba(255,255,255,.1);border-color:var(--bs)}
+#devList details{border-radius:14px;overflow:hidden;background:rgba(255,255,255,.05);margin-bottom:8px}
+#devList summary{padding:12px;font-weight:700;cursor:pointer}
+.drow{display:flex;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid rgba(255,255,255,.1)}
+.drow span{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toasts{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);z-index:650;display:flex;flex-direction:column;gap:8px;max-width:92vw}
+.toast{border-radius:16px;padding:10px 16px;font-size:12.5px;font-weight:600;animation:tin .4s var(--sp);--tint:rgba(10,16,30,.6);color:#fff}
+.toast.out{animation:tout .3s forwards}
+@keyframes tin{from{opacity:0;transform:translateY(20px)}}
+@keyframes tout{to{opacity:0;transform:translateY(20px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
 </head>
-
-<body class="theme-normal is-night">
-  <!-- Viền ambient chống cắt góc trên Chrome -->
-  <div id="ambientFrame" aria-hidden="true"></div>
-
-  <!-- ======================================================================
-       TƠ NHỆN & TRANG TRÍ HALLOWEEN GÓC MÀN HÌNH
-       ====================================================================== -->
-  <svg class="corner-web top-left" viewBox="0 0 100 100" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.8">
-    <path d="M0 0 L100 0 M0 0 L0 100 M0 0 L90 40 M0 0 L40 90 M0 0 L70 70"/>
-    <path d="M25 0 Q20 20 0 25 M50 0 Q40 40 0 50 M75 0 Q60 60 0 75 M100 0 Q80 80 0 100"/>
-    <!-- Nhện treo lơ lửng -->
-    <g class="hanging-spider">
-      <line x1="50" y1="0" x2="50" y2="45" stroke="rgba(255,255,255,0.45)" stroke-width="0.6"/>
-      <ellipse cx="50" cy="48" rx="4" ry="5.5" fill="#120c1a"/>
-      <circle cx="50" cy="44" r="2.8" fill="#1d132b"/>
-      <!-- Chân nhện -->
-      <path d="M48 46 Q42 42 38 46 M52 46 Q58 42 62 46 M48 48 Q40 48 36 53 M52 48 Q60 48 64 53 M48 50 Q42 56 39 60 M52 50 Q58 56 61 60" stroke="#120c1a" stroke-width="0.8" fill="none"/>
+<body class="theme-normal tod-night">
+<div id="envWrap" aria-hidden="true">
+  <div id="stars"></div><div id="sun"></div><div id="moon"></div>
+  <div class="cloud" style="top:10%;animation-duration:70s"><i></i><i></i><i></i></div>
+  <div class="cloud" style="top:20%;animation-duration:95s;animation-delay:-30s"><i></i><i></i><i></i></div>
+  <div class="cloud" style="top:6%;animation-duration:120s;animation-delay:-60s"><i></i><i></i><i></i></div>
+  <div class="cloud" style="top:28%;animation-duration:80s;animation-delay:-15s"><i></i><i></i><i></i></div>
+  <div id="wind"></div><div id="flash"></div>
+  <div class="bird" style="top:16%;animation-duration:40s"><svg width="40" height="20" viewBox="0 0 40 20"><path class="wl" d="M20 10 Q12 2 4 8 Q12 8 20 12Z" fill="var(--sil)"/><path class="wr" d="M20 10 Q28 2 36 8 Q28 8 20 12Z" fill="var(--sil)"/><ellipse cx="20" cy="11" rx="4" ry="2.5" fill="var(--sil)"/></svg></div>
+  <div class="bird" style="top:24%;animation-duration:55s;animation-delay:-22s"><svg width="30" height="15" viewBox="0 0 40 20"><path class="wl" d="M20 10 Q12 2 4 8 Q12 8 20 12Z" fill="var(--sil)"/><path class="wr" d="M20 10 Q28 2 36 8 Q28 8 20 12Z" fill="var(--sil)"/><ellipse cx="20" cy="11" rx="4" ry="2.5" fill="var(--sil)"/></svg></div>
+  <div class="bat" style="top:14%;animation-duration:26s"><svg width="46" height="24" viewBox="0 0 46 24"><path class="wl" d="M23 12 Q15 0 2 6 Q8 8 10 14 Q14 10 17 14 Q20 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><path class="wr" d="M23 12 Q31 0 44 6 Q38 8 36 14 Q32 10 29 14 Q26 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><ellipse cx="23" cy="13" rx="3.5" ry="5" fill="#1a0f2c"/></svg></div>
+  <div class="bat" style="top:26%;animation-duration:34s;animation-delay:-12s"><svg width="34" height="18" viewBox="0 0 46 24"><path class="wl" d="M23 12 Q15 0 2 6 Q8 8 10 14 Q14 10 17 14 Q20 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><path class="wr" d="M23 12 Q31 0 44 6 Q38 8 36 14 Q32 10 29 14 Q26 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><ellipse cx="23" cy="13" rx="3.5" ry="5" fill="#1a0f2c"/></svg></div>
+  <div class="bat" style="top:8%;animation-duration:22s;animation-delay:-6s"><svg width="40" height="21" viewBox="0 0 46 24"><path class="wl" d="M23 12 Q15 0 2 6 Q8 8 10 14 Q14 10 17 14 Q20 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><path class="wr" d="M23 12 Q31 0 44 6 Q38 8 36 14 Q32 10 29 14 Q26 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><ellipse cx="23" cy="13" rx="3.5" ry="5" fill="#1a0f2c"/></svg></div>
+  <div class="bat" style="top:33%;animation-duration:30s;animation-delay:-18s"><svg width="28" height="15" viewBox="0 0 46 24"><path class="wl" d="M23 12 Q15 0 2 6 Q8 8 10 14 Q14 10 17 14 Q20 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><path class="wr" d="M23 12 Q31 0 44 6 Q38 8 36 14 Q32 10 29 14 Q26 11 23 14Z" fill="#1a0f2c" stroke="#ff9a3c" stroke-opacity=".5" stroke-width=".8"/><ellipse cx="23" cy="13" rx="3.5" ry="5" fill="#1a0f2c"/></svg></div>
+  <svg id="envSvg" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <g id="pkb"><ellipse cx="-17" cy="0" rx="17" ry="26" fill="#c94f0a"/><ellipse cx="17" cy="0" rx="17" ry="26" fill="#c94f0a"/><ellipse cx="-9" cy="0" rx="17" ry="28" fill="#ea7016"/><ellipse cx="9" cy="0" rx="17" ry="28" fill="#ea7016"/><ellipse cx="0" cy="0" rx="14" ry="29" fill="#ff8f2a"/><path d="M-9 -26 Q-14 0 -9 26M9 -26 Q14 0 9 26M-22 -20 Q-26 0 -22 20M22 -20 Q26 0 22 20" stroke="#b03e06" stroke-width="1.4" fill="none" opacity=".7"/><path d="M-3 -28 q0 -8 5 -10 l3 3 q-4 2 -3 8z" fill="#4a6b2a"/><path d="M3 -36 q8 -3 10 3" stroke="#4a6b2a" stroke-width="2" fill="none"/></g>
+      <g id="pk1"><use href="#pkb"/><g class="pf" fill="#ffe27a"><path d="M-18 -6 l7 -12 l7 12z M4 -6 l7 -12 l7 12z M-3 3 l3 -6 l3 6z"/><path d="M-21 8 q21 22 42 0 l-6 -3 -5 6 -5 -6 -5 6 -5 -6 -5 6 -5 -6z"/></g></g>
+      <g id="pk2"><use href="#pkb"/><g class="pf" fill="#ffe27a"><circle cx="-12" cy="-8" r="6"/><circle cx="12" cy="-8" r="6"/><path d="M-22 5 q22 26 44 0 q-22 9 -44 0z"/><path d="M-4 0 h8 l-4 6z"/></g></g>
+      <g id="pk3"><use href="#pkb"/><g class="pf" fill="#ffe27a"><path d="M-22 -16 l16 9 l-16 3z M22 -16 l-16 9 l16 3z"/><path d="M-13 6 h26 l-3 15 h-20z M-5 6 v6 M5 6 v6" /></g></g>
+    </defs>
+    <path fill="var(--m1)" opacity=".75" d="M0 340 C120 300 200 240 320 210 C420 185 480 230 560 200 C660 165 720 120 820 150 C920 180 980 230 1080 200 C1180 170 1260 140 1360 180 C1400 195 1420 210 1440 220 L1440 640 0 640Z"/>
+    <path fill="var(--m2)" d="M0 420 C160 380 260 340 400 330 C520 322 600 360 720 350 C860 338 940 300 1080 320 C1200 337 1320 370 1440 350 L1440 640 0 640Z"/>
+    <path id="gGrassBack" fill="var(--grassB)"></path>
+    <g id="gTrees"></g>
+    <path id="gGrassMid" fill="var(--grass)"></path>
+    <path id="gGrassFront" fill="var(--grassF)"></path>
+    <g id="gTHallow">
+      <g fill="var(--sil)"><path transform="translate(560 590)" d="M-14 0v-30a14 14 0 0 1 28 0v30z"/><path transform="translate(640 596) scale(.8)" d="M-14 0v-30a14 14 0 0 1 28 0v30z"/><path transform="translate(1180 592) scale(1.1)" d="M-14 0v-30a14 14 0 0 1 28 0v30z"/></g>
+      <path d="M90 590 v-90 m0 30 q-26 -12 -34 -34 m34 12 q24 -10 32 -30 m-32 -30 q-14 -8 -16 -22" stroke="var(--sil)" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <use href="#pk1" transform="translate(220 580) scale(1.35)"/><use href="#pk2" transform="translate(370 594) scale(.85)"/><use href="#pk3" transform="translate(780 584) scale(1.15)"/><use href="#pk1" transform="translate(960 596) scale(.8)"/><use href="#pk2" transform="translate(1290 578) scale(1.45)"/><use href="#pk3" transform="translate(1100 600) scale(.7)"/>
     </g>
+    <g id="gTXmas"><path d="M240 460 l34 60 h-68z" fill="var(--tree)"/><path d="M240 434 l28 50 h-56z" fill="rgba(255,255,255,.6)"/><path d="M1160 470 l30 54 h-60z" fill="var(--tree)"/><circle cx="232" cy="486" r="3" fill="#ff5b5b"/><circle cx="250" cy="498" r="3" fill="#ffd76a"/><circle cx="240" cy="470" r="3" fill="#29d6c5"/></g>
+    <g id="gTTet"><path d="M180 540 q40 -60 120 -70" stroke="#7a4a21" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#ff5b7a"><circle cx="220" cy="500" r="5"/><circle cx="250" cy="486" r="5"/><circle cx="284" cy="476" r="5"/></g><g fill="#ffd76a"><circle cx="236" cy="494" r="4"/><circle cx="268" cy="480" r="4"/></g><g fill="#e33"><rect x="1150" y="470" width="26" height="34" rx="8"/><rect x="1160" y="462" width="6" height="8" fill="#ffd76a"/></g></g>
   </svg>
-  <svg class="corner-web top-right" viewBox="0 0 100 100" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="0.8">
-    <path d="M0 0 L100 0 M0 0 L0 100 M0 0 L90 40 M0 0 L40 90 M0 0 L70 70"/>
-    <path d="M25 0 Q20 20 0 25 M50 0 Q40 40 0 50 M75 0 Q60 60 0 75 M100 0 Q80 80 0 100"/>
-  </svg>
-
-  <!-- ======================================================================
-       KHÔNG GIAN MÔI TRƯỜNG THIÊN NHIÊN (ENV WRAPPER)
-       ====================================================================== -->
-  <div id="envWrapper" aria-hidden="true">
-    <div id="starfield"></div>
-    <div id="sunBody"></div>
-    <div id="moonBody"></div>
-
-    <!-- Mây đa tầng lững lờ -->
-    <div class="sky-cloud" style="top: 8%; animation-duration: 90s;"><span></span><span></span><span></span></div>
-    <div class="sky-cloud" style="top: 18%; animation-duration: 120s; animation-delay: -35s;"><span></span><span></span><span></span></div>
-    <div class="sky-cloud" style="top: 28%; animation-duration: 80s; animation-delay: -65s;"><span></span><span></span><span></span></div>
-
-    <!-- Vệt gió & chớp bão -->
-    <div id="windStreaks"></div>
-    <div id="stormFlash"></div>
-
-    <!-- Vùng sinh vật trên không (Chim / Dơi sẽ được script tự động inject) -->
-    <div id="skyCreatureLayer"></div>
-
-    <!-- ====================================================================
-         SVG CẢNH QUAN NÚI NON, ĐỒI CỎ, CÂY CỐI & BÍ NGÔ 3D
-         Sửa triệt để lỗi vệt trắng trên núi và trật tự cây bị đè
-         ==================================================================== -->
-    <svg id="natureScene" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMax slice">
-      <defs>
-        <!-- Gradients núi xa mượt mà (không còn vệt trắng hay răng cưa) -->
-        <linearGradient id="gradMountainBack" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="var(--m-back)" stop-opacity="0.95"/>
-          <stop offset="100%" stop-color="var(--m-mid)" stop-opacity="1"/>
-        </linearGradient>
-
-        <linearGradient id="gradMountainMid" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="var(--m-mid)" stop-opacity="1"/>
-          <stop offset="100%" stop-color="var(--m-front)" stop-opacity="1"/>
-        </linearGradient>
-
-        <!-- Shading sườn núi mượt mà thay thế hoàn toàn tuyết trắng vỡ nét -->
-        <linearGradient id="gradMountainRidge" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="rgba(255,255,255,0.08)"/>
-          <stop offset="60%" stop-color="rgba(255,255,255,0.02)"/>
-          <stop offset="100%" stop-color="transparent"/>
-        </linearGradient>
-
-        <!-- Đèn bí ngô Halloween -->
-        <radialGradient id="gradPumpkinSkin" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stop-color="#ff9924"/>
-          <stop offset="55%" stop-color="#e06500"/>
-          <stop offset="100%" stop-color="#802b00"/>
-        </radialGradient>
-      </defs>
-
-      <!-- 1. DÃY NÚI HẬU CẢNH (XA NHẤT) -->
-      <path fill="url(#gradMountainBack)" d="M0,320 C140,270 240,210 380,180 C500,154 580,210 680,180 C800,144 880,95 1010,135 C1120,170 1220,230 1340,190 C1390,174 1420,180 1440,195 L1440,640 L0,640 Z"/>
-      <!-- Sườn núi ánh sáng mềm (Ridge highlight tự nhiên) -->
-      <path fill="url(#gradMountainRidge)" d="M380,180 L420,230 L360,260 Z M1010,135 L1060,195 L990,220 Z"/>
-
-      <!-- 2. DÃY NÚI TRUNG CẢNH -->
-      <path fill="url(#gradMountainMid)" d="M0,390 C180,340 300,310 440,290 C560,272 650,320 780,310 C920,300 1010,260 1150,285 C1260,305 1360,340 1440,325 L1440,640 L0,640 Z"/>
-
-      <!-- 3. ĐỒI CỎ TẦNG SAU (GRASS BACK) -->
-      <path id="gGrassLayerBack" fill="var(--grass-back)" d="M0,480 Q360,430 720,460 T1440,470 L1440,640 L0,640 Z"/>
-
-      <!-- 4. RỪNG CÂY TẦNG SAU (PLANTED ON BACK HILL) -->
-      <g id="gTreesBackGroup"></g>
-
-      <!-- 5. ĐỒI CỎ TẦNG GIỮA (GRASS MID) -->
-      <path id="gGrassLayerMid" fill="var(--grass-mid)" d="M0,530 Q380,490 760,520 T1440,515 L1440,640 L0,640 Z"/>
-
-      <!-- 6. RỪNG CÂY TẦNG TRƯỚC & ĐẠO CỤ HALLOWEEN (GIỮA ĐỒI TRUNG VÀ ĐỒI TRƯỚC) -->
-      <g id="gTreesFrontGroup"></g>
-
-      <!-- PHỤ KIỆN HALLOWEEN ĐẶC BIỆT -->
-      <g id="halloweenDecorLayer">
-        <!-- Bia mộ cổ rêu phong -->
-        <g transform="translate(180, 500) scale(0.9)">
-          <path d="M0,28 C0,12 8,0 20,0 C32,0 40,12 40,28 L40,55 L0,55 Z" fill="#1b1c26"/>
-          <path d="M16,14 H24 M20,10 V24" stroke="rgba(255,255,255,0.25)" stroke-width="2.5" stroke-linecap="round"/>
-          <text x="20" y="38" fill="rgba(255,255,255,0.3)" font-size="8" font-weight="bold" text-anchor="middle" font-family="monospace">R.I.P</text>
-        </g>
-        <g transform="translate(1260, 492) scale(0.85)">
-          <path d="M0,28 C0,12 8,0 20,0 C32,0 40,12 40,28 L40,55 L0,55 Z" fill="#1b1c26"/>
-          <text x="20" y="32" fill="rgba(255,255,255,0.25)" font-size="8" font-weight="bold" text-anchor="middle">13th</text>
-        </g>
-
-        <!-- BÍ NGÔ 1: BÍ NGÔ LỚN KHẮC MẶT 3D ĐỘC ĐÁO -->
-        <g transform="translate(480, 488) scale(1.15)">
-          <!-- Cuống bí ngô -->
-          <path d="M28,6 Q32,-4 36,-6 Q33,-2 32,6 Z" fill="#2d5218"/>
-          <!-- Thân quả bí ngô nhiều múi 3D -->
-          <ellipse cx="28" cy="22" rx="28" ry="19" fill="url(#gradPumpkinSkin)"/>
-          <ellipse cx="18" cy="22" rx="20" ry="19" fill="url(#gradPumpkinSkin)" opacity="0.85"/>
-          <ellipse cx="38" cy="22" rx="20" ry="19" fill="url(#gradPumpkinSkin)" opacity="0.85"/>
-          <!-- Mặt khắc: Mắt, mũi, miệng cười ma mị phát sáng -->
-          <!-- Mắt trái & mắt phải tam giác -->
-          <polygon points="17,14 23,20 13,20" class="pumpkin-carving"/>
-          <polygon points="39,14 43,20 33,20" class="pumpkin-carving"/>
-          <!-- Mũi tam giác ngược -->
-          <polygon points="28,21 31,25 25,25" class="pumpkin-carving"/>
-          <!-- Miệng cười răng cưa nham nhở -->
-          <path d="M14,28 Q28,38 42,28 Q38,32 36,29 Q34,35 30,30 Q26,35 22,29 Q20,33 14,28 Z" class="pumpkin-carving"/>
-        </g>
-
-        <!-- BÍ NGÔ 2: BÍ NGÔ NHỎ BÊN PHẢI -->
-        <g transform="translate(920, 502) scale(0.85)">
-          <path d="M24,5 Q26,-2 30,-4" stroke="#2d5218" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <ellipse cx="24" cy="18" rx="22" ry="15" fill="url(#gradPumpkinSkin)"/>
-          <ellipse cx="16" cy="18" rx="16" ry="15" fill="url(#gradPumpkinSkin)" opacity="0.85"/>
-          <ellipse cx="32" cy="18" rx="16" ry="15" fill="url(#gradPumpkinSkin)" opacity="0.85"/>
-          <!-- Mắt mũi miệng nhấp nháy -->
-          <polygon points="16,11 20,16 12,16" class="pumpkin-carving"/>
-          <polygon points="32,11 36,16 28,16" class="pumpkin-carving"/>
-          <path d="M14,23 Q24,31 34,23 Q29,28 24,24 Q19,28 14,23 Z" class="pumpkin-carving"/>
-        </g>
-      </g>
-
-      <!-- 7. ĐỒI CỎ TIỀN CẢNH (GRASS FRONT - GẦN NHẤT) -->
-      <path id="gGrassLayerFront" fill="var(--grass-front)" d="M0,575 Q400,545 800,570 T1440,560 L1440,640 L0,640 Z"/>
-    </svg>
-
-    <!-- Canvas thời tiết động -->
-    <canvas id="weatherCanvas"></canvas>
+  <div id="fog"></div><canvas id="fx"></canvas>
+</div>
+<svg id="webL" viewBox="0 0 200 200" aria-hidden="true"></svg><svg id="webR" viewBox="0 0 200 200" aria-hidden="true"></svg>
+<div id="loader"><div class="lwrap"><div class="lring"></div><div class="lS">S</div></div></div>
+<header id="hdr"><div class="in lg">
+  <a class="brand" href="#/"><span class="lg-sm lg" data-ic="logo"></span><span class="tx">SKIBIDI SCRIPT</span></a>
+  <span class="sp"></span>
+  <button class="mod lg" id="wtMod" data-ic="clock" aria-label="Giờ trong web"></button>
+  <button class="ibtn lg" id="sndMod" data-ic="sndOff" aria-label="Âm thanh"></button>
+  <button class="ibtn lg" id="btnAcc" data-ic="user" aria-label="Tài khoản"></button>
+  <button class="ibtn lg" id="btnMenu" data-ic="menu" aria-label="Menu"></button>
+</div></header>
+<button id="fabUtil" class="lg">Tiện ích</button>
+<nav id="menu" class="lg">
+  <a class="mlink" href="#/" data-ic="home"><span>Home</span></a>
+  <button class="mlink" id="mSound" data-ic="sndOff"><span>Âm thanh</span></button>
+  <button class="mlink" id="mAcc" data-ic="user"><span>Tài khoản</span></button>
+  <button class="mlink" id="mDev" data-ic="shield" style="display:none"><span>Dev Control</span></button>
+</nav>
+<main id="main"><section class="hero"><h1>SKIBIDI SCRIPT</h1><p>Script, APK, iOS và Link trong một nơi. Bấm “Tiện ích” để mở kho.</p></section></main>
+<div id="ov"></div>
+<div class="pop lg" id="shUtil"><div class="p-h"><h3>Tiện ích</h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div><div class="utabs" id="utabs"></div><div class="p-b"><div class="utilNote" id="utilNote" style="display:none"></div><div id="ulist"></div></div></div>
+<div class="pop lg" id="mdDetail"><div class="p-h"><h3>Chi tiết</h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div><div class="p-b" id="dtBody"></div></div>
+<div class="pop lg" id="shNotice"><div class="p-h"><h3 id="ntTitle">Thông báo</h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div><div class="p-b"><p id="ntBody" style="color:var(--t2);font-size:13.5px;line-height:1.7;white-space:pre-wrap"></p><button class="btn btn-p" data-close>Đã hiểu</button></div></div>
+<div class="pop lg" id="mdAuth"><div class="p-h"><h3>Tài khoản</h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div>
+<div class="p-b"><form id="loginForm" style="display:flex;flex-direction:column;gap:10px"><div class="fld"><label>Email</label><input id="liEmail" type="email" autocomplete="username"></div><div class="fld"><label>Mật khẩu</label><input id="liPass" type="password" autocomplete="current-password"></div><p id="liErr" style="color:var(--danger);font-size:12.5px"></p><button class="btn btn-p" type="submit">Đăng nhập</button><div id="gBtn" style="display:flex;justify-content:center"></div></form>
+<div id="accPane" style="display:none;flex-direction:column;gap:10px"><div class="srow"><span id="accMail"></span><span id="accDev" style="display:none;background:linear-gradient(120deg,var(--ap),var(--as));padding:3px 8px;border-radius:99px;font-size:10px;color:#fff">DEV</span></div><button class="btn btn-p" id="btnDevOpen" style="display:none">Mở Dev Control Center</button><button class="btn btn-g" id="btnOut">Đăng xuất</button></div></div></div>
+<div id="dev">
+  <div class="m-h"><h3>DEV CONTROL CENTER</h3><button class="ibtn" id="devClose" data-ic="x" aria-label="Đóng"></button></div>
+  <div class="tabs" id="devTabs"></div>
+  <div class="body">
+    <div class="pane" id="p-content"><div class="fld"><label>Danh mục</label><div class="seg" id="catSeg"></div></div><div class="fld"><label>Tên</label><input id="fName"></div><div class="fld"><label>Mô tả</label><input id="fDesc"></div><div class="fld" id="wUrl"><label>Link</label><input id="fUrl" type="url"></div><div class="fld" id="wCode"><label>Code</label><textarea id="fCode"></textarea></div><button class="btn btn-p" id="fSave">Lưu mục</button><button class="btn btn-g" id="fCancel" style="display:none">Hủy sửa</button><div id="devList"></div></div>
+    <div class="pane" id="p-env"><div class="srow"><span>Weather Mode</span><div class="seg"><button id="envAuto">Auto</button><button id="envManual">Manual</button></div></div><div class="fld" id="manWxWrap"><label>Manual Weather</label><select id="manWx"></select></div><div class="srow"><span>Lock Environment</span><label class="sw"><input type="checkbox" id="lockOn"><i></i></label></div><div class="fld" id="lockWrap"><label>Môi trường khóa</label><select id="lockEnv"></select></div><button class="btn btn-p" id="envSave">Lưu Environment</button></div>
+    <div class="pane" id="p-notice"><div class="fld"><label>Tiêu đề</label><input id="anTitle"></div><div class="fld"><label>Nội dung</label><textarea id="anBody"></textarea></div><div class="srow"><span>Bật thông báo (popup giữa)</span><label class="sw"><input type="checkbox" id="anOn"><i></i></label></div><button class="btn btn-p" id="anSave">Lưu thông báo</button></div>
+    <div class="pane" id="p-util"><div class="fld"><label>Dòng ghi chú trong Tiện ích</label><textarea id="utilNoteIn"></textarea></div><button class="btn btn-p" id="utilNoteSave">Lưu</button></div>
+    <div class="pane" id="p-perf"><div class="srow"><span>Performance Mode</span><div class="seg"><button data-p="low">Low</button><button data-p="balanced">Balanced</button><button data-p="high">High</button></div></div></div>
+    <div class="pane" id="p-settings"><div class="srow"><span>Tài khoản</span><button class="btn btn-g" id="setOut">Đăng xuất</button></div></div>
   </div>
-
-  <!-- ======================================================================
-       HEADER THANH ĐIỀU HƯỚNG TRÊN CÙNG
-       ====================================================================== -->
-  <header id="mainHeader">
-    <div class="header-inner lg">
-      <!-- Logo SKIBIDI SCRIPT -->
-      <a class="brand-link" href="#/" id="brandLogoBtn">
-        <span class="brand-badge">
-          <svg viewBox="0 0 100 100">
-            <path d="M50 12 L84 31 L84 69 L50 88 L16 69 L16 31 Z" fill="none" stroke="#fff" stroke-width="7"/>
-            <path d="M62 34 C58 28 51 26 44 26 C35 26 29 31 29 38 C29 51 68 44 68 62 C68 71 60 76 50 76 C42 76 35 72 31 66" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <span class="brand-title">SKIBIDI SCRIPT</span>
-      </a>
-
-      <div class="header-spacer"></div>
-
-      <!-- Đồng hồ hiển thị chu kỳ môi trường ảo -->
-      <div class="hdr-btn" id="clockWidget" title="Thời gian thế giới thực tế">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <circle cx="12" cy="12" r="9"/>
-          <polyline points="12 7 12 12 15 15"/>
-        </svg>
-        <span class="hdr-text" id="clockDisplay">12:00</span>
-      </div>
-
-      <!-- Nút bật tắt âm thanh tự nhiên -->
-      <button class="hdr-btn" id="btnToggleSound" title="Bật/Tắt âm thanh môi trường">
-        <div class="sound-bars">
-          <div class="sound-bar"></div>
-          <div class="sound-bar"></div>
-          <div class="sound-bar"></div>
-        </div>
-        <span class="hdr-text" id="soundStatusText">Âm thanh</span>
-      </button>
-
-      <!-- Nút tài khoản cá nhân -->
-      <button class="hdr-btn icon-only" id="btnUserAccount" title="Tài khoản / Đăng nhập">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-      </button>
-
-      <!-- Nút mở Menu -->
-      <button class="hdr-btn icon-only" id="btnFlyoutToggle" title="Mở Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- ======================================================================
-       MENU ĐIỀU HƯỚNG GÓC PHẢI
-       (ĐÃ LOẠI BỎ SCRIPT, APK, IOS, LINK; GIỮ LẠI ĐẦY ĐỦ TÊN RÕ RÀNG)
-       ====================================================================== -->
-  <div id="flyoutMenu" class="lg">
-    <!-- Mục Trang chủ / Home -->
-    <a class="menu-item" href="#/" id="menuItemHome">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-      <span>Trang chủ (Home)</span>
-    </a>
-
-    <!-- Âm thanh môi trường -->
-    <button class="menu-item" id="menuItemSound">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.08"/>
-      </svg>
-      <span>Âm thanh tự nhiên</span>
-    </button>
-
-    <!-- Tài khoản cá nhân -->
-    <button class="menu-item" id="menuItemProfile">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <circle cx="12" cy="8" r="4"/>
-        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-      </svg>
-      <span>Tài khoản cá nhân</span>
-    </button>
-
-    <div class="menu-divider"></div>
-
-    <!-- Dev Control (Chỉ hiện khi xác thực quyền Dev) -->
-    <button class="menu-item" id="menuItemDevStudio" style="display: none; color: var(--brand-secondary);">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
-      <span>Dev Control Center</span>
-    </button>
-  </div>
-
-  <!-- ======================================================================
-       NÚT FAB TIỆN ÍCH TRUNG TÂM (CLICK MỞ NGAY POPUP DẠNG TABS)
-       ====================================================================== -->
-  <button id="fabUtilities" class="press-action">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-      <rect x="3" y="3" width="7" height="7" rx="2"/>
-      <rect x="14" y="3" width="7" height="7" rx="2"/>
-      <rect x="14" y="14" width="7" height="7" rx="2"/>
-      <rect x="3" y="14" width="7" height="7" rx="2"/>
-    </svg>
-    <span>Tiện ích</span>
-  </button>
-
-  <!-- ======================================================================
-       KHU VỰC HIỂN THỊ CHÍNH (MAIN VIEWPORT)
-       ====================================================================== -->
-  <main id="mainContent">
-    <!-- Trang chủ (Home View) -->
-    <section class="app-view active-view" id="viewHome">
-      <div class="hero-card lg">
-        <div class="hero-tag">Hệ sinh thái Script 2026</div>
-        <h1>SKIBIDI SCRIPT</h1>
-        <p>Kho lưu trữ script tối ưu, bộ cài APK Mod, cấu hình iOS và liên kết an toàn trong môi trường đồ họa Liquid Glass pha lê sống động.</p>
-      </div>
-
-      <!-- Quick Highlights -->
-      <div class="items-grid" id="homeHighlightsGrid">
-        <!-- Render tự động các mục nổi bật -->
-      </div>
-    </section>
-
-    <!-- Trang con: Script -->
-    <section class="app-view" id="viewScript">
-      <div class="items-grid" id="gridScriptView"></div>
-    </section>
-
-    <!-- Trang con: APK -->
-    <section class="app-view" id="viewApk">
-      <div class="items-grid" id="gridApkView"></div>
-    </section>
-
-    <!-- Trang con: iOS -->
-    <section class="app-view" id="viewIos">
-      <div class="items-grid" id="gridIosView"></div>
-    </section>
-
-    <!-- Trang con: Link -->
-    <section class="app-view" id="viewLink">
-      <div class="items-grid" id="gridLinkView"></div>
-    </section>
-  </main>
-
-  <!-- LỚP PHỦ MỜ OVERLAY DÙNG CHUNG -->
-  <div id="globalOverlay"></div>
-
-  <!-- ======================================================================
-       POPUP TIỆN ÍCH DẠNG TAB TRUNG TÂM (QUAN TRỌNG NHẤT)
-       - Mặc định mở ngay tab SCRIPT
-       - Chuyển tab sang APK, iOS, Link mượt mà không xung đột
-       - Có ô tìm kiếm tức thì
-       ====================================================================== -->
-  <div id="utilityModal" class="lg">
-    <div class="modal-head">
-      <div class="modal-head-title">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand-secondary)" stroke-width="2.2">
-          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-          <polyline points="2 17 12 22 22 17"/>
-          <polyline points="2 12 12 17 22 12"/>
-        </svg>
-        <span>KHO TIỆN ÍCH TỔNG HỢP</span>
-      </div>
-      <button class="modal-close-btn" id="btnCloseUtilModal" title="Đóng">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Thanh chọn Tab: Script (Mặc định) | APK | iOS | Link -->
-    <div class="util-tab-nav" id="utilTabSelector">
-      <button class="util-tab-btn tab-active" data-tab="script">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="16 18 22 12 16 6"/>
-          <polyline points="8 6 2 12 8 18"/>
-        </svg>
-        <span>Script</span>
-        <span class="util-tab-count" id="countScriptBadge">0</span>
-      </button>
-
-      <button class="util-tab-btn" data-tab="apk">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-          <line x1="12" y1="18" x2="12.01" y2="18"/>
-        </svg>
-        <span>APK Mod</span>
-        <span class="util-tab-count" id="countApkBadge">0</span>
-      </button>
-
-      <button class="util-tab-btn" data-tab="ios">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/>
-          <path d="M10 2c1 .5 2 2 2 5"/>
-        </svg>
-        <span>iOS Config</span>
-        <span class="util-tab-count" id="countIosBadge">0</span>
-      </button>
-
-      <button class="util-tab-btn" data-tab="link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-        </svg>
-        <span>Link hữu ích</span>
-        <span class="util-tab-count" id="countLinkBadge">0</span>
-      </button>
-    </div>
-
-    <!-- Thanh tìm kiếm tức thời trong Tiện ích -->
-    <div class="util-search-box">
-      <svg class="util-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input type="text" class="util-search-input" id="utilSearchField" placeholder="Tìm kiếm nhanh tên, ghi chú, mã lệnh...">
-    </div>
-
-    <!-- Thân cuộn hiển thị dữ liệu dạng Card -->
-    <div class="modal-scroll-body">
-      <div class="util-broadcast-banner" id="utilStickyNote" style="display: none;"></div>
-      <div class="items-grid" id="utilTabItemsContainer">
-        <!-- Được Javascript render theo tab hiện hành -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================
-       MODAL CHI TIẾT SCRIPT / LIÊN KẾT
-       ====================================================================== -->
-  <div id="detailModal" class="lg">
-    <div class="modal-head">
-      <div class="modal-head-title" id="detailModalTitle">Chi tiết mục</div>
-      <button class="modal-close-btn" id="btnCloseDetailModal">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <div class="modal-scroll-body" id="detailModalContent" style="padding-top: 14px;">
-      <!-- Dynamic render -->
-    </div>
-  </div>
-
-  <!-- ======================================================================
-       MODAL TÀI KHOẢN & ĐĂNG NHẬP (TÁCH BIỆT HOÀN TOÀN KHÔNG XUNG ĐỘT)
-       ====================================================================== -->
-  <div id="authModal" class="lg">
-    <div class="modal-head">
-      <div class="modal-head-title">Tài khoản & Xác thực</div>
-      <button class="modal-close-btn" id="btnCloseAuthModal">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <div class="modal-scroll-body" style="padding-top: 18px;">
-      <!-- Form đăng nhập khi chưa có user -->
-      <form id="emailLoginForm">
-        <div class="form-group">
-          <label class="form-label">Email tài khoản</label>
-          <input type="email" class="form-input" id="authEmailInput" placeholder="name@example.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Mật khẩu</label>
-          <input type="password" class="form-input" id="authPasswordInput" placeholder="••••••••" required>
-        </div>
-        <div id="authErrorMessage" style="color: var(--danger); font-size: 12.5px; margin-bottom: 10px;"></div>
-        <button type="submit" class="btn-act primary" style="width: 100%; padding: 12px;">Đăng nhập hệ thống</button>
-        <div style="margin: 14px 0; text-align: center; color: var(--txt-muted); font-size: 12px;">- HOẶC TIẾP TỤC VỚI GOOGLE -</div>
-        <div id="googleSignInButtonWrapper" style="display: flex; justify-content: center;"></div>
-      </form>
-
-      <!-- Giao diện khi đã đăng nhập -->
-      <div id="userProfilePanel" style="display: none; flex-direction: column; gap: 14px;">
-        <div class="dev-row-card">
-          <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 12px; color: var(--txt-muted);">Đang đăng nhập dưới tên:</span>
-            <span id="userProfileEmail" style="font-weight: 700; color: var(--brand-secondary); font-size: 14px;"></span>
-          </div>
-          <span id="userDevBadge" style="display: none; background: var(--brand-gradient); padding: 4px 10px; border-radius: 99px; font-size: 10.5px; font-weight: 800; color: #fff;">DEV</span>
-        </div>
-        <button class="btn-act primary" id="btnLaunchDevCenter" style="display: none;">Mở Dev Control Center</button>
-        <button class="btn-act ghost" id="btnSignOutSession">Đăng xuất tài khoản</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================
-       DEV CONTROL STUDIO (TOÀN QUYỀN ĐIỀU KHIỂN RIÊNG BIỆT)
-       ====================================================================== -->
-  <div id="devControlStudio">
-    <div class="dev-topbar">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-secondary)" stroke-width="2.2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        <h2 style="font-size: 17px; font-weight: 800;">DEV CONTROL STUDIO</h2>
-      </div>
-      <button class="modal-close-btn" id="btnCloseDevStudio">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Tabs quản trị -->
-    <div class="dev-tab-header" id="devTabNavChips">
-      <button class="dev-tab-chip chip-active" data-devpane="content">Quản lý Nội dung</button>
-      <button class="dev-tab-chip" data-devpane="env">Môi trường & Thời tiết</button>
-      <button class="dev-tab-chip" data-devpane="notice">Thông báo Popup</button>
-      <button class="dev-tab-chip" data-devpane="utilnote">Ghi chú Tiện ích</button>
-      <button class="dev-tab-chip" data-devpane="system">Hệ thống & Hiệu năng</button>
-    </div>
-
-    <div class="dev-viewport-body">
-      <!-- 1. QUẢN LÝ NỘI DUNG (SCRIPT, APK, IOS, LINK) -->
-      <div class="dev-pane-content pane-visible" id="devPaneContent">
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="devTargetCatSeg">
-          <button class="btn-act primary" data-cat="script">Script</button>
-          <button class="btn-act ghost" data-cat="apk">APK</button>
-          <button class="btn-act ghost" data-cat="ios">iOS</button>
-          <button class="btn-act ghost" data-cat="link">Link</button>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Tên hiển thị mục</label>
-          <input type="text" class="form-input" id="devItemName" placeholder="Ví dụ: Blox Fruits Auto Farm v24">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Mô tả ngắn</label>
-          <input type="text" class="form-input" id="devItemDesc" placeholder="Tính năng nổi bật, phiên bản...">
-        </div>
-        <div class="form-group" id="devUrlGroup" style="display: none;">
-          <label class="form-label">Đường dẫn liên kết (URL)</label>
-          <input type="url" class="form-input" id="devItemUrl" placeholder="https://...">
-        </div>
-        <div class="form-group" id="devCodeGroup">
-          <label class="form-label">Mã lệnh Script / Lua</label>
-          <textarea class="form-input" id="devItemCode" rows="4" placeholder="loadstring(game:HttpGet(...))()"></textarea>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-          <button class="btn-act primary" id="btnDevSaveItem">+ Thêm mới dữ liệu</button>
-          <button class="btn-act ghost" id="btnDevCancelEdit" style="display: none;">Hủy chế độ sửa</button>
-        </div>
-
-        <div style="margin-top: 16px;">
-          <h4 style="font-size: 14px; margin-bottom: 10px; color: var(--txt-secondary);">Danh sách hiện có:</h4>
-          <div id="devContentCatalogList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-        </div>
-      </div>
-
-      <!-- 2. QUẢN LÝ MÔI TRƯỜNG & THỜI TIẾT -->
-      <div class="dev-pane-content" id="devPaneEnv">
-        <div class="dev-row-card">
-          <span>Chế độ thời tiết (Auto / Thủ công)</span>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn-act primary" id="btnEnvModeAuto">Tự động (Auto)</button>
-            <button class="btn-act ghost" id="btnEnvModeManual">Thủ công</button>
-          </div>
-        </div>
-
-        <div class="form-group" id="devManualWeatherWrap" style="display: none;">
-          <label class="form-label">Chọn thời tiết thủ công</label>
-          <select class="form-input" id="selManualWeather">
-            <option value="clear">Quang đãng (Clear)</option>
-            <option value="rain">Mưa rào (Rain)</option>
-            <option value="storm">Bão giông sấm chớp (Storm)</option>
-            <option value="snow">Tuyết rơi (Snow)</option>
-            <option value="fog">Sương mù dày đặc (Fog)</option>
-            <option value="wind">Gió lốc bụi (Wind)</option>
-          </select>
-        </div>
-
-        <div class="dev-row-card">
-          <span>Khóa chủ đề sự kiện (Theme Lock)</span>
-          <label class="switch-toggle">
-            <input type="checkbox" id="chkLockThemeToggle">
-            <span class="switch-slider"></span>
-          </label>
-        </div>
-
-        <div class="form-group" id="devThemeLockWrap" style="display: none;">
-          <label class="form-label">Chủ đề khóa</label>
-          <select class="form-input" id="selLockTheme">
-            <option value="halloween">Halloween (Trăng máu, Dơi, Bí ngô)</option>
-            <option value="christmas">Giáng Sinh (Cây thông tuyết)</option>
-            <option value="tet">Tết Cổ Truyền (Hoa mai đào)</option>
-            <option value="normal">Bình thường (Mặc định)</option>
-          </select>
-        </div>
-
-        <button class="btn-act primary" id="btnSaveEnvSettings">Lưu cấu hình môi trường</button>
-      </div>
-
-      <!-- 3. QUẢN LÝ THÔNG BÁO POPUP -->
-      <div class="dev-pane-content" id="devPaneNotice">
-        <div class="form-group">
-          <label class="form-label">Tiêu đề thông báo</label>
-          <input type="text" class="form-input" id="devNoticeTitle" placeholder="Bảo trì hoặc cập nhật mới...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Nội dung chi tiết</label>
-          <textarea class="form-input" id="devNoticeBody" rows="4" placeholder="Nội dung gửi đến toàn bộ người dùng..."></textarea>
-        </div>
-        <div class="dev-row-card">
-          <span>Bật thông báo tự động mở</span>
-          <label class="switch-toggle">
-            <input type="checkbox" id="chkNoticeEnabled">
-            <span class="switch-slider"></span>
-          </label>
-        </div>
-        <button class="btn-act primary" id="btnSaveNoticeSettings">Cập nhật thông báo</button>
-      </div>
-
-      <!-- 4. GHI CHÚ TIỆN ÍCH -->
-      <div class="dev-pane-content" id="devPaneUtilNote">
-        <div class="form-group">
-          <label class="form-label">Dòng ghi chú ghim trong Tiện ích</label>
-          <textarea class="form-input" id="devUtilNoteText" rows="3" placeholder="Ví dụ: Lưu ý bật anti-ban trước khi thực thi..."></textarea>
-        </div>
-        <button class="btn-act primary" id="btnSaveUtilNote">Lưu ghi chú tiện ích</button>
-      </div>
-
-      <!-- 5. HỆ THỐNG & HIỆU NĂNG -->
-      <div class="dev-pane-content" id="devPaneSystem">
-        <div class="dev-row-card">
-          <span>Tối ưu hóa hạt Canvas & Render</span>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn-act ghost" data-perf="low">Tiết kiệm</button>
-            <button class="btn-act primary" data-perf="balanced">Cân bằng</button>
-            <button class="btn-act ghost" data-perf="high">Tối đa</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CONTAINER TOAST NOTIFICATION -->
-  <div id="toastContainer"></div>
-
-  <!-- LOADER MÀN HÌNH KHỞI ĐỘNG BAN ĐẦU -->
-  <div id="appLoader">
-    <div class="loader-spinner-wrap">
-      <div class="loader-ring"></div>
-      <div class="loader-emblem">S</div>
-    </div>
-  </div>
-
-  <!-- ======================================================================
-       FIREBASE SDKs (COMPAT VERSION 10.12.2)
-       ====================================================================== -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-  <!-- ======================================================================
-       KỊCH BẢN LOGIC TOÀN NĂNG (JAVASCRIPT ENGINE CHÍNH)
-       ====================================================================== -->
-  <script>
-    /**
-     * SKIBIDI SCRIPT WEB APPLICATION CORE
-     * Kiến trúc tách lớp: Môi trường (Environment), Âm thanh (Audio Synth),
-     * Đồ họa Canvas (Particle FX), Dữ liệu (Firebase & Auth) và Giao diện (UI).
-     */
-    "use strict";
-
-    // --- CẤU HÌNH HỆ THỐNG ---
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyCwxeePF5Q96k_JfglAz0IAcWyVly17eVs",
-      authDomain: "noxsecret-dd77f.firebaseapp.com",
-      databaseURL: "https://noxsecret-dd77f-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "noxsecret-dd77f",
-      storageBucket: "noxsecret-dd77f.firebasestorage.app",
-      messagingSenderId: "618477082488",
-      appId: "1:618477082488:web:38741735ef243d85b4da8d",
-      measurementId: "G-BK25G56E0C"
-    };
-    const GOOGLE_GIS_CLIENT_ID = "971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
-    const DEVELOPER_EMAIL = "hminhgalaxy@gmail.com";
-    const DB_ROOT_NODE = "nox_data";
-
-    // Khởi tạo Firebase
-    let firebaseDB = null;
-    let firebaseAuth = null;
-    try {
-      if (typeof firebase !== "undefined") {
-        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-        firebaseDB = firebase.database();
-        firebaseAuth = firebase.auth();
-        firebaseAuth.setPersistence(firebase.auth.AuthPersistence.LOCAL).catch(() => {});
-      }
-    } catch (err) {
-      console.warn("Firebase Init Error:", err);
-    }
-
-    // --- TIỆN ÍCH TRỢ GIÚP (HELPERS) ---
-    const $ = (selector) => document.querySelector(selector);
-    const $$ = (selector) => document.querySelectorAll(selector);
-
-    const escapeHTML = (str) => {
-      return String(str == null ? "" : str).replace(/[&<>"']/g, (m) => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[m]));
-    };
-
-    const cleanInput = (str) => String(str || "").replace(/[<>]/g, "").slice(0, 1000);
-    const isValidURL = (url) => /^https?:\/\/.+/i.test(String(url || "").trim());
-
-    // Toast notification
-    function showToast(message) {
-      const container = $("#toastContainer");
-      if (!container) return;
-      const el = document.createElement("div");
-      el.className = "toast-msg";
-      el.textContent = message;
-      container.appendChild(el);
-      setTimeout(() => {
-        el.classList.add("toast-out");
-        setTimeout(() => el.remove(), 300);
-      }, 2200);
-    }
-
-    // Sao chép clipboard an toàn
-    function copyToClipboard(text) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-      } else {
-        fallbackCopy(text);
-      }
-    }
-    function fallbackCopy(text) {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand("copy"); } catch (_) {}
-      ta.remove();
-    }
-
-    // --- TRẠNG THÁI TOÀN CỤC CỦA ỨNG DỤNG ---
-    const AppState = {
-      currentRoute: "home",
-      currentUtilTab: "script",
-      searchQuery: "",
-      currentUser: null,
-      isDeveloper: false,
-      soundEnabled: false,
-      dataCatalog: {
-        script: [],
-        apk: [],
-        ios: [],
-        link: []
-      },
-      settings: {
-        envMode: "auto",
-        manualWeather: "clear",
-        lockTheme: "halloween", // Mặc định halloween ma mị theo yêu cầu
-        lockOn: true,
-        performanceMode: "balanced"
-      },
-      devEditingKey: null,
-      devCurrentCategory: "script"
-    };
-
-    const CATEGORIES = [
-      { id: "script", label: "Script", node: "scripts" },
-      { id: "apk", label: "APK Mod", node: "apks" },
-      { id: "ios", label: "iOS Config", node: "ios" },
-      { id: "link", label: "Link", node: "links" }
-    ];
-
-    // ========================================================================
-    // MODULE 1: THỜI GIAN VÀ CHU KỲ MÔI TRƯỜNG TỰ NHIÊN
-    // ========================================================================
-    const EnvironmentClock = {
-      startTimeReal: Date.now(),
-      startHourVirtual: 20, // Bắt đầu vào 20:00 tối để tôn vinh trăng và dơi
-      timeScale: 72, // Kéo dài chu kỳ: 20 phút thật = 24 giờ trong thế giới web
-
-      getVirtualHour() {
-        const elapsedMs = Date.now() - this.startTimeReal;
-        return (this.startHourVirtual + (elapsedMs * this.timeScale) / 3600000) % 24;
-      },
-
-      updateClockDisplay() {
-        const vHour = this.getVirtualHour();
-        const hh = Math.floor(vHour);
-        const mm = Math.floor((vHour % 1) * 60);
-        const clockStr = `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-        const clockEl = $("#clockDisplay");
-        if (clockEl) clockEl.textContent = clockStr;
-
-        this.positionSunMoon(vHour);
-        this.updateTimeOfDayClasses(vHour);
-      },
-
-      positionSunMoon(hour) {
-        const sun = $("#sunBody");
-        const moon = $("#moonBody");
-        if (!sun || !moon) return;
-
-        // Ban ngày từ 06:00 đến 18:00
-        if (hour >= 6 && hour < 18) {
-          const progress = (hour - 6) / 12;
-          sun.style.opacity = "1";
-          moon.style.opacity = "0";
-          sun.style.left = `${6 + progress * 88}%`;
-          sun.style.top = `${54 - Math.sin(progress * Math.PI) * 44}%`;
-        } else {
-          // Ban đêm
-          const nightHour = ((hour - 18) + 24) % 24;
-          const progress = nightHour / 12;
-          moon.style.opacity = "1";
-          sun.style.opacity = "0";
-          moon.style.left = `${92 - progress * 86}%`;
-          moon.style.top = `${54 - Math.sin(progress * Math.PI) * 44}%`;
-        }
-      },
-
-      updateTimeOfDayClasses(hour) {
-        const isDay = (hour >= 6 && hour < 18);
-        document.body.classList.toggle("is-daytime", isDay);
-        document.body.classList.toggle("is-night", !isDay);
-      }
-    };
-
-    // Tạo bầu trời sao đêm lấp lánh ngẫu nhiên
-    function generateNightStars() {
-      const starEl = $("#starfield");
-      if (!starEl) return;
-      const shadows = [];
-      for (let i = 0; i < 90; i++) {
-        const x = (Math.random() * 100).toFixed(2);
-        const y = (Math.random() * 62).toFixed(2);
-        const alpha = (0.3 + Math.random() * 0.7).toFixed(2);
-        const size = Math.random() < 0.2 ? "2px" : "1px";
-        shadows.push(`${x}vw ${y}vh 0 ${size} rgba(255,255,255,${alpha})`);
-      }
-      starEl.style.boxShadow = shadows.join(",");
-    }
-
-    // ========================================================================
-    // MODULE 2: HỆ THỐNG CÂY CỐI & ĐỒI NÚI ĐA TẦNG (FIX LỖI CÂY BỊ NÚI CHE)
-    // ========================================================================
-    function populateVegetationAndTrees() {
-      const backGroup = $("#gTreesBackGroup");
-      const frontGroup = $("#gTreesFrontGroup");
-      if (!backGroup || !frontGroup) return;
-
-      // Mô hình cây thông
-      const modelPine = (x, y, s) => `
-        <g class="scene-tree" transform="translate(${x} ${y}) scale(${s})" fill="var(--tree-foliage)">
-          <path d="M0 -70 L28 -20 H-28 Z M0 -95 L22 -48 H-22 Z M0 -115 L16 -75 H-16 Z"/>
-          <rect x="-4" y="-20" width="8" height="24" fill="var(--tree-trunk)"/>
-        </g>
-      `;
-
-      // Mô hình cây cổ thụ xòe tán
-      const modelOak = (x, y, s) => `
-        <g class="scene-tree" transform="translate(${x} ${y}) scale(${s})" fill="var(--tree-foliage)">
-          <circle cx="0" cy="-60" r="34"/>
-          <circle cx="-22" cy="-45" r="24"/>
-          <circle cx="22" cy="-45" r="24"/>
-          <rect x="-5" y="-24" width="10" height="28" fill="var(--tree-trunk)"/>
-        </g>
-      `;
-
-      // Cây khô khẳng khiu cho Halloween
-      const modelDeadSpooky = (x, y, s) => `
-        <g class="scene-tree" transform="translate(${x} ${y}) scale(${s})">
-          <path d="M0,0 V-70 M0,-45 Q-20,-55 -28,-75 M0,-35 Q22,-45 30,-62 M-12,-52 Q-20,-40 -25,-45 M16,-48 Q22,-36 28,-40" stroke="var(--tree-trunk)" stroke-width="5" stroke-linecap="round" fill="none"/>
-        </g>
-      `;
-
-      let backTreesHtml = "";
-      // Trồng cây tầng đồi sau (Back Hill - Y khoảng 460-475)
-      for (let i = 0; i < 28; i++) {
-        const x = Math.round(20 + Math.random() * 1400);
-        const y = Math.round(460 + Math.random() * 20);
-        const scale = (0.55 + Math.random() * 0.45).toFixed(2);
-        const isDead = Math.random() < 0.4;
-        backTreesHtml += isDead ? modelDeadSpooky(x, y, scale) : modelPine(x, y, scale);
-      }
-      backGroup.innerHTML = backTreesHtml;
-
-      let frontTreesHtml = "";
-      // Trồng cây tầng đồi giữa (Mid Hill - Y khoảng 510-530)
-      for (let j = 0; j < 32; j++) {
-        const x = Math.round(15 + Math.random() * 1410);
-        const y = Math.round(515 + Math.random() * 22);
-        const scale = (0.75 + Math.random() * 0.55).toFixed(2);
-        const r = Math.random();
-        if (r < 0.35) frontTreesHtml += modelOak(x, y, scale);
-        else if (r < 0.7) frontTreesHtml += modelPine(x, y, scale);
-        else frontTreesHtml += modelDeadSpooky(x, y, scale);
-      }
-      frontGroup.innerHTML = frontTreesHtml;
-
-      // Sinh vệt gió lốc
-      const windContainer = $("#windStreaks");
-      if (windContainer) {
-        windContainer.innerHTML = "";
-        for (let k = 0; k < 6; k++) {
-          const streak = document.createElement("div");
-          streak.className = "w-streak";
-          streak.style.top = `${12 + Math.random() * 45}%`;
-          streak.style.width = `${90 + Math.random() * 220}px`;
-          streak.style.animationDuration = `${4 + Math.random() * 6}s`;
-          streak.style.animationDelay = `-${Math.random() * 6}s`;
-          windContainer.appendChild(streak);
-        }
-      }
-    }
-
-    // ========================================================================
-    // MODULE 3: HỆ THỐNG SINH VẬT TRÊN KHÔNG (CHIM & DƠI THEO THỜI TIẾT)
-    // Sửa lỗi: Bão/mưa/đêm không có chim, Halloween biến thành dơi
-    // ========================================================================
-    const AerialWildlife = {
-      container: null,
-
-      init() {
-        this.container = $("#skyCreatureLayer");
-      },
-
-      updateCreatures(weather, isHalloween, virtualHour) {
-        if (!this.container) return;
-        this.container.innerHTML = "";
-
-        const isDay = (virtualHour >= 6 && virtualHour < 18);
-        const isBadWeather = (weather === "rain" || weather === "storm");
-
-        // 1. SỰ KIỆN HALLOWEEN: Toàn bộ sinh vật chuyển thành DƠI ma mị
-        if (isHalloween) {
-          this.spawnBats(5);
-          return;
-        }
-
-        // 2. NẾU MƯA, BÃO HOẶC BAN ĐÊM: Không xuất hiện chim
-        if (isBadWeather || !isDay) {
-          return; // Chim đi trú mưa và ngủ đêm
-        }
-
-        // 3. BAN NGÀY ĐẸP TRỜI: Chim tung cánh bay lượn
-        this.spawnBirds(4);
-      },
-
-      spawnBirds(count) {
-        for (let i = 0; i < count; i++) {
-          const bird = document.createElement("div");
-          bird.className = "air-creature";
-          const topPercent = 14 + Math.random() * 24;
-          const duration = 32 + Math.random() * 24;
-          const delay = -(Math.random() * 20);
-
-          bird.style.top = `${topPercent}%`;
-          bird.style.animationDuration = `${duration}s`;
-          bird.style.animationDelay = `${delay}s`;
-
-          bird.innerHTML = `
-            <svg width="42" height="22" viewBox="0 0 40 20">
-              <path class="bird-wing-left" d="M20 10 Q12 2 4 8 Q12 8 20 12 Z" fill="var(--silhouette)"/>
-              <path class="bird-wing-right" d="M20 10 Q28 2 36 8 Q28 8 20 12 Z" fill="var(--silhouette)"/>
-              <ellipse cx="20" cy="11" rx="4.5" ry="2.6" fill="var(--silhouette)"/>
-            </svg>
-          `;
-          this.container.appendChild(bird);
-        }
-      },
-
-      spawnBats(count) {
-        for (let i = 0; i < count; i++) {
-          const bat = document.createElement("div");
-          bat.className = "air-creature";
-          const topPercent = 12 + Math.random() * 28;
-          const duration = 24 + Math.random() * 18;
-          const delay = -(Math.random() * 15);
-
-          bat.style.top = `${topPercent}%`;
-          bat.style.animationDuration = `${duration}s`;
-          bat.style.animationDelay = `${delay}s`;
-
-          bat.innerHTML = `
-            <svg width="48" height="26" viewBox="0 0 48 26">
-              <!-- Thân dơi có tai nhọn -->
-              <ellipse cx="24" cy="14" rx="3.5" ry="5.5" fill="#140a1c"/>
-              <polygon points="22,10 24,6 23,10" fill="#140a1c"/>
-              <polygon points="26,10 24,6 25,10" fill="#140a1c"/>
-              <!-- Cánh dơi có xương màng -->
-              <path class="bat-wing-left" d="M24,14 C18,8 10,8 2,12 C6,18 12,18 16,21 C18,17 21,17 24,14 Z" fill="#1b0e26"/>
-              <path class="bat-wing-right" d="M24,14 C30,8 38,8 46,12 C42,18 36,18 32,21 C30,17 27,17 24,14 Z" fill="#1b0e26"/>
-            </svg>
-          `;
-          this.container.appendChild(bat);
-        }
-      }
-    };
-
-    // ========================================================================
-    // MODULE 4: CANVAS HIỆU ỨNG THỜI TIẾT (RAIN, STORM, SNOW, BATS, FLIES)
-    // ========================================================================
-    const CanvasFXEngine = {
-      canvas: null,
-      ctx: null,
-      width: 0,
-      height: 0,
-      particles: [],
-      mode: "bats",
-      animId: 0,
-
-      init() {
-        this.canvas = $("#weatherCanvas");
-        if (!this.canvas) return;
-        this.ctx = this.canvas.getContext("2d");
-        this.resize();
-        window.addEventListener("resize", () => this.resize());
-      },
-
-      resize() {
-        const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        this.canvas.width = this.width * dpr;
-        this.canvas.height = this.height * dpr;
-        this.canvas.style.width = `${this.width}px`;
-        this.canvas.style.height = `${this.height}px`;
-        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      },
-
-      setMode(mode) {
-        this.mode = mode;
-        this.particles = [];
-        const mult = AppState.settings.performanceMode === "low" ? 0.35 : (AppState.settings.performanceMode === "high" ? 1.5 : 1);
-        const counts = { rain: 130, storm: 180, snow: 95, fog: 12, bats: 10, flies: 26 };
-        const total = Math.round((counts[mode] || 0) * mult);
-
-        for (let i = 0; i < total; i++) {
-          this.particles.push(this.createParticle(mode));
-        }
-
-        if (mode !== "none" && !this.animId) {
-          this.loop();
-        } else if (mode === "none") {
-          this.ctx.clearRect(0, 0, this.width, this.height);
-          cancelAnimationFrame(this.animId);
-          this.animId = 0;
-        }
-      },
-
-      createParticle(mode) {
-        const R = Math.random;
-        if (mode === "rain" || mode === "storm") {
-          return { x: R() * this.width, y: R() * this.height, len: 12 + R() * 12, spd: 12 + R() * 8, drift: -2.5 };
-        }
-        if (mode === "snow") {
-          return { x: R() * this.width, y: R() * this.height, rad: 1.5 + R() * 2.5, spd: 0.8 + R() * 1.4, phase: R() * 6 };
-        }
-        if (mode === "flies") {
-          return { x: R() * this.width, y: this.height * 0.45 + R() * this.height * 0.5, phase: R() * 6, spd: 0.02 + R() * 0.02 };
-        }
-        if (mode === "bats") {
-          return { x: R() * this.width, y: this.height * 0.1 + R() * this.height * 0.35, spd: 2 + R() * 2.5, phase: R() * 6 };
-        }
-        return {};
-      },
-
-      loop() {
-        this.animId = requestAnimationFrame(() => this.loop());
-        if (document.hidden) return;
-        this.ctx.clearRect(0, 0, this.width, this.height);
-
-        for (let i = 0; i < this.particles.length; i++) {
-          const p = this.particles[i];
-
-          // Hạt mưa
-          if (this.mode === "rain" || this.mode === "storm") {
-            p.y += p.spd;
-            p.x += p.drift;
-            if (p.y > this.height) { p.y = -20; p.x = Math.random() * this.width; }
-            this.ctx.strokeStyle = "rgba(180, 220, 255, 0.45)";
-            this.ctx.lineWidth = 1.3;
-            this.ctx.beginPath();
-            this.ctx.moveTo(p.x, p.y);
-            this.ctx.lineTo(p.x - p.drift, p.y - p.len);
-            this.ctx.stroke();
-          }
-          // Hạt tuyết
-          else if (this.mode === "snow") {
-            p.y += p.spd;
-            p.x += Math.sin(p.phase += 0.015) * 0.7;
-            if (p.y > this.height) { p.y = -10; p.x = Math.random() * this.width; }
-            this.ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-            this.ctx.beginPath();
-            this.ctx.arc(p.x, p.y, p.rad, 0, Math.PI * 2);
-            this.ctx.fill();
-          }
-          // Đom đóm đêm
-          else if (this.mode === "flies") {
-            p.phase += p.spd;
-            const fx = p.x + Math.sin(p.phase * 2) * 18;
-            const fy = p.y + Math.cos(p.phase) * 12;
-            const glow = 0.3 + Math.sin(p.phase * 3) * 0.35;
-            this.ctx.fillStyle = `rgba(255, 235, 130, ${Math.max(0.05, glow)})`;
-            this.ctx.beginPath();
-            this.ctx.arc(fx, fy, 2, 0, Math.PI * 2);
-            this.ctx.fill();
-          }
-        }
-      }
-    };
-
-    // ========================================================================
-    // MODULE 5: BỘ TỔNG HỢP ÂM THANH MÔI TRƯỜNG (WEB AUDIO API SYNTHESIZER)
-    // Không cần bất kỳ file mp3 ngoài nào, tự tạo tiếng mưa, sấm, gió, chim
-    // ========================================================================
-    const AudioEngine = {
-      ctx: null,
-      masterGain: null,
-      activeNodes: [],
-      timers: [],
-
-      initAudioContext() {
-        if (!this.ctx) {
-          const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-          this.ctx = new AudioCtxClass();
-          this.masterGain = this.ctx.createGain();
-          this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
-          this.masterGain.connect(this.ctx.destination);
-        }
-        if (this.ctx.state === "suspended") {
-          this.ctx.resume();
-        }
-        return this.ctx;
-      },
-
-      generateWhiteNoise(ac) {
-        const bufferSize = ac.sampleRate * 2;
-        const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = Math.random() * 2 - 1;
-        }
-        const noise = ac.createBufferSource();
-        noise.buffer = buffer;
-        noise.loop = true;
-        return noise;
-      },
-
-      stopAll() {
-        this.activeNodes.forEach(node => {
-          try { node.stop(); node.disconnect(); } catch (_) {}
-        });
-        this.activeNodes = [];
-        this.timers.forEach(clearInterval);
-        this.timers = [];
-      },
-
-      setSoundscape(type) {
-        if (!AppState.soundEnabled) return;
-        const ac = this.initAudioContext();
-        this.stopAll();
-
-        this.masterGain.gain.setTargetAtTime(0.45, ac.currentTime, 0.4);
-
-        // Âm thanh tiếng mưa rơi
-        if (type === "rain") {
-          const noise = this.generateWhiteNoise(ac);
-          const filter = ac.createBiquadFilter();
-          filter.type = "lowpass";
-          filter.frequency.setValueAtTime(1200, ac.currentTime);
-          noise.connect(filter);
-          filter.connect(this.masterGain);
-          noise.start();
-          this.activeNodes.push(noise);
-        }
-        // Tiếng bão giông kèm sấm chớp
-        else if (type === "storm") {
-          const rainNoise = this.generateWhiteNoise(ac);
-          const rFilter = ac.createBiquadFilter();
-          rFilter.type = "lowpass";
-          rFilter.frequency.setValueAtTime(950, ac.currentTime);
-          rainNoise.connect(rFilter);
-          rFilter.connect(this.masterGain);
-          rainNoise.start();
-          this.activeNodes.push(rainNoise);
-
-          // Tạo tiếng sấm rền ngẫu nhiên
-          const thunderInterval = setInterval(() => {
-            if (document.hidden) return;
-            const tNoise = this.generateWhiteNoise(ac);
-            const tFilter = ac.createBiquadFilter();
-            tFilter.type = "lowpass";
-            tFilter.frequency.setValueAtTime(140, ac.currentTime);
-            const tGain = ac.createGain();
-            tGain.gain.setValueAtTime(0.7, ac.currentTime);
-            tGain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 1.6);
-            tNoise.connect(tFilter);
-            tFilter.connect(tGain);
-            tGain.connect(this.masterGain);
-            tNoise.start();
-            tNoise.stop(ac.currentTime + 1.7);
-          }, 7000 + Math.random() * 6000);
-          this.timers.push(thunderInterval);
-        }
-        // Tiếng gió rít
-        else if (type === "wind") {
-          const wNoise = this.generateWhiteNoise(ac);
-          const wFilter = ac.createBiquadFilter();
-          wFilter.type = "bandpass";
-          wFilter.frequency.setValueAtTime(420, ac.currentTime);
-          wFilter.Q.setValueAtTime(3, ac.currentTime);
-          wNoise.connect(wFilter);
-          wFilter.connect(this.masterGain);
-          wNoise.start();
-          this.activeNodes.push(wNoise);
-        }
-        // Tiếng chim hót líu lo ban ngày
-        else if (type === "birds") {
-          const birdInterval = setInterval(() => {
-            if (document.hidden) return;
-            const osc = ac.createOscillator();
-            const gain = ac.createGain();
-            osc.frequency.setValueAtTime(2200 + Math.random() * 1400, ac.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1200, ac.currentTime + 0.16);
-            gain.gain.setValueAtTime(0.08, ac.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.2);
-            osc.connect(gain);
-            gain.connect(this.masterGain);
-            osc.start();
-            osc.stop(ac.currentTime + 0.22);
-          }, 3200 + Math.random() * 2500);
-          this.timers.push(birdInterval);
-        }
-      },
-
-      toggleAudio() {
-        AppState.soundEnabled = !AppState.soundEnabled;
-        document.body.classList.toggle("sound-active", AppState.soundEnabled);
-        const statusText = $("#soundStatusText");
-        if (statusText) statusText.textContent = AppState.soundEnabled ? "Đang bật" : "Âm thanh";
-
-        if (AppState.soundEnabled) {
-          this.initAudioContext();
-          applyEnvironmentTheme();
-          showToast("Đã kích hoạt âm thanh môi trường.");
-        } else {
-          if (this.masterGain && this.ctx) {
-            this.masterGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.25);
-          }
-          this.stopAll();
-          showToast("Đã tắt âm thanh.");
-        }
-      }
-    };
-
-    // ========================================================================
-    // MODULE 6: ĐIỀU PHỐI MÔI TRƯỜNG & CHỦ ĐỀ SỰ KIỆN TỔNG THỂ
-    // ========================================================================
-    function applyEnvironmentTheme() {
-      const vHour = EnvironmentClock.getVirtualHour();
-      const settings = AppState.settings;
-
-      let theme = "normal";
-      let weather = "clear";
-
-      if (settings.lockOn && settings.lockTheme) {
-        theme = settings.lockTheme;
-      }
-      if (settings.envMode === "manual") {
-        weather = settings.manualWeather || "clear";
-      } else {
-        // Tự động: Ưu tiên Halloween theo yêu cầu
-        weather = "clear";
-        if (theme === "halloween") weather = "wind";
-      }
-
-      // Gắn class cho body
-      document.body.className = document.body.className
-        .replace(/theme-\w+|wx-\w+/g, "")
-        .trim();
-      document.body.classList.add(`theme-${theme}`);
-      if (weather !== "clear") document.body.classList.add(`wx-${weather}`);
-
-      // Cập nhật hạt Canvas
-      if (weather === "rain") CanvasFXEngine.setMode("rain");
-      else if (weather === "storm") CanvasFXEngine.setMode("storm");
-      else if (weather === "snow") CanvasFXEngine.setMode("snow");
-      else if (theme === "halloween") CanvasFXEngine.setMode("bats");
-      else if (!document.body.classList.contains("is-daytime")) CanvasFXEngine.setMode("flies");
-      else CanvasFXEngine.setMode("none");
-
-      // Cập nhật sinh vật trên không (Chim / Dơi)
-      AerialWildlife.updateCreatures(weather, theme === "halloween", vHour);
-
-      // Cập nhật âm thanh
-      if (AppState.soundEnabled) {
-        if (weather === "rain") AudioEngine.setSoundscape("rain");
-        else if (weather === "storm") AudioEngine.setSoundscape("storm");
-        else if (weather === "wind" || theme === "halloween") AudioEngine.setSoundscape("wind");
-        else if (document.body.classList.contains("is-daytime")) AudioEngine.setSoundscape("birds");
-        else AudioEngine.setSoundscape("wind");
-      }
-    }
-
-    // ========================================================================
-    // MODULE 7: GIAO DIỆN & TƯƠNG TÁC POPUP TIỆN ÍCH DẠNG TAB
-    // ========================================================================
-    const UIManager = {
-      initEventListeners() {
-        // Mở popup Tiện ích bằng nút FAB
-        $("#fabUtilities").addEventListener("click", () => this.openUtilityModal("script"));
-
-        // Nút đóng Tiện ích
-        $("#btnCloseUtilModal").addEventListener("click", () => this.closeAllModals());
-
-        // Chuyển Tab bên trong Tiện ích
-        $$(".util-tab-btn").forEach(btn => {
-          btn.addEventListener("click", (e) => {
-            const targetTab = btn.dataset.tab;
-            this.switchUtilTab(targetTab);
-          });
-        });
-
-        // Tìm kiếm tức thời
-        $("#utilSearchField").addEventListener("input", (e) => {
-          AppState.searchQuery = e.target.value.trim().toLowerCase();
-          this.renderUtilTabContent();
-        });
-
-        // Bật tắt Menu góc phải
-        $("#btnFlyoutToggle").addEventListener("click", (e) => {
-          e.stopPropagation();
-          const menu = $("#flyoutMenu");
-          menu.classList.toggle("is-open");
-        });
-
-        // Đóng menu khi click ngoài
-        document.addEventListener("click", (e) => {
-          if (!e.target.closest("#flyoutMenu") && !e.target.closest("#btnFlyoutToggle")) {
-            $("#flyoutMenu").classList.remove("is-open");
-          }
-        });
-
-        // Âm thanh
-        $("#btnToggleSound").addEventListener("click", () => AudioEngine.toggleAudio());
-        $("#menuItemSound").addEventListener("click", () => {
-          AudioEngine.toggleAudio();
-          $("#flyoutMenu").classList.remove("is-open");
-        });
-
-        // Tài khoản
-        $("#btnUserAccount").addEventListener("click", () => this.openAuthModal());
-        $("#menuItemProfile").addEventListener("click", () => {
-          $("#flyoutMenu").classList.remove("is-open");
-          this.openAuthModal();
-        });
-        $("#btnCloseAuthModal").addEventListener("click", () => this.closeAllModals());
-
-        // Overlay toàn cục
-        $("#globalOverlay").addEventListener("click", () => this.closeAllModals());
-
-        // Chi tiết modal
-        $("#btnCloseDetailModal").addEventListener("click", () => this.closeAllModals());
-
-        // Dev Studio Open / Close
-        $("#menuItemDevStudio").addEventListener("click", () => {
-          $("#flyoutMenu").classList.remove("is-open");
-          DevStudio.open();
-        });
-        $("#btnLaunchDevCenter").addEventListener("click", () => {
-          this.closeAllModals();
-          DevStudio.open();
-        });
-        $("#btnCloseDevStudio").addEventListener("click", () => DevStudio.close());
-
-        // Phím Escape
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") this.closeAllModals();
-        });
-
-        // Ủy thác sự kiện hành động thẻ (Copy, Detail, Open Link)
-        document.addEventListener("click", (e) => {
-          const btn = e.target.closest("[data-action]");
-          if (!btn) return;
-          const action = btn.dataset.action;
-          const cat = btn.dataset.cat;
-          const key = btn.dataset.key;
-
-          if (action === "copy-code") {
-            const item = (AppState.dataCatalog[cat] || []).find(x => x.key === key);
-            if (item && item.code) {
-              copyToClipboard(item.code);
-              showToast("Đã sao chép mã Script vào bộ nhớ tạm.");
-            }
-          } else if (action === "view-detail") {
-            this.openDetailModal(cat, key);
-          }
-        });
-      },
-
-      openUtilityModal(defaultTab = "script") {
-        this.closeAllModals();
-        this.switchUtilTab(defaultTab);
-        $("#utilityModal").classList.add("is-open");
-        $("#globalOverlay").classList.add("is-visible");
-      },
-
-      switchUtilTab(tabId) {
-        AppState.currentUtilTab = tabId;
-        $$(".util-tab-btn").forEach(btn => {
-          btn.classList.toggle("tab-active", btn.dataset.tab === tabId);
-        });
-        this.renderUtilTabContent();
-      },
-
-      renderUtilTabContent() {
-        const container = $("#utilTabItemsContainer");
-        if (!container) return;
-
-        const cat = AppState.currentUtilTab;
-        const items = AppState.dataCatalog[cat] || [];
-        const query = AppState.searchQuery;
-
-        const filtered = items.filter(item => {
-          if (!query) return true;
-          return item.name.toLowerCase().includes(query) ||
-                 item.desc.toLowerCase().includes(query) ||
-                 (item.code && item.code.toLowerCase().includes(query));
-        });
-
-        if (filtered.length === 0) {
-          container.innerHTML = `
-            <div class="item-card lg" style="grid-column: 1 / -1; text-align: center; padding: 30px;">
-              <p style="color: var(--txt-muted); font-size: 14px;">Chưa có dữ liệu hoặc không tìm thấy kết quả phù hợp.</p>
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = filtered.map(item => this.createCardMarkup(item, cat)).join("");
-      },
-
-      createCardMarkup(item, cat) {
-        const hasUrl = isValidURL(item.url);
-        return `
-          <div class="item-card lg" tabindex="0">
-            <div class="item-card-title">
-              <span>${escapeHTML(item.name)}</span>
-              <span class="item-badge">${cat.toUpperCase()}</span>
-            </div>
-            ${item.desc ? `<p class="item-desc">${escapeHTML(item.desc)}</p>` : ""}
-            ${item.code ? `<pre class="code-preview-box">${escapeHTML(item.code.slice(0, 160))}</pre>` : ""}
-            <div class="item-footer-actions">
-              ${item.code ? `
-                <button class="btn-act primary" data-action="copy-code" data-cat="${cat}" data-key="${escapeHTML(item.key)}">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  Copy
-                </button>
-              ` : ""}
-              ${hasUrl ? `
-                <a class="btn-act primary" href="${escapeHTML(item.url)}" target="_blank" rel="noopener">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                  Mở link
-                </a>
-              ` : ""}
-              <button class="btn-act ghost" data-action="view-detail" data-cat="${cat}" data-key="${escapeHTML(item.key)}">
-                Chi tiết
-              </button>
-            </div>
-          </div>
-        `;
-      },
-
-      openDetailModal(cat, key) {
-        const item = (AppState.dataCatalog[cat] || []).find(x => x.key === key);
-        if (!item) return;
-
-        $("#detailModalTitle").textContent = item.name;
-        $("#detailModalContent").innerHTML = `
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            ${item.desc ? `<p style="font-size:14px; color:var(--txt-secondary); line-height:1.6;">${escapeHTML(item.desc)}</p>` : ""}
-            ${item.code ? `
-              <div class="form-label">Mã lệnh thực thi:</div>
-              <pre class="code-preview-box" style="max-height:220px; white-space:pre-wrap;">${escapeHTML(item.code)}</pre>
-            ` : ""}
-            ${isValidURL(item.url) ? `
-              <div style="font-size:12.5px; color:var(--brand-secondary); word-break:break-all;">
-                Liên kết: <a href="${escapeHTML(item.url)}" target="_blank" style="text-decoration:underline;">${escapeHTML(item.url)}</a>
-              </div>
-            ` : ""}
-            <div style="display:flex; gap:10px; margin-top:10px;">
-              ${item.code ? `<button class="btn-act primary" data-action="copy-code" data-cat="${cat}" data-key="${escapeHTML(item.key)}">Sao chép Code</button>` : ""}
-              ${isValidURL(item.url) ? `<a class="btn-act primary" href="${escapeHTML(item.url)}" target="_blank">Truy cập ngay</a>` : ""}
-            </div>
-          </div>
-        `;
-
-        this.closeAllModals();
-        $("#detailModal").classList.add("is-open");
-        $("#globalOverlay").classList.add("is-visible");
-      },
-
-      openAuthModal() {
-        this.closeAllModals();
-        $("#authModal").classList.add("is-open");
-        $("#globalOverlay").classList.add("is-visible");
-      },
-
-      closeAllModals() {
-        $("#utilityModal").classList.remove("is-open");
-        $("#authModal").classList.remove("is-open");
-        $("#detailModal").classList.remove("is-open");
-        $("#flyoutMenu").classList.remove("is-open");
-        $("#globalOverlay").classList.remove("is-visible");
-      },
-
-      updateBadges() {
-        CATEGORIES.forEach(c => {
-          const count = (AppState.dataCatalog[c.id] || []).length;
-          const badge = $(`#count${c.id.charAt(0).toUpperCase() + c.id.slice(1)}Badge`);
-          if (badge) badge.textContent = count;
-        });
-      }
-    };
-
-    // ========================================================================
-    // MODULE 8: DEV CONTROL STUDIO (ĐỘC LẬP HOÀN TOÀN KHÔNG GÂY TREO LAG)
-    // ========================================================================
-    const DevStudio = {
-      isOpen: false,
-
-      open() {
-        if (!AppState.isDeveloper) {
-          showToast("Bạn không có quyền truy cập Dev Studio.");
-          return;
-        }
-        this.isOpen = true;
-        $("#devControlStudio").classList.add("is-active");
-        this.renderCatalogList();
-      },
-
-      close() {
-        this.isOpen = false;
-        $("#devControlStudio").classList.remove("is-active");
-      },
-
-      init() {
-        // Chuyển Tab Dev Studio
-        $$(".dev-tab-chip").forEach(chip => {
-          chip.addEventListener("click", () => {
-            const paneId = chip.dataset.devpane;
-            $$(".dev-tab-chip").forEach(c => c.classList.remove("chip-active"));
-            chip.classList.add("chip-active");
-            $$(".dev-pane-content").forEach(p => p.classList.remove("pane-visible"));
-            const targetPane = $(`#devPane${paneId.charAt(0).toUpperCase() + paneId.slice(1)}`);
-            if (targetPane) targetPane.classList.add("pane-visible");
-          });
-        });
-
-        // Đổi danh mục khi thêm nội dung
-        $("#devTargetCatSeg").addEventListener("click", (e) => {
-          const btn = e.target.closest("[data-cat]");
-          if (!btn) return;
-          AppState.devCurrentCategory = btn.dataset.cat;
-          $$("#devTargetCatSeg button").forEach(b => {
-            b.classList.remove("primary");
-            b.classList.add("ghost");
-          });
-          btn.classList.add("primary");
-          btn.classList.remove("ghost");
-
-          const isScript = AppState.devCurrentCategory === "script";
-          $("#devCodeGroup").style.display = isScript ? "flex" : "none";
-          $("#devUrlGroup").style.display = isScript ? "none" : "flex";
-        });
-
-        // Lưu / Cập nhật item
-        $("#btnDevSaveItem").addEventListener("click", () => this.saveItem());
-        $("#btnDevCancelEdit").addEventListener("click", () => this.cancelEdit());
-
-        // Môi trường
-        $("#btnEnvModeAuto").addEventListener("click", () => {
-          AppState.settings.envMode = "auto";
-          $("#btnEnvModeAuto").className = "btn-act primary";
-          $("#btnEnvModeManual").className = "btn-act ghost";
-          $("#devManualWeatherWrap").style.display = "none";
-        });
-        $("#btnEnvModeManual").addEventListener("click", () => {
-          AppState.settings.envMode = "manual";
-          $("#btnEnvModeManual").className = "btn-act primary";
-          $("#btnEnvModeAuto").className = "btn-act ghost";
-          $("#devManualWeatherWrap").style.display = "flex";
-        });
-
-        $("#chkLockThemeToggle").addEventListener("change", (e) => {
-          $("#devThemeLockWrap").style.display = e.target.checked ? "flex" : "none";
-        });
-
-        $("#btnSaveEnvSettings").addEventListener("click", () => {
-          if (!firebaseDB || !AppState.isDeveloper) return;
-          const updateData = {
-            envMode: AppState.settings.envMode,
-            manualWeather: $("#selManualWeather").value,
-            lockOn: $("#chkLockThemeToggle").checked,
-            lockTheme: $("#selLockTheme").value
-          };
-          firebaseDB.ref("nox_settings").update(updateData).then(() => {
-            showToast("Đã lưu cấu hình môi trường thành công.");
-            applyEnvironmentTheme();
-          });
-        });
-
-        // Hiệu năng
-        $$("#devPaneSystem [data-perf]").forEach(btn => {
-          btn.addEventListener("click", () => {
-            $$("#devPaneSystem [data-perf]").forEach(b => {
-              b.classList.remove("primary");
-              b.classList.add("ghost");
-            });
-            btn.classList.add("primary");
-            btn.classList.remove("ghost");
-            AppState.settings.performanceMode = btn.dataset.perf;
-            applyEnvironmentTheme();
-            showToast(`Đã chuyển hiệu năng sang: ${btn.dataset.perf}`);
-          });
-        });
-      },
-
-      saveItem() {
-        if (!firebaseDB || !AppState.isDeveloper) return;
-        const name = $("#devItemName").value.trim();
-        if (!name) {
-          showToast("Vui lòng nhập tên mục.");
-          return;
-        }
-
-        const cat = AppState.devCurrentCategory;
-        const catObj = CATEGORIES.find(c => c.id === cat);
-        const payload = {
-          name: cleanInput(name),
-          desc: cleanInput($("#devItemDesc").value),
-          updatedAt: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        if (cat === "script") {
-          payload.code = $("#devItemCode").value;
-        } else {
-          payload.url = $("#devItemUrl").value.trim();
-        }
-
-        if (AppState.devEditingKey) {
-          firebaseDB.ref(`${DB_ROOT_NODE}/${catObj.node}/${AppState.devEditingKey}`).update(payload).then(() => {
-            showToast("Đã cập nhật mục thành công.");
-            this.cancelEdit();
-          });
-        } else {
-          payload.createdAt = firebase.database.ServerValue.TIMESTAMP;
-          firebaseDB.ref(`${DB_ROOT_NODE}/${catObj.node}`).push(payload).then(() => {
-            showToast("Đã thêm mục mới thành công.");
-            this.cancelEdit();
-          });
-        }
-      },
-
-      cancelEdit() {
-        AppState.devEditingKey = null;
-        $("#devItemName").value = "";
-        $("#devItemDesc").value = "";
-        $("#devItemUrl").value = "";
-        $("#devItemCode").value = "";
-        $("#btnDevSaveItem").textContent = "+ Thêm mới dữ liệu";
-        $("#btnDevCancelEdit").style.display = "none";
-      },
-
-      renderCatalogList() {
-        const container = $("#devContentCatalogList");
-        if (!container) return;
-
-        container.innerHTML = CATEGORIES.map(c => {
-          const items = AppState.dataCatalog[c.id] || [];
-          return `
-            <details class="lg" style="border-radius:14px; overflow:hidden; margin-bottom:8px;">
-              <summary style="padding:12px; font-weight:700; cursor:pointer; color:var(--brand-secondary);">
-                ${c.label} (${items.length})
-              </summary>
-              <div style="display:flex; flex-direction:column;">
-                ${items.map(it => `
-                  <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-top:1px solid var(--border-subtle);">
-                    <span style="font-size:13px; font-weight:600;">${escapeHTML(it.name)}</span>
-                    <div style="display:flex; gap:6px;">
-                      <button class="btn-act ghost" onclick="DevStudio.startEditItem('${c.id}', '${escapeHTML(it.key)}')">Sửa</button>
-                      <button class="btn-act ghost" style="color:var(--danger);" onclick="DevStudio.deleteItem('${c.id}', '${escapeHTML(it.key)}')">Xóa</button>
-                    </div>
-                  </div>
-                `).join("")}
-              </div>
-            </details>
-          `;
-        }).join("");
-      },
-
-      startEditItem(cat, key) {
-        const item = (AppState.dataCatalog[cat] || []).find(x => x.key === key);
-        if (!item) return;
-
-        AppState.devEditingKey = key;
-        AppState.devCurrentCategory = cat;
-
-        $$("#devTargetCatSeg button").forEach(b => {
-          b.classList.toggle("primary", b.dataset.cat === cat);
-          b.classList.toggle("ghost", b.dataset.cat !== cat);
-        });
-
-        $("#devCodeGroup").style.display = (cat === "script") ? "flex" : "none";
-        $("#devUrlGroup").style.display = (cat === "script") ? "none" : "flex";
-
-        $("#devItemName").value = item.name || "";
-        $("#devItemDesc").value = item.desc || "";
-        $("#devItemUrl").value = item.url || "";
-        $("#devItemCode").value = item.code || "";
-
-        $("#btnDevSaveItem").textContent = "Cập nhật dữ liệu";
-        $("#btnDevCancelEdit").style.display = "inline-flex";
-      },
-
-      deleteItem(cat, key) {
-        if (!confirm("Bạn có chắc chắn muốn xóa mục này?")) return;
-        const catObj = CATEGORIES.find(c => c.id === cat);
-        if (!firebaseDB || !catObj) return;
-        firebaseDB.ref(`${DB_ROOT_NODE}/${catObj.node}/${key}`).remove().then(() => {
-          showToast("Đã xóa mục thành công.");
-        });
-      }
-    };
-    window.DevStudio = DevStudio;
-
-    // ========================================================================
-    // MODULE 9: XÁC THỰC TÀI KHOẢN (GOOGLE GIS & EMAIL FIREBASE)
-    // ========================================================================
-    function handleUserAuthenticationState(user) {
-      AppState.currentUser = user;
-      AppState.isDeveloper = !!(user && String(user.email || "").toLowerCase() === DEVELOPER_EMAIL);
-
-      const profilePanel = $("#userProfilePanel");
-      const loginForm = $("#emailLoginForm");
-      const userEmailEl = $("#userProfileEmail");
-      const devBadge = $("#userDevBadge");
-      const launchDevBtn = $("#btnLaunchDevCenter");
-      const menuDevItem = $("#menuItemDevStudio");
-
-      if (user) {
-        if (loginForm) loginForm.style.display = "none";
-        if (profilePanel) profilePanel.style.display = "flex";
-        if (userEmailEl) userEmailEl.textContent = user.email;
-
-        if (devBadge) devBadge.style.display = AppState.isDeveloper ? "inline-block" : "none";
-        if (launchDevBtn) launchDevBtn.style.display = AppState.isDeveloper ? "inline-flex" : "none";
-        if (menuDevItem) menuDevItem.style.display = AppState.isDeveloper ? "flex" : "none";
-      } else {
-        if (loginForm) loginForm.style.display = "block";
-        if (profilePanel) profilePanel.style.display = "none";
-        if (menuDevItem) menuDevItem.style.display = "none";
-      }
-    }
-
-    // Google Sign-In Callback
-    function onGoogleCredentialResponse(response) {
-      if (!response || !response.credential) return;
-      try {
-        const payloadBase64 = response.credential.split(".")[1];
-        const decodedJson = JSON.parse(atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/")));
-        const user = {
-          email: decodedJson.email,
-          name: decodedJson.name || decodedJson.email,
-          picture: decodedJson.picture || ""
-        };
-        handleUserAuthenticationState(user);
-        showToast("Đăng nhập Google thành công.");
-        UIManager.closeAllModals();
-
-        if (firebaseAuth) {
-          const cred = firebase.auth.GoogleAuthProvider.credential(response.credential);
-          firebaseAuth.signInWithCredential(cred).catch(() => {});
-        }
-      } catch (err) {
-        showToast("Lỗi xác thực Google.");
-      }
-    }
-
-    function initGoogleGIS() {
-      if (window.google && google.accounts) {
-        try {
-          google.accounts.id.initialize({
-            client_id: GOOGLE_GIS_CLIENT_ID,
-            callback: onGoogleCredentialResponse,
-            auto_select: false
-          });
-          const btnWrap = $("#googleSignInButtonWrapper");
-          if (btnWrap) {
-            google.accounts.id.renderButton(btnWrap, {
-              theme: "filled_black",
-              size: "large",
-              shape: "pill"
-            });
-          }
-        } catch (_) {}
-      } else {
-        setTimeout(initGoogleGIS, 500);
-      }
-    }
-
-    // ========================================================================
-    // MODULE 10: ĐỒNG BỘ DỮ LIỆU REALTIME FIREBASE
-    // ========================================================================
-    function setupRealtimeListeners() {
-      let pendingCategories = CATEGORIES.length;
-
-      const checkLoaded = () => {
-        pendingCategories--;
-        if (pendingCategories <= 0) {
-          const loader = $("#appLoader");
-          if (loader) {
-            loader.classList.add("loader-done");
-            setTimeout(() => loader.remove(), 600);
-          }
-        }
-      };
-
-      if (!firebaseDB) {
-        checkLoaded();
-        return;
-      }
-
-      // Lắng nghe từng danh mục
-      CATEGORIES.forEach(c => {
-        firebaseDB.ref(`${DB_ROOT_NODE}/${c.node}`).on("value", (snapshot) => {
-          const val = snapshot.val() || {};
-          AppState.dataCatalog[c.id] = Object.keys(val).map(key => {
-            const row = val[key] || {};
-            return {
-              key: key,
-              name: row.name || row.title || "(Không tên)",
-              desc: row.desc || row.description || "",
-              url: row.url || row.link || "",
-              code: row.code || row.script || "",
-              ts: Number(row.updatedAt || row.createdAt || 0)
-            };
-          }).sort((a, b) => b.ts - a.ts);
-
-          UIManager.updateBadges();
-          UIManager.renderUtilTabContent();
-          checkLoaded();
-        }, () => {
-          AppState.dataCatalog[c.id] = [];
-          checkLoaded();
-        });
-      });
-
-      // Lắng nghe cấu hình thời tiết & môi trường
-      firebaseDB.ref("nox_settings").on("value", (snapshot) => {
-        const val = snapshot.val() || {};
-        AppState.settings.envMode = val.envMode || "auto";
-        AppState.settings.manualWeather = val.manualWeather || "clear";
-        AppState.settings.lockOn = (val.lockOn !== false);
-        AppState.settings.lockTheme = val.lockTheme || "halloween";
-        applyEnvironmentTheme();
-      });
-    }
-
-    // ========================================================================
-    // KHỞI ĐỘNG HỆ THỐNG TOÀN DIỆN (APP INITIALIZATION)
-    // ========================================================================
-    document.addEventListener("DOMContentLoaded", () => {
-      // 1. Dựng thiên nhiên & cảnh quan
-      generateNightStars();
-      populateVegetationAndTrees();
-      AerialWildlife.init();
-      CanvasFXEngine.init();
-
-      // 2. Khởi tạo UI & Dev
-      UIManager.initEventListeners();
-      DevStudio.init();
-
-      // 3. Đăng ký auth form
-      $("#emailLoginForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (!firebaseAuth) return;
-        const email = $("#authEmailInput").value.trim();
-        const pass = $("#authPasswordInput").value;
-        const errBox = $("#authErrorMessage");
-        errBox.textContent = "";
-
-        firebaseAuth.signInWithEmailAndPassword(email, pass)
-          .then(res => {
-            handleUserAuthenticationState(res.user);
-            showToast("Đăng nhập thành công.");
-            UIManager.closeAllModals();
-          })
-          .catch(() => {
-            errBox.textContent = "Email hoặc mật khẩu không chính xác.";
-          });
-      });
-
-      $("#btnSignOutSession").addEventListener("click", () => {
-        if (firebaseAuth) firebaseAuth.signOut();
-        handleUserAuthenticationState(null);
-        showToast("Đã đăng xuất.");
-      });
-
-      if (firebaseAuth) {
-        firebaseAuth.onAuthStateChanged(user => {
-          handleUserAuthenticationState(user);
-        });
-      }
-
-      // 4. Bật Google GIS & Firebase Listeners
-      initGoogleGIS();
-      setupRealtimeListeners();
-
-      // 5. Bắt đầu vòng lặp đồng hồ môi trường
-      EnvironmentClock.updateClockDisplay();
-      setInterval(() => {
-        EnvironmentClock.updateClockDisplay();
-        applyEnvironmentTheme();
-      }, 1000);
-
-      // Kích hoạt môi trường ban đầu
-      applyEnvironmentTheme();
-    });
-  </script>
+</div>
+<div id="toasts"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+"use strict";
+const firebaseConfig={apiKey:"AIzaSyCwxeePF5Q96k_JfglAz0IAcWyVly17eVs",authDomain:"noxsecret-dd77f.firebaseapp.com",databaseURL:"https://noxsecret-dd77f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"noxsecret-dd77f",storageBucket:"noxsecret-dd77f.firebasestorage.app",messagingSenderId:"618477082488",appId:"1:618477082488:web:38741735ef243d85b4da8d",measurementId:"G-BK25G56E0C"};
+const GIS_ID="971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
+const DEV_EMAIL="hminhgalaxy@gmail.com",ND="nox_data";
+let db=null,auth=null;
+if(typeof firebase!=="undefined"){try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);db=firebase.database();auth=firebase.auth();auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});}catch(e){db=null;auth=null;}}
+const $=function(s){return document.querySelector(s)};
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+const clean=function(s){return String(s||"").replace(/[<>]/g,"").slice(0,500)};
+const pick=function(o,k){for(const x of k){if(o&&o[x]!=null&&o[x]!=="")return o[x]}return""};
+const vUrl=function(u){return /^https?:\/\/.+/i.test(String(u||"").trim())};
+const hx=function(h){h=String(h).replace("#","");return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]};
+const mix=function(a,b,t){const A=hx(a),B=hx(b);return"#"+A.map(function(v,i){return Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")}).join("")};
+function toast(m){const w=$("#toasts");const e=document.createElement("div");e.className="toast lg";e.textContent=m;w.appendChild(e);setTimeout(function(){e.classList.add("out");setTimeout(function(){e.remove()},300)},2000);}
+const S=function(p,w){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(w||1.8)+'" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'};
+const IC={
+logo:'<svg viewBox="0 0 100 100"><defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#29d6c5"/></linearGradient></defs><path d="M50 8 85 28.5v41L50 90 15 69.5v-41Z" fill="rgba(255,255,255,.08)" stroke="url(#hg)" stroke-width="4"/><path d="M60 32c-2-5-7-8-12-8-7 0-12 4-12 9 0 11 25 7 25 19 0 6-6 10-13 10-6 0-11-3-13-7" fill="none" stroke="url(#hg)" stroke-width="7" stroke-linecap="round"/></svg>',
+menu:S('<path d="M4 7h16M4 12h16M4 17h16"/>',2),x:S('<path d="M6 6l12 12M18 6 6 18"/>',2),
+user:S('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/>'),
+home:S('<path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21.5v-6.5h6v6.5"/>'),
+script:S('<path d="M8 6 3 12l5 6M16 6l5 6-5 6"/>'),
+apk:S('<path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7M12 13v7"/>'),
+ios:S('<path d="M15.6 8.6c-.2-2 1.5-3 1.5-3-1-1.4-2.5-1.6-3.1-1.6-1.4-.1-2.3.8-2.9.8-.6 0-1.6-.8-2.8-.8-1.6 0-3.8 1.3-3.8 4.9 0 3.3 2.5 7.4 4.1 7.4 1 0 1.4-.6 2.8-.6 1.3 0 1.7.6 2.8.6 1.6 0 4-4 4-7.2 0-2.4-1.8-3.4-2.6-3.5Z"/>'),
+link:S('<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'),
+clock:S('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+sndOn:S('<path d="M4 10v4h4l5 4V6l-5 4Z"/><path d="M15 9a4 4 0 0 1 0 6M17.5 7a7 7 0 0 1 0 10"/>'),
+sndOff:S('<path d="M4 10v4h4l5 4V6l-5 4Z"/><path d="m16 9 5 5M21 9l-5 5"/>'),
+shield:S('<path d="M12 2 4 5.5v6c0 5 3.4 8.6 8 10.5 4.6-1.9 8-5.5 8-10.5v-6Z"/>'),
+copy:S('<rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
+ext:S('<path d="M14 4h6v6M20 4 10 14M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>')};
+/* FIX: icon được CHÈN TRƯỚC, không ghi đè innerHTML → tên mục luôn hiện */
+function injectIcons(){document.querySelectorAll("[data-ic]").forEach(function(e){if(e.dataset.done)return;e.dataset.done="1";e.insertAdjacentHTML("afterbegin",IC[e.dataset.ic]||"");});}
+injectIcons();
+document.addEventListener("pointerdown",function(e){var g=e.target.closest(".btn,.utab,.mlink");if(g&&!RM){g.classList.remove("pressed");void g.offsetWidth;g.classList.add("pressed");setTimeout(function(){g.classList.remove("pressed")},380);}});
+const CATS=[{id:"script",label:"Script",node:"scripts",ic:"script"},{id:"apk",label:"APK",node:"apks",ic:"apk"},{id:"ios",label:"iOS",node:"ios",ic:"ios"},{id:"link",label:"Link",node:"links",ic:"link"}];
+const catOf=function(id){return CATS.find(function(c){return c.id===id})};
+const state={user:null,dev:false,data:{},settings:{envMode:"auto",manualWeather:"clear",lockOn:false,lockEnv:"halloween",perf:"balanced"},notice:null,utilNote:"",snd:false,perfEff:"balanced",edit:null,fc:"script",utab:"script",paused:false,autoWx:{wx:"clear",halloween:false}};
+/* THỜI GIAN: 30 phút thật = 24 giờ web; thời tiết đổi mỗi 6 phút thật */
+const WT0=Date.now(),START_HOUR=8,DAY_MS=1800000,CYC_MS=360000;
+let lastCycle=-1;
+function webHour(){return(START_HOUR+(Date.now()-WT0)/DAY_MS*24)%24;}
+function pad(n){return String(Math.floor(n)).padStart(2,"0")}
+function tickTime(){var h=webHour();var el=$("#wtMod");if(el)el.innerHTML=IC.clock+"<span>"+pad(h)+":"+pad((h%1)*60)+"</span>";
+ positionCelestial(h);var cyc=Math.floor((Date.now()-WT0)/CYC_MS);if(cyc!==lastCycle){lastCycle=cyc;rollWeather();applyEnv();}}
+setInterval(tickTime,1000);
+function positionCelestial(h){var sun=$("#sun"),moon=$("#moon");
+ if(h>=6&&h<18){var p=(h-6)/12;sun.style.opacity=1;moon.style.opacity=0;sun.style.left=(5+p*88)+"%";sun.style.top=(55-Math.sin(p*Math.PI)*42)+"%";}
+ else{var q=(((h-18)+24)%24)/12;moon.style.opacity=1;sun.style.opacity=0;moon.style.left=(93-q*88)+"%";moon.style.top=(55-Math.sin(q*Math.PI)*42)+"%";}}
+function rollWeather(){if(state.settings.lockOn||state.settings.envMode==="manual")return;
+ var r=Math.random(),wx=r<.35?"clear":r<.55?"rain":r<.7?"storm":r<.8?"snow":r<.9?"wind":"fog";
+ state.autoWx={wx:wx,halloween:Math.random()<.22};}
+function sndTypeFor(wx){if(wx==="rain")return"rain";if(wx==="storm")return"storm";if(wx==="snow")return"snow";if(wx==="fog"||wx==="wind"||wx==="dust")return"wind";var h=webHour();return(h>=6&&h<18)?"birds":"off";}
+const SND={ac:null,master:null,layers:[],timers:[],type:"off",
+ acx:function(){if(!this.ac){this.ac=new(window.AudioContext||window.webkitAudioContext)();this.master=this.ac.createGain();this.master.gain.value=0;this.master.connect(this.ac.destination);}if(this.ac.state==="suspended")this.ac.resume();return this.ac;},
+ noise:function(ac){var b=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),d=b.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;var s=ac.createBufferSource();s.buffer=b;s.loop=true;return s;},
+ chain:function(ac,type,freq,gain){var s=this.noise(ac),f=ac.createBiquadFilter();f.type=type;f.frequency.value=freq;var g=ac.createGain();g.gain.value=gain;s.connect(f);f.connect(g);g.connect(this.master);s.start();this.layers.push(s);return f;},
+ stop:function(){this.layers.forEach(function(n){try{n.stop()}catch(_){}});this.layers=[];this.timers.forEach(clearInterval);this.timers=[];this.type="off";},
+ set:function(type){if(!state.snd)return;if(type===this.type&&this.layers.length+this.timers.length>0)return;var ac=this.acx(),self=this;this.stop();this.type=type;this.master.gain.setTargetAtTime(.5,ac.currentTime,.5);
+  if(type==="rain")this.chain(ac,"lowpass",1400,.3);
+  if(type==="storm"){this.chain(ac,"lowpass",900,.5);this.timers.push(setInterval(function(){if(document.hidden)return;var s=self.noise(ac),f=ac.createBiquadFilter();f.type="lowpass";f.frequency.value=120;var g=ac.createGain();g.gain.setValueAtTime(.6,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+1.4);s.connect(f);f.connect(g);g.connect(self.master);s.start();s.stop(ac.currentTime+1.5);},6000+Math.random()*6000));}
+  if(type==="snow"||type==="wind"){var f4=this.chain(ac,"bandpass",400,.12);var l=ac.createOscillator();l.frequency.value=.15;var lg=ac.createGain();lg.gain.value=200;l.connect(lg);lg.connect(f4.frequency);l.start();this.layers.push(l);}
+  if(type==="birds")this.timers.push(setInterval(function(){if(document.hidden)return;var o=ac.createOscillator(),gg=ac.createGain();o.frequency.setValueAtTime(2000+Math.random()*1500,ac.currentTime);o.frequency.exponentialRampToValueAtTime(1200,ac.currentTime+.15);gg.gain.setValueAtTime(.06,ac.currentTime);gg.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.2);o.connect(gg);gg.connect(self.master);o.start();o.stop(ac.currentTime+.22);},2500+Math.random()*2000));}};
+function paintSnd(){var on=state.snd;var a=$("#sndMod");if(a)a.innerHTML=on?IC.sndOn:IC.sndOff;var m=$("#mSound");if(m)m.innerHTML=(on?IC.sndOn:IC.sndOff)+"<span>Âm thanh: "+(on?"Bật":"Tắt")+"</span>";}
+function setSnd(on){state.snd=on;try{localStorage.setItem("ssw_snd",on?"1":"0")}catch(_){}paintSnd();
+ if(on){SND.acx();SND.type="off";applyEnv();}else{if(SND.master)SND.master.gain.setTargetAtTime(0,SND.ac.currentTime,.3);SND.stop();}}
+try{state.snd=localStorage.getItem("ssw_snd")==="1"}catch(_){}
+$("#sndMod").addEventListener("click",function(){setSnd(!state.snd)});
+$("#mSound").addEventListener("click",function(){setSnd(!state.snd)});
+/* MÔI TRƯỜNG */
+function grassPath(baseY,hmin,hmax,step){var d="M0 640 L0 "+baseY,x=0;while(x<1440){var h=hmin+Math.random()*(hmax-hmin),w=step*(.7+Math.random()*.6);d+=" L"+(x+w/2).toFixed(0)+" "+(baseY-h).toFixed(0)+" L"+(x+w).toFixed(0)+" "+baseY;x+=w;}return d+" L1440 640Z";}
+/* FIX cây bị che: mỗi cây = <g transform> ngoài + <g.tree> trong (animation không đè transform), cây đặt trên sườn đồi, xếp theo độ sâu */
+function genEnv(){
+ $("#gGrassBack").setAttribute("d",grassPath(560,40,72,26));$("#gGrassMid").setAttribute("d",grassPath(584,30,56,22));$("#gGrassFront").setAttribute("d",grassPath(606,20,42,18));
+ var M={pine:'<path d="M0 -60 l26 44 h-52Z M0 -84 l22 38 h-44Z"/><rect x="-4" y="-16" width="8" height="18"/>',round:'<circle cx="0" cy="-40" r="30"/><rect x="-4" y="-12" width="8" height="34"/>',tall:'<ellipse cx="0" cy="-46" rx="20" ry="40"/><rect x="-3" y="-8" width="6" height="26"/>',bush:'<circle cx="-12" cy="-16" r="16"/><circle cx="12" cy="-14" r="14"/><circle cx="0" cy="-24" r="16"/>',dead:'<path d="M0 0 v-50 m0 16 q-16 -8 -20 -20 m20 8 q14 -6 18 -16" stroke="var(--sil)" stroke-width="5" fill="none" stroke-linecap="round"/>'};
+ var names=["pine","round","tall","bush","pine","round","dead","tall","pine","bush"],list=[];
+ for(var i=0;i<46;i++)list.push({x:10+Math.random()*1420,y:446+Math.random()*124,m:names[i%names.length]});
+ list.sort(function(a,b){return a.y-b.y});
+ $("#gTrees").innerHTML=list.map(function(t){var s=(.3+(t.y-446)/124*.85+Math.random()*.12).toFixed(2);return '<g transform="translate('+t.x.toFixed(0)+' '+t.y.toFixed(0)+') scale('+s+')"><g class="tree" fill="var(--tree)" stroke="rgba(255,255,255,.07)" stroke-width="1.5" style="animation-delay:'+(-Math.random()*4).toFixed(1)+'s">'+M[t.m]+'</g></g>';}).join("");
+ var w=$("#wind");for(var j=0;j<6;j++){var st=document.createElement("div");st.className="wstreak";st.style.cssText="top:"+(12+Math.random()*50)+"%;width:"+(80+Math.random()*180)+"px;animation-duration:"+(4+Math.random()*6)+"s;animation-delay:"+(-Math.random()*8)+"s";w.appendChild(st);}
+ /* tơ nhện: lưới 1/4 hình tròn + nhện đung đưa */
+ var R=190,n=6,pts=[],h="";for(var a=0;a<=n;a++){var an=a*Math.PI/2/n;pts.push([Math.cos(an),Math.sin(an)]);}
+ pts.forEach(function(p){h+='<path d="M0 0 L'+(p[0]*R).toFixed(1)+' '+(p[1]*R).toFixed(1)+'"/>';});
+ for(var r=.18;r<=1;r+=.164){var d="M"+(pts[0][0]*R*r).toFixed(1)+" "+(pts[0][1]*R*r).toFixed(1);for(var k=1;k<=n;k++){var am=(k-.5)*Math.PI/2/n;d+=" Q"+(Math.cos(am)*R*r*.84).toFixed(1)+" "+(Math.sin(am)*R*r*.84).toFixed(1)+" "+(pts[k][0]*R*r).toFixed(1)+" "+(pts[k][1]*R*r).toFixed(1);}h+='<path d="'+d+'"/>';}
+ var web='<g stroke="rgba(255,255,255,.55)" stroke-width="1" fill="none" stroke-linecap="round">'+h+'</g>';
+ var spider='<g class="bobg" transform="translate(120 0)"><line x1="0" y1="-200" x2="0" y2="92" stroke="rgba(255,255,255,.55)" stroke-width="1"/><g transform="translate(0 92)"><g stroke="#140a1e" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M-3 0 l-9 -6 l-4 6M-3 3 l-10 0 l-5 7M3 0 l9 -6 l4 6M3 3 l10 0 l5 7"/></g><ellipse cx="0" cy="4" rx="6" ry="7.5" fill="#140a1e"/><circle cx="0" cy="-3" r="4" fill="#140a1e"/><circle cx="-1.6" cy="-3.6" r="1" fill="#ff5a3c"/><circle cx="1.6" cy="-3.6" r="1" fill="#ff5a3c"/></g></g>';
+ $("#webL").innerHTML=web+spider;$("#webR").innerHTML=web;
+}
+genEnv();
+function computeTod(h){if(h<4)return"deepnight";if(h<6)return"sunrise";if(h<11)return"morning";if(h<14)return"noon";if(h<17)return"afternoon";if(h<19)return"sunset";if(h<21)return"twilight";return"night";}
+function resolveEnv(){var s=state.settings,theme="normal",wx="none";
+ if(s.lockOn&&s.lockEnv){theme=s.lockEnv;if(s.envMode==="manual")wx=s.manualWeather||"none";}
+ else if(s.envMode==="manual")wx=s.manualWeather||"none";
+ else{wx=state.autoWx.wx;if(state.autoWx.halloween)theme="halloween";}
+ if(wx==="clear")wx="none";
+ return{theme:theme,wx:wx,tod:computeTod(webHour())};}
+function setPalette(tod,theme,wx){var top,bot,m1,m2,grassB,grass,grassF,tree,sil;
+ if(tod==="night"||tod==="deepnight"){top="#060a1c";bot="#152039";m1="#182642";m2="#111c33";grassB="#1d4a2c";grass="#163a22";grassF="#0e2418";tree="#12301f";sil="#0a1226";}
+ else if(tod==="sunrise"||tod==="sunset"){top="#3a2b52";bot="#ff9a6b";m1="#4a3a63";m2="#3a2c50";grassB="#3f7d4a";grass="#2c5a38";grassF="#1c4029";tree="#20452a";sil="#2a2044";}
+ else if(tod==="twilight"){top="#1a2340";bot="#5a4a7a";m1="#2a3358";m2="#202a48";grassB="#2a5f38";grass="#1c4029";grassF="#14301f";tree="#1a3c25";sil="#182038";}
+ else{top="#6fb7ff";bot="#dff3ff";m1="#7fa8c9";m2="#5d8f7a";grassB="#57b86f";grass="#3f9d5f";grassF="#2a7a44";tree="#2f7d4f";sil="#27415e";}
+ if(theme==="halloween"){top=mix(top,"#150a26",.7);bot=mix(bot,"#4a1a3a",.7);m1=mix(m1,"#2a1440",.7);m2=mix(m2,"#1d0f30",.7);grassB=mix(grassB,"#2a4018",.6);grass=mix(grass,"#1c2a12",.6);grassF=mix(grassF,"#142008",.6);tree=mix(tree,"#241638",.7);sil=mix(sil,"#120a20",.7);}
+ if(theme==="christmas"){top=mix(top,"#0d2b4a",.6);bot=mix(bot,"#bfe3ff",.5);m2=mix(m2,"#dfeefc",.5);grassB=mix(grassB,"#cfe8ff",.6);grass=mix(grass,"#e8f4ff",.6);grassF=mix(grassF,"#bcd8f0",.6);}
+ if(theme==="tet"){top=mix(top,"#3a0d1a",.6);bot=mix(bot,"#ffb35c",.6);m1=mix(m1,"#4a2030",.6);m2=mix(m2,"#3a1826",.6);}
+ if(wx==="rain"||wx==="storm"){top=mix(top,"#2a3442",.5);bot=mix(bot,"#5a6a7a",.5);}
+ if(wx==="snow"){top=mix(top,"#aebfd4",.4);bot=mix(bot,"#e8f1fa",.4);grassB=mix(grassB,"#e8f4ff",.5);grass=mix(grass,"#cfe8ff",.5);grassF=mix(grassF,"#bcd8f0",.5);}
+ if(wx==="fog"||wx==="wind"){top=mix(top,"#8a94a2",.4);bot=mix(bot,"#c2cad4",.4);}
+ var r=document.documentElement.style,v={"sky-top":top,"sky-bot":bot,m1:m1,m2:m2,grassB:grassB,grass:grass,grassF:grassF,tree:tree,sil:sil};for(var k in v)r.setProperty("--"+k,v[k]);}
+const BASE_N={rain:110,snow:90,fog:7,petals:26,hail:70,dust:36,flies:16,storm:140,wind:40};
+const FX={cv:null,ctx:null,items:[],type:"off",raf:0,W:0,H:0,
+ init:function(){this.cv=$("#fx");this.ctx=this.cv.getContext("2d");var s=this;addEventListener("resize",function(){s.resize()});document.addEventListener("visibilitychange",function(){if(!document.hidden)s.kick();});this.resize();},
+ resize:function(){var d=Math.min(1.5,devicePixelRatio||1);this.W=innerWidth;this.H=innerHeight;this.cv.width=this.W*d;this.cv.height=this.H*d;this.ctx.setTransform(d,0,0,d,0,0);},
+ mult:function(){return state.perfEff==="low"?0:(state.perfEff==="high"?1.5:1)},
+ kick:function(){if(this.type!=="off"&&!this.raf&&!document.hidden&&!state.paused)this.loop();},
+ set:function(t){if(t==="none")t="off";this.type=t;this.items=[];var n=Math.round((BASE_N[t]||0)*this.mult());for(var i=0;i<n;i++)this.items.push(this.spawn(t));if(t==="off"||!n)this.ctx.clearRect(0,0,this.W,this.H);this.kick();},
+ spawn:function(t){var R=Math.random;
+  if(t==="rain"||t==="storm")return{x:R()*this.W,y:R()*this.H,l:10+R()*10,s:10+R()*8,w:-2};
+  if(t==="snow"||t==="hail")return{x:R()*this.W,y:R()*this.H,r:1.5+R()*2.5,s:(t==="hail"?4:.7+R()*1.2),ph:R()*6};
+  if(t==="fog")return{x:R()*this.W,y:this.H*.4+R()*this.H*.5,s:80+R()*140,sx:.2+R()*.3,a:.05+R()*.06};
+  if(t==="petals")return{x:R()*this.W,y:R()*this.H,r:3+R()*3,rot:R()*6,vr:(R()-.5)*.1,s:1+R()*1.5,ph:R()*6};
+  if(t==="dust"||t==="wind")return{x:R()*this.W,y:R()*this.H,l:20+R()*30,s:6+R()*6,a:.08};
+  if(t==="flies")return{x:R()*this.W,y:this.H*.5+R()*this.H*.4,ph:R()*6};
+  return{};},
+ loop:function(){var self=this;if(this.type==="off"||document.hidden||state.paused){this.raf=0;return;}this.raf=requestAnimationFrame(function(){self.loop()});
+  var c=this.ctx,t=this.type;c.clearRect(0,0,this.W,this.H);
+  for(var i=0;i<this.items.length;i++){var p=this.items[i];
+   if(t==="rain"||t==="storm"){p.y+=p.s;p.x+=p.w;if(p.y>this.H){p.y=-20;p.x=Math.random()*this.W}c.strokeStyle="rgba(180,210,255,.5)";c.lineWidth=1.2;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-p.w,p.y-p.l);c.stroke();}
+   else if(t==="snow"||t==="hail"){p.y+=p.s;p.x+=Math.sin(p.ph+=.01)*.6;if(p.y>this.H){p.y=-10;p.x=Math.random()*this.W}c.fillStyle="rgba(255,255,255,.75)";c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill();}
+   else if(t==="fog"){p.x+=p.sx;if(p.x-p.s>this.W)p.x=-p.s;var g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.s);g.addColorStop(0,"rgba(210,220,235,"+p.a+")");g.addColorStop(1,"rgba(210,220,235,0)");c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,p.s,0,7);c.fill();}
+   else if(t==="petals"){p.y+=p.s;p.x+=Math.sin(p.ph+=.02)*.8;p.rot+=p.vr;if(p.y>this.H){p.y=-10;p.x=Math.random()*this.W}c.save();c.translate(p.x,p.y);c.rotate(p.rot);c.fillStyle="rgba(255,120,160,.75)";c.beginPath();c.ellipse(0,0,p.r,p.r*.5,0,0,7);c.fill();c.restore();}
+   else if(t==="dust"||t==="wind"){p.x+=p.s;if(p.x>this.W)p.x=-p.l;c.strokeStyle="rgba(255,255,255,"+p.a+")";c.lineWidth=1.5;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-p.l,p.y);c.stroke();}
+   else if(t==="flies"){p.ph+=.02;var x=p.x+Math.sin(p.ph*2)*20,y=p.y+Math.cos(p.ph)*12;c.fillStyle="rgba(255,240,150,"+(.4+Math.sin(p.ph*4)*.3)+")";c.beginPath();c.arc(x,y,1.6,0,7);c.fill();}
+  }}};
+FX.init();
+/* FIX chim: chỉ ban ngày + trời quang + không Halloween; Halloween → dơi; bão / mưa / đêm → không chim */
+function applyEnv(){var e=resolveEnv();setPalette(e.tod,e.theme,e.wx);
+ var b=document.body;Array.from(b.classList).forEach(function(c){if(/^(theme-|tod-|wx-|birds-)/.test(c)||c==="day")b.classList.remove(c);});
+ b.classList.add("theme-"+e.theme,"tod-"+e.tod);if(e.wx!=="none")b.classList.add("wx-"+e.wx);
+ if(["morning","noon","afternoon"].indexOf(e.tod)>=0)b.classList.add("day");
+ var dayish=["sunrise","morning","noon","afternoon","sunset"].indexOf(e.tod)>=0;
+ if(dayish&&e.theme!=="halloween"&&(e.wx==="none"||e.wx==="dust"))b.classList.add("birds-on");
+ var pt="off";if(["rain","storm","snow","fog","wind","dust"].indexOf(e.wx)>=0)pt=e.wx;else if(e.theme==="halloween")pt="fog";else if(e.theme==="christmas")pt="snow";else if(e.theme==="tet")pt="petals";else if(e.tod==="night"||e.tod==="deepnight")pt="flies";
+ if(FX.type!==pt)FX.set(pt);
+ if(state.snd)SND.set(sndTypeFor(e.wx));}
+(function(){var sh=[];for(var i=0;i<60;i++)sh.push((Math.random()*100)+"vw "+(Math.random()*60)+"vh 0 "+(Math.random()<.3?"1px":"0")+" rgba(255,255,255,"+(.3+Math.random()*.6)+")");$("#stars").style.boxShadow=sh.join(",");})();
+/* DỮ LIỆU + TIỆN ÍCH */
+function nI(k,o){if(o==null||typeof o!=="object")o={name:String(o==null?"":o)};return{key:k,name:pick(o,["name","title"])||"(không tên)",desc:pick(o,["desc","description","note"]),url:pick(o,["url","link","href"]),code:pick(o,["code","script"]),ts:+(o.updatedAt||o.createdAt||0)||0};}
+function cardHTML(it,ci,i){var hu=vUrl(it.url);
+ return '<article class="card lg" style="--i:'+i+'"><h3>'+esc(it.name)+'</h3>'+(it.desc?'<p class="desc">'+esc(it.desc)+'</p>':"")+(it.code?'<pre class="cprev">'+esc(String(it.code).slice(0,140))+'</pre>':"")+'<div class="cfoot">'+(it.code?'<button class="btn btn-p" data-act="copycode" data-cat="'+ci+'" data-key="'+esc(it.key)+'">'+IC.copy+'Copy</button>':"")+(hu?'<a class="btn btn-p" href="'+esc(it.url)+'" target="_blank" rel="noopener">'+IC.ext+'Mở</a>':"")+'<button class="btn btn-g" data-act="detail" data-cat="'+ci+'" data-key="'+esc(it.key)+'">Chi tiết</button></div></article>';}
+function listHTML(id){var items=state.data[id];if(!items)return '<div class="card lg empty">Đang tải…</div>';return items.length?items.map(function(x,i){return cardHTML(x,id,i)}).join(""):'<div class="card lg empty">Chưa có dữ liệu trong mục này.</div>';}
+function buildTabs2(){$("#utabs").innerHTML='<i class="uind"></i>'+CATS.map(function(c){return '<button class="utab'+(c.id===state.utab?" on":"")+'" data-u="'+c.id+'">'+IC[c.ic]+'<span>'+esc(c.label)+'</span><small>'+((state.data[c.id]||[]).length)+'</small></button>'}).join("");}
+function moveInd(){var t=document.querySelector(".utab.on"),i=$(".uind");if(!t||!i)return;i.style.width=t.offsetWidth+"px";i.style.transform="translateX("+t.offsetLeft+"px)";}
+function showUtab(id,instant){state.utab=id;document.querySelectorAll(".utab").forEach(function(b){b.classList.toggle("on",b.dataset.u===id)});moveInd();var l=$("#ulist");
+ if(instant){l.classList.remove("out");l.innerHTML=listHTML(id);return;}
+ l.classList.add("out");setTimeout(function(){if(state.utab===id){l.innerHTML=listHTML(id);l.classList.remove("out");}},160);}
+function refreshUtil(){buildTabs2();$("#ulist").innerHTML=listHTML(state.utab);requestAnimationFrame(moveInd);}
+$("#utabs").addEventListener("click",function(e){var b=e.target.closest(".utab");if(b&&b.dataset.u!==state.utab)showUtab(b.dataset.u);});
+function openPop(id){var p=$(id);if(!p)return;p.classList.add("on");$("#ov").classList.add("on");}
+function openUtil(){state.utab="script";buildTabs2();$("#ulist").classList.remove("out");$("#ulist").innerHTML=listHTML("script");openPop("#shUtil");requestAnimationFrame(function(){requestAnimationFrame(moveInd)});}
+$("#fabUtil").addEventListener("click",openUtil);
+function openDetail(ci,k){var it=(state.data[ci]||[]).find(function(x){return x.key===k});if(!it)return;var hu=vUrl(it.url);
+ $("#dtBody").innerHTML='<h3 style="font-size:17px;font-weight:800">'+esc(it.name)+'</h3><p style="color:var(--t2);font-size:13.5px">'+esc(it.desc||"")+'</p>'+(it.code?'<pre class="cprev" style="max-height:220px">'+esc(it.code)+'</pre>':"")+(hu?'<div style="font-size:12px;color:var(--as);word-break:break-all">'+esc(it.url)+'</div>':"")+'<div class="cfoot">'+(it.code?'<button class="btn btn-p" data-act="copycode" data-cat="'+ci+'" data-key="'+esc(it.key)+'">'+IC.copy+'Copy code</button>':"")+(hu?'<a class="btn btn-p" href="'+esc(it.url)+'" target="_blank" rel="noopener">'+IC.ext+'Mở link</a><button class="btn btn-g" data-act="copyurl" data-url="'+esc(it.url)+'">'+IC.copy+'Copy link</button>':"")+'</div>';
+ openPop("#mdDetail");}
+function copy(v){if(navigator.clipboard)navigator.clipboard.writeText(v).catch(function(){});else{var ta=document.createElement("textarea");ta.value=v;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(_){}ta.remove();}}
+document.addEventListener("click",function(e){var t=e.target.closest("[data-act]");if(!t)return;var a=t.dataset.act;
+ if(a==="detail")openDetail(t.dataset.cat,t.dataset.key);
+ else if(a==="copycode"){var it=(state.data[t.dataset.cat]||[]).find(function(x){return x.key===t.dataset.key});if(it&&it.code){copy(it.code);toast("Đã sao chép code.");}}
+ else if(a==="copyurl"){copy(t.dataset.url);toast("Đã sao chép link.");}});
+/* MENU / POPUP */
+function anyPop(){return!!document.querySelector(".pop.on")||$("#menu").classList.contains("on");}
+function openMenu(){$("#menu").classList.add("on");$("#ov").classList.add("on");}
+function closeMenu(){$("#menu").classList.remove("on");if(!anyPop())$("#ov").classList.remove("on");}
+function closePops(){document.querySelectorAll(".pop.on").forEach(function(s){s.classList.remove("on")});if(!$("#menu").classList.contains("on"))$("#ov").classList.remove("on");}
+$("#btnMenu").addEventListener("click",function(e){e.stopPropagation();$("#menu").classList.contains("on")?closeMenu():openMenu();});
+document.addEventListener("click",function(e){if(!e.target.closest("#menu")&&!e.target.closest("#btnMenu"))closeMenu();
+ var c=e.target.closest("[data-close]");if(c){var p=c.closest(".pop");if(p)p.classList.remove("on");if(!anyPop())$("#ov").classList.remove("on");}});
+$("#ov").addEventListener("click",function(){closePops();closeMenu();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){if($("#dev").classList.contains("on"))closeDev();else{closePops();closeMenu();}}});
+function openAuth(){closeMenu();openPop("#mdAuth");}
+$("#mAcc").addEventListener("click",openAuth);$("#btnAcc").addEventListener("click",openAuth);
+$("#mDev").addEventListener("click",function(){closeMenu();openDev();});
+$("#btnDevOpen").addEventListener("click",openDev);
+$("#devClose").addEventListener("click",closeDev);
+/* ĐĂNG NHẬP — ok=true chỉ khi đã xác thực thật (Firebase / chữ ký Google). Session cũ trong localStorage KHÔNG đủ để mở Dev */
+function setLocalSession(s){try{localStorage.setItem("ssw_session",JSON.stringify({email:s.email,name:s.name,picture:s.picture}))}catch(_){}}
+function getLocalSession(){try{return JSON.parse(localStorage.getItem("ssw_session")||"null")}catch(_){return null}}
+function applyUser(){var u=state.user;state.dev=!!(u&&u.ok&&String(u.email||"").toLowerCase()===DEV_EMAIL);
+ $("#accPane").style.display=u?"flex":"none";$("#loginForm").style.display=u?"none":"flex";$("#accMail").textContent=(u&&u.email)||"";
+ $("#accDev").style.display=state.dev?"inline":"none";$("#btnDevOpen").style.display=state.dev?"inline-flex":"none";$("#mDev").style.display=state.dev?"flex":"none";
+ if(!state.dev&&$("#dev").classList.contains("on"))closeDev();}
+let gCerts=null;
+function b64u(s){s=s.replace(/-/g,"+").replace(/_/g,"/");if(s.length%4)s+="=".repeat(4-s.length%4);var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer}
+function dJ(p){return JSON.parse(new TextDecoder().decode(b64u(p)))}
+async function verifyGoogle(t){var p=String(t).split(".");if(p.length!==3)throw new Error("token sai");var h=dJ(p[0]),pl=dJ(p[1]);
+ if(pl.aud!==GIS_ID)throw new Error("sai aud");if(["accounts.google.com","https://accounts.google.com"].indexOf(pl.iss)<0)throw new Error("sai iss");
+ if(pl.exp&&pl.exp<Math.floor(Date.now()/1000)-30)throw new Error("hết hạn");if(!pl.email)throw new Error("không có email");
+ if(!(window.crypto&&crypto.subtle))throw new Error("cần HTTPS");if(!gCerts)gCerts=await(await fetch("https://www.googleapis.com/oauth2/v3/certs")).json();
+ var j=(gCerts.keys||[]).find(function(k){return k.kid===h.kid});if(!j)throw new Error("không tìm thấy khóa");
+ var k=await crypto.subtle.importKey("jwk",{kty:j.kty,n:j.n,e:j.e,alg:"RS256",ext:true},{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
+ if(!await crypto.subtle.verify("RSASSA-PKCS1-v1_5",k,b64u(p[2]),new TextEncoder().encode(p[0]+"."+p[1])))throw new Error("chữ ký sai");return pl;}
+async function onGoogle(resp){if(!resp||!resp.credential)return;
+ try{var pl=await verifyGoogle(resp.credential);state.user={email:pl.email,name:pl.name||pl.email,picture:pl.picture||"",ok:true};setLocalSession(state.user);applyUser();toast("Đăng nhập Google thành công.");
+  if(auth){try{await auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(resp.credential));}catch(e){}}
+  closePops();}catch(e){toast("Google: "+e.message);}}
+function initGIS(t){if(window.google&&google.accounts){try{google.accounts.id.initialize({client_id:GIS_ID,callback:onGoogle,auto_select:false});google.accounts.id.renderButton($("#gBtn"),{theme:"filled_black",size:"medium",shape:"pill"});}catch(e){}}else if(t>0)setTimeout(function(){initGIS(t-1)},500);}
+initGIS(15);
+(function(){var s=getLocalSession();if(s&&s.email){state.user={email:s.email,name:s.name,picture:s.picture,ok:false};applyUser();}})();
+$("#loginForm").addEventListener("submit",function(e){e.preventDefault();var err=$("#liErr");err.textContent="";if(!auth){err.textContent="Không kết nối được Firebase.";return;}
+ auth.signInWithEmailAndPassword($("#liEmail").value.trim(),$("#liPass").value).then(function(c){state.user={email:c.user.email,name:c.user.displayName||c.user.email,picture:c.user.photoURL||"",ok:true};setLocalSession(state.user);applyUser();closePops();toast("Đăng nhập thành công.");}).catch(function(){err.textContent="Sai email hoặc mật khẩu.";});});
+function doSignOut(){try{localStorage.removeItem("ssw_session")}catch(_){}state.user=null;applyUser();if(auth)auth.signOut().catch(function(){});}
+$("#btnOut").addEventListener("click",function(){doSignOut();closePops();});
+$("#setOut").addEventListener("click",function(){doSignOut();});
+if(auth)auth.onAuthStateChanged(function(u){if(u){state.user={email:u.email,name:u.displayName||u.email,picture:u.photoURL||"",ok:true};applyUser();}});
+/* DEV PANEL: nền đặc, đóng hết popup trước khi mở, tạm dừng hiệu ứng nền → không lag/xung đột */
+const TABS=[["content","Content"],["env","Environment"],["notice","Thông báo"],["util","Tiện ích note"],["perf","Performance"],["settings","Settings"]];
+function buildTabs(){$("#devTabs").innerHTML=TABS.map(function(t){return '<button class="tab" data-t="'+t[0]+'">'+t[1]+'</button>'}).join("");}
+function showTab(t){document.querySelectorAll("#dev .tab").forEach(function(b){b.classList.toggle("on",b.dataset.t===t)});document.querySelectorAll("#dev .pane").forEach(function(p){p.classList.toggle("on",p.id==="p-"+t)});}
+$("#devTabs").addEventListener("click",function(e){var b=e.target.closest(".tab");if(b)showTab(b.dataset.t);});
+function fillDev(){var v=state.notice||{};$("#utilNoteIn").value=state.utilNote||"";$("#anTitle").value=v.title||"";$("#anBody").value=v.body||"";$("#anOn").checked=!!v.enabled;document.querySelectorAll("#p-perf [data-p]").forEach(function(x){x.classList.toggle("on",x.dataset.p===state.settings.perf)});}
+function openDev(){if(!state.dev)return;closePops();closeMenu();state.paused=true;document.body.classList.add("devopen");buildTabs();buildCatSeg();fillDev();syncEnvUI();renderDevList();$("#dev").classList.add("on");showTab("content");}
+function closeDev(){$("#dev").classList.remove("on");document.body.classList.remove("devopen");state.paused=false;FX.kick();}
+function buildCatSeg(){$("#catSeg").innerHTML=CATS.map(function(c){return '<button data-c="'+c.id+'" class="'+(state.fc===c.id?"on":"")+'">'+esc(c.label)+'</button>'}).join("");$("#wCode").style.display=state.fc==="script"?"flex":"none";$("#wUrl").style.display=state.fc==="script"?"none":"flex";}
+$("#catSeg").addEventListener("click",function(e){var b=e.target.closest("button");if(b){state.fc=b.dataset.c;buildCatSeg();}});
+function resetForm(){state.edit=null;$("#fCancel").style.display="none";$("#fName").value=$("#fDesc").value=$("#fUrl").value=$("#fCode").value="";}
+$("#fSave").addEventListener("click",function(){if(!state.dev||!db)return;var name=$("#fName").value.trim();if(!name){toast("Nhập tên trước.");return;}var c=catOf(state.fc),p={name:clean(name),desc:clean($("#fDesc").value),updatedAt:firebase.database.ServerValue.TIMESTAMP};
+ if(state.fc==="script")p.code=$("#fCode").value;else{if(!vUrl($("#fUrl").value)){toast("Link phải bắt đầu bằng http(s)://");return;}p.url=$("#fUrl").value.trim();}
+ var job=state.edit?db.ref(ND+"/"+c.node+"/"+state.edit).update(p):db.ref(ND+"/"+c.node).push(Object.assign(p,{createdAt:firebase.database.ServerValue.TIMESTAMP}));
+ job.then(function(){toast("Đã lưu.");resetForm();}).catch(function(){toast("Lưu thất bại (kiểm tra quyền Firebase).");});});
+$("#fCancel").addEventListener("click",resetForm);
+function renderDevList(){$("#devList").innerHTML=CATS.map(function(c){var it=state.data[c.id]||[];return '<details><summary>'+esc(c.label)+' ('+it.length+')</summary>'+it.map(function(x){return '<div class="drow"><span>'+esc(x.name)+'</span><button class="btn btn-g" data-ed="'+c.id+':'+esc(x.key)+'">Sửa</button><button class="btn btn-g" data-del="'+c.id+':'+esc(x.key)+'">Xóa</button></div>'}).join("")+"</details>"}).join("");}
+$("#devList").addEventListener("click",function(e){if(!state.dev||!db)return;var ed=e.target.closest("[data-ed]"),de=e.target.closest("[data-del]");
+ if(ed){var a=ed.dataset.ed.split(":"),it=(state.data[a[0]]||[]).find(function(x){return x.key===a[1]});if(it){state.fc=a[0];buildCatSeg();state.edit=a[1];$("#fName").value=it.name;$("#fDesc").value=it.desc||"";$("#fUrl").value=it.url||"";$("#fCode").value=it.code||"";$("#fCancel").style.display="inline-flex";scrollTo({top:0});$("#dev .body").scrollTo({top:0,behavior:"smooth"});}}
+ if(de&&confirm("Xóa mục này?")){var b=de.dataset.del.split(":");db.ref(ND+"/"+catOf(b[0]).node+"/"+b[1]).remove();}});
+function fillEnvSel(){$("#manWx").innerHTML=["none","clear","rain","snow","fog","storm","wind","dust"].map(function(w){return "<option>"+w+"</option>"}).join("");$("#lockEnv").innerHTML=["normal","halloween","christmas","tet"].map(function(t){return "<option>"+t+"</option>"}).join("");}
+function syncEnvUI(){var s=state.settings;$("#envAuto").classList.toggle("on",s.envMode==="auto");$("#envManual").classList.toggle("on",s.envMode==="manual");$("#manWxWrap").style.display=s.envMode==="manual"?"flex":"none";$("#lockOn").checked=!!s.lockOn;$("#lockWrap").style.display=s.lockOn?"flex":"none";$("#manWx").value=s.manualWeather||"clear";$("#lockEnv").value=s.lockEnv||"halloween";}
+$("#envAuto").addEventListener("click",function(){state.settings.envMode="auto";syncEnvUI();});
+$("#envManual").addEventListener("click",function(){state.settings.envMode="manual";syncEnvUI();});
+$("#lockOn").addEventListener("change",function(e){state.settings.lockOn=e.target.checked;syncEnvUI();});
+$("#envSave").addEventListener("click",function(){if(!state.dev||!db)return;state.settings.manualWeather=$("#manWx").value;state.settings.lockEnv=$("#lockEnv").value;db.ref("nox_settings").update({envMode:state.settings.envMode,manualWeather:state.settings.manualWeather,lockOn:state.settings.lockOn,lockEnv:state.settings.lockEnv}).then(function(){toast("Đã lưu environment.");}).catch(function(){toast("Lưu thất bại.");});applyEnv();});
+$("#anSave").addEventListener("click",function(){if(!state.dev||!db)return;db.ref("nox_notice").update({title:clean($("#anTitle").value),body:clean($("#anBody").value),enabled:$("#anOn").checked,updatedAt:firebase.database.ServerValue.TIMESTAMP});toast("Đã lưu thông báo.");});
+$("#utilNoteSave").addEventListener("click",function(){if(!state.dev||!db)return;db.ref("nox_notice").update({util:clean($("#utilNoteIn").value)});toast("Đã lưu ghi chú.");});
+document.querySelectorAll("#p-perf [data-p]").forEach(function(b){b.addEventListener("click",function(){state.settings.perf=state.perfEff=b.dataset.p;if(db&&state.dev)db.ref("nox_settings").update({perf:b.dataset.p});FX.set(FX.type);document.querySelectorAll("#p-perf [data-p]").forEach(function(x){x.classList.toggle("on",x===b)});});});
+/* FIREBASE */
+let pend=CATS.length,done=false;
+function markPend(){pend--;if(pend<=0&&!done){done=true;hideLoader();}}
+function hideLoader(){var l=$("#loader");if(l){l.classList.add("hide");setTimeout(function(){l.style.display="none"},600);}}
+setTimeout(hideLoader,3000);
+if(db){CATS.forEach(function(c){db.ref(ND+"/"+c.node).on("value",function(s){var v=s.val()||{};state.data[c.id]=Object.keys(v).map(function(k){return nI(k,v[k])}).sort(function(a,b){return b.ts-a.ts});if($("#shUtil").classList.contains("on"))refreshUtil();if(state.dev&&$("#dev").classList.contains("on"))renderDevList();markPend();},function(){state.data[c.id]=[];markPend();});});
+ db.ref("nox_settings").on("value",function(s){var v=s.val()||{};Object.assign(state.settings,{envMode:v.envMode||"auto",manualWeather:v.manualWeather||"clear",lockOn:!!v.lockOn,lockEnv:v.lockEnv||"halloween",perf:v.perf||"balanced"});state.perfEff=state.settings.perf;syncEnvUI();FX.set(FX.type);applyEnv();},function(){});
+ db.ref("nox_notice").on("value",function(s){var v=s.val()||{};state.notice=v;state.utilNote=v.util||"";var un=$("#utilNote");if(state.utilNote){un.style.display="block";un.textContent=state.utilNote;}else un.style.display="none";
+  if(v.enabled&&v.body){var ver=String(v.updatedAt||""),rec=null;try{rec=JSON.parse(sessionStorage.getItem("ssw_notice_seen")||"null")}catch(_){}
+   if(!(rec&&rec.ver===ver)){$("#ntTitle").textContent=v.title||"Thông báo";$("#ntBody").textContent=v.body;openPop("#shNotice");try{sessionStorage.setItem("ssw_notice_seen",JSON.stringify({ver:ver}))}catch(_){}}}},function(){});
+}else{CATS.forEach(function(c){state.data[c.id]=[];markPend();});}
+setInterval(applyEnv,30000);
+fillEnvSel();syncEnvUI();applyUser();paintSnd();tickTime();applyEnv();
+</script>
 </body>
 </html>
