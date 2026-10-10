@@ -1,0 +1,162 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "roles": {
+      "$u": {
+        ".read": "auth.uid === $u",
+        ".write": false
+      }
+    },
+    "users": {
+      ".read": true,
+      "$u": {
+        ".write": "auth != null && auth.uid === $u"
+      }
+    },
+    "names": {
+      ".read": true,
+      "$n": {
+        ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+      }
+    },
+    "pub": {
+      ".read": true,
+      "posts": {
+        ".indexOn": [
+          "createdAt",
+          "authorId"
+        ],
+        "$p": {
+          ".write": "auth != null && ((!data.exists() && newData.child('authorId').val() === auth.uid && root.child('pub/settings/moderation').val() === false) || (data.exists() && data.child('authorId').val() === auth.uid) || root.child('roles/' + auth.uid).val() === 'dev')",
+          ".validate": "newData.hasChildren(['title','type','authorId','createdAt']) && newData.child('title').val().length <= 120",
+          "likeCount": {
+            ".write": "auth != null",
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() === data.val() + 1 || newData.val() === data.val() - 1)"
+          },
+          "views": {
+            ".write": "auth != null",
+            ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val() + 1)"
+          },
+          "ratingSum": {
+            ".write": "auth != null",
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || (newData.val() - data.val() <= 5 && newData.val() - data.val() >= -4))"
+          },
+          "ratingCount": {
+            ".write": "auth != null",
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() - data.val() === 1 || newData.val() === data.val())"
+          }
+        }
+      },
+      "games": {
+        ".write": "root.child('roles/' + auth.uid).val() === 'dev'"
+      },
+      "menu": {
+        ".write": "root.child('roles/' + auth.uid).val() === 'dev'"
+      },
+      "settings": {
+        ".write": "root.child('roles/' + auth.uid).val() === 'dev'"
+      },
+      "categories": {
+        "$c": {
+          ".write": "auth != null && (!data.exists() || root.child('roles/' + auth.uid).val() === 'dev')",
+          ".validate": "newData.child('name').val().length <= 20"
+        }
+      }
+    },
+    "likes": {
+      "$u": {
+        ".read": "auth != null && auth.uid === $u",
+        ".write": "auth != null && auth.uid === $u"
+      }
+    },
+    "world": {
+      ".read": "auth != null",
+      "posts": {
+        ".indexOn": [
+          "at"
+        ],
+        "$p": {
+          ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || data.child('uid').val() === auth.uid || root.child('roles/' + auth.uid).val() === 'dev')",
+          ".validate": "newData.child('text').val().length <= 1000"
+        }
+      },
+      "replies": {
+        "$p": {
+          "$r": {
+            ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || data.child('uid').val() === auth.uid || root.child('roles/' + auth.uid).val() === 'dev')",
+            ".validate": "newData.child('text').val().length <= 500"
+          }
+        }
+      }
+    },
+    "rooms": {
+      ".read": "auth != null",
+      "$r": {
+        ".write": "auth != null && ((!data.exists() && newData.child('owner').val() === auth.uid) || data.child('owner').val() === auth.uid)"
+      }
+    },
+    "roomKeys": {
+      "$r": {
+        ".read": false,
+        ".write": "auth != null && !data.exists() && root.child('rooms/' + $r + '/owner').val() === auth.uid"
+      }
+    },
+    "members": {
+      "$r": {
+        "$u": {
+          ".read": "auth != null && auth.uid === $u",
+          ".write": "auth != null && auth.uid === $u && ((root.child('rooms/' + $r + '/hasPw').val() !== true && newData.val() === true) || newData.val() === root.child('roomKeys/' + $r).val())"
+        }
+      }
+    },
+    "msgs": {
+      "$r": {
+        ".read": "auth != null && root.child('members/' + $r + '/' + auth.uid).exists()",
+        ".indexOn": [
+          "at"
+        ],
+        "$m": {
+          ".write": "auth != null && root.child('members/' + $r + '/' + auth.uid).exists() && ((!data.exists() && newData.child('u').val() === auth.uid) || data.child('u').val() === auth.uid)",
+          ".validate": "newData.child('t').val().length <= 500"
+        }
+      }
+    },
+    "inbox": {
+      "$u": {
+        ".read": "auth != null && auth.uid === $u",
+        "$m": {
+          ".write": "auth != null && (auth.uid === $u || (!data.exists() && newData.child('from').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['from','text','at']) && newData.child('text').val().length <= 500"
+        }
+      }
+    },
+    "reports": {
+      ".read": "auth != null && root.child('roles/' + auth.uid).val() === 'dev'",
+      "$r": {
+        ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || root.child('roles/' + auth.uid).val() === 'dev')",
+        ".validate": "newData.hasChildren(['uid','status','text','at']) && newData.child('text').val().length <= 1000"
+      }
+    },
+    "ratings": {
+      "$u": {
+        ".read": "auth != null && auth.uid === $u",
+        "$p": {
+          ".write": "auth != null && auth.uid === $u",
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5"
+        }
+      }
+    },
+    "pending": {
+      ".read": "auth != null && root.child('roles/' + auth.uid).val() === 'dev'",
+      ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'dev'",
+      "$u": {
+        ".read": "auth != null && auth.uid === $u",
+        "$p": {
+          ".write": "auth != null && (auth.uid === $u || root.child('roles/' + auth.uid).val() === 'dev')",
+          ".validate": "newData.hasChildren(['title','type','authorId','createdAt']) && newData.child('authorId').val() === $u && newData.child('title').val().length <= 120"
+        }
+      }
+    }
+  }
+}
