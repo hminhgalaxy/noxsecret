@@ -1,0 +1,185 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "pub": {
+      ".read": true,
+      "settings": {
+        ".write": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev')"
+      },
+      "categories": {
+        ".write": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev')"
+      },
+      "games": {
+        ".write": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev')"
+      },
+      "names": {
+        "$name": {
+          ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && !newData.exists()))",
+          ".validate": "newData.isString()"
+        }
+      },
+      "users": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChild('name') && newData.child('name').isString() && newData.child('name').val().length >= 3 && newData.child('name').val().length <= 24 && !newData.hasChild('role') && (!newData.hasChild('bio') || newData.child('bio').val().length <= 200) && (!newData.hasChild('pic') || newData.child('pic').val().length <= 100000)"
+        }
+      },
+      "posts": {
+        ".indexOn": [
+          "createdAt",
+          "type",
+          "gameId",
+          "authorId"
+        ],
+        "$id": {
+          ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (!data.exists() && newData.child('authorId').val() === auth.uid) || (data.child('authorId').val() === auth.uid && data.child('locked').val() !== true))",
+          ".validate": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (newData.hasChildren(['title','type','authorId','createdAt']) && newData.child('title').isString() && newData.child('title').val().length <= 120 && newData.child('authorId').val() === (data.exists() ? data.child('authorId').val() : auth.uid) && newData.child('createdAt').val() === (data.exists() ? data.child('createdAt').val() : now))",
+          "views": {
+            ".write": "data.parent().exists() && newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          },
+          "likeCount": {
+            ".write": "auth != null && data.parent().exists() && newData.isNumber() && newData.val() >= 0 && newData.val() - (data.exists() ? data.val() : 0) <= 1 && (data.exists() ? data.val() : 0) - newData.val() <= 1"
+          },
+          "ratingCount": {
+            ".write": "auth != null && data.parent().exists() && newData.isNumber() && newData.val() >= 0 && newData.val() - (data.exists() ? data.val() : 0) <= 1 && (data.exists() ? data.val() : 0) - newData.val() <= 1"
+          },
+          "ratingSum": {
+            ".write": "auth != null && data.parent().exists() && newData.isNumber() && newData.val() >= 0 && newData.val() - (data.exists() ? data.val() : 0) <= 5 && (data.exists() ? data.val() : 0) - newData.val() <= 5"
+          }
+        }
+      },
+      "postBody": {
+        "$id": {
+          ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || root.child('pub/posts/'+$id+'/authorId').val() === auth.uid || root.child('queue/'+$id+'/authorId').val() === auth.uid)"
+        }
+      },
+      "world": {
+        "posts": {
+          ".indexOn": [
+            "createdAt"
+          ],
+          "$id": {
+            ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (!data.exists() && newData.child('authorId').val() === auth.uid) || data.child('authorId').val() === auth.uid)",
+            ".validate": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (newData.hasChildren(['authorId','createdAt']) && newData.child('authorId').val() === (data.exists() ? data.child('authorId').val() : auth.uid) && newData.child('createdAt').val() === (data.exists() ? data.child('createdAt').val() : now) && (!newData.hasChild('text') || (newData.child('text').isString() && newData.child('text').val().length <= 1500)))",
+            "likes": {
+              "$uid": {
+                ".write": "auth != null && auth.uid === $uid",
+                ".validate": "newData.val() === true"
+              }
+            },
+            "replyCount": {
+              ".write": "auth != null && data.parent().exists() && newData.isNumber() && newData.val() >= 0 && newData.val() - (data.exists() ? data.val() : 0) <= 1 && (data.exists() ? data.val() : 0) - newData.val() <= 1"
+            }
+          }
+        },
+        "replies": {
+          "$pid": {
+            ".indexOn": [
+              "createdAt"
+            ],
+            ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || root.child('pub/world/posts/'+$pid+'/authorId').val() === auth.uid)",
+            "$rid": {
+              ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (!data.exists() && newData.child('authorId').val() === auth.uid) || data.child('authorId').val() === auth.uid)",
+              ".validate": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (newData.hasChildren(['authorId','createdAt']) && newData.child('authorId').val() === (data.exists() ? data.child('authorId').val() : auth.uid) && newData.child('createdAt').val() === (data.exists() ? data.child('createdAt').val() : now) && (!newData.hasChild('text') || (newData.child('text').isString() && newData.child('text').val().length <= 500)))"
+            }
+          }
+        }
+      },
+      "groups": {
+        "$gid": {
+          ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (!data.exists() && newData.child('ownerId').val() === auth.uid) || data.child('ownerId').val() === auth.uid)",
+          ".validate": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (newData.hasChildren(['name','ownerId','createdAt']) && newData.child('name').isString() && newData.child('name').val().length >= 2 && newData.child('name').val().length <= 30 && newData.child('ownerId').val() === (data.exists() ? data.child('ownerId').val() : auth.uid) && newData.child('createdAt').val() === (data.exists() ? data.child('createdAt').val() : now))",
+          "memberCount": {
+            ".write": "auth != null && data.parent().exists() && newData.isNumber() && newData.val() >= 0 && newData.val() - (data.exists() ? data.val() : 0) <= 1 && (data.exists() ? data.val() : 0) - newData.val() <= 1"
+          }
+        }
+      },
+      "roles": {}
+    },
+    "groupKeys": {
+      "$gid": {
+        ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || root.child('pub/groups/'+$gid+'/ownerId').val() === auth.uid)"
+      }
+    },
+    "groupMembers": {
+      "$gid": {
+        ".write": "(auth != null && root.child('pub/groups/'+$gid+'/ownerId').val() === auth.uid) || (auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev')",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid && (!newData.exists() || (root.child('pub/groups/'+$gid).exists() && ((!root.child('groupKeys/'+$gid).exists() && newData.val() === true) || newData.val() === root.child('groupKeys/'+$gid).val())))"
+        }
+      }
+    },
+    "groupMsgs": {
+      "$gid": {
+        ".read": "auth != null && root.child('groupMembers/'+$gid+'/'+auth.uid).exists()",
+        ".indexOn": [
+          "createdAt"
+        ],
+        ".write": "(auth != null && root.child('pub/groups/'+$gid+'/ownerId').val() === auth.uid) || (auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev')",
+        "$mid": {
+          ".write": "auth != null && root.child('groupMembers/'+$gid+'/'+auth.uid).exists() && ((!data.exists() && newData.child('authorId').val() === auth.uid) || data.child('authorId').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['authorId','createdAt']) && newData.child('authorId').val() === auth.uid && newData.child('createdAt').val() === now && (!newData.hasChild('text') || (newData.child('text').isString() && newData.child('text').val().length <= 1000))"
+        }
+      }
+    },
+    "userGroups": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "votes": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$pid": {
+          ".validate": "newData.hasChildren(['liked','stars']) && newData.child('liked').isBoolean() && newData.child('stars').isNumber() && newData.child('stars').val() >= 0 && newData.child('stars').val() <= 5"
+        }
+      }
+    },
+    "userPosts": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || (auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev'))"
+      }
+    },
+    "queue": {
+      ".read": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev')",
+      "$id": {
+        ".read": "auth != null && data.child('authorId').val() === auth.uid",
+        ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (!data.exists() && newData.child('authorId').val() === auth.uid) || data.child('authorId').val() === auth.uid)",
+        ".validate": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (newData.hasChildren(['title','type','authorId','createdAt']) && newData.child('authorId').val() === (data.exists() ? data.child('authorId').val() : auth.uid) && newData.child('createdAt').val() === (data.exists() ? data.child('createdAt').val() : now))"
+      }
+    },
+    "reports": {
+      ".read": "(auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev')",
+      "$id": {
+        ".write": "auth != null && ((auth != null && root.child('pub/roles/'+auth.uid).val() === 'dev') || (!data.exists() && newData.child('authorId').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['authorId','text','createdAt']) && newData.child('text').isString() && newData.child('text').val().length <= 1500 && newData.child('createdAt').val() === now"
+      }
+    },
+    "inboxIdx": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$o": {
+          ".write": "auth != null && (auth.uid === $uid || auth.uid === $o)",
+          ".read": "auth != null && (auth.uid === $uid || auth.uid === $o)"
+        }
+      }
+    },
+    "dm": {
+      "$pair": {
+        ".read": "auth != null && $pair.contains(auth.uid)",
+        ".indexOn": [
+          "createdAt"
+        ],
+        "$mid": {
+          ".write": "auth != null && $pair.contains(auth.uid) && !data.exists() && newData.child('authorId').val() === auth.uid",
+          ".validate": "newData.hasChildren(['authorId','createdAt']) && newData.child('createdAt').val() === now && (!newData.hasChild('text') || (newData.child('text').isString() && newData.child('text').val().length <= 1000))"
+        }
+      }
+    }
+  }
+}
