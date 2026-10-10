@@ -46,8 +46,6 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-
 #ai-frame i:nth-child(3){bottom:calc(env(safe-area-inset-bottom,0px) + 10px);left:10px;border-width:0 0 1.5px 1.5px;border-bottom-left-radius:7px}
 #ai-frame i:nth-child(4){bottom:calc(env(safe-area-inset-bottom,0px) + 10px);right:10px;border-width:0 1.5px 1.5px 0;border-bottom-right-radius:7px}
 @keyframes aiFr{to{opacity:.55}}
-#ai-dock{position:absolute;z-index:4;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 30px);transform:translate(-50%,16px);display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:min(94vw,780px);opacity:0;pointer-events:none;transition:opacity 1s,transform 1s}
-#ai-dock.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 #ai-side{position:absolute;z-index:5;right:14px;top:calc(env(safe-area-inset-top,0px) + 22px);opacity:0;pointer-events:none;transition:opacity 1s}
 #ai-side.on{opacity:1;pointer-events:auto}
 #ai-hint{top:calc(env(safe-area-inset-top,0px) + 74px);right:16px}
@@ -57,7 +55,39 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-
 .rb:active{transform:scale(.95)}
 .rb:focus-visible{outline:2px solid var(--a1);outline-offset:2px}
 .rb.act{color:#06101c;background:linear-gradient(135deg,var(--a1),var(--a2)) padding-box,linear-gradient(135deg,var(--a1),var(--a2)) border-box;box-shadow:0 0 16px var(--a1)}
-@media (max-width:759px){#ai-dock .rb{width:38px;padding:0}#ai-dock .rb span{display:none}}
+#ai-side .rb{width:40px;padding:0;position:relative}
+.bdg{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#ff4d7a;color:#fff;font-size:9px;line-height:16px;font-style:normal;text-align:center;box-shadow:0 0 10px #ff4d7a}
+#ai-mscrim{position:absolute;inset:0;z-index:10;background:rgba(2,4,12,.45);opacity:0;pointer-events:none;transition:opacity .4s}
+.mOpen #ai-mscrim{opacity:1;pointer-events:auto}
+#ai-menu{position:absolute;z-index:11;top:0;right:0;bottom:0;width:min(360px,92vw);box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 18px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;color:#fff;background:linear-gradient(160deg,rgba(255,255,255,.15),rgba(255,255,255,.04) 50%,rgba(255,255,255,.09));backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-left:1px solid rgba(255,255,255,.22);box-shadow:inset 1px 0 1px rgba(255,255,255,.35),-20px 0 60px rgba(0,0,0,.5);transform:translateX(105%);transition:transform .6s cubic-bezier(.2,.9,.25,1)}
+.mOpen #ai-menu{transform:none}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.mh b{letter-spacing:.35em;font-size:13px}
+#ai-menu h4,.dvc h4{display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px;font-size:10px;letter-spacing:.3em;opacity:.75;font-weight:600}
+.lnk{background:none;border:0;color:var(--a1);font-family:inherit;font-size:9px;letter-spacing:.14em;cursor:pointer;padding:6px 0}
+.mac{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13)}
+.mac img{width:40px;height:40px;border-radius:12px;object-fit:cover}.mwho{flex:1;min-width:0}
+.mwho b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mwho small{display:block;font-size:10.5px;opacity:.65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:6px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;font-family:inherit;font-size:12px;letter-spacing:.2em;cursor:pointer;transition:background .2s,transform .15s}
+.mc:hover{background:rgba(255,255,255,.16)}.mc:active{transform:scale(.98)}
+.mc img{width:34px;height:34px;border-radius:9px;background:rgba(0,0,0,.35)}.mc span{flex:1;text-align:left}.mc em{font-style:normal;font-size:11px;padding:3px 9px;border-radius:9px;background:rgba(0,0,0,.35);letter-spacing:.05em}
+.mn{padding:9px 11px;margin-bottom:6px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-left:3px solid var(--nc,var(--a1))}
+.mn.un{background:rgba(255,255,255,.13)}.mn b{display:block;font-size:12px}.mn p{margin:3px 0 0;font-size:11.5px;opacity:.82;line-height:1.45}.mn small{font-size:9.5px;opacity:.55}
+.mn-empty{font-size:11.5px;opacity:.55;padding:6px 2px}
+#ai-dock{display:grid;grid-template-columns:1fr 1fr;gap:6px}#ai-dock .rb,#ai-menu .mac .rb{justify-content:flex-start}#ai-dock .rb{width:100%}
+#ai-note{position:absolute;z-index:13;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 42px);width:min(420px,92vw);box-sizing:border-box;transform:translate(-50%,24px);padding:12px 14px 12px 16px;border-radius:14px;color:#fff;cursor:pointer;background:linear-gradient(rgba(14,18,36,.82),rgba(14,18,36,.82)) padding-box,linear-gradient(135deg,var(--nc,var(--a1)),var(--a2)) border-box;border:1px solid transparent;box-shadow:0 14px 40px rgba(0,0,0,.55),0 0 24px rgba(120,160,255,.2);opacity:0;pointer-events:none;transition:opacity .45s,transform .55s cubic-bezier(.2,.9,.3,1.1)}
+#ai-note.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#ai-note b{display:block;font-size:12.5px;letter-spacing:.14em}#ai-note span{display:block;margin-top:3px;font-size:12px;opacity:.85;line-height:1.5}
+#ai-dev{position:absolute;inset:0;z-index:12;display:grid;place-items:center;background:rgba(2,4,12,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s}
+#ai-dev.on{opacity:1;pointer-events:auto}
+.dvc{width:min(560px,94vw);max-height:88vh;overflow-y:auto;box-sizing:border-box;padding:18px;border-radius:20px;color:#fff;touch-action:pan-y;background:linear-gradient(rgba(14,18,36,.82),rgba(14,18,36,.82)) padding-box,linear-gradient(135deg,var(--a1),var(--a2)) border-box;border:1px solid transparent;box-shadow:0 24px 70px rgba(0,0,0,.6);transform:translateY(16px) scale(.97);transition:transform .5s cubic-bezier(.2,.9,.3,1.1)}
+#ai-dev.on .dvc{transform:none}
+.dvc header{display:flex;align-items:center;gap:10px}.dvc header b{letter-spacing:.3em;font-size:14px}.dvc header span{flex:1;min-width:0;font-size:11px;opacity:.65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}.dv-stats div{padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);text-align:center}
+.dv-stats b{display:block;font-size:17px}.dv-stats small{font-size:9px;letter-spacing:.14em;opacity:.65}
+.dvc input,.dvc textarea,.dvc select{width:100%;box-sizing:border-box;margin-bottom:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.3);color:#fff;font:inherit;font-size:13px;outline:0}
+.dvc textarea{min-height:80px;resize:vertical}.dvc select option{color:#000}.dv-row{display:flex;gap:8px}.dv-row select{flex:1}.dv-row .rb{height:40px;margin-bottom:8px}
+.dv-it{display:flex;gap:8px;align-items:center;padding:8px 10px;margin-bottom:6px;border-radius:10px;background:rgba(255,255,255,.06);font-size:12px}.dv-it span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv-cats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 #ai-skip{position:absolute;z-index:9;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);height:32px;padding:0 14px;border-radius:9px;border:1px solid rgba(255,255,255,.22);background:rgba(10,14,28,.25);color:#fff;font-family:inherit;font-weight:600;font-size:10px;letter-spacing:.2em;opacity:.32;cursor:pointer;transition:opacity .3s;-webkit-tap-highlight-color:transparent}
 #ai-skip:hover,#ai-skip:active{opacity:.9}
 #ai-veil{position:absolute;inset:0;z-index:20;background:#000;opacity:0;pointer-events:none;transition:opacity .45s}
@@ -79,7 +109,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-
 .pg{position:absolute;inset:-25%;z-index:-1;pointer-events:none;background:radial-gradient(circle at 22% 14%,var(--pca),transparent 42%),radial-gradient(circle at 82% 88%,rgba(167,123,255,.3),transparent 48%);animation:pgm 14s ease-in-out infinite alternate}
 @keyframes pgm{to{transform:translate(6%,-5%) rotate(14deg) scale(1.1)}}
 @media (max-width:759px){#ai-panel{right:10px;left:10px;width:auto;top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);height:min(62vh,540px);transform:translateY(60px) scale(.96);backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%)}.pOpen #ai-panel{transform:translateY(0) scale(1)}}
-.pOpen #ai-dock,.pOpen #ai-hint{opacity:0!important;pointer-events:none!important}
+.mOpen #ai-hint,.pOpen #ai-hint{opacity:0!important;pointer-events:none!important}
 #ai-panel header{display:flex;align-items:center;gap:10px;padding:16px 16px 8px}
 #ph-ico{width:44px;height:44px;border-radius:14px;background:rgba(0,0,0,.35);border:1px solid var(--pc);box-shadow:0 0 18px var(--pca)}
 #ai-panel header div{flex:1;min-width:0}#ph-t{display:block;font-size:15px;letter-spacing:.3em}#ph-c{font-size:11px;opacity:.7}
@@ -120,11 +150,29 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-
   <div id="ai-hint">KÉO NỀN ĐỂ QUAN SÁT · CUỘN / 2 NGÓN ĐỂ ZOOM · CHẠM SAO ĐỂ MỞ</div>
   <div id="ai-card"><b id="ai-cn"></b><span id="ai-cd"></span></div>
   <div id="ai-frame"><i></i><i></i><i></i><i></i></div>
-  <div id="ai-dock" role="toolbar" aria-label="Điều khiển"><button class="rb act" data-a="observe" title="Quan sát tự do" aria-label="Quan sát tự do"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>QUAN SÁT</span></button><button class="rb" data-a="lookreset" title="Đặt lại góc nhìn" aria-label="Đặt lại góc nhìn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>GÓC NHÌN</span></button><button class="rb" data-a="home" title="Về vị trí ban đầu" aria-label="Về vị trí ban đầu"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/></svg><span>VỀ GỐC</span></button><button class="rb" data-a="auto" title="Tự xoay camera" aria-label="Tự xoay camera"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)"/><circle cx="12" cy="12" r="2"/></svg><span>TỰ XOAY</span></button><button class="rb" data-a="shuffle" title="Xáo trộn sao" aria-label="Xáo trộn sao"><svg viewBox="0 0 24 24"><path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/></svg><span>XÁO TRỘN</span></button><button class="rb" data-a="reset" title="Bố cục đều" aria-label="Bố cục đều"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span>BỐ CỤC</span></button><button class="rb" data-a="palette" title="Đổi bảng màu" aria-label="Đổi bảng màu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="15.5" cy="10" r="1" fill="currentColor"/></svg><span>MÀU</span></button><button class="rb" data-a="sound" title="Âm thanh" aria-label="Âm thanh"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg><span>ÂM THANH</span></button><button class="rb" data-a="full" title="Toàn màn hình" aria-label="Toàn màn hình"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>TOÀN MÀN</span></button><button class="rb" data-a="replay" title="Phát lại intro" aria-label="Phát lại intro"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></svg><span>PHÁT LẠI</span></button></div>
-  <div id="ai-side"><button class="rb" data-a="login" title="Đăng nhập" aria-label="Đăng nhập"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 5-7 8-7s7 2 8 7"/></svg><span id="lg-t">ĐĂNG NHẬP</span></button></div>
+  
+  <div id="ai-side"><button class="rb" data-a="menu" title="Menu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><i class="bdg" id="bdg" hidden></i></button></div>
+  <div id="ai-mscrim"></div>
+  <aside id="ai-menu" aria-hidden="true" aria-label="Menu">
+    <div class="mh"><b>MENU</b><button class="pbtn" id="mn-x" aria-label="Đóng menu"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="mac"><img id="mn-av" alt="" hidden><div class="mwho"><b id="mn-nm">Khách</b><small id="mn-em">Chưa đăng nhập</small></div><button class="rb" data-a="login" title="Tài khoản"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 5-7 8-7s7 2 8 7"/></svg><span id="lg-t">ĐĂNG NHẬP</span></button></div>
+    <h4>DANH MỤC</h4><div id="mn-cats"></div>
+    <h4>THÔNG BÁO <button class="lnk" id="mn-read">ĐÃ ĐỌC TẤT CẢ</button></h4><div id="mn-notes"></div>
+    <h4>ĐIỀU KHIỂN</h4><div id="ai-dock" role="toolbar" aria-label="Điều khiển"><button class="rb act" data-a="observe" title="Quan sát tự do" aria-label="Quan sát tự do"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>QUAN SÁT</span></button><button class="rb" data-a="lookreset" title="Đặt lại góc nhìn" aria-label="Đặt lại góc nhìn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>GÓC NHÌN</span></button><button class="rb" data-a="home" title="Về vị trí ban đầu" aria-label="Về vị trí ban đầu"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/></svg><span>VỀ GỐC</span></button><button class="rb" data-a="auto" title="Tự xoay camera" aria-label="Tự xoay camera"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)"/><circle cx="12" cy="12" r="2"/></svg><span>TỰ XOAY</span></button><button class="rb" data-a="shuffle" title="Xáo trộn sao" aria-label="Xáo trộn sao"><svg viewBox="0 0 24 24"><path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/></svg><span>XÁO TRỘN</span></button><button class="rb" data-a="reset" title="Bố cục đều" aria-label="Bố cục đều"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg><span>BỐ CỤC</span></button><button class="rb" data-a="palette" title="Đổi bảng màu" aria-label="Đổi bảng màu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="15.5" cy="10" r="1" fill="currentColor"/></svg><span>MÀU</span></button><button class="rb" data-a="sound" title="Âm thanh" aria-label="Âm thanh"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg><span>ÂM THANH</span></button><button class="rb" data-a="full" title="Toàn màn hình" aria-label="Toàn màn hình"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>TOÀN MÀN</span></button><button class="rb" data-a="replay" title="Phát lại intro" aria-label="Phát lại intro"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></svg><span>PHÁT LẠI</span></button></div>
+    <div id="mn-dev" hidden><h4>QUẢN TRỊ</h4><button class="rb act" id="mn-devbtn" style="width:100%"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span>DEV PANEL</span></button></div>
+  </aside>
+  <div id="ai-dev" aria-hidden="true"><div class="dvc">
+    <header><b>DEV PANEL</b><span id="dv-who"></span><button class="pbtn" id="dv-x" aria-label="Đóng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="dv-stats" id="dv-stats"></div>
+    <h4>GỬI THÔNG BÁO</h4><input id="dv-t" placeholder="Tiêu đề" maxlength="80"><textarea id="dv-m" placeholder="Nội dung thông báo" maxlength="400"></textarea>
+    <div class="dv-row"><select id="dv-ty"><option value="info">Thông tin</option><option value="success">Thành công</option><option value="warning">Cảnh báo</option></select><button class="rb act" id="dv-send"><span>GỬI</span></button></div>
+    <h4>THÔNG BÁO ĐÃ GỬI</h4><div id="dv-list"></div>
+    <h4>QUẢN LÝ DỮ LIỆU</h4><div class="dv-cats" id="dv-cats"></div>
+  </div></div>
+  <div id="ai-note" role="status"><b id="nt-t"></b><span id="nt-m"></span></div>
   <button id="ai-skip" type="button">BỎ QUA ›</button>
   <div id="ai-veil"></div>
-  <div id="ai-gl" aria-hidden="true"><div class="glc"><b>ĐĂNG NHẬP</b><p id="gl-p"></p><button class="gbtn" id="gl-go"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16.9z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.1-5.5c-2 1.3-4.5 2.1-8.8 2.1-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span id="gl-gt">Đăng nhập bằng Google</span></button><button class="rb" id="gl-x" style="margin:0 auto"><span style="display:inline">ĐÓNG</span></button></div></div>
+  <div id="ai-gl" aria-hidden="true"><div class="glc"><b>ĐĂNG NHẬP</b><p id="gl-p"></p><div id="gl-btn" style="display:flex;justify-content:center;min-height:44px;margin-bottom:10px;font-size:12px"></div><button class="rb" id="gl-out" hidden style="margin:0 auto 8px"><span style="display:inline">ĐĂNG XUẤT</span></button><button class="rb" id="gl-x" style="margin:0 auto"><span style="display:inline">ĐÓNG</span></button></div></div>
   <section id="ai-panel" aria-hidden="true" role="dialog" aria-label="Danh mục"><div class="pg"></div>
   <header><button class="pbtn" id="ph-b" aria-label="Quay lại không gian"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><img id="ph-ico" alt=""><div><b id="ph-t"></b><span id="ph-c"></span></div><button class="pbtn" id="ph-add" hidden aria-label="Thêm mục"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button><button class="pbtn" id="ph-x" aria-label="Đóng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
   <div class="pbar"><input id="ph-q" type="search" placeholder="Tìm kiếm…" autocomplete="off"><button class="chip" id="ph-s">A→Z</button></div>
@@ -135,16 +183,31 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-
 </div>
 
 <script>
-/* ===== CẤU HÌNH NEW ARENA — DÁN THÔNG TIN FIREBASE CỦA BẠN VÀO ĐÂY ===== */
+/* ===== NOX CONFIG — cấu hình NEW ARENA ===== */
+const GOOGLE_CLIENT_ID =
+  "971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCwxeePF5Q96k_JfglAz0IAcWyVly17eVs",
+  authDomain: "noxsecret-dd77f.firebaseapp.com",
+  databaseURL: "https://noxsecret-dd77f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "noxsecret-dd77f",
+  storageBucket: "noxsecret-dd77f.firebasestorage.app",
+  messagingSenderId: "618477082488",
+  appId: "1:618477082488:web:38741735ef243d85b4da8d"
+};
+
 window.NOX_CONFIG={
-  firebase:{apiKey:"",authDomain:"",databaseURL:"",projectId:"",storageBucket:"",messagingSenderId:"",appId:""},
-  googleClientId:"",
-  adminEmails:[]
+  firebase:firebaseConfig,          /* toàn bộ dữ liệu, thông báo, Dev Panel dùng Firebase */
+  googleClientId:GOOGLE_CLIENT_ID,  /* đăng nhập Google dùng Google Identity Services */
+  devEmail:"hminhgalaxy@gmail.com", /* tài khoản dev: toàn quyền */
+  adminEmails:[]                    /* thêm email quản trị khác nếu cần */
 };
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
@@ -405,7 +468,7 @@ const ptrs=new Map(),L={yaw:0,pitch:0,dolly:0,px:0,py:0,tyaw:0,tpitch:0,tdolly:0
 let drag=null,orb=false,sx0=0,sy0=0,st=0,lt0=0,hover=-1,pinch=null,moved=false,obs=true,saved=null;
 function pick(x,y){let b=-1,bd=1e9;big.forEach((s,i)=>{if(!s.vis||s.sx===undefined||s.g.scale.x<.01)return;const d=Math.hypot(x-s.sx,y-s.sy);if(d<Math.max(s.px*2.8,44)&&d<bd){bd=d;b=i}});return b}
 root.addEventListener('pointerdown',e=>{
-  if(T<BOOM+2.5||e.target.closest('#ai-dock,#ai-side,#ai-panel,#ai-gl,#ai-skip'))return;
+  if(T<BOOM+2.5||e.target.closest('#ai-dock,#ai-side,#ai-panel,#ai-gl,#ai-skip,#ai-menu,#ai-mscrim,#ai-dev,#ai-note'))return;
   root.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});hint.classList.remove('on');
   if(ptrs.size===2){const a=[...ptrs.values()];pinch={d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),mx:(a[0].x+a[1].x)/2,my:(a[0].y+a[1].y)/2};if(drag){drag.held=false;drag=null}orb=false;moved=true;return}
   sx0=e.clientX;sy0=e.clientY;st=lt0=e.timeStamp;moved=false;
@@ -505,7 +568,7 @@ function extrasUpdate(dt,tb){
 const dock=document.getElementById('ai-dock');
 function toast(t,d){cn.textContent=t;cn.style.color=PAL[pi].a;cd.textContent=d||'';card.classList.add('on');clearTimeout(cardTO);cardTO=setTimeout(()=>card.classList.remove('on'),2200)}
 const ACT={
-  replay(){T=0;uiOn=false;yaw=pitch=0;L.tyaw=L.tpitch=L.tdolly=L.tpx=L.tpy=L.yaw=L.pitch=L.dolly=L.px=L.py=0;closePanel();[brand,hint,dock,side,card].forEach(e=>e.classList.remove('on'));big.forEach(s=>{s.x=undefined;s.el.classList.remove('on')});anchors()},
+  replay(){T=0;uiOn=false;yaw=pitch=0;L.tyaw=L.tpitch=L.tdolly=L.tpx=L.tpy=L.yaw=L.pitch=L.dolly=L.px=L.py=0;closePanel();menuClose();devClose();[brand,hint,dock,side,card].forEach(e=>e.classList.remove('on'));big.forEach(s=>{s.x=undefined;s.el.classList.remove('on')});anchors()},
   shuffle(){const v=big.filter(s=>s.vis&&s.x!==undefined),pts=v.map(s=>[s.ax,s.ay]);
     for(let i=pts.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[pts[i],pts[j]]=[pts[j],pts[i]]}
     v.forEach((s,i)=>{s.ax=pts[i][0];s.ay=pts[i][1]});toast('XÁO TRỘN','Các ngôi sao đổi chỗ')},
@@ -513,6 +576,7 @@ const ACT={
   auto(b){auto=!auto;b.classList.toggle('act',auto);toast('TỰ XOAY',auto?'BẬT':'TẮT')},
   palette(){pi=(pi+1)%PAL.length;applyPal(pi);toast('BẢNG MÀU',PAL[pi].n)},
   sound(b){snd=!snd;if(snd){if(!sndOn())snd=false}else sndOff();b.classList.toggle('act',snd);toast('ÂM THANH',snd?'BẬT':'TẮT')},
+  menu(){menuToggle()},
   observe(b){obs=!obs;b.classList.toggle('act',obs);toast('QUAN SÁT TỰ DO',obs?'BẬT':'TẮT');if(!obs&&!panelOpen){L.tyaw=L.tpitch=L.tdolly=L.tpx=L.tpy=0}},
   lookreset(){L.tyaw=L.tpitch=0;toast('GÓC NHÌN','Đã đặt lại')},
   home(){L.tyaw=L.tpitch=L.tdolly=L.tpx=L.tpy=0;yaw=pitch=0;toast('VỊ TRÍ BAN ĐẦU','Camera đã quay về')},
@@ -520,8 +584,8 @@ const ACT={
   full(){const d=document,e=d.documentElement;d.fullscreenElement?d.exitFullscreen():(e.requestFullscreen&&e.requestFullscreen())}
 };
 if(!document.fullscreenEnabled)dock.querySelector('[data-a=full]').remove();
-const side=document.getElementById('ai-side');
-[dock,side].forEach(d=>d.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;navigator.vibrate&&navigator.vibrate(8);ACT[b.dataset.a](b)}));
+const side=document.getElementById('ai-side'),menuEl=document.getElementById('ai-menu');
+[menuEl,side].forEach(d=>d.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!ACT[b.dataset.a])return;navigator.vibrate&&navigator.vibrate(8);ACT[b.dataset.a](b)}));
 
 /* ===== Thiên thể trang trí ===== */
 const DEC=[[-46,24,-120,4.2,0x7a8cff],[58,-20,-150,5.5,0xff9ad0],[16,34,-190,6.5,0x6fffe0]].map(([x,y,z,r,c],k)=>{
@@ -532,7 +596,7 @@ function decorUpdate(dt,tb){const f=ss(tb,3,5.5);DEC.forEach(d=>{d.m.visible=d.g
 
 /* ===== Camera FREE LOOK ===== */
 const keys={},fwd=new THREE.Vector3();
-addEventListener('keydown',e=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA/.test(a.tagName))return;if(e.key==='Escape'){closePanel();glClose()}if(obs&&e.code.startsWith('Arrow'))e.preventDefault();keys[e.code]=true});
+addEventListener('keydown',e=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA/.test(a.tagName))return;if(e.key==='Escape'){closePanel();glClose();menuClose();devClose()}if(obs&&e.code.startsWith('Arrow'))e.preventDefault();keys[e.code]=true});
 addEventListener('keyup',e=>{keys[e.code]=false});
 function applyLook(dt){
   if(obs){const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),r=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);L.tdolly+=f*22*dt;L.tpx+=r*12*dt}
@@ -560,16 +624,14 @@ const g1=(o,k)=>{for(const x of FM[k]){const v=o[x];if(v!=null&&v!==''&&typeof v
 const isUrl=v=>/^https?:\/\//i.test(v||'');
 function norm(v){if(v==null)return[];const a=Array.isArray(v)?v.map((x,k)=>[String(k),x]):Object.entries(v);return a.filter(([,x])=>x!=null).map(([k,x])=>typeof x==='object'?Object.assign({_k:k},x):{_k:k,name:k,value:String(x)})}
 function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
-function cnt(i){const s=big[i];if(!s)return;s.el.textContent=STARS[i][0]+' · '+(DATA[i]?DATA[i].length:0);s.lw=s.el.offsetWidth}
-function loginUI(){glUI();const b=document.querySelector('[data-a=login]');if(b){b.classList.toggle('act',!!user);b.title=user?'Tài khoản '+(user.email||''):'Đăng nhập Google';const t=document.getElementById('lg-t');if(t)t.textContent=user?String(user.displayName||user.email||'TÀI KHOẢN').slice(0,14).toUpperCase():'ĐĂNG NHẬP'}P.add.hidden=!(isAdmin&&panelOpen)}
+function cnt(i){const mc=document.getElementById('mc'+i);if(mc)mc.textContent=DATA[i]?DATA[i].length:'–';const s=big[i];if(!s)return;s.el.textContent=STARS[i][0]+' · '+(DATA[i]?DATA[i].length:0);s.lw=s.el.offsetWidth}
+function loginUI(){glUI();menuUI();const b=document.querySelector('[data-a=login]');if(b){b.classList.toggle('act',!!user);b.title=user?'Tài khoản '+(user.email||''):'Đăng nhập Google';const t=document.getElementById('lg-t');if(t)t.textContent=user?String(user.displayName||user.email||'TÀI KHOẢN').slice(0,14).toUpperCase():'ĐĂNG NHẬP'}P.add.hidden=!(isAdmin&&panelOpen)}
 function initFB(){
   const cfg=NC.firebase||{};
   if(!window.firebase||!cfg.databaseURL){ERR.fill('nocfg');return}
   try{if(!firebase.apps.length)firebase.initializeApp(cfg);db=firebase.database();auth=firebase.auth&&firebase.auth()}catch(e){ERR.fill('init');return}
   NODES.forEach((n,i)=>db.ref('nox_data/'+n).on('value',sn=>{DATA[i]=norm(sn.val());ERR[i]=null;cnt(i);if(selIdx===i&&panelOpen)renderList()},er=>{ERR[i]=(er&&er.code)||'err';DATA[i]=DATA[i]||[];if(selIdx===i&&panelOpen)renderList()}));
-  auth&&auth.onAuthStateChanged(async u=>{user=u;isAdmin=false;
-    if(u){isAdmin=(NC.adminEmails||[]).includes(u.email);if(!isAdmin){try{isAdmin=(await db.ref('nox_data/admins/'+u.uid).once('value')).exists()}catch(e){}}}
-    loginUI();if(panelOpen)renderList()});
+  auth&&auth.onAuthStateChanged(u=>{if(u&&u.email&&!user)setUser({email:u.email,displayName:u.displayName,photoURL:u.photoURL})});
 }
 function items(){
   const all=(DATA[selIdx]||[]).map(o=>({o,t:g1(o,'title')||o._k,d:g1(o,'desc'),u:g1(o,'url'),c:g1(o,'code'),v:g1(o,'ver'),g:g1(o,'tag'),ic:g1(o,'icon'),dt:g1(o,'date')}));
@@ -727,14 +789,89 @@ wind.frustumCulled=false;scene.add(wind);
 /* skip, màn che, đăng nhập Google */
 const skipEl=document.getElementById('ai-skip'),veil=document.getElementById('ai-veil'),glEl=document.getElementById('ai-gl');
 skipEl.onclick=()=>{veil.classList.add('on');setTimeout(()=>{if(T<BOOM+5.5)T=BOOM+5.5;veil.classList.remove('on')},480)};
-function glUI(){const p=$('gl-p'),t=$('gl-gt');if(!p)return;
-  if(user){p.textContent='Đã đăng nhập: '+(user.email||user.displayName||'')+(isAdmin?' · Quản trị viên':'');t.textContent='Đăng xuất'}
-  else{p.textContent='Đăng nhập bằng tài khoản Google để đồng bộ và dùng quyền quản trị.'+(auth?'':' (Firebase chưa được cấu hình)');t.textContent='Đăng nhập bằng Google'}}
-function glOpen(){glUI();glEl.classList.add('on');glEl.setAttribute('aria-hidden','false')}
+/* ===== Đăng nhập Google (GIS) · menu 3 gạch · thông báo Firebase · Dev Panel ===== */
+const ADMINS=[NC.devEmail||'hminhgalaxy@gmail.com'].concat(NC.adminEmails||[]).map(x=>String(x).toLowerCase());
+const NOTI_NODES=['notifications','notification','announcements','announcement','notice','thongbao'],NSRC={},NCOL={info:'#7fe9ff',success:'#3dff9a',warning:'#ffb347',error:'#ff5d7a'};
+const NK={t:['title','name','tieude','head','subject'],m:['message','msg','body','content','text','desc','description','noidung','value'],d:['time','timestamp','createdAt','date','ts'],y:['type','level','loai','kind']};
+let gisReady=false,CONN=false,NOTI=[],noteQ=[],noteBusy=false,initDone=false,readSet=new Set(),popped=new Set();
+try{readSet=new Set(JSON.parse(localStorage.getItem('nox_read')||'[]'))}catch(e){}
+const nk=(o,k)=>{for(const x of NK[k]){const v=o[x];if(v!=null&&v!==''&&typeof v!=='object')return v}return ''};
+const tms=d=>typeof d==='number'?(d<1e12?d*1000:d):(Date.parse(d)||0);
+function fmtT(v){if(v===''||v==null)return '';const d=new Date(tms(v));return isNaN(d)||!d.getTime()?String(v):d.toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}
+function jwt(t){try{const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b),c=>c.charCodeAt(0))))}catch(e){return null}}
+function setUser(u){user=u||null;isAdmin=!!(u&&u.email&&ADMINS.includes(u.email.toLowerCase()));loginUI();if(panelOpen)renderList();if(!isAdmin)devClose();devUI()}
+async function onCred(r){
+  const p=jwt(r&&r.credential);
+  if(!p||p.aud!==NC.googleClientId||!/^(https:\/\/)?accounts\.google\.com$/.test(p.iss||'')||p.exp*1000<Date.now()||p.email_verified===false){toast('ĐĂNG NHẬP LỖI','Token Google không hợp lệ');return}
+  setUser({email:p.email,displayName:p.name||p.email,photoURL:p.picture||''});
+  try{localStorage.setItem('nox_user',JSON.stringify({email:p.email,name:p.name,pic:p.picture,exp:p.exp}))}catch(e){}
+  glClose();toast('ĐĂNG NHẬP',p.name||p.email);
+  if(auth){try{await auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(r.credential))}catch(e){console.warn('Firebase Auth:',e.code)}}
+}
+function restoreUser(){try{const s=JSON.parse(localStorage.getItem('nox_user')||'null');if(s&&s.email&&s.exp*1000>Date.now())setUser({email:s.email,displayName:s.name||s.email,photoURL:s.pic||''})}catch(e){}}
+function gisInit(){if(gisReady||!(window.google&&google.accounts&&google.accounts.id))return;google.accounts.id.initialize({client_id:NC.googleClientId,callback:onCred,auto_select:false,cancel_on_tap_outside:true});gisReady=true}
+window.onGoogleLibraryLoad=gisInit;
+function signOutAll(){try{window.google&&google.accounts&&google.accounts.id.disableAutoSelect()}catch(e){}try{localStorage.removeItem('nox_user')}catch(e){}if(auth)auth.signOut().catch(()=>{});setUser(null);toast('ĐÃ ĐĂNG XUẤT','')}
+function glUI(){const p=$('gl-p'),b=$('gl-btn'),o=$('gl-out');if(!p)return;o.hidden=!user;b.hidden=!!user;
+  p.textContent=user?'Đã đăng nhập: '+user.email+(isAdmin?' · TÀI KHOẢN DEV':''):'Đăng nhập bằng tài khoản Google để đồng bộ và dùng quyền quản trị.'}
+function glOpen(){menuClose();gisInit();glUI();glEl.classList.add('on');glEl.setAttribute('aria-hidden','false');
+  if(!user){const b=$('gl-btn');b.replaceChildren();
+    if(gisReady)google.accounts.id.renderButton(b,{type:'standard',theme:'filled_black',size:'large',shape:'rectangular',text:'signin_with',logo_alignment:'left',width:260,locale:'vi'});
+    else b.textContent='Không tải được dịch vụ Google. Kiểm tra mạng hoặc trình chặn quảng cáo.'}}
 function glClose(){glEl.classList.remove('on');glEl.setAttribute('aria-hidden','true')}
-$('gl-go').onclick=async()=>{if(!auth){toast('FIREBASE','Chưa cấu hình NOX_CONFIG');return}
-  try{if(user){await auth.signOut();toast('ĐÃ ĐĂNG XUẤT','')}else{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());toast('ĐĂNG NHẬP','Thành công')}glClose()}catch(e){toast('ĐĂNG NHẬP LỖI',e.code||'')}};
-$('gl-x').onclick=glClose;glEl.addEventListener('click',e=>{if(e.target===glEl)glClose()});
+$('gl-out').onclick=()=>{signOutAll();glClose()};$('gl-x').onclick=glClose;glEl.addEventListener('click',e=>{if(e.target===glEl)glClose()});
+
+/* menu 3 gạch */
+function menuUI(){const av=$('mn-av'),nm=$('mn-nm'),em=$('mn-em');if(!av)return;
+  nm.textContent=user?(user.displayName||user.email):'Khách';em.textContent=user?user.email+(isAdmin?' · DEV':''):'Chưa đăng nhập';
+  if(user&&isUrl(user.photoURL)){av.referrerPolicy='no-referrer';av.src=user.photoURL;av.hidden=false}else av.hidden=true;
+  $('mn-dev').hidden=!isAdmin}
+function menuOpen(){closePanel();glClose();devClose();menuUI();notiMenu();root.classList.add('mOpen');$('ai-menu').setAttribute('aria-hidden','false');markRead()}
+function menuClose(){root.classList.remove('mOpen');const m=$('ai-menu');m&&m.setAttribute('aria-hidden','true')}
+function menuToggle(){root.classList.contains('mOpen')?menuClose():menuOpen()}
+big.forEach((s,i)=>{const b=el('button','mc'),im=el('img');im.src=s.icon;im.alt='';const c=el('em',null,'–');c.id='mc'+i;b.append(im,el('span',null,STARS[i][0]),c);b.onclick=()=>{menuClose();selectStar(i)};$('mn-cats').appendChild(b)});
+NODES.forEach((_,i)=>{if(DATA[i])cnt(i)});
+$('mn-x').onclick=$('ai-mscrim').onclick=menuClose;$('mn-read').onclick=()=>{markRead();notiMenu()};$('mn-devbtn').onclick=devOpen;
+
+/* thông báo từ Firebase */
+function badge(){const b=$('bdg');if(!b)return;const u=NOTI.filter(x=>!readSet.has(x.id)).length;b.hidden=!u;b.textContent=u>9?'9+':String(u)}
+function markRead(){NOTI.forEach(x=>readSet.add(x.id));try{localStorage.setItem('nox_read',JSON.stringify([...readSet].slice(-400)))}catch(e){}badge()}
+function notiMenu(){const w=$('mn-notes');if(!w)return;w.replaceChildren();
+  if(!NOTI.length){w.appendChild(el('div','mn-empty','Chưa có thông báo.'));return}
+  NOTI.slice(0,6).forEach(x=>{const d=el('div','mn'+(readSet.has(x.id)?'':' un'));d.style.setProperty('--nc',NCOL[x.y]||NCOL.info);d.appendChild(el('b',null,x.t||'Thông báo'));if(x.m)d.appendChild(el('p',null,x.m));const tm=fmtT(x.d);if(tm)d.appendChild(el('small',null,tm));w.appendChild(d)})}
+function notiRefresh(){
+  NOTI=[].concat(...Object.values(NSRC)).filter(x=>x.t||x.m);NOTI.sort((a,b)=>tms(b.d)-tms(a.d)||(b.k>a.k?1:-1));
+  if(initDone)NOTI.filter(x=>!readSet.has(x.id)&&!popped.has(x.id)).slice(0,3).forEach(x=>{popped.add(x.id);noteQ.push(x)});
+  badge();if(root.classList.contains('mOpen'))notiMenu();devUI()}
+function watchNoti(){
+  if(!db)return;
+  NOTI_NODES.forEach(n=>db.ref('nox_data/'+n).on('value',sn=>{NSRC[n]=norm(sn.val()).map(o=>({id:n+'/'+o._k,n,k:o._k,t:String(nk(o,'t')||''),m:String(nk(o,'m')||''),d:nk(o,'d'),y:String(nk(o,'y')||'info').toLowerCase()}));notiRefresh()},()=>{}));
+  db.ref('.info/connected').on('value',s=>{CONN=!!s.val();devStats()});
+  setTimeout(()=>{initDone=true;const f=NOTI.filter(x=>!readSet.has(x.id));f.slice(0,3).forEach(x=>noteQ.push(x));f.forEach(x=>popped.add(x.id))},2500);
+}
+function popNote(){const x=noteQ.shift();if(!x)return;noteBusy=true;const e=$('ai-note');$('nt-t').textContent=x.t||'Thông báo';$('nt-m').textContent=x.m;
+  e.style.setProperty('--nc',NCOL[x.y]||NCOL.info);e.classList.add('on');navigator.vibrate&&navigator.vibrate(15);sfx(3);clearTimeout(popNote.to);popNote.to=setTimeout(hideNote,7000)}
+function hideNote(){$('ai-note').classList.remove('on');setTimeout(()=>{noteBusy=false},500)}
+$('ai-note').onclick=hideNote;setInterval(()=>{if(uiOn&&!noteBusy&&noteQ.length)popNote()},900);
+
+/* Dev Panel (chỉ tài khoản dev) */
+function devOpen(){if(!isAdmin){toast('KHÔNG CÓ QUYỀN','Chỉ tài khoản dev');return}menuClose();const d=$('ai-dev'),c=$('dv-cats');d.classList.add('on');d.setAttribute('aria-hidden','false');
+  if(!c.children.length)STARS.forEach((st,i)=>{const b=el('button','rb');b.appendChild(el('span',null,'QUẢN LÝ '+st[0]));b.style.display='flex';b.onclick=()=>{devClose();selectStar(i)};c.appendChild(b)});devUI()}
+function devClose(){const d=$('ai-dev');if(d){d.classList.remove('on');d.setAttribute('aria-hidden','true')}}
+function devStats(){const d=$('ai-dev');if(!d||!d.classList.contains('on'))return;const s=$('dv-stats');s.replaceChildren();
+  const row=(v,l)=>{const x=el('div');x.append(el('b',null,String(v)),el('small',null,l));s.appendChild(x)};
+  STARS.forEach((st,i)=>row(DATA[i]?DATA[i].length:'–',st[0]));row(NOTI.length,'THÔNG BÁO');row(CONN?'ONLINE':'OFFLINE','FIREBASE')}
+function devList(){const l=$('dv-list');l.replaceChildren();const mine=NOTI.filter(x=>x.n==='notifications');
+  if(!mine.length){l.appendChild(el('div','mn-empty','Chưa có thông báo nào.'));return}
+  mine.slice(0,20).forEach(x=>{const r=el('div','dv-it'),b=el('button','ab dng','Xóa');r.appendChild(el('span',null,(x.t||'—')+(x.m?' — '+x.m:'')));
+    b.onclick=()=>{if(db&&confirm('Xóa thông báo này?'))db.ref('nox_data/notifications/'+x.k).remove().catch(e=>toast('XÓA THẤT BẠI',e.code||''))};r.appendChild(b);l.appendChild(r)})}
+function devUI(){const d=$('ai-dev');if(!d||!d.classList.contains('on'))return;$('dv-who').textContent=user?user.email:'';devStats();devList()}
+$('dv-x').onclick=devClose;$('ai-dev').addEventListener('click',e=>{if(e.target.id==='ai-dev')devClose()});
+$('dv-send').onclick=async()=>{const t=$('dv-t').value.trim(),m=$('dv-m').value.trim();
+  if(!isAdmin||!db){toast('KHÔNG CÓ QUYỀN','');return}if(!t&&!m){toast('THIẾU NỘI DUNG','Nhập tiêu đề hoặc nội dung');return}
+  try{await db.ref('nox_data/notifications').push({title:t,message:m,type:$('dv-ty').value,time:firebase.database.ServerValue.TIMESTAMP,by:user.email});$('dv-t').value='';$('dv-m').value='';toast('ĐÃ GỬI','Thông báo đã lên Firebase')}
+  catch(e){toast('GỬI THẤT BẠI',e.code||e.message)}};
+watchNoti();restoreUser();menuUI();if(window.google&&window.google.accounts)gisInit();
 
 function easeBack(x){const c=1.70158+1,k=x-1;return 1+c*k*k*k+1.70158*k*k}
 
