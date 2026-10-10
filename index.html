@@ -251,6 +251,13 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
 .sec .row{margin-top:8px}
 .prow{display:flex;gap:14px;align-items:center}
 .ln{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+/* ===== Chia sẻ ===== */
+.shb{position:absolute;right:8px;bottom:8px;z-index:2;padding:6px;line-height:0;border-radius:10px;background:rgba(255,255,255,.94);color:#09090b;border-color:transparent}
+.shb:active:not(:disabled){transform:scale(.94)}
+.shm{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.shm button{width:100%;justify-content:flex-start;padding:11px 14px;gap:10px}
+.shu{margin-top:12px;font-size:13px;color:var(--mu);text-overflow:ellipsis}
+.wp.wfocus{border-color:var(--tx)}
 @media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr);gap:12px}.cb{padding:10px 12px 12px}.ti{font-size:14px}.ds{font-size:12px}.mu{font-size:11px}h2{font-size:20px}.mg{max-width:92%}}
 @media(max-width:360px){.grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01ms!important}}
@@ -273,6 +280,7 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
   <section id="vWorld" class="view" hidden><div class="wrap">
     <div class="hrow"><h2>World</h2>
       <div class="seg"><button id="wtP" onclick="wTabSet('posts')"><span data-ic="msg" data-s="16"></span><span data-i="w.tab.posts"></span></button><button id="wtG" onclick="wTabSet('groups')"><span data-ic="users" data-s="16"></span><span data-i="w.tab.groups"></span></button></div></div>
+    <div id="wNote"></div>
     <div id="wPosts"><div id="wComp"></div><div id="wFeed" data-sk="list"></div></div>
     <div id="wGroups" hidden>
       <div class="ln"><span class="mu" data-i="g.hint"></span><button class="pri" onclick="openGroupForm()"><span data-ic="plus" data-s="16"></span><span data-i="g.new"></span></button></div>
@@ -399,6 +407,19 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
 <div class="modal" id="mDev" onclick="if(event.target===this)closeM(this)"><div class="box" style="max-width:820px">
   <button class="x ic" onclick="closeM($('mDev'))" data-ia="close"><span data-ic="x" data-s="16"></span></button>
   <div id="devBox"></div>
+</div></div>
+
+<!-- Chia sẻ (chỉ cho nội dung đã đăng: bài World, Script, APK, iOS, Link, mục khác) -->
+<div class="modal" id="mShare" onclick="if(event.target===this)closeM(this)"><div class="box" style="max-width:420px">
+  <button class="x ic" onclick="closeM($('mShare'))" data-ia="close"><span data-ic="x" data-s="16"></span></button>
+  <b class="hd" data-i="share"></b>
+  <p class="mu" id="shTitle" style="margin-top:6px;word-break:break-word"></p>
+  <input id="shUrl" class="shu" readonly aria-label="URL" onfocus="this.select()" onclick="this.select()">
+  <div class="shm">
+    <button class="pri" id="shCopy" onclick="shareCopy()"><span data-ic="link" data-s="16"></span><span data-i="sh.copy"></span></button>
+    <button id="shNative" onclick="shareNative()"><span data-ic="share" data-s="16"></span><span data-i="sh.app"></span></button>
+  </div>
+  <div class="fm" id="shMsg" role="status"></div>
 </div></div>
 
 <!-- Hộp thoại xác nhận / nhập -->
@@ -555,6 +576,18 @@ D("s.guest","Đăng nhập để chỉnh sửa hồ sơ, tên, mật khẩu và 
 D("s.name.same","Đây đã là tên hiện tại của bạn","That's already your name");
 /* Báo cáo, lọc */
 D("dev.reply","Trả lời","Reply");
+/* Chia sẻ */
+D("sh.copy","Sao chép liên kết","Copy link");D("sh.app","Chia sẻ qua ứng dụng khác","Share via another app");
+D("sh.nosupport","Thiết bị hoặc trình duyệt này không hỗ trợ chia sẻ qua ứng dụng khác. Hãy sao chép liên kết.","This device or browser can't share to other apps. Copy the link instead.");
+D("sh.fail","Không sao chép được liên kết. Hãy nhấn vào ô liên kết rồi chép thủ công.","Couldn't copy the link. Tap the link box and copy it manually.");
+D("sh.err","Chưa chia sẻ được. Hãy thử lại.","Couldn't share. Please try again.");
+D("sh.badid","Nội dung này chưa có liên kết hợp lệ.","This item doesn't have a valid link.");
+D("sh.gone","Nội dung này đã bị xóa hoặc không tồn tại.","This content was deleted or doesn't exist.");
+D("sh.denied","Bạn không có quyền xem nội dung này.","You don't have permission to view this content.");
+D("sh.denied.login","Hãy đăng nhập để xem nội dung này.","Log in to view this content.");
+D("sh.loaderr","Chưa tải được nội dung được chia sẻ.","The shared content didn't load.");
+D("sh.home","Về trang chủ","Go to home");D("sh.shared","Bạn đang xem bài viết được chia sẻ.","You're viewing a shared post.");
+D("sh.all","Xem tất cả bài viết","View all posts");D("sh.wtitle","Bài viết của {0} trên World","World post by {0}");
 const T0=document.title,D0=document.querySelector('meta[name=description]').content;
 
 /* ===== ICON ===== */
@@ -589,7 +622,9 @@ msg:'<path d="M21 12a8 8 0 0 1-11.500 7.200L3 21l1.800-6A8 8 0 1 1 21 12z"/>',
 star:'<path d="m12 3 2.800 5.800 6.200.9-4.500 4.400 1.100 6.200L12 17.300 6.400 20.300l1.100-6.200L3 9.700l6.200-.9z"/>',
 hash:'<path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/>',
 eyeview:'<path d="M2 12s3.600-7 10-7 10 7 10 7-3.600 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
-key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/>'
+key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/>',
+share:'<path d="M12 16V4M7 9l5-5 5 5M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/>',
+link:'<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/>'
 };
 const svg=(n,s=18)=>`<svg class="si" viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true">${P[n]||""}</svg>`;
 function applyIcons(root){(root||document).querySelectorAll("[data-ic]").forEach(e=>{e.innerHTML=svg(e.dataset.ic,+e.dataset.s||18)})}
@@ -1286,7 +1321,7 @@ async function authGo(){
   }
   $("aGo").disabled=false;$("aGo").textContent=reg?t("a.title.reg"):t("login");
 }
-function afterAuth(){renderAuth();pollUnread();show(view,viewArg,true)}
+function afterAuth(){renderAuth();pollUnread();show(view,viewArg,true);if(/^#\/post\//.test(location.hash)&&!openId)openFromHash()}
 async function logout(){
   try{await api("/auth/logout","POST")}catch(e){}
   me=null;myVotes={};setUnread(0);toggleMenu(false);closeRoom();renderAuth();
@@ -1356,6 +1391,7 @@ function go(h){
 function route(){
   const p=location.hash.replace(/^#\/?/,"").split("/").map(x=>{try{return decodeURIComponent(x)}catch(e){return x}});let k=p[0];
   if(k!=="post"&&openId)closeDetail(true);
+  if(k!=="w")wFocus=null;
   closeRoom();
   if(["liked","mine","inbox"].includes(k)&&!me){openAuth("login");history.replaceState(null,"","#/");k=""}
   if((k==="games"||k==="world")&&navHidden(k)&&!isDev()){history.replaceState(null,"","#/");k=""}
@@ -1364,6 +1400,10 @@ function route(){
   else if(k==="u"&&p[1])show("profile",p[1]);
   else if(k==="c"&&p[1])showHome(p[1]);
   else if(k==="g"&&p[1])showHome("",p[1]);
+  else if(k==="w"&&p[1]){
+    if(navHidden("world")&&!isDev()){if(!viewReady)showHome();showUnavailable("sh.denied");return}
+    wFocus={id:p[1],post:null,st:"load"};wTab="posts";show("world");
+  }
   else if(k==="post"&&p[1]){if(!viewReady)showHome();openFromHash()}
   else showHome();
 }
@@ -1474,7 +1514,7 @@ function filtered(){
 }
 function cardHtml(p){
   const g=games[p.gameId],n=p.ratingCount||0;
-  return `<article class="card" tabindex="0" onkeydown="if(event.key==='Enter')this.click()" onclick="openPost(${jsq(p.id)})"><div class="th" style="${bgs(p.thumb||(g&&g.img)||catImg(p.type))}"><span class="ov">${badge(p.type)}${p.featured?`<span class="tag bd">${esc(t("feat"))}</span>`:""}${p.pinned?`<span class="tag bd">${esc(t("pinned"))}</span>`:""}${(p.labels||[]).slice(0,2).map(l=>`<span class="tag bd">${esc(l)}</span>`).join("")}</span></div>
+  return `<article class="card" tabindex="0" onkeydown="if(event.key==='Enter')this.click()" onclick="openPost(${jsq(p.id)})"><div class="th" style="${bgs(p.thumb||(g&&g.img)||catImg(p.type))}"><span class="ov">${badge(p.type)}${p.featured?`<span class="tag bd">${esc(t("feat"))}</span>`:""}${p.pinned?`<span class="tag bd">${esc(t("pinned"))}</span>`:""}${(p.labels||[]).slice(0,2).map(l=>`<span class="tag bd">${esc(l)}</span>`).join("")}</span><button class="shb" onclick="event.stopPropagation();openShare('p',${jsq(p.id)})" onkeydown="event.stopPropagation()" aria-label="${esc(t("share"))}">${svg("share",15)}</button></div>
   <div class="cb"><h3 class="ti">${esc(p.title)}</h3><p class="ds">${esc(p.desc||"")}</p>
   <div class="au lk" onclick="event.stopPropagation();openProfile(${jsq(p.authorId||"")})">${avatar(p.authorName,p.authorPic)}<div><b>${esc(p.authorName||t("anon"))}</b><span class="mu">${esc(fmt(p.createdAt))}</span></div></div>
   <div class="ft"><span class="gm">${g?esc(g.name):""}</span><span class="sts"><span>${svg("heart",13)}${p.likeCount||0}</span><span>${svg("star",13)}${n?(p.ratingSum/n).toFixed(1):"0.0"}</span><span>${svg("eyeview",13)}${p.views||0}</span></span></div></div></article>`;
@@ -1542,9 +1582,67 @@ function bumpView(id){
   fbDb.ref("pub/posts/"+id+"/views").transaction(c=>(c||0)+1).then(r=>{const p=curPosts[id];if(p&&r&&r.snapshot)p.views=r.snapshot.val()}).catch(()=>{});
 }
 function copyCode(id){navigator.clipboard.writeText(curPosts[id].code).then(()=>toast(t("copied"))).catch(()=>{})}
-async function share(id){
-  const u=location.origin+location.pathname+"#/post/"+id,ti=curPosts[id].title;
-  try{if(navigator.share)await navigator.share({title:ti,url:u});else{await navigator.clipboard.writeText(u);toast(t("linkcopied"))}}catch(e){}
+/* ===== CHIA SẺ LIÊN KẾT RIÊNG — chỉ cho nội dung đã đăng =====
+   /p/{id}  bài trong pub/posts (Script, APK, iOS, Link và mục khác do dev tạo) · /w/{id}  bài World trong pub/world/posts
+   Trên Vercel, api/share.js trả trang có thẻ Open Graph (bản xem trước khi gửi qua app nhắn tin) rồi chuyển người mở sang #/post/{id} hoặc #/w/{id}.
+   Link luôn trỏ tới bản ghi gốc trong Firebase (không tạo bản sao). Bài đã xóa/bị ẩn/không có quyền => hiện thông báo tương ứng. */
+const SITE="https://skibidiscript.vercel.app";
+const shareBase=()=>/^https?:$/.test(location.protocol)?location.origin:SITE;
+const shareUrl=(k,id)=>shareBase()+"/"+k+"/"+encodeURIComponent(id);
+const oneLine=(s,n)=>String(s||"").replace(/\s+/g," ").trim().slice(0,n);
+let shCtx=null;
+/* đọc dữ liệu công khai: ưu tiên SDK (mang theo đăng nhập, tuân theo Rules), dự phòng REST */
+async function readShared(path){
+  if(fbInit()){
+    try{return await snap(path)}
+    catch(e){if(/permission[_ -]?denied/i.test(String((e&&e.code)||"")+" "+String((e&&e.message)||"")))throw fbErr(403,"denied");throw e}
+  }
+  return dbGet(path);
+}
+function openShare(k,id,ttl){
+  id=String(id||"");
+  if(!/^[\w-]{1,60}$/.test(id))return toast(t("sh.badid"));
+  let label="",text="",title="";
+  if(k==="p"){const p=curPosts[id];label=ttl||(p&&p.title)||"";text=p?oneLine(p.desc,120):"";title=(label||"SKIBIDISCRIPT")+" — SKIBIDISCRIPT"}
+  else{const p=wFind(id)||{};text=oneLine(p.text,120);title=t("sh.wtitle",p.authorName||t("anon"))+" — SKIBIDISCRIPT";label=text||t("sh.wtitle",p.authorName||t("anon"))}
+  shCtx={k,id,title,text,url:shareUrl(k,id)};
+  $("shTitle").textContent=oneLine(label,90);$("shUrl").value=shCtx.url;
+  const can=typeof navigator.share==="function";
+  $("shNative").disabled=!can;
+  if(can)setMsg("shMsg","");else setMsg("shMsg",t("sh.nosupport"),"warn");
+  openM($("mShare"));
+}
+const share=id=>openShare("p",id);
+async function copyText(s){
+  try{if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext){await navigator.clipboard.writeText(s);return true}}catch(e){}
+  const ta=document.createElement("textarea");
+  try{
+    ta.value=s;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;width:1px;height:1px;min-height:0;opacity:0";
+    document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,s.length);
+    return document.execCommand("copy")===true;
+  }catch(e){return false}finally{ta.remove()}
+}
+async function shareCopy(){
+  const c=shCtx;if(!c)return;
+  const b=$("shCopy");b.disabled=true;
+  const ok=await copyText(c.url);
+  b.disabled=false;
+  if(ok){closeM($("mShare"));toast(t("linkcopied"))}
+  else{setMsg("shMsg",t("sh.fail"),"bad");toast(t("sh.fail"));const i=$("shUrl");i.focus();i.select()}
+}
+async function shareNative(){
+  const c=shCtx;if(!c)return;
+  const d={title:c.title,url:c.url};if(c.text)d.text=c.text;
+  if(typeof navigator.share!=="function"||(typeof navigator.canShare==="function"&&!navigator.canShare(d)))return setMsg("shMsg",t("sh.nosupport"),"warn");
+  try{await navigator.share(d);closeM($("mShare"))}
+  catch(e){if(e&&e.name==="AbortError")return;console.warn("[share]",e);setMsg("shMsg",t("sh.err"),"bad");toast(t("sh.err"))}
+}
+/* Hộp thông báo khi mở link tới bài không còn / không có quyền / lỗi tải */
+function showUnavailable(k,retry){
+  openId="!";
+  const act=k==="sh.denied.login"?`<button class="pri" onclick="closeDetail(true);openAuth()">${esc(t("login"))}</button>`:retry?`<button class="pri" onclick="closeDetail(true);openFromHash()">${esc(t("reload"))}</button>`:"";
+  $("detail").innerHTML=`<div class="st" style="min-height:240px"><span class="sti">${svg("doc",22)}</span><b>${esc(t(k))}</b><div class="row c">${act}<button onclick="closeDetail();go('')">${esc(t("sh.home"))}</button></div></div>`;
+  openM($("mDetail"));
 }
 function editPost(id){closeDetail();openForm(curPosts[id])}
 async function delPost(id){
@@ -1553,8 +1651,20 @@ async function delPost(id){
 }
 async function openFromHash(){
   const m=location.hash.match(/^#\/post\/([\w-]+)$/);if(!m)return;
-  if(!curPosts[m[1]]){try{const d=await dbGet("pub/posts/"+m[1]);if(d)curPosts[m[1]]={id:m[1],...d}}catch(e){}}
-  if(curPosts[m[1]])openPost(m[1]);
+  const id=m[1],h=location.hash;
+  if(!curPosts[id]){
+    let d;
+    try{d=await readShared("pub/posts/"+id)}
+    catch(e){
+      if(location.hash!==h)return;
+      const den=!!e&&(e.status===401||e.status===403);
+      return showUnavailable(den?(me?"sh.denied":"sh.denied.login"):"sh.loaderr",!den);
+    }
+    if(location.hash!==h)return;
+    if(!d||typeof d!=="object")return showUnavailable("sh.gone");
+    curPosts[id]={id,...d};
+  }
+  openPost(id);
 }
 const reportPost=id=>openReport({type:"post",id,title:(curPosts[id]||{}).title||id});
 
@@ -1618,7 +1728,7 @@ async function loadMine(){
     window._mine=Object.fromEntries(posts.map(p=>[p.id,p]));region(el,"success");
     el.innerHTML=posts.map(p=>`<div class="item"><div><b>${esc(p.title)}</b> ${badge(p.type)} <span class="tag">${esc(p.status)}</span>
     <div class="mu">${esc(t("created",fmt(p.createdAt)))}${p.updatedAt?esc(t("edited",fmt(p.updatedAt))):""}${p.rejectReason?" · "+esc(t("reason",p.rejectReason)):""}</div></div>
-    <div class="row" style="margin:0">${p.locked?`<span class="mu">${esc(t("locked"))}</span>`:`<button onclick="openForm(_mine[${jsq(p.id)}])">${esc(t("edit"))}</button><button class="danger" onclick="delMine(${jsq(p.id)})">${esc(t("del"))}</button>`}</div></div>`).join("");
+    <div class="row" style="margin:0">${p.status==="published"?`<button onclick="openShare('p',${jsq(p.id)},${jsq(p.title)})">${svg("share",16)}${esc(t("share"))}</button>`:""}${p.locked?`<span class="mu">${esc(t("locked"))}</span>`:`<button onclick="openForm(_mine[${jsq(p.id)}])">${esc(t("edit"))}</button><button class="danger" onclick="delMine(${jsq(p.id)})">${esc(t("del"))}</button>`}</div></div>`).join("");
   }catch(e){if(gone(e))return region(el,"empty",t("mine.none"));region(el,"error",e,loadMine)}
 }
 async function delMine(id){
@@ -1669,9 +1779,11 @@ async function pollUnread(){
 
 /* ===== WORLD: bài viết + trả lời ===== */
 let wTab="posts",wList=[],wMore=false,wImgs=[],wRep={},wOpen=new Set(),rImgs={};
+let wFocus=null; /* bài World đang được mở từ link chia sẻ: {id,post,st:load|ok|gone|denied|err} */
+const wFind=id=>wList.find(x=>x.id===id);
 const bgRaw=u=>{const s=imgSrc(u);return s?`background-image:url("${s.replace(/["'()\\\s<>]/g,c=>"%"+c.charCodeAt(0).toString(16).padStart(2,"0"))}")`:""};
 const canDel=a=>me&&(me.userId===a||me.role==="dev");
-function loadWorld(){renderWComposer();wTabSet(wTab)}
+function loadWorld(){renderWComposer();renderWNote();wTabSet(wTab)}
 function wTabSet(k){
   wTab=k;$("wtP").classList.toggle("on",k==="posts");$("wtG").classList.toggle("on",k==="groups");
   $("wPosts").hidden=k!=="posts";$("wGroups").hidden=k!=="groups";
@@ -1687,25 +1799,56 @@ const thumbs=(arr,rm)=>arr.map((g,i)=>`<span class="gp"><img class="gi" src="${e
 function renderWGal(){const el=$("wGal");if(el)el.innerHTML=thumbs(wImgs,"rmWImg")}
 function rmWImg(i){wImgs.splice(i,1);renderWGal()}
 function addWImg(){if(wImgs.length>=4)return toast(t("w.max4"));pickFile(v=>{if(wImgs.length<4){wImgs.push(v);renderWGal()}})}
+/* Mở link chia sẻ bài World: đọc đúng bản ghi gốc theo ID, đưa lên đầu bảng tin (không tạo bản sao) */
+async function focusWPost(f){
+  if(!/^[\w-]{1,60}$/.test(f.id)){f.st="gone";f.post=null;return}
+  try{
+    const d=await readShared("pub/world/posts/"+f.id);
+    if(wFocus!==f)return;
+    if(!d||typeof d!=="object"){f.st="gone";f.post=null;return}
+    if(!rolesC)await loadRoles();
+    const uid=fbAuth&&fbAuth.currentUser?fbAuth.currentUser.uid:undefined;
+    f.post=wFix({id:f.id,...d},uid);f.st="ok";
+  }catch(e){
+    if(wFocus!==f)return;
+    f.post=null;f.st=e&&(e.status===401||e.status===403)?"denied":"err";
+  }
+}
+function renderWNote(){
+  const el=$("wNote");if(!el)return;
+  const f=wFocus;
+  if(!f||f.st==="load"){el.innerHTML="";return}
+  const m={ok:"sh.shared",gone:"sh.gone",denied:me?"sh.denied":"sh.denied.login",err:"sh.loaderr"}[f.st];
+  const btn=f.st==="denied"&&!me?`<button class="pri" onclick="openAuth()">${esc(t("login"))}</button>`:f.st==="err"?`<button onclick="loadWPosts()">${esc(t("reload"))}</button>`:`<button onclick="go('world')">${esc(t("sh.all"))}</button>`;
+  el.innerHTML=`<div class="ann">${svg(f.st==="ok"?"world":"flag",18)}<span style="flex:1;min-width:0">${esc(t(m))}</span>${btn}</div>`;
+}
 async function loadWPosts(more){
-  const el=$("wFeed");
+  const el=$("wFeed"),f=!more?wFocus:null;
   if(!more&&!wList.length)region(el,"loading");
+  if(f){await focusWPost(f);renderWNote()}
+  const pin=l=>f&&f.post?[f.post].concat(l.filter(x=>x.id!==f.post.id)):l;
   try{
     const q=more&&wList.length?"&before="+wList[wList.length-1].createdAt:"";
     const r=await api("/world/posts?limit=20"+q),ps=r.posts||[];
-    wList=more?wList.concat(ps.filter(p=>!wList.some(x=>x.id===p.id))):ps;wMore=ps.length>=20;
+    wList=more?wList.concat(ps.filter(p=>!wList.some(x=>x.id===p.id))):pin(ps);wMore=ps.length>=20;
     renderWPosts();
-  }catch(e){if(wList.length)toast(e.message);else if(gone(e)){wList=[];renderWPosts()}else region(el,"error",e,()=>loadWPosts())}
+  }catch(e){
+    if(f&&f.post){wList=pin([]);renderWPosts();if(!gone(e))toast(e.message)}
+    else if(wList.length)toast(e.message);
+    else if(gone(e)){wList=[];renderWPosts()}
+    else region(el,"error",e,()=>loadWPosts());
+  }
 }
 function wpHtml(p){
   const open=wOpen.has(p.id),id=jsq(p.id);
-  return `<article class="wp" id="wp-${esc(p.id)}"><div class="wph"><div class="au lk" onclick="openProfile(${jsq(p.authorId||"")})">${avatar(p.authorName,p.authorPic,true)}<div><b>${esc(p.authorName||t("anon"))}${devTag(p.authorRole)}</b><span class="mu">${esc(ago(p.createdAt))}</span></div></div>${canDel(p.authorId)?`<button class="gh ic" onclick="delWPost(${id})" aria-label="${esc(t("del"))}">${svg("trash",16)}</button>`:""}</div>
+  return `<article class="wp${wFocus&&wFocus.st==="ok"&&wFocus.id===p.id?" wfocus":""}" id="wp-${esc(p.id)}"><div class="wph"><div class="au lk" onclick="openProfile(${jsq(p.authorId||"")})">${avatar(p.authorName,p.authorPic,true)}<div><b>${esc(p.authorName||t("anon"))}${devTag(p.authorRole)}</b><span class="mu">${esc(ago(p.createdAt))}</span></div></div>${canDel(p.authorId)?`<button class="gh ic" onclick="delWPost(${id})" aria-label="${esc(t("del"))}">${svg("trash",16)}</button>`:""}</div>
   ${p.text?`<p class="wt">${esc(p.text)}</p>`:""}${imgsHtml(p.images)}
-  <div class="wa"><button class="${p.liked?"on":""}" onclick="likeW(${id})" aria-label="${esc(t("v.like"))}">${svg("heart",15)}${p.likeCount||0}</button><button class="${open?"on":""}" onclick="toggleReplies(${id})" aria-label="${esc(t("w.replies"))}">${svg("msg",15)}${p.replyCount||0}</button><button onclick="reportW(${id})" aria-label="${esc(t("report"))}">${svg("flag",15)}</button></div>
+  <div class="wa"><button class="${p.liked?"on":""}" onclick="likeW(${id})" aria-label="${esc(t("v.like"))}">${svg("heart",15)}${p.likeCount||0}</button><button class="${open?"on":""}" onclick="toggleReplies(${id})" aria-label="${esc(t("w.replies"))}">${svg("msg",15)}${p.replyCount||0}</button><button onclick="openShare('w',${id})" aria-label="${esc(t("share"))}">${svg("share",15)}</button><button onclick="reportW(${id})" aria-label="${esc(t("report"))}">${svg("flag",15)}</button></div>
   <div class="wr" id="wr-${esc(p.id)}" ${open?"":"hidden"}></div></article>`;
 }
 function renderWPosts(){
   const el=$("wFeed");
+  renderWNote();
   if(!wList.length)return region(el,"empty",t("w.none"));
   region(el,"success");
   el.innerHTML=wList.map(wpHtml).join("")+(wMore?`<div class="row c"><button onclick="loadWPosts(true)">${esc(t("more"))}</button></div>`:"");
@@ -1725,7 +1868,7 @@ async function sendWPost(){
 }
 async function delWPost(id){
   if(!await yes({title:t("w.del.t"),ok:t("del"),danger:true}))return;
-  try{await api("/world/posts/"+id,"DELETE");wList=wList.filter(p=>p.id!==id);renderWPosts();toast(t("deleted"))}catch(e){toast(e.message)}
+  try{await api("/world/posts/"+id,"DELETE");wList=wList.filter(p=>p.id!==id);if(wFocus&&wFocus.id===id){wFocus.st="gone";wFocus.post=null}renderWPosts();toast(t("deleted"))}catch(e){toast(e.message)}
 }
 async function likeW(id){
   if(!me)return openAuth();
@@ -2113,6 +2256,7 @@ async function devGameDel(id){if(!await yes({title:"Xóa game?",ok:t("del"),dang
 
 /* ===== KHỞI ĐỘNG ===== */
 applyTheme(themePref);applyStatic();applyIcons();
+{const m=location.pathname.match(/^\/(p|w)\/([\w-]{1,60})\/?$/);if(m)history.replaceState(null,"",(m[1]==="p"?"/#/post/":"/#/w/")+m[2])}
 window.addEventListener("hashchange",route);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)pollUnread()});
 const qp=new URLSearchParams(location.search).get("q");if(qp)$("q").value=qp;
