@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SKIBIDISCRIPT — Kho Script, APK, iOS và Link cộng đồng</title>
+<title>SKIBIDISCRIPT</title>
 <meta name="description" content="SKIBIDISCRIPT là nơi cộng đồng chia sẻ script game, APK, iOS và link hữu ích. Đăng ký tài khoản để đăng bài, thả tim và đánh giá.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com https://accounts.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; frame-src https://accounts.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="theme-color" content="#f4f4f5" id="tc"><script>try{var s=localStorage.getItem("theme")||"light";if(s==="system")s=matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";document.documentElement.dataset.theme=s}catch(e){document.documentElement.dataset.theme="light"}</script>
 <link rel="canonical" href="https://skibidiscript.vercel.app/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2309090b'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
@@ -21,9 +21,6 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"SKIBIDISCRIPT","url":"https://skibidiscript.vercel.app/","inLanguage":"vi","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ===== Màu: đen – trắng ===== */
@@ -113,11 +110,12 @@ h2{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
 .sk i{display:block;height:12px;border-radius:6px}
 @keyframes shim{to{background-position:-200% 0}}
 /* ===== Modal ===== */
-.modal{position:fixed;inset:0;background:var(--ov);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;overflow:auto;z-index:50;padding:16px}
+.modal{position:fixed;inset:0;background:var(--ov);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;overflow:auto;z-index:50;padding:16px}
 .modal.on{display:flex}
-#mAuth{align-items:center;padding:16px;overscroll-behavior:contain}#mAuth .box{margin:auto;max-height:calc(100dvh - 32px);overflow-y:auto;width:min(100%,420px)}#mAsk{z-index:90;align-items:center}#mImg{z-index:95;align-items:center;cursor:zoom-out;padding:12px}
+#mAsk{z-index:90;align-items:center}#mImg{z-index:95;align-items:center;cursor:zoom-out;padding:12px}
 #mImg img{max-width:100%;max-height:92vh;border-radius:12px;display:block}
-.box{position:relative;background:var(--s1);border:1px solid var(--bd);border-radius:24px;padding:20px;width:100%;max-width:640px;box-shadow:var(--sh);animation:pop .3s cubic-bezier(.2,.8,.2,1)}
+/* margin:auto => hộp luôn nằm giữa màn hình (cả ngang lẫn dọc); nếu nội dung cao hơn màn hình thì vẫn cuộn được, không bị cắt mất phần đầu */
+.box{position:relative;margin:auto;background:var(--s1);border:1px solid var(--bd);border-radius:24px;padding:20px;width:100%;max-width:640px;box-shadow:var(--sh);animation:pop .3s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}}
 .box label{display:block;margin:12px 0 5px;color:var(--mu);font-size:12px;font-weight:500}
 .box label.sw,.box label.cl{display:inline-flex;margin:0;color:var(--tx);font-size:13px}
@@ -411,6 +409,8 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
 <div id="toast" role="status"></div>
 <script>
 /* ===== CẤU HÌNH ===== */
+/* Firebase mới (noxgalaxy). Trang này chỉ dùng databaseURL để đọc dữ liệu công khai (pub/*).
+   Backend /api cũng phải dùng đúng project Firebase này (biến môi trường trên Vercel). */
 const firebaseConfig={
   apiKey:"AIzaSyDNGa1YNLJk1n5C_cxCqsGlx7_hP7DjetA",
   authDomain:"noxgalaxy-2cd71.firebaseapp.com",
@@ -418,12 +418,9 @@ const firebaseConfig={
   projectId:"noxgalaxy-2cd71",
   appId:"1:632801709671:web:d239eb4bc8e0f7acab4ec2"
 };
-if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-const database=firebase.database();
-const auth=firebase.auth();
-const DB_URL=firebaseConfig.databaseURL;
-const API="/api"; // API cũ vẫn được giữ cho các tính năng không thuộc đăng nhập
 const GOOGLE_CLIENT_ID="971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
+const DB_URL=firebaseConfig.databaseURL; // đọc dữ liệu công khai (bài, game, mục, cấu hình)
+const API="/api"; // vercel.json rewrite /api/* → backend; phiên đăng nhập là cookie httpOnly
 const $=id=>document.getElementById(id);
 
 /* ===== NGÔN NGỮ (vi / en) ===== */
@@ -451,7 +448,7 @@ D("e.403","Bạn không có quyền thực hiện thao tác này","You don't hav
 D("e.409","Dữ liệu đã tồn tại","Already exists");D("e.413","Dữ liệu quá lớn","Too large");D("e.429","Thao tác quá nhanh, hãy thử lại sau","Too many requests, try again later");
 D("e.code","Lỗi ({0})","Error ({0})");D("e.bad","Máy chủ trả về dữ liệu không đọc được. Hãy thử lại.","Unreadable response. Please try again.");
 D("e.load","Chưa tải được nội dung","Content didn't load");D("e.loadsub","Nhấn tải lại để thử lần nữa.","Press reload to try again.");
-D("home.title","Mới nhất","Latest");D("home.none","Chưa có bài đăng nào.","No posts yet.");D("home.nomatch","Không tìm thấy bài phù hợp.","No matching posts.");
+D("home.title","Mới nhất","Latest");D("home.none","No post","No post");D("home.nomatch","Không tìm thấy bài phù hợp.","No matching posts.");
 D("games.title","Chọn game","Choose a game");D("games.none","Chưa có game nào.","No games yet.");
 D("liked.title","Bài đã thích","Liked posts");D("liked.none","Bạn chưa thả tim bài nào.","You haven't liked any posts.");
 D("mine.title","Bài của tôi","My posts");D("mine.none","Bạn chưa có bài nào.","You have no posts yet.");
@@ -503,7 +500,7 @@ D("g.nocred","Google không trả về thông tin đăng nhập. Hãy thử lạ
 /* World */
 D("w.tab.posts","Bài viết","Posts");D("w.tab.groups","Nhóm chat","Group chats");D("w.login","Đăng nhập để đăng bài và trò chuyện cùng mọi người.","Log in to post and chat with everyone.");
 D("w.ph","Bạn đang nghĩ gì?","What's on your mind?");D("w.img","Ảnh","Image");D("w.max4","Tối đa 4 ảnh","Max 4 images");D("w.post","Đăng","Post");D("w.empty","Hãy viết gì đó hoặc thêm ảnh","Write something or add an image");
-D("w.none","Chưa có bài viết nào. Hãy là người đầu tiên!","No posts yet. Be the first!");D("w.replies","Trả lời","Reply");D("w.reply.ph","Viết trả lời…","Write a reply…");
+D("w.none","No post","No post");D("w.replies","Trả lời","Reply");D("w.reply.ph","Viết trả lời…","Write a reply…");
 D("w.reply.login","Đăng nhập để trả lời","Log in to reply");D("w.del.t","Xóa bài viết này?","Delete this post?");D("w.delr.t","Xóa trả lời này?","Delete this reply?");
 D("g.hint","Tạo nhóm và trò chuyện trực tiếp.","Create a group and chat live.");D("g.new","Tạo nhóm","New group");D("g.none","Chưa có nhóm nào. Hãy tạo nhóm đầu tiên.","No groups yet. Create the first one.");
 D("g.joined","Đã tham gia","Joined");D("g.members","{0} thành viên","{0} members");D("g.name","Tên nhóm *","Group name *");D("g.desc","Mô tả ngắn","Short description");
@@ -528,7 +525,7 @@ D("rk.bug","Lỗi / không hoạt động","Bug / not working");D("rk.link","Lin
 D("rk.account","Vấn đề tài khoản","Account problem");D("rk.idea","Góp ý / đề xuất","Feedback / idea");D("rk.other","Khác","Other");
 D("rs.low","Không gấp","Not urgent");D("rs.mid","Cần xem sớm","Needs attention");D("rs.high","Khẩn cấp","Urgent");
 /* Hồ sơ + cài đặt */
-D("p.posts","Bài đăng","Posts");D("p.likes","Lượt tim","Likes");D("p.joined","Tham gia","Joined");D("p.edit","Sửa hồ sơ","Edit profile");D("p.none","Người này chưa có bài đăng.","No posts from this user yet.");
+D("p.posts","Bài đăng","Posts");D("p.likes","Lượt tim","Likes");D("p.joined","Tham gia","Joined");D("p.edit","Sửa hồ sơ","Edit profile");D("p.none","No post","No post");
 D("p.nobio","Chưa có giới thiệu.","No bio yet.");D("p.notfound","Không tìm thấy người dùng này.","User not found.");
 D("s.theme","Giao diện","Appearance");D("s.light","Sáng","Light");D("s.dark","Tối","Dark");D("s.system","Theo máy","System");D("s.lang","Ngôn ngữ","Language");
 D("s.profile","Hồ sơ","Profile");D("s.avatar","Đổi ảnh đại diện","Change avatar");D("s.bio","Giới thiệu","Bio");D("s.bio.ph","Vài dòng về bạn…","A few words about you…");
@@ -623,7 +620,7 @@ function region(el,state,msg,retry){
   if(state==="error"){
     console.warn("[load]",msg);
     const n=el._n=(el._n||0)+1;
-    if(n<=3&&retry){el.innerHTML=skel(el.dataset.sk);el._rt=setTimeout(retry,900*n);return}
+    if(n<=2&&retry){el.innerHTML=skel(el.dataset.sk);el._rt=setTimeout(retry,700*n);return}
     el._n=0;
     el.innerHTML=`<div class="st"><span class="sti">${svg("doc",22)}</span><b>${esc(t("e.load"))}</b><span>${esc(t("e.loadsub"))}</span><button class="pri" data-rt>${esc(t("reload"))}</button></div>`;
     const b=el.querySelector("[data-rt]");if(b&&retry)b.onclick=()=>{b.disabled=true;retry()};
@@ -650,21 +647,22 @@ const yes=async o=>(await ask(o))===true;
 
 /* ===== DỮ LIỆU ===== */
 async function dbGet(path,qs=""){
-  const r=await fetch(DB_URL+"/"+path+".json"+qs,{cache:"no-store"});
-  if(!r.ok)throw new Error("db "+r.status+" "+path);
+  const r=await fetch(DB_URL+"/"+path+".json"+qs);
+  if(!r.ok){const er=new Error("db "+r.status+" "+path);er.status=r.status;throw er}
   return r.json();
 }
 async function api(path,method="GET",body){
   let r;
   try{r=await fetch(API+path,{method,credentials:"include",headers:{"Content-Type":"application/json","X-Skibidi":"1"},body:body?JSON.stringify(body):undefined})}
-  catch(e){const er=new Error(t("e.gen"));er.net=true;throw er}
+  catch(e){console.warn("[api] network",method,path,e);const er=new Error(t("e.gen"));er.net=true;throw er}
   const raw=await r.text();let j=null;try{j=JSON.parse(raw)}catch(e){}
+  if(!r.ok)console.warn("[api]",method,path,r.status,raw.slice(0,300));
   if(r.status===401&&me&&!path.startsWith("/auth/")){me=null;myVotes={};setUnread(0);renderAuth();throw new Error(t("e.expired"))}
   if(!r.ok){
     const sv=j&&j.error?String(j.error):"";let m;
-    if(r.status>=500)m=t("e.server");
+    if(r.status>=500)m=t("e.server")+(sv?" ("+sv+")":" ["+r.status+"]");
     else if(r.status===404&&!j)m=t("e.unavail");
-    else m=t("e."+r.status)!=="e."+r.status?t("e."+r.status):t("e.code",r.status),m+=sv?": "+sv:"";
+    else{m=t("e."+r.status)!=="e."+r.status?t("e."+r.status):t("e.code",r.status);m+=sv?": "+sv:""}
     const er=new Error(m);er.status=r.status;throw er;
   }
   if(j===null){const er=new Error(t("e.bad"));er.status=502;throw er}
@@ -753,8 +751,14 @@ function vName(v){
 function vEmail(v){
   if(!v)return t("v.em.empty");
   if(/\s/.test(v))return t("v.em.space");
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))return "Email không hợp lệ";
-  return "";
+  if(!v.includes("@"))return t("v.em.at");
+  const p=v.split("@");
+  if(p.length>2)return t("v.em.at2");
+  if(p[1]!=="gmail.com")return t("v.em.dom");
+  if(p[0].length<6||p[0].length>30)return t("v.em.len");
+  if(!/^[a-z0-9.]+$/.test(p[0]))return t("v.em.chars");
+  if(/^\.|\.$|\.\./.test(p[0]))return t("v.em.dots");
+  return"";
 }
 function pwCheck(p){
   const r={len:p.length>=8,up:/\p{Lu}/u.test(p),sp:/[^\p{L}\p{N}\s]/u.test(p),ns:!/\s/.test(p)};
@@ -773,12 +777,16 @@ function onName(force){
   clearTimeout(nt);const v=$("aName").value.trim(),e=vName(v);
   if(!v&&!force){setMsg("nameMsg","");return e}
   if(e){setMsg("nameMsg",e,"bad");return e}
-  setMsg("nameMsg",t("n.checking"));const seq=++nseq;
-  nt=setTimeout(async()=>{try{
-    const snap=await database.ref("usernames/"+v.toLowerCase()).once("value");
-    if(seq!==nseq)return;nameTaken=!!snap.val();setMsg("nameMsg",nameTaken?t("n.taken"):t("n.ok"),nameTaken?"bad":"ok");
-  }catch(e){if(seq===nseq){nameTaken=false;setMsg("nameMsg",t("n.nocheck"))}}},250);
-  return "";
+  setMsg("nameMsg",t("n.checking"));
+  const s=++nseq;
+  nt=setTimeout(async()=>{
+    try{
+      const r=await fetch(API+"/auth/check-name?name="+encodeURIComponent(v));const j=await r.json();
+      if(s!==nseq)return;
+      nameTaken=!j.ok;setMsg("nameMsg",j.ok?t("n.ok"):(j.error||t("n.taken")),j.ok?"ok":"bad");
+    }catch(x){if(s===nseq)setMsg("nameMsg",t("n.nocheck"))}
+  },350);
+  return"";
 }
 function onEmail(force){
   const v=$("aEmail").value.trim().toLowerCase(),e=vEmail(v);
@@ -804,34 +812,24 @@ function onPw2(force){
   return!b?(force?e:""):e;
 }
 async function authGo(){
-  const reg=aMode==="reg",email=$("aEmail").value.trim().toLowerCase(),pw=$("aPass").value;
+  const reg=aMode==="reg",now=Date.now();
+  if(now<lockUntil)return setMsg("aMsg",t("auth.locked",Math.ceil((lockUntil-now)/1000)),"bad");
   const eN=reg?onName(1):"",eE=onEmail(1),eP=onPw(1),eP2=reg?onPw2(1):"";
   if(eN||eE||eP||eP2)return setMsg("aMsg",t("auth.invalid"),"bad");
-  const btn=$("aGo");btn.disabled=true;btn.textContent=t("auth.wait");setMsg("aMsg","");
+  if(reg&&nameTaken)return setMsg("aMsg",t("auth.nametaken"),"bad");
+  const name=$("aName").value.trim(),email=$("aEmail").value.trim().toLowerCase(),pw=$("aPass").value;
+  setMsg("aMsg","");$("aGo").disabled=true;$("aGo").textContent=t("auth.wait");
   try{
-    let cred;
-    if(reg){
-      const name=$("aName").value.trim();
-      cred=await auth.createUserWithEmailAndPassword(email,pw);
-      await cred.user.updateProfile({displayName:name});
-      const profile={uid:cred.user.uid,userId:cred.user.uid,name,email:cred.user.email,pic:"",role:"user",createdAt:firebase.database.ServerValue.TIMESTAMP};
-      await database.ref().update({["users/"+cred.user.uid]:profile,["usernames/"+name.toLowerCase()]:cred.user.uid});me=profile;
-    }else{
-      cred=await auth.signInWithEmailAndPassword(email,pw);
-      me=await firebaseProfile(cred.user);
-    }
+    me=await api(reg?"/auth/register":"/auth/login","POST",reg?{name,email,password:pw}:{email,password:pw});
     fails=0;closeAuth();afterAuth();toast(reg?t("auth.hello.reg",me.name,me.userId):t("auth.hello",me.name));
   }catch(e){
-    const code=e.code||"";let m=({"auth/email-already-in-use":"Email này đã được đăng ký.","auth/invalid-credential":"Email hoặc mật khẩu không chính xác.","auth/user-not-found":"Không tìm thấy tài khoản.","auth/wrong-password":"Email hoặc mật khẩu không chính xác.","auth/weak-password":"Mật khẩu chưa đủ mạnh.","auth/invalid-email":"Địa chỉ email không hợp lệ.","auth/network-request-failed":"Lỗi mạng. Hãy kiểm tra kết nối rồi thử lại.","auth/too-many-requests":"Bạn thử quá nhiều lần. Hãy chờ rồi thử lại.","PERMISSION_DENIED":"Firebase Database chưa cấp quyền đọc/ghi cho tài khoản."})[code]||e.message||t("e.gen");
+    let m=e.message;
+    if(!reg&&e.status===401)m=t("auth.wrong");
+    else if(reg&&e.status===409)m=t("auth.exists");
+    if(e.status&&e.status<500&&++fails>=5){lockUntil=Date.now()+30000;fails=0;m+=t("auth.lock30")}
     setMsg("aMsg",m,"bad");
-  }finally{btn.disabled=false;btn.textContent=reg?t("a.title.reg"):t("login")}
-}
-async function firebaseProfile(user){
-  const snap=await database.ref("users/"+user.uid).once("value");
-  const old=snap.val()||{};
-  const profile={uid:user.uid,userId:user.uid,name:old.name||user.displayName||((user.email||"user").split("@")[0]),email:user.email||old.email||"",pic:user.photoURL||old.pic||"",role:old.role||"user",googleLinked:user.providerData.some(p=>p.providerId==="google.com")};
-  await database.ref("users/"+user.uid).update(profile);
-  return profile;
+  }
+  $("aGo").disabled=false;$("aGo").textContent=reg?t("a.title.reg"):t("login");
 }
 function afterAuth(){renderAuth();pollUnread();show(view,viewArg,true)}
 async function logout(){
@@ -840,13 +838,9 @@ async function logout(){
   if(["mine","liked","inbox"].includes(view))go("");else show(view,viewArg,true);
 }
 async function restore(){
-  try{const user=auth.currentUser;if(user)me=await firebaseProfile(user)}catch(e){console.warn("Firebase profile restore:",e)}
+  try{const r=await fetch(API+"/me",{credentials:"include"});if(r.ok&&/json/.test(r.headers.get("content-type")||""))me=await r.json()}catch(e){}
   authReady=true;
 }
-auth.onAuthStateChanged(async user=>{
-  try{me=user?await firebaseProfile(user):null}catch(e){console.warn("Firebase auth state:",e);me=user?{uid:user.uid,userId:user.uid,name:user.displayName||user.email?.split("@")[0]||"user",email:user.email||"",pic:user.photoURL||"",role:"user"}:null}
-  authReady=true;renderAuth();
-});
 
 /* --- Google Identity Services (đăng nhập + gắn Gmail) --- */
 let gInit=false,gTries=0,gMode="login";
@@ -864,7 +858,7 @@ function gRender(boxId,msgId,mode){
     setTimeout(()=>{const e2=$(boxId);if(e2&&e2.offsetParent!==null)gRender(boxId,msgId,mode)},250);return;
   }
   el.innerHTML="";
-  try{google.accounts.id.renderButton(el,{theme:"outline",size:"large",text:mode==="link"?"continue_with":"continue_with",shape:"pill",width:Math.max(200,Math.min(280,innerWidth-90)),locale:lang})}
+  try{google.accounts.id.renderButton(el,{theme:"outline",size:"large",text:"continue_with",shape:"pill",width:Math.max(200,Math.min(280,innerWidth-90)),locale:lang})}
   catch(e){setMsg(msgId,t("g.fail"),"bad")}
 }
 async function onCred(r){
@@ -872,11 +866,8 @@ async function onCred(r){
   if(!r||!r.credential)return setMsg(msg,t("g.nocred"),"bad");
   setMsg(msg,t("g.verify"));
   try{
-    const credential=firebase.auth.GoogleAuthProvider.credential(r.credential);
-    const result=link?await auth.currentUser.linkWithCredential(credential):await auth.signInWithCredential(credential);
-    me=await firebaseProfile(result.user);
-    if(link){renderAuth();renderSettings();toast(t("s.gmail.done"))}
-    else{closeAuth();afterAuth();toast(t("auth.hello",me.name))}
+    if(link){const u=await api("/me/link-google","POST",{credential:r.credential});Object.assign(me,u,{googleLinked:true});renderAuth();renderSettings();toast(t("s.gmail.done"))}
+    else{me=await api("/auth/google","POST",{credential:r.credential});closeAuth();afterAuth();toast(t("auth.hello",me.name))}
   }catch(e){setMsg(msg,e.message,"bad")}
 }
 
@@ -986,9 +977,17 @@ async function loadPosts(silent){
     let qs=`?orderBy="createdAt"&limitToLast=${limit}`;
     if(curGame)qs=`?orderBy="gameId"&equalTo=${JSON.stringify(curGame)}&limitToLast=${limit}`;
     else if(curType)qs=`?orderBy="type"&equalTo=${JSON.stringify(curType)}&limitToLast=${limit}`;
-    const d=(await dbGet("pub/posts",qs))||{};
+    let d;
+    try{d=await dbGet("pub/posts",qs)}
+    catch(e){
+      /* Firebase báo lỗi 400 khi chưa khai báo ".indexOn" cho createdAt/type/gameId.
+         Thử lại bằng truy vấn theo khóa (không cần index) và lọc ở phía trình duyệt. */
+      if(e.status!==400)throw e;
+      d=await dbGet("pub/posts",`?orderBy="$key"&limitToLast=${limit*4}`);
+    }
+    d=d||{};
     if(k!==loadKey)return;
-    all=Object.entries(d).map(([id,v])=>({id,...v}));
+    all=Object.entries(d).filter(([,v])=>v&&typeof v==="object").map(([id,v])=>({id,...v}));
     renderPosts();
   }catch(e){if(k===loadKey)region(el,"error",e,()=>loadPosts())}
 }
@@ -1131,7 +1130,7 @@ async function loadMine(){
   const el=$("mine");if(!me)return;region(el,"loading");
   try{
     const {posts}=await api("/me/posts");
-    if(!posts.length)return region(el,"empty",t("mine.none"));
+    if(!posts||!posts.length)return region(el,"empty",t("mine.none"));
     window._mine=Object.fromEntries(posts.map(p=>[p.id,p]));region(el,"success");
     el.innerHTML=posts.map(p=>`<div class="item"><div><b>${esc(p.title)}</b> ${badge(p.type)} <span class="tag">${esc(p.status)}</span>
     <div class="mu">${esc(t("created",fmt(p.createdAt)))}${p.updatedAt?esc(t("edited",fmt(p.updatedAt))):""}${p.rejectReason?" · "+esc(t("reason",p.rejectReason)):""}</div></div>
@@ -1146,7 +1145,7 @@ async function loadLiked(){
   const el=$("liked");if(!me)return;region(el,"loading");
   try{
     const {posts}=await api("/me/likes");
-    if(!posts.length)return region(el,"empty",t("liked.none"));
+    if(!posts||!posts.length)return region(el,"empty",t("liked.none"));
     posts.forEach(p=>{curPosts[p.id]=p});region(el,"success");el.innerHTML=posts.map(cardHtml).join("");
   }catch(e){region(el,"error",e,loadLiked)}
 }
@@ -1530,7 +1529,7 @@ async function devRender(){
   try{
     if(devTab==="pending"||devTab==="all"){
       const {posts}=await api("/dev/posts"+(devTab==="pending"?"?status=pending":""));
-      if(!posts.length)return region(body,"empty","Không có bài nào.");
+      if(!posts||!posts.length)return region(body,"empty","Không có bài nào.");
       window._dp=Object.fromEntries(posts.map(p=>[p.id,p]));region(body,"success");
       body.innerHTML=posts.map(p=>`<div class="item"><div><b>${esc(p.title)}</b> ${badge(p.type)} <span class="tag">${esc(p.status)}</span><div class="mu">${esc(p.authorName)} · ${esc(p.authorId||"")}</div></div>
       <div class="row" style="margin:0">${["published","rejected","hidden"].map(s=>`<button onclick="devSet(${jsq(p.id)},{status:'${s}'})">${s}</button>`).join("")}
@@ -1539,7 +1538,7 @@ async function devRender(){
     }else if(devTab==="games"){
       const {games:g}=await api("/dev/games");region(body,"success");
       body.innerHTML=`<div class="row"><input id="gN" placeholder="Tên game" style="flex:1 1 140px"><input id="gI" placeholder="Ảnh (https hoặc tải lên)" style="flex:1 1 160px"><button onclick="pickFile(v=>{$('gI').value=v})">Tải ảnh</button><input id="gD" placeholder="Mô tả" style="flex:1 1 140px"><input id="gO" type="number" placeholder="Thứ tự" style="width:90px"><button class="pri" onclick="devGame()">Thêm</button></div>`+
-      g.map(x=>`<div class="item" data-id="${esc(x.id)}" data-n="${esc(x.name)}"><span style="display:flex;align-items:center;gap:8px">${x.img&&imgSrc(x.img)?`<span class="ci" style="${bgs(x.img)}"></span>`:""}${esc(x.name)} <span class="mu">(${x.count||0} bài${x.published===false?" · ẩn":""})</span></span><div class="row" style="margin:0"><button onclick="pickFile(v=>devGame(rid(this),{img:v}))">Đổi ảnh</button><button onclick="devGame(rid(this),{published:${x.published===false}})">${x.published===false?"Xuất bản":"Ẩn"}</button><button onclick="devRename(this)">Đổi tên</button><button class="danger" onclick="devGameDel(rid(this))">Xóa</button></div></div>`).join("");
+      (g||[]).map(x=>`<div class="item" data-id="${esc(x.id)}" data-n="${esc(x.name)}"><span style="display:flex;align-items:center;gap:8px">${x.img&&imgSrc(x.img)?`<span class="ci" style="${bgs(x.img)}"></span>`:""}${esc(x.name)} <span class="mu">(${x.count||0} bài${x.published===false?" · ẩn":""})</span></span><div class="row" style="margin:0"><button onclick="pickFile(v=>devGame(rid(this),{img:v}))">Đổi ảnh</button><button onclick="devGame(rid(this),{published:${x.published===false}})">${x.published===false?"Xuất bản":"Ẩn"}</button><button onclick="devRename(this)">Đổi tên</button><button class="danger" onclick="devGameDel(rid(this))">Xóa</button></div></div>`).join("");
     }else if(devTab==="cats"){
       region(body,"success");
       body.innerHTML=`<div class="item cf"><b>Thêm mục mới (hiện trong menu)</b>
@@ -1558,7 +1557,7 @@ async function devRender(){
         catIds().map(c=>rowH("c:"+c,ico(c)||svg("hash"),catName(c),!catHidden(c))).join("");
     }else if(devTab==="reports"){
       const {reports}=await api("/dev/reports");
-      if(!reports.length)return region(body,"empty","Không có báo cáo.");
+      if(!reports||!reports.length)return region(body,"empty","Không có báo cáo.");
       region(body,"success");
       body.innerHTML=reports.map(r=>`<div class="item" data-id="${esc(r.id)}"><div style="min-width:0;flex:1"><div class="row" style="margin:0">${r.kind?`<span class="tag bd">${esc(t("rk."+r.kind))}</span>`:""}${r.severity?`<span class="tag">${esc(t("rs."+r.severity))}</span>`:""}<span class="mu">${esc(r.authorName||"")}${r.refType?" · "+esc(r.refType)+" "+esc(r.refId||""):r.postId?" · bài "+esc(r.postId):""}</span></div><div style="margin-top:6px;white-space:pre-wrap;word-break:break-word">${esc(r.text||r.reason||"")}</div></div>
         <div class="row" style="margin:0">${r.authorId?`<button onclick="devReply(${jsq(r.authorId)})">Trả lời</button>`:""}<button onclick="devDone(rid(this))">Đã xử lý</button></div></div>`).join("");
