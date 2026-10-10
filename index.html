@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SKIBIDISCRIPT — Kho Script, APK, iOS và Link cộng đồng</title>
-<meta name="description" content="SKIBIDISCRIPT là nơi cộng đồng chia sẻ script game, APK, iOS và link hữu ích. Đăng ký tài khoản để đăng bài, thả tim và đánh giá.">
+<title>SKIBIDISCRIPT — Scripts, APKs, iOS Files &amp; Community Links</title>
+<meta name="description" content="SKIBIDISCRIPT is a community hub for sharing game scripts, APKs, iOS files and useful links. Create a free account to post, like and rate.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
@@ -13,12 +13,12 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2309090b'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SKIBIDISCRIPT">
-<meta property="og:locale" content="vi_VN">
+<meta property="og:locale" content="en_US">
 <meta property="og:url" content="https://skibidiscript.vercel.app/">
-<meta property="og:title" content="SKIBIDISCRIPT — Kho Script, APK, iOS và Link cộng đồng">
-<meta property="og:description" content="Cộng đồng chia sẻ script game, APK, iOS và link hữu ích.">
+<meta property="og:title" content="SKIBIDISCRIPT — Scripts, APKs, iOS Files &amp; Community Links">
+<meta property="og:description" content="A community hub for game scripts, APKs, iOS files and useful links.">
 <meta name="twitter:card" content="summary">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"SKIBIDISCRIPT","url":"https://skibidiscript.vercel.app/","inLanguage":"vi","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"SKIBIDISCRIPT","url":"https://skibidiscript.vercel.app/","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -430,8 +430,10 @@ const $=id=>document.getElementById(id);
 /* ===== NGÔN NGỮ (vi / en) ===== */
 const I={vi:{},en:{}};
 const D=(k,v,e)=>{I.vi[k]=v;I.en[k]=e===undefined?v:e};
-let lang="vi";try{lang=localStorage.getItem("lang")==="en"?"en":"vi"}catch(e){}
+let lang="en";try{lang=localStorage.getItem("lang")==="vi"?"vi":"en"}catch(e){}
 const t=(k,...a)=>{let s=I[lang][k];if(s===undefined)s=I.vi[k];if(s===undefined)s=k;a.forEach((v,i)=>{s=s.split("{"+i+"}").join(v)});return s};
+/* Backend /api chưa có (404) hoặc DB công khai chưa cho đọc (401/403) => coi như chưa có nội dung, hiện "No post" thay vì báo lỗi */
+const gone=e=>!!e&&!e.net&&(e.status===404||e.status===401||e.status===403);
 const loc=()=>lang==="en"?"en-GB":"vi-VN";
 /* chung */
 D("ok","Đồng ý","OK");D("cancel","Hủy","Cancel");D("save","Lưu","Save");D("close","Đóng","Close");D("back","Quay lại","Back");
@@ -505,6 +507,10 @@ D("fb.off","Phương thức đăng nhập chưa được bật trong Firebase Co
 D("fb.rules","Không ghi được dữ liệu. Hãy kiểm tra Rules của Realtime Database.","Couldn't write data. Check your Realtime Database rules.");
 D("fb.google","Google bị từ chối. Thêm Client ID vào Firebase → Authentication → Google → Safelist client IDs, và thêm tên miền vào Authorized domains.","Google was rejected. Add the Client ID under Firebase → Authentication → Google → Safelist client IDs, and add your domain to Authorized domains.");
 D("fb.diff","Gmail này đã đăng ký bằng cách khác. Hãy đăng nhập bằng mật khẩu rồi gắn Google trong Cài đặt.","This Gmail is registered another way. Log in with your password, then link Google in Settings.");
+D("fb.config","Firebase Authentication chưa được bật cho project này. Vào Firebase Console → Authentication → Get started, rồi bật Email/Password và Google.","Firebase Authentication isn't set up for this project. Open Firebase Console → Authentication → Get started, then enable Email/Password and Google.");
+D("fb.domain","Tên miền này chưa được cho phép. Thêm vào Firebase Console → Authentication → Settings → Authorized domains.","This domain isn't authorized. Add it in Firebase Console → Authentication → Settings → Authorized domains.");
+D("g.popup","Đăng nhập Google bằng cửa sổ riêng","Sign in with Google in a popup");
+D("g.popup.closed","Cửa sổ Google đã bị đóng hoặc bị chặn. Hãy cho phép popup rồi thử lại.","The Google window was closed or blocked. Allow popups and try again.");
 D("fb.recent","Hãy đăng nhập lại rồi thử lần nữa.","Please log in again and retry.");
 D("g.nocred","Google không trả về thông tin đăng nhập. Hãy thử lại.","Google returned no credentials. Please try again.");D("g.verify","Đang xác thực với Google…","Verifying with Google…");
 /* World */
@@ -673,11 +679,14 @@ function fbInit(){
 const fbErr=(status,msg)=>{const e=new Error(msg);e.status=status;return e};
 function mapFb(e,google){
   const c=(e&&e.code)||"";console.warn("[firebase]",c,e&&e.message);
-  if(google&&["auth/invalid-credential","auth/invalid-oauth-client-id","auth/invalid-idp-response","auth/argument-error","auth/unauthorized-domain"].includes(c))return fbErr(403,t("fb.google"));
+  if(google&&["auth/invalid-credential","auth/invalid-oauth-client-id","auth/invalid-idp-response","auth/argument-error"].includes(c)){const er=fbErr(403,t("fb.google"));er.google=true;return er}
   if(["auth/invalid-credential","auth/wrong-password","auth/user-not-found","auth/invalid-login-credentials","auth/invalid-email"].includes(c))return fbErr(401,t("auth.wrong"));
   if(["auth/email-already-in-use","auth/credential-already-in-use","auth/provider-already-linked"].includes(c))return fbErr(409,t("auth.exists"));
   if(c==="auth/account-exists-with-different-credential")return fbErr(409,t("fb.diff"));
   if(c==="auth/too-many-requests")return fbErr(429,t("e.429"));
+  if(c==="auth/configuration-not-found"||c==="auth/api-key-not-valid"||c==="auth/invalid-api-key")return fbErr(403,t("fb.config"));
+  if(c==="auth/unauthorized-domain")return fbErr(403,t("fb.domain"));
+  if(c==="auth/popup-closed-by-user"||c==="auth/popup-blocked"||c==="auth/cancelled-popup-request")return fbErr(0,t("g.popup.closed"));
   if(c==="auth/network-request-failed")return fbErr(0,t("e.gen"));
   if(c==="auth/operation-not-allowed")return fbErr(403,t("fb.off"));
   if(c==="auth/user-disabled")return fbErr(403,t("e.403"));
@@ -713,7 +722,13 @@ async function fbLogin(b){
 }
 async function fbGoogle(credential){
   let r;try{r=await fbAuth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(credential))}catch(e){throw mapFb(e,true)}
-  const u=r.user;
+  return fbGoogleDone(r.user);
+}
+async function fbGooglePopup(){
+  let r;try{r=await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){throw mapFb(e)}
+  return fbGoogleDone(r.user);
+}
+async function fbGoogleDone(u){
   const p=await dbGet("pub/users/"+u.uid).catch(()=>null);
   if(!p){
     let base=((u.email||"user").split("@")[0]).replace(/[^\p{L}\p{N}_]/gu,"_").slice(0,18);
@@ -733,7 +748,7 @@ async function fbGoogle(credential){
 async function localApi(path,method,body){
   const k=method+" "+path;
   const um=path.match(/^\/users\/([^/]+)$/);
-  if(!(k==="POST /auth/register"||k==="POST /auth/login"||k==="POST /auth/google"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
+  if(!(k==="POST /auth/register"||k==="POST /auth/login"||k==="POST /auth/google"||k==="POST /auth/google-popup"||k==="POST /me/link-popup"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
   if(!fbInit())throw fbErr(0,t("fb.noload"));
   const u=fbAuth.currentUser;
   if(um){
@@ -746,11 +761,15 @@ async function localApi(path,method,body){
     case "POST /auth/register":return fbRegister(body);
     case "POST /auth/login":return fbLogin(body);
     case "POST /auth/google":return fbGoogle(body.credential);
+    case "POST /auth/google-popup":return fbGooglePopup();
     case "POST /auth/logout":await fbAuth.signOut();return{ok:true};
   }
   if(!u)throw fbErr(401,t("e.expired"));
   switch(k){
     case "GET /me":return fbMe(u);
+    case "POST /me/link-popup":
+      try{await u.linkWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){throw mapFb(e)}
+      await u.reload();return fbMe(fbAuth.currentUser);
     case "POST /me/link-google":
       try{await u.linkWithCredential(firebase.auth.GoogleAuthProvider.credential(body.credential))}catch(e){throw mapFb(e,true)}
       await u.reload();return fbMe(fbAuth.currentUser);
@@ -987,13 +1006,28 @@ function gSetup(){
 function gRender(boxId,msgId,mode){
   const el=$(boxId);if(!el)return;gMode=mode;setMsg(msgId,"");
   if(!gSetup()){
-    if(++gTries>40){el.innerHTML="";setMsg(msgId,t("g.fail"),"bad");return}
+    if(++gTries>40){el.innerHTML="";gFail(msgId,t("g.fail"),mode==="link");return}
     el.innerHTML='<div class="sp" style="width:22px;height:22px;border-width:2px"></div>';
     setTimeout(()=>{const e2=$(boxId);if(e2&&e2.offsetParent!==null)gRender(boxId,msgId,mode)},250);return;
   }
   el.innerHTML="";
   try{google.accounts.id.renderButton(el,{theme:"outline",size:"large",text:"continue_with",shape:"pill",width:Math.max(200,Math.min(280,innerWidth-90)),locale:lang})}
-  catch(e){setMsg(msgId,t("g.fail"),"bad")}
+  catch(e){gFail(msgId,t("g.fail"),mode==="link")}
+}
+/* Khi nút Google (GIS) lỗi/bị từ chối: hiện thêm nút đăng nhập Google bằng popup của Firebase (không cần Client ID riêng) */
+function gFail(msgId,text,link){
+  setMsg(msgId,text,"bad");
+  const el=$(msgId);if(!el)return;
+  const b=document.createElement("button");b.type="button";b.className="pri";b.style.marginTop="8px";b.textContent=t("g.popup");
+  b.onclick=()=>gPopup(link,msgId,b);
+  el.appendChild(document.createElement("br"));el.appendChild(b);
+}
+async function gPopup(link,msgId,btn){
+  btn.disabled=true;
+  try{
+    if(link){const u=await api("/me/link-popup","POST");Object.assign(me,u,{googleLinked:true});renderAuth();renderSettings();toast(t("s.gmail.done"))}
+    else{me=await api("/auth/google-popup","POST");closeAuth();afterAuth();toast(t("auth.hello",me.name))}
+  }catch(e){gFail(msgId,e.message,link)}
 }
 async function onCred(r){
   const link=gMode==="link",msg=link?"gLinkMsg":"gMsg";
@@ -1002,7 +1036,7 @@ async function onCred(r){
   try{
     if(link){const u=await api("/me/link-google","POST",{credential:r.credential});Object.assign(me,u,{googleLinked:true});renderAuth();renderSettings();toast(t("s.gmail.done"))}
     else{me=await api("/auth/google","POST",{credential:r.credential});closeAuth();afterAuth();toast(t("auth.hello",me.name))}
-  }catch(e){setMsg(msg,e.message,"bad")}
+  }catch(e){if(e.google)gFail(msg,e.message,link);else setMsg(msg,e.message,"bad")}
 }
 
 /* ===== ĐIỀU HƯỚNG ===== */
@@ -1092,7 +1126,7 @@ async function loadGames(){
     const pg=$("fpGame"),pv=pg.value,ids=gameIds();
     pg.innerHTML=`<option value="">${esc(t("f.nogame"))}</option>`+ids.map(i=>`<option value="${esc(i)}">${esc(games[i].name)}</option>`).join("");pg.value=pv;
     renderGames();if(all.length&&view==="home")renderPosts();
-  }catch(e){region(el,"error",e,loadGames)}
+  }catch(e){if(gone(e)){games={};renderGames();return}region(el,"error",e,loadGames)}
 }
 const gameIds=()=>Object.keys(games).filter(i=>games[i]&&games[i].published!==false).sort((a,b)=>(games[a].order||0)-(games[b].order||0));
 function renderGames(){
@@ -1123,7 +1157,7 @@ async function loadPosts(silent){
     if(k!==loadKey)return;
     all=Object.entries(d).filter(([,v])=>v&&typeof v==="object").map(([id,v])=>({id,...v}));
     renderPosts();
-  }catch(e){if(k===loadKey)region(el,"error",e,()=>loadPosts())}
+  }catch(e){if(k!==loadKey)return;if(gone(e)){all=[];renderPosts();return}region(el,"error",e,()=>loadPosts())}
 }
 function filtered(){
   const q=$("q").value.trim().toLowerCase();
@@ -1269,7 +1303,7 @@ async function loadMine(){
     el.innerHTML=posts.map(p=>`<div class="item"><div><b>${esc(p.title)}</b> ${badge(p.type)} <span class="tag">${esc(p.status)}</span>
     <div class="mu">${esc(t("created",fmt(p.createdAt)))}${p.updatedAt?esc(t("edited",fmt(p.updatedAt))):""}${p.rejectReason?" · "+esc(t("reason",p.rejectReason)):""}</div></div>
     <div class="row" style="margin:0">${p.locked?`<span class="mu">${esc(t("locked"))}</span>`:`<button onclick="openForm(_mine[${jsq(p.id)}])">${esc(t("edit"))}</button><button class="danger" onclick="delMine(${jsq(p.id)})">${esc(t("del"))}</button>`}</div></div>`).join("");
-  }catch(e){region(el,"error",e,loadMine)}
+  }catch(e){if(gone(e))return region(el,"empty",t("mine.none"));region(el,"error",e,loadMine)}
 }
 async function delMine(id){
   if(!await yes({title:t("d.confirm"),text:t("d.confirm.t"),ok:t("del"),danger:true}))return;
@@ -1281,7 +1315,7 @@ async function loadLiked(){
     const {posts}=await api("/me/likes");
     if(!posts||!posts.length)return region(el,"empty",t("liked.none"));
     posts.forEach(p=>{curPosts[p.id]=p});region(el,"success");el.innerHTML=posts.map(cardHtml).join("");
-  }catch(e){region(el,"error",e,loadLiked)}
+  }catch(e){if(gone(e))return region(el,"empty",t("liked.none"));region(el,"error",e,loadLiked)}
 }
 
 /* ===== HỒ SƠ NGƯỜI DÙNG ===== */
@@ -1345,7 +1379,7 @@ async function loadWPosts(more){
     const r=await api("/world/posts?limit=20"+q),ps=r.posts||[];
     wList=more?wList.concat(ps.filter(p=>!wList.some(x=>x.id===p.id))):ps;wMore=ps.length>=20;
     renderWPosts();
-  }catch(e){if(wList.length)toast(e.message);else region(el,"error",e,()=>loadWPosts())}
+  }catch(e){if(wList.length)toast(e.message);else if(gone(e)){wList=[];renderWPosts()}else region(el,"error",e,()=>loadWPosts())}
 }
 function wpHtml(p){
   const open=wOpen.has(p.id),id=jsq(p.id);
@@ -1430,7 +1464,7 @@ async function delReply(pid,rid){
 let wGroups=[],roomG=null,roomMsgs=[],roomImgs=[];
 async function loadGroups(){
   const el=$("wGroupList");region(el,"loading");
-  try{wGroups=(await api("/world/groups")).groups||[];renderGroups()}catch(e){region(el,"error",e,loadGroups)}
+  try{wGroups=(await api("/world/groups")).groups||[];renderGroups()}catch(e){if(gone(e)){wGroups=[];renderGroups()}else region(el,"error",e,loadGroups)}
 }
 function renderGroups(){
   const el=$("wGroupList");
@@ -1546,7 +1580,7 @@ async function loadInbox(){
     if(!th.length)return region(el,"empty",t("in.none"));
     region(el,"success");
     el.innerHTML=th.map(x=>`<button class="thr${x.unread?" un":""}" onclick="go('inbox/'+encodeURIComponent(${jsq(x.withId)}))">${avatar(x.withName,x.withPic)}<div><b>${esc(x.withName||x.withId)}${devTag(x.withRole)}</b><span class="mu pv">${esc(x.last||"")}</span></div><span class="mu">${x.lastAt?esc(ago(x.lastAt)):""}</span>${x.unread?`<span class="cnt">${x.unread>9?"9+":x.unread}</span>`:""}</button>`).join("");
-  }catch(e){region(el,"error",e,loadInbox)}
+  }catch(e){if(gone(e))return region(el,"empty",t("in.none"));region(el,"error",e,loadInbox)}
 }
 async function openThread(uid){
   const el=$("inboxBody");inboxWith=uid;region(el,"loading");
