@@ -7,7 +7,7 @@
 <meta name="description" content="SKIBIDISCRIPT là nơi cộng đồng chia sẻ script game, APK, iOS và link hữu ích. Đăng ký tài khoản để đăng bài, thả tim và đánh giá.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="theme-color" content="#f4f4f5" id="tc"><script>try{var s=localStorage.getItem("theme")||"light";if(s==="system")s=matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";document.documentElement.dataset.theme=s}catch(e){document.documentElement.dataset.theme="light"}</script>
 <link rel="canonical" href="https://skibidiscript.vercel.app/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2309090b'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
@@ -22,6 +22,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <style>
 /* ===== Màu: đen – trắng ===== */
 :root,[data-theme=light]{color-scheme:light;--bg:#f4f4f5;--s1:#fff;--s2:#f0f0f1;--bd:#e4e4e7;--bd2:#cfcfd4;--tx:#0a0a0a;--mu:#6b6b72;--acc:#0a0a0a;--acc-tx:#fff;--er:#d92d20;--ok:#0f8a4b;--warn:#b86e00;--dot:#ff3b30;--ph:linear-gradient(135deg,#e4e4e7,#c4c4ca);--sh:0 1px 2px rgba(0,0,0,.04),0 12px 32px -14px rgba(0,0,0,.16);--ov:rgba(0,0,0,.45);--hdr:rgba(255,255,255,.82)}
@@ -409,8 +412,9 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
 <div id="toast" role="status"></div>
 <script>
 /* ===== CẤU HÌNH ===== */
-/* Firebase mới (noxgalaxy). Trang này chỉ dùng databaseURL để đọc dữ liệu công khai (pub/*).
-   Backend /api cũng phải dùng đúng project Firebase này (biến môi trường trên Vercel). */
+/* Firebase: muốn dùng project khác thì thay 5 giá trị bên dưới (Firebase Console → Project settings → Your apps → Web app).
+   Đăng ký / đăng nhập / Google / hồ sơ chạy thẳng bằng Firebase Auth + Realtime Database ở trình duyệt.
+   Các tính năng còn lại (đăng bài, thả tim, World, hòm thư, Dev Panel) vẫn gọi backend /api. */
 const firebaseConfig={
   apiKey:"AIzaSyDNGa1YNLJk1n5C_cxCqsGlx7_hP7DjetA",
   authDomain:"noxgalaxy-2cd71.firebaseapp.com",
@@ -440,7 +444,7 @@ D("deleted","Đã xóa","Deleted");D("saved","Đã lưu","Saved");D("search","T�
 D("up.ing","Đang tải ảnh lên…","Uploading image…");D("up.ok","Đã tải ảnh lên","Image uploaded");D("img.bad","Không đọc được ảnh (định dạng không hợp lệ)","Couldn't read this image");
 /* lỗi + trạng thái */
 D("e.gen","Chưa thực hiện được. Hãy thử lại.","That didn't work. Please try again.");
-D("e.unavail","Không tìm thấy máy chủ /api (404): backend chưa được triển khai hoặc sai đường dẫn.","The /api server was not found (404): the backend is not deployed or the path is wrong.");
+D("e.unavail","Tính năng này chưa sẵn sàng.","This feature isn't available yet.");
 D("e.server","Máy chủ đang bận. Hãy thử lại sau ít phút.","The server is busy. Try again in a few minutes.");
 D("e.expired","Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.","Your session expired. Please log in again.");
 D("e.400","Dữ liệu không hợp lệ","Invalid data");D("e.401","Chưa đăng nhập hoặc sai thông tin","Not logged in or wrong details");
@@ -496,6 +500,12 @@ D("auth.locked","Bạn đã thử sai nhiều lần. Vui lòng thử lại sau {
 D("auth.wrong","Sai Gmail hoặc mật khẩu.","Wrong Gmail or password.");D("auth.exists","Gmail hoặc tên hiển thị đã được đăng ký.","That Gmail or name is already registered.");
 D("auth.wait","Đang xử lý…","Working…");D("auth.hello","Xin chào {0}","Welcome, {0}");D("auth.hello.reg","Xin chào {0} · ID {1}","Welcome, {0} · ID {1}");
 D("g.fail","Không tải được nút đăng nhập Google. Hãy thử tải lại trang.","Google sign-in couldn't load. Try reloading the page.");
+D("fb.noload","Không tải được Firebase. Kiểm tra mạng rồi tải lại trang.","Firebase couldn't load. Check your connection and reload.");
+D("fb.off","Phương thức đăng nhập chưa được bật trong Firebase Console (Authentication → Sign-in method).","This sign-in method isn't enabled in Firebase Console (Authentication → Sign-in method).");
+D("fb.rules","Không ghi được dữ liệu. Hãy kiểm tra Rules của Realtime Database.","Couldn't write data. Check your Realtime Database rules.");
+D("fb.google","Google bị từ chối. Thêm Client ID vào Firebase → Authentication → Google → Safelist client IDs, và thêm tên miền vào Authorized domains.","Google was rejected. Add the Client ID under Firebase → Authentication → Google → Safelist client IDs, and add your domain to Authorized domains.");
+D("fb.diff","Gmail này đã đăng ký bằng cách khác. Hãy đăng nhập bằng mật khẩu rồi gắn Google trong Cài đặt.","This Gmail is registered another way. Log in with your password, then link Google in Settings.");
+D("fb.recent","Hãy đăng nhập lại rồi thử lần nữa.","Please log in again and retry.");
 D("g.nocred","Google không trả về thông tin đăng nhập. Hãy thử lại.","Google returned no credentials. Please try again.");D("g.verify","Đang xác thực với Google…","Verifying with Google…");
 /* World */
 D("w.tab.posts","Bài viết","Posts");D("w.tab.groups","Nhóm chat","Group chats");D("w.login","Đăng nhập để đăng bài và trò chuyện cùng mọi người.","Log in to post and chat with everyone.");
@@ -651,7 +661,126 @@ async function dbGet(path,qs=""){
   if(!r.ok){const er=new Error("db "+r.status+" "+path);er.status=r.status;throw er}
   return r.json();
 }
+/* ===== FIREBASE AUTH: đăng ký / đăng nhập / Google / hồ sơ chạy thẳng trên trình duyệt (không cần backend /api) =====
+   Dữ liệu hồ sơ: pub/users/{uid} = {name,pic,bio,createdAt} · pub/names/{tênviếtthường} = uid · pub/roles/{uid} = "dev" (chỉ sửa trong Console) */
+let fbAuth=null,fbDb=null;
+function fbInit(){
+  if(fbAuth)return true;
+  if(!window.firebase||!firebase.auth||!firebase.database)return false;
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  fbAuth=firebase.auth();fbDb=firebase.database();return true;
+}
+const fbErr=(status,msg)=>{const e=new Error(msg);e.status=status;return e};
+function mapFb(e,google){
+  const c=(e&&e.code)||"";console.warn("[firebase]",c,e&&e.message);
+  if(google&&["auth/invalid-credential","auth/invalid-oauth-client-id","auth/invalid-idp-response","auth/argument-error","auth/unauthorized-domain"].includes(c))return fbErr(403,t("fb.google"));
+  if(["auth/invalid-credential","auth/wrong-password","auth/user-not-found","auth/invalid-login-credentials","auth/invalid-email"].includes(c))return fbErr(401,t("auth.wrong"));
+  if(["auth/email-already-in-use","auth/credential-already-in-use","auth/provider-already-linked"].includes(c))return fbErr(409,t("auth.exists"));
+  if(c==="auth/account-exists-with-different-credential")return fbErr(409,t("fb.diff"));
+  if(c==="auth/too-many-requests")return fbErr(429,t("e.429"));
+  if(c==="auth/network-request-failed")return fbErr(0,t("e.gen"));
+  if(c==="auth/operation-not-allowed")return fbErr(403,t("fb.off"));
+  if(c==="auth/user-disabled")return fbErr(403,t("e.403"));
+  if(c==="auth/requires-recent-login")return fbErr(401,t("fb.recent"));
+  if(c==="auth/weak-password")return fbErr(400,t("v.pw.weak"));
+  return fbErr(0,(e&&e.message)||t("e.gen"));
+}
+async function fbMe(u){
+  const [p,r]=await Promise.all([dbGet("pub/users/"+u.uid).catch(()=>null),dbGet("pub/roles/"+u.uid).catch(()=>null)]);
+  const pv=u.providerData.map(x=>x.providerId);
+  return{userId:u.uid,name:(p&&p.name)||u.displayName||(u.email||"user").split("@")[0],pic:(p&&p.pic)||u.photoURL||"",bio:(p&&p.bio)||"",role:r==="dev"?"dev":"user",email:u.email||"",createdAt:(p&&p.createdAt)||0,hasPassword:pv.includes("password"),googleLinked:pv.includes("google.com")};
+}
+const nameKey=n=>"pub/names/"+encodeURIComponent(String(n).toLowerCase());
+async function nameFree(n,uid){const v=await dbGet(nameKey(n)).catch(()=>null);return !v||v===uid}
+async function claimName(n,uid){
+  try{await fbDb.ref("pub/names/"+String(n).toLowerCase()).set(uid)}catch(e){
+    if(await nameFree(n,uid))throw fbErr(403,t("fb.rules"));
+    throw fbErr(409,t("auth.nametaken"));
+  }
+}
+async function fbRegister(b){
+  if(!await nameFree(b.name))throw fbErr(409,t("auth.nametaken"));
+  let cr;try{cr=await fbAuth.createUserWithEmailAndPassword(b.email,b.password)}catch(e){throw mapFb(e)}
+  const u=cr.user;
+  try{await claimName(b.name,u.uid)}catch(e){await u.delete().catch(()=>{});throw e}
+  try{await fbDb.ref("pub/users/"+u.uid).set({name:b.name,pic:"",bio:"",createdAt:firebase.database.ServerValue.TIMESTAMP})}catch(e){console.warn("[profile]",e)}
+  try{await u.updateProfile({displayName:b.name})}catch(e){}
+  return fbMe(u);
+}
+async function fbLogin(b){
+  let cr;try{cr=await fbAuth.signInWithEmailAndPassword(b.email,b.password)}catch(e){throw mapFb(e)}
+  return fbMe(cr.user);
+}
+async function fbGoogle(credential){
+  let r;try{r=await fbAuth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(credential))}catch(e){throw mapFb(e,true)}
+  const u=r.user;
+  const p=await dbGet("pub/users/"+u.uid).catch(()=>null);
+  if(!p){
+    let base=((u.email||"user").split("@")[0]).replace(/[^\p{L}\p{N}_]/gu,"_").slice(0,18);
+    if(base.length<3)base=(base+"user").slice(0,18);
+    let name=base,ok=false;
+    for(let i=0;i<6&&!ok;i++){
+      if(i)name=base.slice(0,19)+Math.floor(1000+Math.random()*9000);
+      if(!await nameFree(name,u.uid))continue;
+      try{await claimName(name,u.uid);ok=true}catch(e){if(e.status!==409)throw e}
+    }
+    if(!ok)throw fbErr(409,t("auth.nametaken"));
+    try{await fbDb.ref("pub/users/"+u.uid).set({name,pic:u.photoURL||"",bio:"",createdAt:firebase.database.ServerValue.TIMESTAMP})}catch(e){console.warn("[profile]",e)}
+    try{await u.updateProfile({displayName:name})}catch(e){}
+  }
+  return fbMe(u);
+}
+async function localApi(path,method,body){
+  const k=method+" "+path;
+  const um=path.match(/^\/users\/([^/]+)$/);
+  if(!(k==="POST /auth/register"||k==="POST /auth/login"||k==="POST /auth/google"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
+  if(!fbInit())throw fbErr(0,t("fb.noload"));
+  const u=fbAuth.currentUser;
+  if(um){
+    const id=decodeURIComponent(um[1]);
+    const [p,r]=await Promise.all([dbGet("pub/users/"+id),dbGet("pub/roles/"+id).catch(()=>null)]);
+    if(!p)throw fbErr(404,t("e.404"));
+    return{userId:id,name:p.name,pic:p.pic||"",bio:p.bio||"",role:r==="dev"?"dev":"user",createdAt:p.createdAt||0,postCount:0,likeCount:0};
+  }
+  switch(k){
+    case "POST /auth/register":return fbRegister(body);
+    case "POST /auth/login":return fbLogin(body);
+    case "POST /auth/google":return fbGoogle(body.credential);
+    case "POST /auth/logout":await fbAuth.signOut();return{ok:true};
+  }
+  if(!u)throw fbErr(401,t("e.expired"));
+  switch(k){
+    case "GET /me":return fbMe(u);
+    case "POST /me/link-google":
+      try{await u.linkWithCredential(firebase.auth.GoogleAuthProvider.credential(body.credential))}catch(e){throw mapFb(e,true)}
+      await u.reload();return fbMe(fbAuth.currentUser);
+    case "POST /me/profile":{
+      const d={bio:String(body.bio||"").slice(0,200),pic:body.pic||""};
+      try{await fbDb.ref("pub/users/"+u.uid).update(d)}catch(e){throw fbErr(403,t("fb.rules"))}
+      return d;
+    }
+    case "POST /me/name":{
+      const n=String(body.name||"").trim(),old=me&&me.name;
+      if(!await nameFree(n,u.uid))throw fbErr(409,t("n.taken"));
+      await claimName(n,u.uid);
+      try{await fbDb.ref("pub/users/"+u.uid+"/name").set(n)}catch(e){throw fbErr(403,t("fb.rules"))}
+      if(old&&old.toLowerCase()!==n.toLowerCase())fbDb.ref("pub/names/"+old.toLowerCase()).remove().catch(()=>{});
+      try{await u.updateProfile({displayName:n})}catch(e){}
+      return{name:n};
+    }
+    case "POST /me/password":
+      try{
+        if(me&&me.hasPassword!==false){
+          await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,body.current||""));
+          await u.updatePassword(body.password);
+        }else await u.linkWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,body.password));
+      }catch(e){throw mapFb(e)}
+      return{ok:true};
+  }
+}
 async function api(path,method="GET",body){
+  const L=await localApi(path,method,body);
+  if(L!==undefined)return L;
   let r;
   try{r=await fetch(API+path,{method,credentials:"include",headers:{"Content-Type":"application/json","X-Skibidi":"1"},body:body?JSON.stringify(body):undefined})}
   catch(e){console.warn("[api] network",method,path,e);const er=new Error(t("e.gen"));er.net=true;throw er}
@@ -781,9 +910,9 @@ function onName(force){
   const s=++nseq;
   nt=setTimeout(async()=>{
     try{
-      const r=await fetch(API+"/auth/check-name?name="+encodeURIComponent(v));const j=await r.json();
+      const j=await dbGet(nameKey(v));
       if(s!==nseq)return;
-      nameTaken=!j.ok;setMsg("nameMsg",j.ok?t("n.ok"):(j.error||t("n.taken")),j.ok?"ok":"bad");
+      nameTaken=!!j;setMsg("nameMsg",j?t("n.taken"):t("n.ok"),j?"bad":"ok");
     }catch(x){if(s===nseq)setMsg("nameMsg",t("n.nocheck"))}
   },350);
   return"";
@@ -838,7 +967,12 @@ async function logout(){
   if(["mine","liked","inbox"].includes(view))go("");else show(view,viewArg,true);
 }
 async function restore(){
-  try{const r=await fetch(API+"/me",{credentials:"include"});if(r.ok&&/json/.test(r.headers.get("content-type")||""))me=await r.json()}catch(e){}
+  try{
+    if(fbInit()){
+      const u=await new Promise(res=>{const off=fbAuth.onAuthStateChanged(x=>{off();res(x)})});
+      if(u)me=await fbMe(u);
+    }
+  }catch(e){console.warn("[restore]",e)}
   authReady=true;
 }
 
