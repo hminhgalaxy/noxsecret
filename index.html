@@ -336,7 +336,7 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
   <label data-i="f.game"></label><select id="fpGame"></select>
   <label data-i="f.desc"></label><textarea id="fDesc" maxlength="2000"></textarea>
   <label data-i="f.thumb"></label>
-  <div class="row" style="margin-top:0"><input id="fThumb" data-ip="f.thumb.ph" style="flex:1" oninput="prevThumb()"><button type="button" onclick="pickFile(v=>{$('fThumb').value=v;prevThumb()})" data-i="f.upload"></button></div>
+  <div class="row" style="margin-top:0"><input id="fThumb" data-ip="f.thumb.ph" style="flex:1" oninput="prevThumb()"><button type="button" onclick="pickFile(v=>{$('fThumb').value=v;prevThumb()},420)" data-i="f.upload"></button></div>
   <div id="thPrev" class="gal" style="grid-template-columns:120px"></div>
   <label data-i="f.more"></label>
   <div class="row" style="margin-top:0"><button type="button" onclick="addGalImg()"><span data-ic="plus" data-s="16"></span><span data-i="f.addimg"></span></button></div>
@@ -379,7 +379,7 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
   <label data-i="g.name"></label><input id="cgName" maxlength="30">
   <label data-i="g.desc"></label><input id="cgDesc" maxlength="100">
   <label data-i="g.img"></label>
-  <div class="row" style="margin-top:0"><input id="cgImg" style="flex:1" readonly data-ip="g.img.ph"><button type="button" onclick="pickFile(v=>{$('cgImg').value=v})" data-i="f.upload"></button></div>
+  <div class="row" style="margin-top:0"><input id="cgImg" style="flex:1" readonly data-ip="g.img.ph"><button type="button" onclick="pickFile(v=>{$('cgImg').value=v},300)" data-i="f.upload"></button></div>
   <label data-i="g.pw.opt"></label>
   <div class="pw"><input id="cgPw" type="password" maxlength="40" autocomplete="new-password"><button type="button" class="eye" onclick="eye('cgPw',this)" data-ic="eye"></button></div>
   <div class="mu" style="margin-top:4px" data-i="g.pw.hint"></div>
@@ -412,19 +412,23 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
 <div id="toast" role="status"></div>
 <script>
 /* ===== CẤU HÌNH ===== */
-/* Firebase: muốn dùng project khác thì thay 5 giá trị bên dưới (Firebase Console → Project settings → Your apps → Web app).
-   Đăng ký / đăng nhập / Google / hồ sơ chạy thẳng bằng Firebase Auth + Realtime Database ở trình duyệt.
-   Các tính năng còn lại (đăng bài, thả tim, World, hòm thư, Dev Panel) vẫn gọi backend /api. */
+/* Firebase: project skibidiscriptdvminh. Toàn bộ tính năng (tài khoản, bài đăng, thả tim, World, nhóm chat, hòm thư, Dev Panel)
+   chạy thẳng bằng Firebase Auth + Realtime Database ở trình duyệt, không cần backend /api.
+   databaseURL: nếu Realtime Database của bạn tạo ở khu vực khác Mỹ, hãy chép đúng URL trong Firebase Console → Realtime Database
+   (dạng https://skibidiscriptdvminh-default-rtdb.<khu-vực>.firebasedatabase.app) và dán vào đây. */
 const firebaseConfig={
-  apiKey:"AIzaSyDNGa1YNLJk1n5C_cxCqsGlx7_hP7DjetA",
-  authDomain:"noxgalaxy-2cd71.firebaseapp.com",
-  databaseURL:"https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"noxgalaxy-2cd71",
-  appId:"1:632801709671:web:d239eb4bc8e0f7acab4ec2"
+  apiKey:"AIzaSyDGqHQt893hj0VGkjgapwM5sfwq2vP-6Mk",
+  authDomain:"skibidiscriptdvminh.firebaseapp.com",
+  databaseURL:"https://skibidiscriptdvminh-default-rtdb.firebaseio.com",
+  projectId:"skibidiscriptdvminh",
+  storageBucket:"skibidiscriptdvminh.firebasestorage.app",
+  messagingSenderId:"361948203038",
+  appId:"1:361948203038:web:b165d2843bdf5a9a67860f",
+  measurementId:"G-LLV0PKPH40"
 };
 const GOOGLE_CLIENT_ID="971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
 const DB_URL=firebaseConfig.databaseURL; // đọc dữ liệu công khai (bài, game, mục, cấu hình)
-const API="/api"; // vercel.json rewrite /api/* → backend; phiên đăng nhập là cookie httpOnly
+const API="/api"; // chỉ còn là đường dự phòng; mọi thao tác đã được xử lý bằng Firebase trong localApi()
 const $=id=>document.getElementById(id);
 
 /* ===== NGÔN NGỮ (vi / en) ===== */
@@ -477,7 +481,7 @@ D("f.code","Code / nội dung để sao chép","Code / text to copy");D("f.url",
 D("f.tags","Tag (cách nhau bằng dấu phẩy)","Tags (comma separated)");D("f.note","Ghi chú / tương thích","Note / compatibility");D("f.submit","Gửi bài","Submit");
 D("f.needt","Cần nhập tiêu đề","A title is required");D("f.needcat","Chưa có mục nào để đăng. Dev cần tạo mục trong Dev Panel.","No sections to post in yet. A dev must create one in the Dev Panel.");
 D("f.badurl","URL phải bắt đầu bằng http(s)://","URLs must start with http(s)://");D("f.badthumb","Ảnh thumbnail không hợp lệ","Invalid thumbnail");D("f.sending","Đang gửi…","Sending…");
-D("f.sent","Đã gửi bài","Post submitted");D("f.onlydev","Chỉ dev mới có thể thêm mục.","Only devs can add sections.");
+D("f.sent","Đã gửi bài","Post submitted");D("f.pending","Đã gửi bài, đang chờ dev duyệt","Submitted — waiting for review");D("f.onlydev","Chỉ dev mới có thể thêm mục.","Only devs can add sections.");
 /* tài khoản */
 D("a.title.reg","Tạo tài khoản","Create account");D("a.name","Tên hiển thị (không có khoảng trắng)","Display name (no spaces)");D("a.name.ph","vd: skibidi_fan","e.g. skibidi_fan");
 D("a.pw","Mật khẩu","Password");D("a.pw2","Nhập lại mật khẩu","Repeat password");D("a.showpw","Hiện mật khẩu","Show password");D("a.hidepw","Ẩn mật khẩu","Hide password");
@@ -603,14 +607,18 @@ let me=null,authReady=false,games={},cats={},siteCfg={},all=[],limit=PAGE,view="
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const jsq=s=>esc(JSON.stringify(String(s))); /* chuỗi JS an toàn trong thuộc tính onclick */
 const safeUrl=u=>{try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch{return ""}};
-const imgSrc=v=>/^img:[\w-]{1,40}$/.test(v||"")?API+"/img/"+v.slice(4):safeUrl(v);
+const imgSrc=v=>typeof v==="string"&&v.length<700000&&/^data:image\/(?:jpeg|png|webp);base64,/.test(v)?v:/^img:[\w-]{1,40}$/.test(v||"")?API+"/img/"+v.slice(4):safeUrl(v);
 const bgs=u=>{const s=imgSrc(u);return s?`background-image:url(&quot;${esc(s.replace(/["'()\\\s<>]/g,c=>"%"+c.charCodeAt(0).toString(16).padStart(2,"0")))}&quot;)`:""};
 const fmt=ts=>new Date(ts).toLocaleString(loc(),{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit",year:"numeric"});
 const hm=ts=>new Date(ts).toLocaleTimeString(loc(),{hour:"2-digit",minute:"2-digit"});
 function ago(ts){const s=Math.max(0,(Date.now()-ts)/1000);if(s<60)return t("now");if(s<3600)return t("m.ago",Math.floor(s/60));if(s<86400)return t("h.ago",Math.floor(s/3600));if(s<604800)return t("d.ago",Math.floor(s/86400));return new Date(ts).toLocaleDateString(loc())}
-const avatar=(n,pic,big)=>`<span class="av${big===true?" l":big==="xl"?" xl":""}">${esc((n||"?").trim().charAt(0).toUpperCase())}${safeUrl(pic)||imgSrc(pic)?`<img src="${esc(imgSrc(pic))}" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.remove()">`:""}</span>`;
+const avatar=(n,pic,big)=>`<span class="av${big===true?" l":big==="xl"?" xl":""}">${esc((n||"?").trim().charAt(0).toUpperCase())}${/^u:[\w-]{1,40}$/.test(pic||"")?`<img data-u="${esc(pic.slice(2))}" alt="" loading="lazy" onerror="this.remove()">`:imgSrc(pic)?`<img src="${esc(imgSrc(pic))}" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.remove()">`:""}</span>`;
+/* ảnh đại diện lưu trong hồ sơ được tải lười theo uid, để bài/tin nhắn không phải mang theo ảnh nặng */
+const picC={};
+function hydratePics(){document.querySelectorAll("img[data-u]").forEach(i=>{const id=i.dataset.u;i.removeAttribute("data-u");(picC[id]=picC[id]||dbGet("pub/users/"+encodeURIComponent(id)+"/pic").catch(()=>null)).then(v=>{const sr=v&&imgSrc(v);if(sr)i.src=sr;else i.remove()})})}
 const imgsHtml=a=>{a=(a||[]).filter(i=>imgSrc(i));return a.length?`<div class="gal${a.length===1?" n1":""}">${a.map(i=>`<img class="gi" src="${esc(imgSrc(i))}" alt="" loading="lazy" onclick="viewImg(this.src)">`).join("")}</div>`:""};
 const devTag=r=>r==="dev"?'<em class="tag bd">DEV</em>':"";
+new MutationObserver(()=>hydratePics()).observe(document.documentElement,{childList:true,subtree:true});
 function viewImg(src){$("bigImg").src=src;openM($("mImg"))}
 function toast(m){
   const el=$("toast");el.textContent="";
@@ -745,7 +753,7 @@ async function fbGoogleDone(u){
   }
   return fbMe(u);
 }
-async function localApi(path,method,body){
+async function authApi(path,method,body){
   const k=method+" "+path;
   const um=path.match(/^\/users\/([^/]+)$/);
   if(!(k==="POST /auth/register"||k==="POST /auth/login"||k==="POST /auth/google"||k==="POST /auth/google-popup"||k==="POST /me/link-popup"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
@@ -795,6 +803,305 @@ async function localApi(path,method,body){
         }else await u.linkWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,body.password));
       }catch(e){throw mapFb(e)}
       return{ok:true};
+  }
+}
+/* ===== DỮ LIỆU: bài đăng, vote, World, nhóm chat, hòm thư, báo cáo, Dev Panel — toàn bộ chạy bằng Firebase Realtime Database =====
+   Cấu trúc:
+   pub/posts/{id}        bài đã đăng (nhẹ)          pub/postBody/{id}     ảnh thêm + code (nặng, tải khi mở bài)
+   queue/{id}            bài chờ duyệt / bị ẩn      userPosts/{uid}/{id}  danh sách bài của tôi
+   votes/{uid}/{id}      tim + sao của tôi          pub/games, pub/categories, pub/settings, pub/roles, pub/users, pub/names
+   pub/world/posts, pub/world/replies               pub/groups, groupMembers, groupKeys, groupMsgs, userGroups
+   dm/{uidA_uidB}        tin nhắn riêng             inboxIdx/{uid}/{otherUid}  danh sách hội thoại
+   reports/{id}          báo cáo gửi dev */
+const R=p=>fbDb.ref(p),TS=()=>firebase.database.ServerValue.TIMESTAMP;
+const clean=o=>JSON.parse(JSON.stringify(o));
+const clip=(s,n)=>String(s==null?"":s).slice(0,n);
+const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,20)||"x";
+const snap=async p=>(await R(p).once("value")).val();
+const kids=s=>{const a=[];s.forEach(c=>{const v=c.val();a.push(v&&typeof v==="object"?{id:c.key,...v}:{id:c.key,value:v})});return a};
+const isDevMe=()=>!!me&&me.role==="dev";
+const picRef=()=>me&&me.pic?(/^data:/.test(me.pic)?"u:"+me.userId:me.pic):"";
+let rolesC=null;
+async function loadRoles(){try{rolesC=(await dbGet("pub/roles"))||{}}catch(e){rolesC=rolesC||{}}return rolesC}
+const roleOf=id=>rolesC&&rolesC[id]==="dev"?"dev":"";
+const bump=(ref,d)=>ref.transaction(c=>Math.max(0,(c||0)+d));
+const pairKey=(a,b)=>[a,b].sort().join("_");
+async function pwHash(gid,pw){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(gid+":"+pw));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function stamped(path,obj){const ref=R(path).push();await ref.set(clean({...obj,createdAt:TS()}));const v=(await ref.once("value")).val();return{id:ref.key,...v}}
+async function locate(id){
+  let d=await snap("pub/posts/"+id);if(d)return{where:"pub",path:"pub/posts/"+id,data:d};
+  try{d=await snap("queue/"+id)}catch(e){d=null}
+  return d?{where:"queue",path:"queue/"+id,data:d}:null;
+}
+const upMeta=(aid,id,patch)=>R("userPosts/"+aid+"/"+id).update(clean(patch));
+const slimUser=async id=>{const [p]=await Promise.all([snap("pub/users/"+id)]);return p?{userId:id,name:p.name,pic:p.pic?(/^data:/.test(p.pic)?"u:"+id:p.pic):"",role:roleOf(id)}:{userId:id,name:id,pic:"",role:""}};
+
+async function savePost(b){
+  const x=fbAuth.currentUser,dev=isDevMe();
+  const title=clip(b.title,120).trim();if(!title)throw fbErr(400,t("f.needt"));
+  const type=clip(b.type,40);if(!/^[\w-]+$/.test(type))throw fbErr(400,t("f.needcat"));
+  const light={title,type,gameId:clip(b.gameId,40),desc:clip(b.desc,2000),thumb:imgSrc(b.thumb)?b.thumb:"",url:safeUrl(b.url)||"",dl:safeUrl(b.dl)||"",version:clip(b.version,30),tags:(Array.isArray(b.tags)?b.tags:[]).map(v=>clip(v,30)).filter(Boolean).slice(0,10),note:clip(b.note,300)};
+  const body={images:(Array.isArray(b.images)?b.images:[]).filter(i=>imgSrc(i)).slice(0,4),code:clip(b.code,30000)};
+  if(b.id){
+    const loc=await locate(b.id);if(!loc)throw fbErr(404,t("e.404"));
+    const p=loc.data;
+    if(p.authorId!==x.uid&&!dev)throw fbErr(403,t("e.403"));
+    if(p.locked&&!dev)throw fbErr(403,t("locked"));
+    const patch={...light,updatedAt:TS()};
+    let st=p.status;
+    if(p.status==="rejected"&&!dev){patch.status="pending";st="pending"}
+    await R(loc.path).update(clean(patch));
+    await R("pub/postBody/"+b.id).set(clean(body));
+    await upMeta(p.authorId,b.id,{title,type,status:st,updatedAt:TS()});
+    return{id:b.id,message:t("f.sent")};
+  }
+  const mod=(await snap("pub/settings/moderation"))===true&&!dev;
+  const ref=R(mod?"queue":"pub/posts").push(),id=ref.key;
+  await ref.set(clean({...light,authorId:x.uid,authorName:me.name,authorPic:picRef(),createdAt:TS(),likeCount:0,ratingCount:0,ratingSum:0,views:0,status:mod?"pending":"published"}));
+  const created=(await ref.once("value")).val();
+  await R("pub/postBody/"+id).set(clean(body));
+  await R("userPosts/"+x.uid+"/"+id).set(clean({title,type,status:created.status,createdAt:created.createdAt}));
+  return{id,message:mod?t("f.pending"):t("f.sent")};
+}
+async function castVote(id,patch){
+  const x=fbAuth.currentUser,vr=R("votes/"+x.uid+"/"+id),old=(await vr.once("value")).val()||{};
+  const nv={liked:patch.liked!==undefined?patch.liked:!old.liked,stars:patch.stars!==undefined?patch.stars:(old.stars||0)};
+  const pr=R("pub/posts/"+id);if(!(await pr.child("title").once("value")).exists())throw fbErr(404,t("e.404"));
+  await vr.set(nv);
+  const dl=(nv.liked?1:0)-(old.liked?1:0),ds=nv.stars-(old.stars||0),dc=(nv.stars?1:0)-(old.stars?1:0);
+  if(dl)await bump(pr.child("likeCount"),dl);
+  if(ds)await bump(pr.child("ratingSum"),ds);
+  if(dc)await bump(pr.child("ratingCount"),dc);
+  const p=await snap("pub/posts/"+id)||{};
+  return{likeCount:p.likeCount||0,ratingCount:p.ratingCount||0,ratingSum:p.ratingSum||0,liked:nv.liked,stars:nv.stars};
+}
+const wFix=(p,uid)=>{const l=p.likes||{};const o={...p,liked:!!(uid&&l[uid]),likeCount:Object.keys(l).length,authorRole:roleOf(p.authorId)};delete o.likes;return o};
+
+async function dataApi(path,method,body){
+  const u=new URL(path,"http://x"),P=u.pathname,Q=u.searchParams,D=decodeURIComponent;let m;
+  const M=r=>(m=P.match(r))!==null;
+  const user=()=>{const x=fbAuth.currentUser;if(!x||!me)throw fbErr(401,t("e.expired"));return x};
+  const dev=()=>{user();if(!isDevMe())throw fbErr(403,t("e.403"))};
+  body=body||{};
+
+  /* ---------- bài đăng ---------- */
+  if(method==="GET"&&M(/^\/posts\/([\w-]+)\/vote$/)){const v=(await snap("votes/"+user().uid+"/"+m[1]))||{};return{liked:!!v.liked,stars:v.stars||0}}
+  if(method==="GET"&&M(/^\/posts\/([\w-]+)\/full$/)){
+    const loc=await locate(m[1]);if(!loc)throw fbErr(404,t("e.404"));
+    const b=(await snap("pub/postBody/"+m[1]))||{};return{id:m[1],...loc.data,...b,_bl:1};
+  }
+  if(method==="POST"&&M(/^\/posts\/([\w-]+)\/like$/)){user();return castVote(m[1],{})}
+  if(method==="POST"&&M(/^\/posts\/([\w-]+)\/rate$/)){user();const s=Math.max(0,Math.min(5,Math.round(+body.stars||0)));return castVote(m[1],{stars:s})}
+  if(method==="POST"&&P==="/posts"){user();return savePost(body)}
+  if(method==="DELETE"&&M(/^\/posts\/([\w-]+)$/)){
+    const x=user(),id=m[1],loc=await locate(id);if(!loc)throw fbErr(404,t("e.404"));
+    if(loc.data.authorId!==x.uid&&!isDevMe())throw fbErr(403,t("e.403"));
+    await R("pub/postBody/"+id).remove();await R("userPosts/"+loc.data.authorId+"/"+id).remove();await R(loc.path).remove();
+    return{ok:true};
+  }
+  if(method==="GET"&&P==="/me/posts"){
+    const x=user(),a=kids(await R("userPosts/"+x.uid).once("value"));
+    a.sort((p,q)=>(q.createdAt||0)-(p.createdAt||0));return{posts:a};
+  }
+  if(method==="GET"&&P==="/me/likes"){
+    const x=user(),v=(await snap("votes/"+x.uid))||{};
+    const ids=Object.keys(v).filter(k=>v[k]&&v[k].liked).slice(0,60);
+    const a=(await Promise.all(ids.map(id=>snap("pub/posts/"+id).then(d=>d?{id,...d}:null).catch(()=>null)))).filter(Boolean);
+    a.sort((p,q)=>(q.createdAt||0)-(p.createdAt||0));return{posts:a};
+  }
+  if(method==="GET"&&M(/^\/users\/([^/]+)\/posts$/)){
+    const a=kids(await R("pub/posts").orderByChild("authorId").equalTo(D(m[1])).once("value"));
+    a.sort((p,q)=>(q.createdAt||0)-(p.createdAt||0));return{posts:a};
+  }
+  if(method==="POST"&&P==="/upload"){
+    user();const d=body.data;
+    if(typeof d!=="string"||d.length>700000||!/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(d))throw fbErr(400,t("img.bad"));
+    return{id:d};
+  }
+  if(method==="POST"&&P==="/reports"){
+    const x=user();
+    await R("reports").push().set(clean({authorId:x.uid,authorName:me.name,kind:clip(body.kind,20),severity:clip(body.severity,10),text:clip(body.text||body.reason,1500),refType:clip(body.refType,20),refId:clip(body.refId,80),postId:clip(body.postId,80),createdAt:TS()}));
+    return{ok:true};
+  }
+
+  /* ---------- Dev Panel ---------- */
+  if(method==="GET"&&P==="/dev/posts"){
+    dev();const st=Q.get("status");let a=kids(await R("queue").once("value"));
+    if(st==="pending")a=a.filter(p=>p.status==="pending");
+    else a=a.concat(kids(await R("pub/posts").orderByChild("createdAt").limitToLast(100).once("value")));
+    a.sort((p,q)=>(q.createdAt||0)-(p.createdAt||0));return{posts:a};
+  }
+  if(method==="POST"&&M(/^\/dev\/posts\/([\w-]+)$/)){
+    dev();const id=m[1];let loc=await locate(id);if(!loc)throw fbErr(404,t("e.404"));
+    const aid=loc.data.authorId;
+    if(body.status){
+      const st=String(body.status);if(!["published","rejected","hidden","pending"].includes(st))throw fbErr(400,t("e.400"));
+      const rec={...loc.data,status:st};if(st==="published")delete rec.rejectReason;else if(body.reason)rec.rejectReason=clip(body.reason,200);
+      const toPub=st==="published",dest=(toPub?"pub/posts/":"queue/")+id;
+      if(dest!==loc.path){await R(dest).set(clean(rec));await R(loc.path).remove()}else await R(dest).update({status:st});
+      loc={path:dest};
+      await upMeta(aid,id,{status:st,rejectReason:rec.rejectReason||null});
+    }
+    const f={};["featured","pinned","locked"].forEach(k=>{if(typeof body[k]==="boolean")f[k]=body[k]||null});
+    if(Object.keys(f).length){await R(loc.path).update(f);if("locked"in f)await upMeta(aid,id,{locked:f.locked===null?null:true})}
+    return{ok:true};
+  }
+  if(method==="GET"&&P==="/dev/games"){dev();const g=(await snap("pub/games"))||{};return{games:Object.entries(g).map(([id,v])=>({id,...v}))}}
+  if(method==="POST"&&P==="/dev/games"){
+    dev();const b=body;
+    if(b.id){const d={};["name","img","desc","order","published"].forEach(k=>{if(b[k]!==undefined)d[k]=b[k]});await R("pub/games/"+b.id).update(clean(d));return{id:b.id,...d}}
+    const name=clip(b.name,40).trim();if(!name)throw fbErr(400,t("e.400"));
+    const id=slug(name)+"-"+Math.random().toString(36).slice(2,6),d={name,img:b.img||"",desc:clip(b.desc,200),order:+b.order||0,published:true};
+    await R("pub/games/"+id).set(clean(d));return{id,...d};
+  }
+  if(method==="DELETE"&&M(/^\/dev\/games\/([\w-]+)$/)){dev();await R("pub/games/"+m[1]).remove();return{ok:true}}
+  if(method==="POST"&&(P==="/categories"||M(/^\/dev\/categories\/([\w-]+)$/))){
+    dev();const id=P==="/categories"?slug(body.name)+"-"+Math.random().toString(36).slice(2,5):m[1];
+    const d={name:clip(body.name,24).trim(),img:body.img||"",actions:(body.actions&&body.actions.length?body.actions:["detail"]),hidden:!!body.hidden};
+    if(!d.name)throw fbErr(400,t("e.400"));
+    await R("pub/categories/"+id).set(clean(d));return{id,...d};
+  }
+  if(method==="DELETE"&&M(/^\/dev\/categories\/([\w-]+)$/)){dev();await R("pub/categories/"+m[1]).remove();return{ok:true}}
+  if(method==="GET"&&P==="/dev/settings"){dev();return(await snap("pub/settings"))||{}}
+  if(method==="POST"&&P==="/dev/settings"){
+    dev();const d={moderation:!!body.moderation,announcement:clip(body.announcement,300),hiddenNav:body.hiddenNav||{}};
+    await R("pub/settings").set(clean(d));return d;
+  }
+  if(method==="GET"&&P==="/dev/reports"){
+    dev();const a=kids(await R("reports").once("value"));a.sort((p,q)=>(q.createdAt||0)-(p.createdAt||0));return{reports:a};
+  }
+  if(method==="DELETE"&&M(/^\/dev\/reports\/([\w-]+)$/)){dev();await R("reports/"+m[1]).remove();return{ok:true}}
+
+  /* ---------- World: bài viết + trả lời ---------- */
+  if(method==="GET"&&P==="/world/posts"){
+    if(!rolesC)await loadRoles();
+    const lim=Math.min(40,+Q.get("limit")||20),before=+Q.get("before")||0,uid=fbAuth.currentUser&&fbAuth.currentUser.uid;
+    let q=R("pub/world/posts").orderByChild("createdAt");if(before)q=q.endAt(before-1);
+    const a=kids(await q.limitToLast(lim).once("value")).reverse();
+    return{posts:a.map(p=>wFix(p,uid))};
+  }
+  if(method==="POST"&&P==="/world/posts"){
+    const x=user(),text=clip(body.text,1500).trim(),images=(Array.isArray(body.images)?body.images:[]).filter(i=>imgSrc(i)).slice(0,4);
+    if(!text&&!images.length)throw fbErr(400,t("w.empty"));
+    const p=await stamped("pub/world/posts",{text,images,authorId:x.uid,authorName:me.name,authorPic:picRef(),replyCount:0});
+    return wFix(p,x.uid);
+  }
+  if(method==="DELETE"&&M(/^\/world\/posts\/([\w-]+)$/)){
+    user();await R("pub/world/replies/"+m[1]).remove().catch(()=>{});await R("pub/world/posts/"+m[1]).remove();return{ok:true};
+  }
+  if(method==="POST"&&M(/^\/world\/posts\/([\w-]+)\/like$/)){
+    const x=user(),lr=R("pub/world/posts/"+m[1]+"/likes"),on=!!(await snap("pub/world/posts/"+m[1]+"/likes/"+x.uid));
+    await lr.child(x.uid).set(on?null:true);
+    const l=(await lr.once("value")).val()||{};return{liked:!on,likeCount:Object.keys(l).length};
+  }
+  if(method==="GET"&&M(/^\/world\/posts\/([\w-]+)\/replies$/)){
+    if(!rolesC)await loadRoles();
+    const a=kids(await R("pub/world/replies/"+m[1]).orderByChild("createdAt").limitToLast(100).once("value"));
+    return{replies:a.map(r=>({...r,authorRole:roleOf(r.authorId)}))};
+  }
+  if(method==="POST"&&M(/^\/world\/posts\/([\w-]+)\/replies$/)){
+    const x=user(),text=clip(body.text,500).trim(),images=(Array.isArray(body.images)?body.images:[]).filter(i=>imgSrc(i)).slice(0,4);
+    if(!text&&!images.length)throw fbErr(400,t("w.empty"));
+    const r=await stamped("pub/world/replies/"+m[1],{text,images,authorId:x.uid,authorName:me.name,authorPic:picRef()});
+    await bump(R("pub/world/posts/"+m[1]+"/replyCount"),1);return{...r,authorRole:roleOf(x.uid)};
+  }
+  if(method==="DELETE"&&M(/^\/world\/posts\/([\w-]+)\/replies\/([\w-]+)$/)){
+    user();await R("pub/world/replies/"+m[1]+"/"+m[2]).remove();await bump(R("pub/world/posts/"+m[1]+"/replyCount"),-1);return{ok:true};
+  }
+
+  /* ---------- World: nhóm chat ---------- */
+  if(method==="GET"&&P==="/world/groups"){
+    const x=fbAuth.currentUser,g=(await snap("pub/groups"))||{},j=x?((await snap("userGroups/"+x.uid))||{}):{};
+    const a=Object.entries(g).map(([id,v])=>({id,...v,joined:!!j[id]}));
+    a.sort((p,q)=>(q.createdAt||0)-(p.createdAt||0));return{groups:a};
+  }
+  if(method==="POST"&&P==="/world/groups"){
+    const x=user(),name=clip(body.name,30).trim(),pw=clip(body.password,40);
+    if(name.length<2)throw fbErr(400,t("g.nameshort"));
+    const ref=R("pub/groups").push(),id=ref.key;
+    await ref.set(clean({name,desc:clip(body.desc,100),img:imgSrc(body.img)?body.img:"",ownerId:x.uid,createdAt:TS(),locked:!!pw,memberCount:1}));
+    let mv=true;if(pw){mv=await pwHash(id,pw);await R("groupKeys/"+id).set(mv)}
+    await R("groupMembers/"+id+"/"+x.uid).set(mv);await R("userGroups/"+x.uid+"/"+id).set(true);
+    return{id,...(await ref.once("value")).val()};
+  }
+  if(method==="POST"&&M(/^\/world\/groups\/([\w-]+)\/join$/)){
+    const x=user(),id=m[1],g=await snap("pub/groups/"+id);if(!g)throw fbErr(404,t("e.404"));
+    const had=await R("groupMembers/"+id+"/"+x.uid).once("value").then(s=>s.exists()).catch(()=>false);
+    if(!had){
+      const mv=g.locked?await pwHash(id,clip(body.password,40)):true;
+      try{await R("groupMembers/"+id+"/"+x.uid).set(mv)}catch(e){throw fbErr(403,t("g.wrongpw"))}
+      await bump(R("pub/groups/"+id+"/memberCount"),1);
+    }
+    await R("userGroups/"+x.uid+"/"+id).set(true);return{ok:true};
+  }
+  if(method==="GET"&&M(/^\/world\/groups\/([\w-]+)\/messages$/)){
+    user();const id=m[1],after=+Q.get("after")||0;
+    let q=R("groupMsgs/"+id).orderByChild("createdAt");q=after?q.startAt(after+1):q.limitToLast(100);
+    const a=kids(await q.once("value"));
+    const g=await snap("pub/groups/"+id);
+    return{group:g?{name:g.name,desc:g.desc,img:g.img,locked:g.locked,memberCount:g.memberCount||0}:null,messages:a};
+  }
+  if(method==="POST"&&M(/^\/world\/groups\/([\w-]+)\/messages$/)){
+    const x=user(),text=clip(body.text,1000).trim(),images=(Array.isArray(body.images)?body.images:[]).filter(i=>imgSrc(i)).slice(0,4);
+    if(!text&&!images.length)throw fbErr(400,t("w.empty"));
+    return stamped("groupMsgs/"+m[1],{text,images,authorId:x.uid,authorName:me.name,authorPic:picRef()});
+  }
+  if(method==="POST"&&M(/^\/world\/groups\/([\w-]+)\/leave$/)){
+    const x=user(),id=m[1];
+    await R("groupMembers/"+id+"/"+x.uid).remove();await R("userGroups/"+x.uid+"/"+id).remove();await bump(R("pub/groups/"+id+"/memberCount"),-1);return{ok:true};
+  }
+  if(method==="POST"&&M(/^\/world\/groups\/([\w-]+)\/password$/)){
+    user();const id=m[1],pw=clip(body.password,40);
+    if(pw)await R("groupKeys/"+id).set(await pwHash(id,pw));else await R("groupKeys/"+id).remove();
+    await R("pub/groups/"+id).update({locked:!!pw});return{ok:true};
+  }
+  if(method==="DELETE"&&M(/^\/world\/groups\/([\w-]+)$/)){
+    user();const id=m[1];
+    await R("groupKeys/"+id).remove();await R("groupMsgs/"+id).remove();await R("groupMembers/"+id).remove();await R("pub/groups/"+id).remove();return{ok:true};
+  }
+
+  /* ---------- Hòm thư ---------- */
+  if(method==="GET"&&P==="/inbox/unread"){
+    const x=user(),v=(await snap("inboxIdx/"+x.uid))||{};return{unread:Object.values(v).reduce((n,e)=>n+((e&&e.unread)||0),0)};
+  }
+  if(method==="GET"&&P==="/inbox"){
+    if(!rolesC)await loadRoles();
+    const x=user(),v=(await snap("inboxIdx/"+x.uid))||{};
+    const th=Object.entries(v).map(([id,e])=>({withId:id,withName:e.withName||id,withPic:e.withPic||"",withRole:roleOf(id),last:e.last||"",lastAt:e.lastAt||0,unread:e.unread||0}));
+    th.sort((a,b)=>b.lastAt-a.lastAt);return{threads:th,unread:th.reduce((n,e)=>n+e.unread,0)};
+  }
+  if(method==="GET"&&M(/^\/inbox\/([^/]+)$/)){
+    if(!rolesC)await loadRoles();
+    const x=user(),other=D(m[1]);
+    const ms=kids(await R("dm/"+pairKey(x.uid,other)).orderByChild("createdAt").limitToLast(200).once("value"));
+    const ir=R("inboxIdx/"+x.uid+"/"+other);
+    if((await ir.child("unread").once("value")).val())await ir.child("unread").set(0);
+    return{with:await slimUser(other),messages:ms};
+  }
+  if(method==="POST"&&P==="/inbox/send"){
+    const x=user(),to=clip(body.toId,60),text=clip(body.text,1000).trim();
+    if(!text||!to||to===x.uid)throw fbErr(400,t("e.400"));
+    const msg=await stamped("dm/"+pairKey(x.uid,to),{text,authorId:x.uid,authorName:me.name,authorPic:picRef()});
+    const other=await slimUser(to);
+    await R("inboxIdx/"+x.uid+"/"+to).set(clean({withName:other.name,withPic:other.pic,last:text.slice(0,80),lastAt:msg.createdAt,unread:0}));
+    await R("inboxIdx/"+to+"/"+x.uid).transaction(c=>({withName:me.name,withPic:picRef(),last:text.slice(0,80),lastAt:msg.createdAt,unread:((c&&c.unread)||0)+1}));
+    return msg;
+  }
+  return undefined;
+}
+/* Điểm vào duy nhất: thử xử lý bằng Firebase; nếu không có route thì trả undefined để api() gọi backend dự phòng */
+async function localApi(path,method,body){
+  try{
+    let r=await authApi(path,method,body);
+    if(r===undefined){if(!fbInit())throw fbErr(0,t("fb.noload"));r=await dataApi(path,method,body)}
+    return r;
+  }catch(e){
+    if(e&&e.status!==undefined)throw e;
+    console.warn("[data]",method,path,e);
+    const c=String((e&&e.code)||"")+" "+String((e&&e.message)||"");
+    if(/permission[_ -]?denied/i.test(c))throw fbErr(403,t("fb.rules"));
+    if(/network|offline|disconnect/i.test(c)){const er=fbErr(0,t("e.gen"));er.net=true;throw er}
+    throw fbErr(0,(e&&e.message)||t("e.gen"));
   }
 }
 async function api(path,method="GET",body){
@@ -992,7 +1299,7 @@ async function restore(){
       if(u)me=await fbMe(u);
     }
   }catch(e){console.warn("[restore]",e)}
-  authReady=true;
+  loadRoles();authReady=true;
 }
 
 /* --- Google Identity Services (đăng nhập + gắn Gmail) --- */
@@ -1202,8 +1509,10 @@ function refreshVote(id){const el=$("vote");if(el&&openId===id)el.innerHTML=vote
 function applyVote(id,r){Object.assign(curPosts[id],{likeCount:r.likeCount,ratingCount:r.ratingCount,ratingSum:r.ratingSum});myVotes[id]={liked:r.liked,stars:r.stars};refreshVote(id);if(view==="home")renderPosts()}
 async function like(id){if(!me)return openAuth();try{applyVote(id,await api("/posts/"+id+"/like","POST"))}catch(e){toast(e.message)}}
 async function rate(id,s){if(!me)return openAuth();try{applyVote(id,await api("/posts/"+id+"/rate","POST",{stars:s}))}catch(e){toast(e.message)}}
-function openPost(id){
-  const p=curPosts[id];if(!p)return;openId=id;
+async function openPost(id){
+  const p=curPosts[id];if(!p)return;
+  if(!p._bl){p._bl=1;try{const b=await dbGet("pub/postBody/"+id);if(b)Object.assign(p,b)}catch(e){}}
+  openId=id;
   const g=games[p.gameId],a=catActions(p.type),own=me&&(me.userId===p.authorId||me.role==="dev");
   const open=a.includes("open")&&safeUrl(p.url),dl=a.includes("download")&&safeUrl(p.dl);
   const lnk=(h,l,pri)=>`<a class="btn${pri?" pri":""}" href="${esc(h)}" target="_blank" rel="noopener noreferrer nofollow ugc">${esc(l)}</a>`;
@@ -1224,8 +1533,13 @@ function openPost(id){
   openM($("mDetail"));
   history.replaceState(null,"","#/post/"+id);
   seo(p.title+" — SKIBIDISCRIPT",(p.desc||p.title).replace(/\s+/g," ").slice(0,155));
-  fetch(API+"/posts/"+id+"/view",{method:"POST",credentials:"include",headers:{"X-Skibidi":"1"}}).catch(()=>{});
+  bumpView(id);
   if(me&&!myVotes[id])api("/posts/"+id+"/vote").then(v=>{myVotes[id]=v;refreshVote(id)}).catch(()=>{});
+}
+const seenV=new Set();
+function bumpView(id){
+  if(seenV.has(id)||!fbInit())return;seenV.add(id);
+  fbDb.ref("pub/posts/"+id+"/views").transaction(c=>(c||0)+1).then(r=>{const p=curPosts[id];if(p&&r&&r.snapshot)p.views=r.snapshot.val()}).catch(()=>{});
 }
 function copyCode(id){navigator.clipboard.writeText(curPosts[id].code).then(()=>toast(t("copied"))).catch(()=>{})}
 async function share(id){
@@ -1252,15 +1566,16 @@ function syncForm(){
 function prevThumb(){const s=imgSrc($("fThumb").value.trim());$("thPrev").innerHTML=s?`<img class="gi" src="${esc(s)}" alt="">`:""}
 function renderGal(){$("galPrev").innerHTML=gal.map((g,i)=>`<span class="gp"><img class="gi" src="${esc(imgSrc(g))}" alt=""><button type="button" onclick="gal.splice(${i},1);renderGal()" aria-label="${esc(t("del"))}">✕</button></span>`).join("")}
 function addGalImg(){if(gal.length>=4)return $("formMsg").textContent=t("f.max4");pickFile(v=>{if(gal.length<4){gal.push(v);renderGal()}})}
-function shrink(file){
+function shrink(file,mx){
+  mx=mx||800;
   return new Promise((ok,no)=>{
     const i=new Image(),u=URL.createObjectURL(file);
     i.onload=()=>{
       URL.revokeObjectURL(u);let d="";
-      for(const[max,q]of[[1000,.82],[800,.65],[600,.55]]){
+      for(const[max,q]of[[mx,.72],[mx*.75,.6],[mx*.55,.5]]){
         const r=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");
         c.width=Math.round(i.width*r);c.height=Math.round(i.height*r);c.getContext("2d").drawImage(i,0,0,c.width,c.height);
-        d=c.toDataURL("image/jpeg",q);if(d.length<520000)break;
+        d=c.toDataURL("image/jpeg",q);if(d.length<(mx<=420?70000:190000))break;
       }
       ok(d);
     };
@@ -1268,15 +1583,16 @@ function shrink(file){
   });
 }
 /* chọn ảnh từ máy → tải lên → cb(id ảnh). Dùng chung cho mọi nơi cần ảnh */
-let fileCb=null;
-function pickFile(cb){fileCb=cb;$("fileX").click()}
+let fileCb=null,fileMx=800;
+function pickFile(cb,mx){fileCb=cb;fileMx=mx||800;$("fileX").click()}
 async function onFile(inp){
   const f=inp.files[0];inp.value="";if(!f||!fileCb)return;const cb=fileCb;
   toast(t("up.ing"));
-  try{const r=await api("/upload","POST",{data:await shrink(f)});cb(r.id);toast(t("up.ok"))}catch(e){toast(e.message)}
+  try{const r=await api("/upload","POST",{data:await shrink(f,fileMx)});cb(r.id);toast(t("up.ok"))}catch(e){toast(e.message)}
 }
-function openForm(p){
+async function openForm(p){
   if(!me)return openAuth();
+  if(p&&p.id&&!p._bl){try{p={...p,...await api("/posts/"+p.id+"/full")}}catch(e){toast(e.message);return}}
   editing=p&&p.id?p.id:null;p=p||{};gal=[...(p.images||[])];
   fillType(p.type||curType||navCats()[0]||"");
   $("fTitle").value=p.title||"";$("fpGame").value=p.gameId||"";$("fDesc").value=p.desc||"";$("fThumb").value=p.thumb||"";$("fCode").value=p.code||"";$("fUrl").value=p.url||"";$("fDl").value=p.dl||"";$("fVer").value=p.version||"";$("fTags").value=(p.tags||[]).join(", ");$("fNote").value=p.note||"";
@@ -1645,7 +1961,7 @@ function renderSettings(){
   else{
     const hasPw=me.hasPassword!==false;
     h+=`<div class="sec" id="sec-profile"><h3>${esc(t("s.profile"))}</h3>
-      <div class="prow">${avatar(me.name,me.pic,"xl")}<div><button onclick="pickFile(setAvatar)">${svg("image",16)}${esc(t("s.avatar"))}</button></div></div>
+      <div class="prow">${avatar(me.name,me.pic,"xl")}<div><button onclick="pickFile(setAvatar,300)">${svg("image",16)}${esc(t("s.avatar"))}</button></div></div>
       <label class="mu" style="display:block;margin:12px 0 4px" for="stBio">${esc(t("s.bio"))}</label><textarea id="stBio" maxlength="200" placeholder="${esc(t("s.bio.ph"))}">${esc(me.bio||"")}</textarea>
       <div class="row"><button class="pri" onclick="saveProfile()">${esc(t("save"))}</button></div></div>
     <div class="sec"><h3>${esc(t("s.name"))}</h3><input id="stName" maxlength="24" value="${esc(me.name)}" autocapitalize="off" spellcheck="false"><div class="fm" id="stNameMsg"></div><div class="row" style="margin-top:0"><button class="pri" onclick="saveName()">${esc(t("save"))}</button></div></div>
@@ -1705,16 +2021,16 @@ async function devRender(){
       <button onclick="openForm(_dp[${jsq(p.id)}])">Sửa</button><button class="danger" onclick="devDel(${jsq(p.id)})">Xóa</button></div></div>`).join("");
     }else if(devTab==="games"){
       const {games:g}=await api("/dev/games");region(body,"success");
-      body.innerHTML=`<div class="row"><input id="gN" placeholder="Tên game" style="flex:1 1 140px"><input id="gI" placeholder="Ảnh (https hoặc tải lên)" style="flex:1 1 160px"><button onclick="pickFile(v=>{$('gI').value=v})">Tải ảnh</button><input id="gD" placeholder="Mô tả" style="flex:1 1 140px"><input id="gO" type="number" placeholder="Thứ tự" style="width:90px"><button class="pri" onclick="devGame()">Thêm</button></div>`+
-      (g||[]).map(x=>`<div class="item" data-id="${esc(x.id)}" data-n="${esc(x.name)}"><span style="display:flex;align-items:center;gap:8px">${x.img&&imgSrc(x.img)?`<span class="ci" style="${bgs(x.img)}"></span>`:""}${esc(x.name)} <span class="mu">(${x.count||0} bài${x.published===false?" · ẩn":""})</span></span><div class="row" style="margin:0"><button onclick="pickFile(v=>devGame(rid(this),{img:v}))">Đổi ảnh</button><button onclick="devGame(rid(this),{published:${x.published===false}})">${x.published===false?"Xuất bản":"Ẩn"}</button><button onclick="devRename(this)">Đổi tên</button><button class="danger" onclick="devGameDel(rid(this))">Xóa</button></div></div>`).join("");
+      body.innerHTML=`<div class="row"><input id="gN" placeholder="Tên game" style="flex:1 1 140px"><input id="gI" placeholder="Ảnh (https hoặc tải lên)" style="flex:1 1 160px"><button onclick="pickFile(v=>{$('gI').value=v},420)">Tải ảnh</button><input id="gD" placeholder="Mô tả" style="flex:1 1 140px"><input id="gO" type="number" placeholder="Thứ tự" style="width:90px"><button class="pri" onclick="devGame()">Thêm</button></div>`+
+      (g||[]).map(x=>`<div class="item" data-id="${esc(x.id)}" data-n="${esc(x.name)}"><span style="display:flex;align-items:center;gap:8px">${x.img&&imgSrc(x.img)?`<span class="ci" style="${bgs(x.img)}"></span>`:""}${esc(x.name)} <span class="mu">(${x.published===false?"ẩn":"hiển thị"})</span></span><div class="row" style="margin:0"><button onclick="pickFile(v=>devGame(rid(this),{img:v}),420)">Đổi ảnh</button><button onclick="devGame(rid(this),{published:${x.published===false}})">${x.published===false?"Xuất bản":"Ẩn"}</button><button onclick="devRename(this)">Đổi tên</button><button class="danger" onclick="devGameDel(rid(this))">Xóa</button></div></div>`).join("");
     }else if(devTab==="cats"){
       region(body,"success");
       body.innerHTML=`<div class="item cf"><b>Thêm mục mới (hiện trong menu)</b>
         <input data-k="name" placeholder="Tên mục, ví dụ: Discord" maxlength="24">
-        <div class="row" style="margin:0"><input data-k="img" placeholder="Ảnh của mục (https hoặc tải lên)" style="flex:1"><button onclick="pickFile(v=>{this.previousElementSibling.value=v})">Tải ảnh</button></div>
+        <div class="row" style="margin:0"><input data-k="img" placeholder="Ảnh của mục (https hoặc tải lên)" style="flex:1"><button onclick="pickFile(v=>{this.previousElementSibling.value=v},420)">Tải ảnh</button></div>
         <div class="row" style="margin:0">${actChk(["detail"])}<button class="pri" onclick="devAddCat(this)" style="margin-left:auto">Thêm mục</button></div></div>`+
       (catIds().length?catIds().map(c=>`<div class="item cf" data-id="${esc(c)}"><div class="row" style="margin:0">${ico(c)}<input data-k="name" value="${esc(catName(c))}" maxlength="24" style="flex:1"></div>
-        <div class="row" style="margin:0"><input data-k="img" value="${esc(catImg(c))}" placeholder="Ảnh của mục (https hoặc tải lên)" style="flex:1"><button onclick="pickFile(v=>{this.previousElementSibling.value=v})">Tải ảnh</button></div>
+        <div class="row" style="margin:0"><input data-k="img" value="${esc(catImg(c))}" placeholder="Ảnh của mục (https hoặc tải lên)" style="flex:1"><button onclick="pickFile(v=>{this.previousElementSibling.value=v},420)">Tải ảnh</button></div>
         <div class="row" style="margin:0">${actChk(catActions(c))}<span style="margin-left:auto;display:flex;gap:8px"><button onclick="saveCat(this)">Lưu</button><button class="danger" onclick="delCat(this)">Xóa</button></span></div></div>`).join(""):'<div class="st" style="min-height:120px">Chưa có mục nào. Thêm mục đầu tiên ở trên.</div>');
     }else if(devTab==="menu"){
       try{const s=await api("/dev/settings");if(s&&s.hiddenNav)siteCfg.hiddenNav=s.hiddenNav}catch(e){}
@@ -1731,7 +2047,7 @@ async function devRender(){
         <div class="row" style="margin:0">${r.authorId?`<button onclick="devReply(${jsq(r.authorId)})">Trả lời</button>`:""}<button onclick="devDone(rid(this))">Đã xử lý</button></div></div>`).join("");
     }else{
       const s=await api("/dev/settings");region(body,"success");
-      body.innerHTML=`<label class="row sw" style="margin-top:14px"><input type="checkbox" id="sMod" ${s.moderation!==false?"checked":""}><i></i><span>Bật kiểm duyệt bài mới</span></label><div class="row"><input id="sAnn" placeholder="Thông báo hiển thị ở trang chủ" value="${esc(s.announcement||"")}" style="flex:1"><button class="pri" onclick="devSettings()">Lưu</button></div>`;
+      body.innerHTML=`<label class="row sw" style="margin-top:14px"><input type="checkbox" id="sMod" ${s.moderation===true?"checked":""}><i></i><span>Bật kiểm duyệt bài mới</span></label><div class="row"><input id="sAnn" placeholder="Thông báo hiển thị ở trang chủ" value="${esc(s.announcement||"")}" style="flex:1"><button class="pri" onclick="devSettings()">Lưu</button></div>`;
     }
   }catch(e){region(body,"error",e,devRender)}
 }
@@ -1749,7 +2065,7 @@ async function toggleNav(k,show){
     }else{
       const hn={...(siteCfg.hiddenNav||{}),[k]:!show};
       let s={};try{s=await api("/dev/settings")}catch(e){}
-      await api("/dev/settings","POST",{moderation:s.moderation!==false,announcement:s.announcement||"",hiddenNav:hn});siteCfg.hiddenNav=hn;
+      await api("/dev/settings","POST",{moderation:s.moderation===true,announcement:s.announcement||"",hiddenNav:hn});siteCfg.hiddenNav=hn;
     }
     renderNav();renderPop();toast(t("saved"));
   }catch(e){toast(e.message);devRender()}
