@@ -574,6 +574,18 @@ D("s.name","Tên đăng nhập","Username");D("s.pass","Đổi mật khẩu","Ch
 D("s.gmail","Gmail","Gmail");D("s.gmail.none","Chưa gắn Gmail.","No Gmail linked.");D("s.gmail.link","Gắn tài khoản Google để đăng nhập nhanh và khôi phục tài khoản.","Link your Google account for quick login and recovery.");D("s.gmail.done","Đã gắn Gmail","Gmail linked");
 D("s.guest","Đăng nhập để chỉnh sửa hồ sơ, tên, mật khẩu và Gmail.","Log in to edit your profile, name, password and Gmail.");D("s.name.done","Đã đổi tên đăng nhập","Username updated");D("s.pass.done","Đã đổi mật khẩu","Password updated");D("s.profile.done","Đã cập nhật hồ sơ","Profile updated");
 D("s.name.same","Đây đã là tên hiện tại của bạn","That's already your name");
+D("s.name.hint","Tên đăng nhập chỉ đổi được 7 ngày một lần.","You can change your username once every 7 days.");
+D("s.name.cool","Bạn vừa đổi tên gần đây. Có thể đổi lại sau {0}.","You changed your name recently. You can change it again after {0}.");
+D("s.name.confirm","Đổi tên đăng nhập?","Change username?");D("s.name.confirm.t","Sau khi đổi, bạn phải chờ 7 ngày mới đổi được lần nữa.","After this you must wait 7 days before changing it again.");
+D("s.id","ID người dùng","User ID");D("s.id.now","ID hiện tại: {0}","Current ID: {0}");
+D("s.id.hint","Bạn có thể tự đặt ID tùy thích (3–20 ký tự: chữ không dấu, số, _). Chỉ đổi được 1 lần duy nhất, sau đó khóa vĩnh viễn.","Pick any ID you like (3–20 characters: letters, numbers, _). You can set it only ONCE — after that it's locked forever.");
+D("s.id.ph","vd: skibidi_king","e.g. skibidi_king");D("s.id.save","Đặt ID","Set ID");
+D("s.id.confirm","Đặt ID này?","Set this ID?");D("s.id.confirm.t","ID {0} sẽ bị khóa vĩnh viễn, bạn không thể đổi lại.","ID {0} will be locked permanently. You won't be able to change it again.");
+D("s.id.locked","ID của bạn đã được đặt và không thể thay đổi nữa.","Your ID is set and can no longer be changed.");
+D("s.id.taken","ID này đã có người sử dụng.","This ID is already taken.");D("s.id.done","Đã đặt ID","ID set");
+D("v.id.empty","Vui lòng nhập ID","Enter an ID");D("v.id.short","ID quá ngắn (tối thiểu 3 ký tự)","ID is too short (min 3 characters)");D("v.id.long","ID quá dài (tối đa 20 ký tự)","ID is too long (max 20 characters)");D("v.id.chars","ID chỉ gồm chữ không dấu, số và dấu _","Use letters (A–Z), numbers and _ only");
+D("s.pass.wrong","Mật khẩu hiện tại không đúng.","Current password is incorrect.");D("s.pass.same","Mật khẩu mới phải khác mật khẩu hiện tại.","New password must differ from the current one.");
+D("p.unknown","Người dùng","User");
 /* Báo cáo, lọc */
 D("dev.reply","Trả lời","Reply");
 /* Chia sẻ */
@@ -653,6 +665,7 @@ const picC={};
 function hydratePics(){document.querySelectorAll("img[data-u]").forEach(i=>{const id=i.dataset.u;i.removeAttribute("data-u");(picC[id]=picC[id]||dbGet("pub/users/"+encodeURIComponent(id)+"/pic").catch(()=>null)).then(v=>{const sr=v&&imgSrc(v);if(sr)i.src=sr;else i.remove()})})}
 const imgsHtml=a=>{a=(a||[]).filter(i=>imgSrc(i));return a.length?`<div class="gal${a.length===1?" n1":""}">${a.map(i=>`<img class="gi" src="${esc(imgSrc(i))}" alt="" loading="lazy" onclick="viewImg(this.src)">`).join("")}</div>`:""};
 const devTag=r=>r==="dev"?'<em class="tag bd">DEV</em>':"";
+const idOf=u=>u&&u.handle?"@"+u.handle:(u&&u.userId)||"";
 new MutationObserver(()=>hydratePics()).observe(document.documentElement,{childList:true,subtree:true});
 function viewImg(src){$("bigImg").src=src;openM($("mImg"))}
 function toast(m){
@@ -712,12 +725,14 @@ async function dbGet(path,qs=""){
 }
 /* ===== FIREBASE AUTH: đăng ký / đăng nhập / Google / hồ sơ chạy thẳng trên trình duyệt (không cần backend /api) =====
    Dữ liệu hồ sơ: pub/users/{uid} = {name,pic,bio,createdAt} · pub/names/{tênviếtthường} = uid · pub/roles/{uid} = "dev" (chỉ sửa trong Console) */
-let fbAuth=null,fbDb=null;
+let fbAuth=null,fbDb=null,srvOff=0,authBusy=0;
+const NAME_CD=7*864e5,srvNow=()=>Date.now()+srvOff;
+const busy=async f=>{authBusy++;try{return await f()}finally{authBusy--}};
 function fbInit(){
   if(fbAuth)return true;
   if(!window.firebase||!firebase.auth||!firebase.database)return false;
   if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-  fbAuth=firebase.auth();fbDb=firebase.database();return true;
+  fbAuth=firebase.auth();fbDb=firebase.database();try{fbDb.ref(".info/serverTimeOffset").on("value",s=>{srvOff=+s.val()||0})}catch(e){}return true;
 }
 const fbErr=(status,msg)=>{const e=new Error(msg);e.status=status;return e};
 function mapFb(e,google){
@@ -737,10 +752,47 @@ function mapFb(e,google){
   if(c==="auth/weak-password")return fbErr(400,t("v.pw.weak"));
   return fbErr(0,(e&&e.message)||t("e.gen"));
 }
+/* Đọc bằng SDK (có kèm phiên đăng nhập) trước, REST chỉ là dự phòng => tên/ảnh luôn tải đúng ngay sau khi đăng nhập */
+const rdb=async p=>{try{return await snap(p)}catch(e){return dbGet(p).catch(()=>null)}};
+/* Tài khoản chưa có hồ sơ (ghi lỗi lúc đăng ký…) => tự tạo để không bao giờ bị "không tìm thấy người dùng" */
+async function ensureProfile(u){
+  let base=(u.displayName||(u.email||"user").split("@")[0]).replace(/[^\p{L}\p{N}_]/gu,"_").slice(0,18);
+  if(base.length<3)base=(base+"user").slice(0,18);
+  let name=base,ok=false;
+  for(let i=0;i<6&&!ok;i++){
+    if(i)name=base.slice(0,14)+Math.floor(1000+Math.random()*9000);
+    try{if(!await nameFree(name,u.uid))continue;await claimName(name,u.uid);ok=true}catch(e){if(e&&e.status&&e.status!==409)break}
+  }
+  const d={name:ok?name:base,pic:u.photoURL||"",bio:"",createdAt:TS()};
+  try{await fbDb.ref("pub/users/"+u.uid).set(d)}catch(e){console.warn("[profile]",e);return{name:d.name,pic:d.pic,bio:"",createdAt:0}}
+  return{name:d.name,pic:d.pic,bio:"",createdAt:Date.now()};
+}
 async function fbMe(u){
-  const [p,r]=await Promise.all([dbGet("pub/users/"+u.uid).catch(()=>null),dbGet("pub/roles/"+u.uid).catch(()=>null)]);
+  const [p0,r]=await Promise.all([rdb("pub/users/"+u.uid),rdb("pub/roles/"+u.uid)]);
+  const p=p0||await ensureProfile(u);
   const pv=u.providerData.map(x=>x.providerId);
-  return{userId:u.uid,name:(p&&p.name)||u.displayName||(u.email||"user").split("@")[0],pic:(p&&p.pic)||u.photoURL||"",bio:(p&&p.bio)||"",role:r==="dev"?"dev":"user",email:u.email||"",createdAt:(p&&p.createdAt)||0,hasPassword:pv.includes("password"),googleLinked:pv.includes("google.com")};
+  return{userId:u.uid,name:(p&&p.name)||u.displayName||(u.email||"user").split("@")[0],pic:(p&&p.pic)||u.photoURL||"",bio:(p&&p.bio)||"",handle:(p&&p.handle)||"",handleSet:!!(p&&(p.handleSet||p.handle)),nameChangedAt:(p&&p.nameChangedAt)||0,role:r==="dev"?"dev":"user",email:u.email||"",createdAt:(p&&p.createdAt)||0,hasPassword:pv.includes("password"),googleLinked:pv.includes("google.com")};
+}
+/* Hồ sơ công khai của bất kỳ người dùng nào (nhận uid hoặc ID tùy chỉnh). Không bao giờ báo "không tìm thấy". */
+async function guessUser(id){
+  if(me&&me.userId===id)return me;
+  const hit=[...Object.values(curPosts),...wList].find(p=>p&&p.authorId===id&&p.authorName);
+  if(hit)return{name:hit.authorName,pic:hit.authorPic};
+  if(fbInit())for(const path of ["pub/posts","pub/world/posts"]){
+    try{const a=kids(await R(path).orderByChild("authorId").equalTo(id).limitToFirst(1).once("value"));if(a[0]&&a[0].authorName)return{name:a[0].authorName,pic:a[0].authorPic}}catch(e){}
+  }
+  return{};
+}
+async function profileOf(x){
+  let id=x,p=await rdb("pub/users/"+x);
+  if(!p){
+    const h=await rdb("pub/handles/"+String(x).toLowerCase());
+    if(h&&typeof h==="string"){id=h;p=await rdb("pub/users/"+h)}
+  }
+  const r=await rdb("pub/roles/"+id),role=r==="dev"?"dev":"user";
+  if(p)return{userId:id,name:p.name||t("p.unknown"),pic:p.pic||"",bio:p.bio||"",handle:p.handle||"",role,createdAt:p.createdAt||0};
+  const f=await guessUser(id);
+  return{userId:id,name:f.name||t("p.unknown"),pic:f.pic||"",bio:"",handle:"",role,createdAt:0};
 }
 const nameKey=n=>"pub/names/"+encodeURIComponent(String(n).toLowerCase());
 async function nameFree(n,uid){const v=await dbGet(nameKey(n)).catch(()=>null);return !v||v===uid}
@@ -791,20 +843,15 @@ async function fbGoogleDone(u){
 async function authApi(path,method,body){
   const k=method+" "+path;
   const um=path.match(/^\/users\/([^/]+)$/);
-  if(!(k==="POST /auth/register"||k==="POST /auth/login"||k==="POST /auth/google"||k==="POST /auth/google-popup"||k==="POST /me/link-popup"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
+  if(!(k==="POST /auth/register"||k==="POST /auth/login"||k==="POST /auth/google"||k==="POST /auth/google-popup"||k==="POST /me/link-popup"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/handle"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
   if(!fbInit())throw fbErr(0,t("fb.noload"));
   const u=fbAuth.currentUser;
-  if(um){
-    const id=decodeURIComponent(um[1]);
-    const [p,r]=await Promise.all([dbGet("pub/users/"+id),dbGet("pub/roles/"+id).catch(()=>null)]);
-    if(!p)throw fbErr(404,t("e.404"));
-    return{userId:id,name:p.name,pic:p.pic||"",bio:p.bio||"",role:r==="dev"?"dev":"user",createdAt:p.createdAt||0,postCount:0,likeCount:0};
-  }
+  if(um)return profileOf(decodeURIComponent(um[1]));
   switch(k){
-    case "POST /auth/register":return fbRegister(body);
-    case "POST /auth/login":return fbLogin(body);
-    case "POST /auth/google":return fbGoogle(body.credential);
-    case "POST /auth/google-popup":return fbGooglePopup();
+    case "POST /auth/register":return busy(()=>fbRegister(body));
+    case "POST /auth/login":return busy(()=>fbLogin(body));
+    case "POST /auth/google":return busy(()=>fbGoogle(body.credential));
+    case "POST /auth/google-popup":return busy(()=>fbGooglePopup());
     case "POST /auth/logout":await fbAuth.signOut();return{ok:true};
   }
   if(!u)throw fbErr(401,t("e.expired"));
@@ -823,14 +870,36 @@ async function authApi(path,method,body){
     }
     case "POST /me/name":{
       const n=String(body.name||"").trim(),old=me&&me.name;
+      /* chỉ được đổi tên 7 ngày một lần (đọc mốc thời gian từ server, không tin dữ liệu trên máy) */
+      const prev=+(await rdb("pub/users/"+u.uid+"/nameChangedAt"))||0;
+      if(prev&&prev+NAME_CD>srvNow())throw fbErr(429,t("s.name.cool",new Date(prev+NAME_CD).toLocaleString(loc())));
       if(!await nameFree(n,u.uid))throw fbErr(409,t("n.taken"));
       await claimName(n,u.uid);
-      try{await fbDb.ref("pub/users/"+u.uid+"/name").set(n)}catch(e){throw fbErr(403,t("fb.rules"))}
-      if(old&&old.toLowerCase()!==n.toLowerCase())fbDb.ref("pub/names/"+old.toLowerCase()).remove().catch(()=>{});
+      const diff=!old||old.toLowerCase()!==n.toLowerCase();
+      try{await fbDb.ref("pub/users/"+u.uid).update({name:n,nameChangedAt:TS()})}
+      catch(e){if(diff)fbDb.ref("pub/names/"+n.toLowerCase()).remove().catch(()=>{});throw fbErr(403,t("fb.rules"))}
+      if(old&&diff)fbDb.ref("pub/names/"+old.toLowerCase()).remove().catch(()=>{});
       try{await u.updateProfile({displayName:n})}catch(e){}
-      return{name:n};
+      return{name:n,nameChangedAt:srvNow()};
+    }
+    case "POST /me/handle":{
+      /* ID tùy chỉnh: đặt tùy thích nhưng chỉ 1 lần duy nhất, sau đó khóa vĩnh viễn */
+      const h=String(body.handle||"").trim().replace(/^@/,""),lk=h.toLowerCase(),er=vHandle(h);
+      if(er)throw fbErr(400,er);
+      const cur=await rdb("pub/users/"+u.uid);
+      if(cur&&(cur.handleSet||cur.handle))throw fbErr(403,t("s.id.locked"));
+      let res;try{res=await fbDb.ref("pub/handles/"+lk).transaction(c=>c?undefined:u.uid)}catch(e){throw fbErr(403,t("fb.rules"))}
+      if(!res.committed||res.snapshot.val()!==u.uid)throw fbErr(409,t("s.id.taken"));
+      try{await fbDb.ref("pub/users/"+u.uid).update({handle:h,handleSet:true})}
+      catch(e){fbDb.ref("pub/handles/"+lk).remove().catch(()=>{});throw fbErr(403,t("fb.rules"))}
+      return{handle:h,handleSet:true};
     }
     case "POST /me/password":
+      /* bắt buộc nhập đúng mật khẩu đang dùng (nếu tài khoản có mật khẩu) và mật khẩu mới phải khác */
+      if(me&&me.hasPassword!==false){
+        if(!body.current)throw fbErr(401,t("s.pass.wrong"));
+        if(body.current===body.password)throw fbErr(400,t("s.pass.same"));
+      }
       try{
         if(me&&me.hasPassword!==false){
           await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,body.current||""));
@@ -918,6 +987,8 @@ async function dataApi(path,method,body){
   const user=()=>{const x=fbAuth.currentUser;if(!x||!me)throw fbErr(401,t("e.expired"));return x};
   const dev=()=>{user();if(!isDevMe())throw fbErr(403,t("e.403"))};
   body=body||{};
+  /* đã đăng nhập Firebase nhưng hồ sơ chưa nạp (me rỗng) => nạp ngay để không bị kẹt "chưa đăng nhập" khi gửi bài/tin */
+  if(fbAuth.currentUser&&!me&&!authBusy){try{me=await fbMe(fbAuth.currentUser);renderAuth()}catch(e){console.warn("[me]",e)}}
 
   /* ---------- bài đăng ---------- */
   if(method==="GET"&&M(/^\/posts\/([\w-]+)\/vote$/)){const v=(await snap("votes/"+user().uid+"/"+m[1]))||{};return{liked:!!v.liked,stars:v.stars||0}}
@@ -1134,13 +1205,18 @@ async function localApi(path,method,body){
     if(e&&e.status!==undefined)throw e;
     console.warn("[data]",method,path,e);
     const c=String((e&&e.code)||"")+" "+String((e&&e.message)||"");
-    if(/permission[_ -]?denied/i.test(c))throw fbErr(403,t("fb.rules"));
+    if(/permission[_ -]?denied/i.test(c))throw fbErr(403,t("fb.rules")+" ("+method+" "+String(path).split("?")[0]+")");
     if(/network|offline|disconnect/i.test(c)){const er=fbErr(0,t("e.gen"));er.net=true;throw er}
     throw fbErr(0,(e&&e.message)||t("e.gen"));
   }
 }
 async function api(path,method="GET",body){
-  const L=await localApi(path,method,body);
+  let L;
+  try{L=await localApi(path,method,body)}
+  catch(e){
+    if(e&&e.status===401&&me&&!path.startsWith("/auth/")&&!(fbAuth&&fbAuth.currentUser)){me=null;myVotes={};setUnread(0);renderAuth()}
+    throw e;
+  }
   if(L!==undefined)return L;
   let r;
   try{r=await fetch(API+path,{method,credentials:"include",headers:{"Content-Type":"application/json","X-Skibidi":"1"},body:body?JSON.stringify(body):undefined})}
@@ -1212,7 +1288,7 @@ function renderAuth(){
     d.innerHTML=authReady?`<button class="pri" onclick="openAuth('login');toggleMenu(false)">${esc(t("login"))}</button><button onclick="openAuth('reg');toggleMenu(false)">${esc(t("register"))}</button>`:"";
   }else{
     a.innerHTML=avatar(me.name,me.pic);a.setAttribute("aria-label",t("a.profile"));
-    d.innerHTML=`<div class="au lk" onclick="openProfile(${jsq(me.userId)});toggleMenu(false)">${avatar(me.name,me.pic,true)}<div><b>${esc(me.name)}${devTag(me.role)}</b><span class="mu">${esc(me.userId)}</span></div></div><button onclick="logout()">${svg("logout",16)}${esc(t("logout"))}</button>`;
+    d.innerHTML=`<div class="au lk" onclick="openProfile(${jsq(me.userId)});toggleMenu(false)">${avatar(me.name,me.pic,true)}<div><b>${esc(me.name)}${devTag(me.role)}</b><span class="mu">${esc(idOf(me))}</span></div></div><button onclick="logout()">${svg("logout",16)}${esc(t("logout"))}</button>`;
   }
   renderNav();renderPop();
 }
@@ -1236,6 +1312,14 @@ function vName(v){
   if(v.length<3)return t("v.name.short");
   if(v.length>24)return t("v.name.long");
   if(!/^[\p{L}\p{N}_]+$/u.test(v))return t("v.name.chars");
+  return"";
+}
+function vHandle(v){
+  if(!v)return t("v.id.empty");
+  if(/\s/.test(v))return t("v.name.space");
+  if(v.length<3)return t("v.id.short");
+  if(v.length>20)return t("v.id.long");
+  if(!/^[A-Za-z0-9_]+$/.test(v))return t("v.id.chars");
   return"";
 }
 function vEmail(v){
@@ -1311,7 +1395,7 @@ async function authGo(){
   setMsg("aMsg","");$("aGo").disabled=true;$("aGo").textContent=t("auth.wait");
   try{
     me=await api(reg?"/auth/register":"/auth/login","POST",reg?{name,email,password:pw}:{email,password:pw});
-    fails=0;closeAuth();afterAuth();toast(reg?t("auth.hello.reg",me.name,me.userId):t("auth.hello",me.name));
+    fails=0;closeAuth();afterAuth();toast(reg?t("auth.hello.reg",me.name,idOf(me)):t("auth.hello",me.name));
   }catch(e){
     let m=e.message;
     if(!reg&&e.status===401)m=t("auth.wrong");
@@ -1321,10 +1405,15 @@ async function authGo(){
   }
   $("aGo").disabled=false;$("aGo").textContent=reg?t("a.title.reg"):t("login");
 }
-function afterAuth(){renderAuth();pollUnread();show(view,viewArg,true);if(/^#\/post\//.test(location.hash)&&!openId)openFromHash()}
+function afterAuth(){
+  /* làm mới toàn bộ dữ liệu theo tài khoản mới, không cần tải lại trang */
+  wList=[];wRep={};wGroups=[];homeDirty=true;unreadFails=0;
+  renderAuth();pollUnread();loadRoles();loadCats();loadCfg();loadGames();
+  show(view,viewArg,true);if(/^#\/post\//.test(location.hash)&&!openId)openFromHash();
+}
 async function logout(){
   try{await api("/auth/logout","POST")}catch(e){}
-  me=null;myVotes={};setUnread(0);toggleMenu(false);closeRoom();renderAuth();
+  me=null;myVotes={};wList=[];wRep={};wGroups=[];setUnread(0);toggleMenu(false);closeRoom();renderAuth();
   if(["mine","liked","inbox"].includes(view))go("");else show(view,viewArg,true);
 }
 async function restore(){
@@ -1335,6 +1424,13 @@ async function restore(){
     }
   }catch(e){console.warn("[restore]",e)}
   loadRoles();authReady=true;
+  if(fbAuth)fbAuth.onAuthStateChanged(async u=>{
+    if(authBusy)return;
+    try{
+      if(!u){if(me){me=null;myVotes={};setUnread(0);renderAuth();if(["mine","liked","inbox"].includes(view))go("");else show(view,viewArg,true)}}
+      else if(!me||me.userId!==u.uid){me=await fbMe(u);afterAuth()}
+    }catch(e){console.warn("[auth]",e)}
+  });
 }
 
 /* --- Google Identity Services (đăng nhập + gắn Gmail) --- */
@@ -1751,18 +1847,20 @@ async function loadProfile(id){
   try{
     const u=await api("/users/"+encodeURIComponent(id));
     if(view!=="profile"||viewArg!==id)return;
-    let posts=[];try{posts=(await api("/users/"+encodeURIComponent(id)+"/posts")).posts||[]}catch(e){}
+    let posts=[];try{posts=(await api("/users/"+encodeURIComponent(u.userId)+"/posts")).posts||[]}catch(e){}
     if(view!=="profile"||viewArg!==id)return;
     posts.forEach(p=>{curPosts[p.id]=p});
     const mine=me&&me.userId===u.userId;
+    if(mine)Object.assign(u,{name:me.name,pic:me.pic,bio:me.bio,handle:me.handle});
+    const likes=posts.reduce((n,p)=>n+(p.likeCount||0),0);
     region(el,"success");
-    el.innerHTML=`<div class="pcard">${avatar(u.name,u.pic,"xl")}<div class="pi"><h2>${esc(u.name)}${devTag(u.role)}</h2><span class="mu">ID ${esc(u.userId)}</span>
+    el.innerHTML=`<div class="pcard">${avatar(u.name,u.pic,"xl")}<div class="pi"><h2>${esc(u.name)}${devTag(u.role)}</h2><span class="mu">ID ${esc(idOf(u))}</span>
     <p style="margin-top:8px;white-space:pre-wrap;word-break:break-word;color:${u.bio?"inherit":"var(--mu)"}">${esc(u.bio||t("p.nobio"))}</p>
-    <div class="pst"><div><b>${u.postCount||posts.length}</b><span class="mu">${esc(t("p.posts"))}</span></div><div><b>${u.likeCount||0}</b><span class="mu">${esc(t("p.likes"))}</span></div>${u.createdAt?`<div><b>${esc(new Date(u.createdAt).toLocaleDateString(loc()))}</b><span class="mu">${esc(t("p.joined"))}</span></div>`:""}</div>
+    <div class="pst"><div><b>${posts.length}</b><span class="mu">${esc(t("p.posts"))}</span></div><div><b>${likes}</b><span class="mu">${esc(t("p.likes"))}</span></div>${u.createdAt?`<div><b>${esc(new Date(u.createdAt).toLocaleDateString(loc()))}</b><span class="mu">${esc(t("p.joined"))}</span></div>`:""}</div>
     <div class="row" style="margin-top:4px">${mine?`<button class="pri" onclick="openSettings('profile')">${svg("gear",16)}${esc(t("p.edit"))}</button>`:`<button class="pri" onclick="msgUser(${jsq(u.userId)})">${svg("mail",16)}${esc(t("in.msg"))}</button><button onclick="openReport({type:'user',id:${jsq(u.userId)},title:${jsq(u.name)}})">${svg("flag",16)}${esc(t("report"))}</button>`}</div></div></div>
     <div class="hrow"><h2>${esc(t("p.posts"))}</h2></div>
     ${posts.length?`<div class="grid">${posts.map(cardHtml).join("")}</div>`:`<div class="st" style="min-height:160px">${esc(t("p.none"))}</div>`}`;
-  }catch(e){if(e.status===404){region(el,"empty",t("p.notfound"))}else region(el,"error",e,()=>loadProfile(id))}
+  }catch(e){region(el,"error",e,()=>loadProfile(id))}
 }
 function msgUser(id){if(!me)return openAuth();go("inbox/"+encodeURIComponent(id))}
 
@@ -1886,7 +1984,7 @@ async function loadReplies(id){
   catch(e){el.innerHTML=`<div class="mu ln"><span>${esc(t("e.load"))}</span><button onclick="loadReplies(${jsq(id)})">${esc(t("reload"))}</button></div>`}
 }
 function replyHtml(pid,r){
-  return `<div class="rp">${avatar(r.authorName,r.authorPic)}<div style="min-width:0"><div class="rb"><b onclick="openProfile(${jsq(r.authorId||"")})" style="cursor:pointer">${esc(r.authorName||t("anon"))}</b>${devTag(r.authorRole)}<div class="rt2">${esc(r.text||"")}</div>${imgsHtml(r.images)}</div>
+  return `<div class="rp"><span onclick="openProfile(${jsq(r.authorId||"")})" style="cursor:pointer">${avatar(r.authorName,r.authorPic)}</span><div style="min-width:0"><div class="rb"><b onclick="openProfile(${jsq(r.authorId||"")})" style="cursor:pointer">${esc(r.authorName||t("anon"))}</b>${devTag(r.authorRole)}<div class="rt2">${esc(r.text||"")}</div>${imgsHtml(r.images)}</div>
   <div class="rm"><span>${esc(ago(r.createdAt))}</span>${me?`<button onclick="replyTo(${jsq(pid)},${jsq(r.authorName||"")})">${esc(t("w.replies"))}</button>`:""}${canDel(r.authorId)?`<button onclick="delReply(${jsq(pid)},${jsq(r.id)})">${esc(t("del"))}</button>`:""}</div></div></div>`;
 }
 function paintReplies(id){
@@ -2103,11 +2201,14 @@ function renderSettings(){
   if(!me)h+=`<div class="sec"><p class="mu" style="font-size:13px">${esc(t("s.guest"))}</p><div class="row"><button class="pri" onclick="closeM($('mSet'));openAuth()">${esc(t("login"))}</button></div></div>`;
   else{
     const hasPw=me.hasPassword!==false;
+    const nameLock=(me.nameChangedAt||0)+NAME_CD>srvNow(),idLock=!!(me.handleSet||me.handle);
     h+=`<div class="sec" id="sec-profile"><h3>${esc(t("s.profile"))}</h3>
       <div class="prow">${avatar(me.name,me.pic,"xl")}<div><button onclick="pickFile(setAvatar,300)">${svg("image",16)}${esc(t("s.avatar"))}</button></div></div>
       <label class="mu" style="display:block;margin:12px 0 4px" for="stBio">${esc(t("s.bio"))}</label><textarea id="stBio" maxlength="200" placeholder="${esc(t("s.bio.ph"))}">${esc(me.bio||"")}</textarea>
       <div class="row"><button class="pri" onclick="saveProfile()">${esc(t("save"))}</button></div></div>
-    <div class="sec"><h3>${esc(t("s.name"))}</h3><input id="stName" maxlength="24" value="${esc(me.name)}" autocapitalize="off" spellcheck="false"><div class="fm" id="stNameMsg"></div><div class="row" style="margin-top:0"><button class="pri" onclick="saveName()">${esc(t("save"))}</button></div></div>
+    <div class="sec"><h3>${esc(t("s.name"))}</h3><input id="stName" maxlength="24" value="${esc(me.name)}" autocapitalize="off" spellcheck="false" ${nameLock?"disabled":""}><div class="fm${nameLock?" warn":""}" id="stNameMsg">${esc(nameLock?t("s.name.cool",new Date((me.nameChangedAt||0)+NAME_CD).toLocaleString(loc())):t("s.name.hint"))}</div><div class="row" style="margin-top:0"><button class="pri" onclick="saveName()" ${nameLock?"disabled":""}>${esc(t("save"))}</button></div></div>
+    <div class="sec" id="sec-id"><h3>${esc(t("s.id"))}</h3><p class="mu" style="font-size:13px;word-break:break-all">${esc(t("s.id.now",idOf(me)))}</p>
+      ${idLock?`<p class="fm ok">${esc(t("s.id.locked"))}</p>`:`<p class="mu" style="margin:4px 0 8px">${esc(t("s.id.hint"))}</p><input id="stId" maxlength="20" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="${esc(t("s.id.ph"))}"><div class="fm" id="stIdMsg"></div><div class="row" style="margin-top:0"><button class="pri" onclick="saveHandle()">${esc(t("s.id.save"))}</button></div>`}</div>
     <div class="sec"><h3>${esc(t("s.pass"))}</h3>
       ${hasPw?`<div class="pw"><input id="pwCur" type="password" maxlength="64" autocomplete="current-password" placeholder="${esc(t("s.pass.cur"))}"><button type="button" class="eye" onclick="eye('pwCur',this)">${svg("eye")}</button></div>`:""}
       <div class="pw" style="margin-top:8px"><input id="pwNew" type="password" maxlength="64" autocomplete="new-password" placeholder="${esc(t("s.pass.new"))}"><button type="button" class="eye" onclick="eye('pwNew',this)">${svg("eye")}</button></div>
@@ -2122,7 +2223,7 @@ function renderSettings(){
 }
 function setTheme(p){applyTheme(p,true);renderSettings()}
 function setAvatar(id){
-  api("/me/profile","POST",{pic:id,bio:me.bio||""}).then(u=>{Object.assign(me,u,{pic:u.pic||id});renderAuth();renderSettings();toast(t("s.profile.done"))}).catch(e=>toast(e.message));
+  api("/me/profile","POST",{pic:id,bio:me.bio||""}).then(u=>{delete picC[me.userId];Object.assign(me,u,{pic:u.pic||id});renderAuth();renderSettings();toast(t("s.profile.done"))}).catch(e=>toast(e.message));
 }
 async function saveProfile(){
   try{const u=await api("/me/profile","POST",{bio:$("stBio").value.trim(),pic:me.pic||""});Object.assign(me,u);renderAuth();toast(t("s.profile.done"))}catch(e){toast(e.message)}
@@ -2131,16 +2232,25 @@ async function saveName(){
   const v=$("stName").value.trim(),e=vName(v);
   if(e)return setMsg("stNameMsg",e,"bad");
   if(v===me.name)return setMsg("stNameMsg",t("s.name.same"),"warn");
+  if(!await yes({title:t("s.name.confirm"),text:t("s.name.confirm.t"),ok:t("save")}))return;
   try{const u=await api("/me/name","POST",{name:v});Object.assign(me,u,{name:u.name||v});renderAuth();renderSettings();toast(t("s.name.done"))}
   catch(er){setMsg("stNameMsg",er.status===409?t("n.taken"):er.message,"bad")}
+}
+async function saveHandle(){
+  const v=$("stId").value.trim().replace(/^@/,""),e=vHandle(v);
+  if(e)return setMsg("stIdMsg",e,"bad");
+  if(!await yes({title:t("s.id.confirm"),text:t("s.id.confirm.t",v),ok:t("s.id.save"),danger:true}))return;
+  try{const u=await api("/me/handle","POST",{handle:v});Object.assign(me,u);renderAuth();renderSettings();toast(t("s.id.done"))}
+  catch(er){setMsg("stIdMsg",er.message,"bad")}
 }
 async function savePass(){
   const cur=$("pwCur")?$("pwCur").value:"",n1=$("pwNew").value,n2=$("pwNew2").value;
   if($("pwCur")&&!cur)return setMsg("stPwMsg",t("v.pw.empty"),"bad");
   const e=pwErr(n1);if(e)return setMsg("stPwMsg",e,"bad");
   if(n1!==n2)return setMsg("stPwMsg",t("v.pw.diff"),"bad");
+  if(cur&&cur===n1)return setMsg("stPwMsg",t("s.pass.same"),"bad");
   try{await api("/me/password","POST",{current:cur,password:n1});me.hasPassword=true;renderSettings();toast(t("s.pass.done"))}
-  catch(er){setMsg("stPwMsg",er.status===401||er.status===403?t("auth.wrong"):er.message,"bad")}
+  catch(er){setMsg("stPwMsg",er.status===401?t("s.pass.wrong"):er.message,"bad")}
 }
 
 /* ===== DEV PANEL (mọi thao tác kiểm tra quyền ở backend) ===== */
