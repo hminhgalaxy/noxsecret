@@ -1,8 +1,6 @@
-/* ===== Giao diện trang đăng nhập / đăng ký — CHỈ email + mật khẩu (Firebase). Google nằm riêng ở google.html ===== */
+/* ===== Giao diện trang đăng nhập / đăng ký — CHỈ email + mật khẩu (Firebase). Google nằm riêng ở google-login.js ===== */
 (function () {
   "use strict";
-  /* Google quay về địa chỉ login.html (đã khai báo trong Google Cloud) -> chuyển nguyên sang trang Google riêng, trang này KHÔNG xử lý Google */
-  if (/(^|&)(id_token|error)=/.test(location.hash.replace(/^#/, ""))) { location.replace("google.html" + location.hash); return; }
   const $ = id => document.getElementById(id);
   const REG = document.body.dataset.page === "register";
   let lang = "en"; try { lang = localStorage.getItem("lang") === "vi" ? "vi" : "en"; } catch (e) {}
@@ -37,14 +35,15 @@
   D("locked", "Bạn đã thử sai nhiều lần. Thử lại sau {0} giây.", "Too many attempts. Try again in {0}s.");
   D("e.wrong", "Sai Gmail hoặc mật khẩu.", "Wrong Gmail or password."); D("e.exists", "Gmail này đã được đăng ký. Hãy đăng nhập.", "This Gmail is already registered. Log in instead.");
   D("e.nametaken", "Tên hiển thị đã có người sử dụng. Hãy chọn tên khác.", "That name is taken. Choose another.");
-  D("e.diff", "Gmail này đã đăng ký bằng cách khác. Hãy đăng nhập bằng mật khẩu, rồi gắn Google trong Cài đặt.", "This Gmail is registered another way. Log in with your password, then link Google in Settings.");
+  D("e.diff", "Gmail này đã dùng cách đăng nhập khác. Hãy đăng nhập bằng cách bạn đã dùng lúc đầu.", "This Gmail uses a different sign-in method. Log in the way you first did.");
   D("e.toomany", "Thao tác quá nhanh, hãy thử lại sau ít phút.", "Too many requests, try again in a few minutes.");
   D("e.network", "Mất kết nối mạng. Kiểm tra mạng rồi thử lại.", "Network error. Check your connection and try again.");
-  D("e.noload", "Không tải được Firebase. Kiểm tra mạng rồi tải lại trang.", "Firebase couldn't load. Check your connection and reload.");
-  D("e.config", "Firebase Authentication chưa bật cho project này: vào Firebase Console → Authentication → Get started.", "Firebase Authentication isn't set up: Firebase Console → Authentication → Get started.");
-  D("e.off", "Cách đăng nhập này chưa bật: Firebase Console → Authentication → Sign-in method → bật Email/Password (và Google nếu dùng Google).", "This sign-in method is off: Firebase Console → Authentication → Sign-in method → enable Email/Password (and Google).");
-  D("e.domain", "Tên miền này chưa được phép: Firebase Console → Authentication → Settings → Authorized domains.", "This domain isn't authorized: Firebase Console → Authentication → Settings → Authorized domains.");
+  D("e.noload", "Không kết nối được. Kiểm tra mạng rồi tải lại trang.", "Couldn't connect. Check your connection and reload the page.");
+  D("e.config", "Đăng nhập đang tạm thời chưa dùng được. Hãy thử lại sau ít phút.", "Sign-in is temporarily unavailable. Please try again in a few minutes.");
+  D("e.off", "Đăng nhập đang tạm thời chưa dùng được. Hãy thử lại sau ít phút.", "Sign-in is temporarily unavailable. Please try again in a few minutes.");
+  D("e.domain", "Đăng nhập đang tạm thời chưa dùng được. Hãy thử lại sau ít phút.", "Sign-in is temporarily unavailable. Please try again in a few minutes.");
   D("e.disabled", "Tài khoản này đã bị khóa.", "This account is disabled."); D("e.weak", "Mật khẩu quá yếu.", "Password is too weak.");
+  D("e.timeout", "Kết nối đang chậm. Hãy kiểm tra mạng rồi thử lại.", "The connection is slow. Check your network and try again.");
   D("e.other", "Chưa thực hiện được. Hãy thử lại.", "That didn't work. Please try again.");
   D("pn.title", "Một tài khoản cho cả cộng đồng.", "One account for the whole community.");
   D("pn.1", "Script, APK, iOS và link do mọi người chia sẻ", "Scripts, APKs, iOS files and links shared by everyone");
@@ -122,6 +121,7 @@
     const email = $("email").value.trim().toLowerCase(), password = $("pw").value;
     try {
       if (REG) await SkibidiFB.register({ name: $("name").value.trim(), email, password }); else await SkibidiFB.login({ email, password });
+      try { localStorage.removeItem("skibidi_google_session"); } catch (e) {}
       return done();
     } catch (e) {
       busy(false);
@@ -148,7 +148,6 @@
       const inp = b.parentElement.querySelector("input"); b.innerHTML = EYE.on; b.setAttribute("aria-label", t("a.showpw"));
       b.addEventListener("click", () => { const s = inp.type === "password"; inp.type = s ? "text" : "password"; b.innerHTML = s ? EYE.off : EYE.on; b.setAttribute("aria-label", t(s ? "a.hidepw" : "a.showpw")); });
     });
-    $("gLink").href = "google.html" + (NEXT !== "./" ? "?next=" + encodeURIComponent(NEXT) : "");
     /* đã đăng nhập sẵn => vào thẳng trang chính (không làm gián đoạn lúc đang đăng ký) */
     SkibidiFB.onceUser(u => { if (u && !working) done(); }).catch(e => { if (e.code === "noload" || e.code === "config") msg("aMsg", fbText(e), "bad"); });
   }
