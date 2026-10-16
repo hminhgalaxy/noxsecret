@@ -2967,4 +2967,755 @@ $("#fSave").addEventListener("click",function(){
 });
 $("#fCancel").addEventListener("click",resetForm);
 function renderDevList(){
-  $("#devList").inn
+  $("#devList").innerHTML=CATS.map(function(c){
+    var it=state.data[c.id]||[];
+    return '<details><summary>'+esc(c.label)+' ('+it.length+')</summary>'+it.map(function(x){
+      return '<div class="drow"><span>'+esc(x.name)+'</span><button class="btn btn-g" data-ed="'+c.id+':'+esc(x.key)+'">Sửa</button><button class="btn btn-g" data-del="'+c.id+':'+esc(x.key)+'">Xóa</button></div>'
+    }).join("")+"</details>"
+  }).join("");
+}
+$("#devList").addEventListener("click",function(e){
+  if(!state.dev||!db)return;
+  var ed=e.target.closest("[data-ed]"),de=e.target.closest("[data-del]");
+  if(ed){
+    var a=ed.dataset.ed.split(":"),it=(state.data[a[0]]||[]).find(function(x){
+      return x.key===a[1]
+    });
+    if(it){
+      state.fc=a[0];
+      buildCatSeg();
+      state.edit=a[1];
+      $("#fName").value=it.name;
+      $("#fDesc").value=it.desc||"";
+      $("#fUrl").value=it.url||"";
+      $("#fCode").value=it.code||"";
+      $("#fCancel").style.display="inline-flex";
+      $("#dev .body").scrollTo({
+        top:0,behavior:"smooth"
+      });
+    }
+  }
+  if(de&&confirm("Xóa mục này?")){
+    var b=de.dataset.del.split(":");
+    db.ref(ND+"/"+catOf(b[0]).node+"/"+b[1]).remove();
+  }
+});
+const MW=[["halloween","Halloween (sự kiện)"],["christmas","Giáng sinh (sự kiện)"],["tet","Tết (sự kiện)"],["autumn","Mùa thu"],["summer","Mùa hè"]];
+function fillEnvSel(){
+  $("#manWx").innerHTML=["none","clear","rain","snow","fog","storm","wind","dust"].map(function(w){
+    return "<option>"+w+"</option>"
+  }).join("");
+  $("#lockEnv").innerHTML=["normal","autumn","summer","halloween","christmas","tet"].map(function(t){
+    return "<option>"+t+"</option>"
+  }).join("");
+  $("#musList").innerHTML=MW.map(function(m){
+    return '<div class="fld"><label>'+m[1]+'</label><input data-mw="'+m[0]+'" type="url" placeholder="https://…/nhac.mp3"></div>'
+  }).join("");
+}
+function syncEnvUI(){
+  var s=state.settings;
+  $("#envAuto").classList.toggle("on",s.envMode==="auto");
+  $("#envManual").classList.toggle("on",s.envMode==="manual");
+  $("#manWxWrap").style.display=s.envMode==="manual"?"flex":"none";
+  $("#lockOn").checked=!!s.lockOn;
+  $("#lockWrap").style.display=s.lockOn?"flex":"none";
+  $("#manWx").value=s.manualWeather||"clear";
+  $("#lockEnv").value=s.lockEnv||"halloween";
+  $("#volR").value=state.vol;
+  $("#volV").textContent=state.vol+"%";
+  document.querySelectorAll("[data-mw]").forEach(function(i){
+    i.value=(state.music||{})[i.dataset.mw]||""
+  });
+}
+$("#volR").addEventListener("input",function(e){
+  state.vol=+e.target.value;
+  $("#volV").textContent=state.vol+"%";
+  if(SND.master)SND.master.gain.setTargetAtTime(state.vol/100,SND.ac.currentTime,.1);
+  BGM.volume=state.vol/100;
+});
+$("#envAuto").addEventListener("click",function(){
+  state.settings.envMode="auto";
+  syncEnvUI();
+});
+$("#envManual").addEventListener("click",function(){
+  state.settings.envMode="manual";
+  syncEnvUI();
+});
+$("#lockOn").addEventListener("change",function(e){
+  state.settings.lockOn=e.target.checked;
+  syncEnvUI();
+});
+$("#envSave").addEventListener("click",function(){
+  if(!state.dev||!db)return;
+  state.settings.manualWeather=$("#manWx").value;
+  state.settings.lockEnv=$("#lockEnv").value;
+  var mu={};
+  document.querySelectorAll("[data-mw]").forEach(function(i){
+    var u=i.value.trim();
+    if(vUrl(u))mu[i.dataset.mw]=u;
+  });
+  state.music=mu;
+  state.vol=+$("#volR").value;
+  db.ref("nox_settings").update({
+    envMode:state.settings.envMode,manualWeather:state.settings.manualWeather,lockOn:state.settings.lockOn,lockEnv:state.settings.lockEnv,vol:state.vol,music:mu
+  }).then(function(){
+    toast("Đã lưu environment.");
+  }).catch(function(){
+    toast("Lưu thất bại.");
+  });
+  applyEnv();
+});
+$("#anSave").addEventListener("click",function(){
+  if(!state.dev||!db)return;
+  db.ref("nox_notice").update({
+    title:clean($("#anTitle").value),body:clean($("#anBody").value),enabled:$("#anOn").checked,updatedAt:firebase.database.ServerValue.TIMESTAMP
+  });
+  toast("Đã lưu thông báo.");
+});
+$("#utilNoteSave").addEventListener("click",function(){
+  if(!state.dev||!db)return;
+  db.ref("nox_notice").update({
+    util:clean($("#utilNoteIn").value)
+  });
+  toast("Đã lưu ghi chú.");
+});
+document.querySelectorAll("#p-perf [data-p]").forEach(function(b){
+  b.addEventListener("click",function(){
+    state.settings.perf=state.perfEff=b.dataset.p;
+    if(db&&state.dev)db.ref("nox_settings").update({
+      perf:b.dataset.p
+    });
+    FX.set(FX.type);
+    document.querySelectorAll("#p-perf [data-p]").forEach(function(x){
+      x.classList.toggle("on",x===b)
+    });
+  });
+});
+/* FIREBASE */
+let pend=CATS.length,done=false;
+function markPend(){
+  pend--;
+  if(pend<=0&&!done){
+    done=true;
+    hideLoader();
+  }
+}
+function hideLoader(){
+  var l=$("#loader");
+  if(l){
+    l.classList.add("hide");
+    setTimeout(function(){
+      l.style.display="none"
+    },600);
+  }
+}
+setTimeout(function(){
+  if(!done)loaderFail();
+},9000);
+var listened={};
+function afterData(){
+  if($("#shUtil").classList.contains("on"))refreshUtil();
+  if(state.dev&&$("#dev").classList.contains("on"))renderDevList();
+  renderHome();
+}
+function listenCat(c){
+  if(listened[c.id])return;
+  listened[c.id]=1;
+  db.ref(ND+"/"+c.node).on("value",function(sn){
+    var v=sn.val()||{};
+    state.data[c.id]=Object.keys(v).map(function(k){
+      return nI(k,v[k])
+    }).sort(function(a,b){
+      return b.ts-a.ts
+    });
+    afterData();
+    markPend();
+  },function(){
+    state.data[c.id]=[];
+    markPend();
+  });
+}
+if(db){
+  BASE.forEach(listenCat);
+  db.ref("nox_cats").on("value",function(sn){
+    var v=sn.val()||{};
+    state.cx=v;
+    CATS=BASE.concat(Object.keys(v).map(function(k){
+      var m=v[k]&&v[k].mode==="code"?"code":"url";
+      return{
+        id:"c_"+k,label:clean((v[k]&&v[k].label)||"Mục").slice(0,24),node:"cx_"+k,ic:m==="code"?"script":"link",mode:m
+      }
+    }));
+    CATS.forEach(function(c){
+      if(c.id.indexOf("c_")===0)listenCat(c)
+    });
+    if($("#shUtil").classList.contains("on"))refreshUtil();
+    if($("#dev").classList.contains("on")){
+      buildCatSeg();
+      renderDevList();
+      renderCx();
+    }
+    renderHome();
+  },function(){});
+  db.ref("nox_settings").on("value",function(s){
+    var v=s.val()||{};
+    Object.assign(state.settings,{
+      envMode:v.envMode||"auto",manualWeather:v.manualWeather||"clear",lockOn:!!v.lockOn,lockEnv:v.lockEnv||"halloween",perf:v.perf||"balanced"
+    });
+    state.perfEff=state.settings.perf;
+    state.vol=isFinite(v.vol)?+v.vol:50;
+    state.music=v.music||{};
+    if(SND.master)SND.master.gain.setTargetAtTime(state.vol/100,SND.ac.currentTime,.2);
+    BGM.volume=state.vol/100;
+    syncEnvUI();
+    FX.set(FX.type);
+    applyEnv();
+  },function(){});
+  db.ref("nox_notice").on("value",function(s){
+    var v=s.val()||{};
+    state.notice=v;
+    state.utilNote=v.util||"";
+    var un=$("#utilNote");
+    if(state.utilNote){
+      un.style.display="block";
+      un.textContent=state.utilNote;
+    }else un.style.display="none";
+    if(v.enabled&&v.body){
+      var ver=String(v.updatedAt||""),rec=null;
+      try{
+        rec=JSON.parse(sessionStorage.getItem("ssw_notice_seen")||"null")
+      }catch(_){}
+      if(!(rec&&rec.ver===ver)){
+        $("#ntTitle").textContent=v.title||"Thông báo";
+        $("#ntBody").textContent=v.body;
+        openPop("#shNotice");
+        try{
+          sessionStorage.setItem("ssw_notice_seen",JSON.stringify({
+            ver:ver
+          }))
+        }catch(_){}
+      }
+    }
+  },function(){});
+}else{
+  CATS.forEach(function(c){
+    state.data[c.id]=[];
+    markPend();
+  });
+}
+setInterval(applyEnv,30000);
+const WXN={
+  none:"Quang đãng",clear:"Quang đãng",rain:"Mưa",storm:"Giông bão",snow:"Tuyết",fog:"Sương mù",wind:"Gió lớn",dust:"Bụi gió"
+};
+const ENN={
+  normal:"Thường",halloween:"Halloween",christmas:"Giáng sinh",tet:"Tết",autumn:"Mùa thu",summer:"Mùa hè"
+};
+function updateChips(){
+  var e=state.env,h=webHour(),set=function(id,v){
+    var n=document.getElementById(id);
+    if(n&&n.textContent!==v)n.textContent=v
+  };
+  if(!e)return;
+  set("cT","Giờ web "+pad(h)+":"+pad((h%1)*60));
+  set("cW",WXN[e.wx]||"Quang đãng");
+  set("cE",ENN[e.theme!=="normal"?e.theme:e.season]||"Thường");
+  set("cG","Gió "+(WIND<.5?"nhẹ":WIND<1?"vừa":"mạnh"));
+}
+function renderHome(){
+  $("#main").innerHTML='<section class="hero lg"><h1>SKIBIDI SCRIPT</h1><p>Script, APK, iOS và link hữu ích gom về một nơi, giữa khung cảnh chạy theo giờ web. Mọi bài đăng đều được Dev kiểm duyệt trước khi công khai.</p><div class="chips"><span class="chip lg" id="cT"></span><span class="chip lg" id="cW"></span><span class="chip lg" id="cE"></span><span class="chip lg" id="cG"></span></div><div class="cfoot"><button class="btn btn-p" data-act="cat" data-cat="script">Mở Tiện ích</button></div></section>';
+  updateChips();
+}
+function renderCx(){
+  var k=Object.keys(state.cx);
+  $("#cxList").innerHTML=k.length?k.map(function(i){
+    var c=state.cx[i]||{};
+    return'<div class="drow"><span>'+esc(c.label)+' · '+(c.mode==="code"?"Code":"Link")+'</span><button class="btn btn-g" data-cxdel="'+esc(i)+'">Xóa</button></div>'
+  }).join(""):'<div class="utilNote" style="color:#b4bed3">Chưa có danh mục riêng.</div>';
+}
+$("#cxMode").addEventListener("click",function(e){
+  var b=e.target.closest("button");
+  if(!b)return;
+  state.cxm=b.dataset.m;
+  this.querySelectorAll("button").forEach(function(x){
+    x.classList.toggle("on",x===b)
+  });
+});
+$("#cxAdd").addEventListener("click",function(){
+  if(!state.dev||!db)return;
+  var n=clean($("#cxName").value.trim()).slice(0,24);
+  if(!n){
+    toast("Nhập tên danh mục.");
+    return;
+  }
+  db.ref("nox_cats").push({
+    label:n,mode:state.cxm,createdAt:firebase.database.ServerValue.TIMESTAMP
+  }).then(function(){
+    $("#cxName").value="";
+    toast("Đã thêm danh mục.");
+  }).catch(function(){
+    toast("Lưu thất bại (kiểm tra quyền Firebase).");
+  });
+});
+$("#cxList").addEventListener("click",function(e){
+  var b=e.target.closest("[data-cxdel]");
+  if(!b||!state.dev||!db)return;
+  if(confirm("Xóa danh mục này và toàn bộ mục bên trong?")){
+    var k=b.dataset.cxdel;
+    db.ref("nox_cats/"+k).remove();
+    db.ref(ND+"/cx_"+k).remove();
+  }
+});
+fillEnvSel();
+syncEnvUI();
+updateWxInfo();
+applyUser();
+paintSnd();
+renderHome();
+tickTime();
+applyEnv();
+
+/* =====================================================================
+   MÔ-ĐUN NÂNG CẤP v4
+   - Giao diện: Bối cảnh (Natural / Dynamic) + Phong cách (Nox / Liquid Glass)
+   - Đăng bài chờ duyệt, hồ sơ (đổi tên 7 ngày/lần), báo cáo & góp ý
+   - Dev: tab Chờ duyệt + Báo cáo, quyền thật nằm ở database.rules.json
+   ===================================================================== */
+var PREF_KEY = "ssw_pref4";
+var WEEK = 7 * 24 * 60 * 60 * 1000;
+var pref = { bg: "", st: "", lite: false };
+try { Object.assign(pref, JSON.parse(localStorage.getItem(PREF_KEY) || "{}")); } catch (_) {}
+var prof = null;
+var pendAll = [];
+var repAll = [];
+var devRefs = [];
+var SVT = function () { return firebase.database.ServerValue.TIMESTAMP; };
+
+function uidNow() { return auth && auth.currentUser ? auth.currentUser.uid : null; }
+function myName() {
+  return (prof && prof.displayName) || (state.user && state.user.name) || "Ẩn danh";
+}
+function flat(v) {
+  var out = [];
+  v = v || {};
+  Object.keys(v).forEach(function (u) {
+    Object.keys(v[u] || {}).forEach(function (k) {
+      out.push(Object.assign({ uid: u, key: k }, v[u][k]));
+    });
+  });
+  return out.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+}
+
+/* ---------- Lưu & áp dụng lựa chọn giao diện ---------- */
+function savePref(p) {
+  Object.assign(pref, p);
+  try { localStorage.setItem(PREF_KEY, JSON.stringify(pref)); } catch (_) {}
+  applyPref();
+}
+function applyPref() {
+  pref.bg = "dynamic";
+  var b = document.body;
+  b.classList.remove("bg-natural", "bg-dynamic", "st-glass", "st-nox");
+  if (pref.bg) b.classList.add("bg-" + pref.bg);
+  if (pref.st) b.classList.add("st-" + pref.st);
+  var dyn = pref.bg === "dynamic";
+  state.paused = dyn || $("#dev").classList.contains("on");
+  if (dyn) { startDyn(); }
+  else { stopDyn(); if (!state.paused) FX.kick(); }
+}
+
+/* ---------- Three.js: nền Dynamic (tải khi cần, giải phóng khi đổi) ---------- */
+var DYN = { r: null, raf: 0, sc: null, mv: null, rs: null, busy: false };
+function stopDyn() {
+  cancelAnimationFrame(DYN.raf);
+  DYN.raf = 0;
+  if (DYN.mv) { removeEventListener("pointermove", DYN.mv); DYN.mv = null; }
+  if (DYN.rs) { removeEventListener("resize", DYN.rs); DYN.rs = null; }
+  if (DYN.sc) {
+    DYN.sc.traverse(function (o) {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) o.material.dispose();
+    });
+    DYN.sc = null;
+  }
+  if (DYN.r) { DYN.r.dispose(); DYN.r = null; }
+}
+function startDyn() {
+  stopDyn();
+  if (!window.THREE) {
+    if (DYN.busy) return;
+    DYN.busy = true;
+    var s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+    s.onload = function () { DYN.busy = false; if (pref.bg === "dynamic") startDyn(); };
+    s.onerror = function () { DYN.busy = false; toast("Không tải được Three.js, dùng nền tĩnh."); };
+    document.head.appendChild(s);
+    return;
+  }
+  var T = THREE, cv = $("#fx3");
+  var weak = pref.lite || (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  var r;
+  try { r = new T.WebGLRenderer({ canvas: cv, alpha: true, antialias: false, powerPreference: "low-power" }); }
+  catch (e) { toast("Thiết bị không hỗ trợ WebGL."); return; }
+  r.setPixelRatio(Math.min(devicePixelRatio || 1, weak ? 1 : 1.5));
+  r.setSize(innerWidth, innerHeight, false);
+  DYN.r = r;
+  var sc = new T.Scene();
+  var cam = new T.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 200);
+  cam.position.z = 30;
+  DYN.sc = sc;
+  var N = weak ? 260 : 800;
+  var pos = new Float32Array(N * 3), col = new Float32Array(N * 3), vel = new Float32Array(N);
+  var pal = [[0.16, 0.84, 0.77], [0.49, 0.36, 1], [0.9, 0.4, 0.9]];
+  for (var i = 0; i < N; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 80;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 50;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 60;
+    vel[i] = 0.2 + Math.random();
+    col.set(pal[i % 3], i * 3);
+  }
+  var g = new T.BufferGeometry();
+  g.setAttribute("position", new T.BufferAttribute(pos, 3));
+  g.setAttribute("color", new T.BufferAttribute(col, 3));
+  sc.add(new T.Points(g, new T.PointsMaterial({
+    size: 0.34, vertexColors: true, transparent: true, opacity: 0.85,
+    depthWrite: false, blending: T.AdditiveBlending
+  })));
+  var mx = 0, my = 0, last = 0, fps = weak ? 30 : 60;
+  DYN.mv = function (e) { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; };
+  DYN.rs = function () { r.setSize(innerWidth, innerHeight, false); cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); };
+  addEventListener("pointermove", DYN.mv, { passive: true });
+  addEventListener("resize", DYN.rs);
+  function tick(t) {
+    DYN.raf = requestAnimationFrame(tick);
+    if (document.hidden || t - last < 1000 / fps - 1) return;
+    last = t;
+    var a = g.attributes.position.array;
+    for (var k = 0; k < N; k++) {
+      a[k * 3 + 2] += vel[k] * 0.12;
+      if (a[k * 3 + 2] > 30) a[k * 3 + 2] = -30;
+    }
+    g.attributes.position.needsUpdate = true;
+    cam.position.x += (mx * 8 - cam.position.x) * 0.03;
+    cam.position.y += (-my * 5 - cam.position.y) * 0.03;
+    cam.lookAt(0, 0, 0);
+    r.render(sc, cam);
+  }
+  if (RM) { r.render(sc, cam); } else { DYN.raf = requestAnimationFrame(tick); }
+}
+
+/* ---------- Ghi đè nhỏ: popup khóa, loader lỗi, Dev ---------- */
+closePops = function () {
+  document.querySelectorAll(".pop.on").forEach(function (s) {
+    if (s.dataset.lock !== "1") s.classList.remove("on");
+  });
+  if (!$("#menu").classList.contains("on") && !document.querySelector(".pop.on")) $("#ov").classList.remove("on");
+};
+function loaderFail() {
+  $("#lMsg").style.display = "block";
+  $("#lRetry").style.display = "inline-flex";
+}
+$("#lRetry").addEventListener("click", function () { location.reload(); });
+
+var _openDev = openDev;
+openDev = function () { _openDev(); renderPending(); renderReports(); };
+var _closeDev = closeDev;
+closeDev = function () { _closeDev(); if (pref.bg === "dynamic") state.paused = true; };
+
+/* ---------- Thiết lập lần đầu (bắt buộc chọn mỗi nhóm một lựa chọn) ---------- */
+var pick2 = { bg: pref.bg, st: pref.st };
+function showSetup() {
+  $("#mdSetup").dataset.lock = "1";
+  openPop("#mdSetup");
+}
+$("#mdSetup").addEventListener("click", function (e) {
+  var o = e.target.closest(".opt");
+  if (o) {
+    pick2[o.dataset.k] = o.dataset.v;
+    document.querySelectorAll('#mdSetup .opt[data-k="' + o.dataset.k + '"]').forEach(function (x) {
+      x.classList.toggle("on", x === o);
+    });
+    $("#suGo").disabled = !(pick2.bg && pick2.st);
+    Object.assign(pref, pick2);
+    applyPref();
+  }
+  if (e.target.id === "suGo" && pick2.bg && pick2.st) {
+    savePref(pick2);
+    $("#mdSetup").dataset.lock = "";
+    $("#mdSetup").classList.remove("on");
+    if (!anyPop()) $("#ov").classList.remove("on");
+  }
+});
+
+/* ---------- Cài đặt: hồ sơ + giao diện ---------- */
+function loadProf() {
+  var u = uidNow();
+  if (!u || !db) { prof = null; return; }
+  db.ref("nox_profiles/" + u).once("value").then(function (s) {
+    prof = s.val();
+    renderSettings();
+  }).catch(function () {});
+}
+function renderSettings() {
+  var box = $("#stProfile");
+  if (!state.user) {
+    box.innerHTML = '<button class="btn btn-p" id="stLogin">Đăng nhập</button>';
+  } else {
+    var last = (prof && prof.nameChangedAt) || 0;
+    var wait = last + WEEK - Date.now();
+    box.innerHTML = '<div class="srow"><span>' + esc(state.user.email || "") + '</span></div>'
+      + '<div class="fld"><label>Tên hiển thị</label><input id="pfName" maxlength="24" value="' + esc(myName()) + '"></div>'
+      + '<button class="btn btn-p" id="pfSave">Đổi tên</button>'
+      + '<p class="hint">' + (wait > 0 ? "Có thể đổi tên lại sau " + Math.ceil(wait / 86400000) + " ngày." : "Tên chỉ đổi được mỗi 7 ngày.") + '</p>';
+  }
+  document.querySelectorAll("#stBg button").forEach(function (b) { b.classList.toggle("on", b.dataset.v === pref.bg); });
+  document.querySelectorAll("#stSt button").forEach(function (b) { b.classList.toggle("on", b.dataset.v === pref.st); });
+  $("#stLite").checked = !!pref.lite;
+}
+function openSettings() {
+  closeMenu();
+  closePops();
+  renderSettings();
+  openPop("#mdSettings");
+  loadProf();
+}
+$("#mdSettings").addEventListener("click", function (e) {
+  var b = e.target.closest("#stBg button,#stSt button");
+  if (b) {
+    var k = b.parentNode.id === "stBg" ? "bg" : "st";
+    var o = {}; o[k] = b.dataset.v;
+    savePref(o);
+    renderSettings();
+    return;
+  }
+  if (e.target.id === "stLogin") { closePops(); openAuth(); return; }
+  if (e.target.id === "pfSave") {
+    var u = uidNow(), n = clean($("#pfName").value).trim().slice(0, 24);
+    if (!u || !db) return;
+    if (n.length < 2) { toast("Tên tối thiểu 2 ký tự."); return; }
+    var last = (prof && prof.nameChangedAt) || 0;
+    if (Date.now() - last < WEEK) { toast("Chỉ đổi tên mỗi 7 ngày."); return; }
+    db.ref("nox_profiles/" + u).set({ displayName: n, nameChangedAt: SVT() })
+      .then(function () { return db.ref("nox_profiles/" + u).once("value"); })
+      .then(function (s) { prof = s.val(); toast("Đã đổi tên."); renderSettings(); })
+      .catch(function () { toast("Không đổi được (chưa đủ 7 ngày hoặc thiếu quyền)."); });
+  }
+});
+$("#stLite").addEventListener("change", function (e) { savePref({ lite: e.target.checked }); });
+
+/* ---------- Đăng bài (vào hộp thư Dev chờ duyệt) ---------- */
+function syncPost() {
+  var c = catOf($("#poCat").value) || CATS[0];
+  var code = c.mode === "code";
+  $("#poCodeW").style.display = code ? "flex" : "none";
+  $("#poUrlW").style.display = code ? "none" : "flex";
+}
+function loadMine() {
+  var u = uidNow();
+  if (!u || !db) return;
+  db.ref("nox_pending/" + u).once("value").then(function (s) {
+    var v = s.val() || {}, ks = Object.keys(v);
+    $("#poList").innerHTML = ks.length
+      ? '<div class="hint">Đang chờ duyệt</div>' + ks.map(function (k) {
+          return '<div class="drow"><span>' + esc(v[k].name) + '</span><button class="btn btn-g" data-pdel="' + esc(k) + '">Hủy</button></div>';
+        }).join("")
+      : "";
+  }).catch(function () {});
+}
+function openPost() {
+  if (!state.user || !uidNow()) { toast("Đăng nhập để đăng bài."); closePops(); openAuth(); return; }
+  $("#poCat").innerHTML = CATS.map(function (c) { return '<option value="' + esc(c.id) + '">' + esc(c.label) + '</option>'; }).join("");
+  $("#poCat").value = catOf(state.utab) ? state.utab : "script";
+  syncPost();
+  closePops();
+  openPop("#mdPost");
+  loadMine();
+}
+$("#uPost").addEventListener("click", openPost);
+$("#poCat").addEventListener("change", syncPost);
+$("#poList").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-pdel]");
+  if (b && db && uidNow()) db.ref("nox_pending/" + uidNow() + "/" + b.dataset.pdel).remove().then(loadMine).catch(function () { toast("Không hủy được."); });
+});
+$("#poSend").addEventListener("click", function () {
+  var u = uidNow();
+  if (!u || !db) { toast("Cần đăng nhập."); return; }
+  var c = catOf($("#poCat").value), name = clean($("#poName").value).trim();
+  if (!c || !name) { toast("Nhập tên bài."); return; }
+  var p = { cat: c.id, name: name.slice(0, 80), desc: clean($("#poDesc").value).slice(0, 300), by: clean(myName()).slice(0, 60), createdAt: SVT() };
+  if (c.mode === "code") {
+    p.code = $("#poCode").value.slice(0, 20000);
+    if (!p.code.trim()) { toast("Nhập code."); return; }
+  } else {
+    var url = $("#poUrl").value.trim();
+    if (!vUrl(url)) { toast("Link phải bắt đầu bằng http(s)://"); return; }
+    p.url = url;
+  }
+  db.ref("nox_pending/" + u).push(p).then(function () {
+    $("#poName").value = $("#poDesc").value = $("#poUrl").value = $("#poCode").value = "";
+    toast("Đã gửi, chờ Dev duyệt.");
+    loadMine();
+  }).catch(function () { toast("Gửi thất bại (kiểm tra quyền Firebase)."); });
+});
+
+/* ---------- Báo cáo & góp ý ---------- */
+function loadReports() {
+  var u = uidNow();
+  if (!u || !db) { $("#rpList").innerHTML = ""; return; }
+  db.ref("nox_reports/" + u).limitToLast(20).once("value").then(function (s) {
+    var v = s.val() || {};
+    $("#rpList").innerHTML = Object.keys(v).reverse().map(function (k) {
+      var r = v[k];
+      return '<div class="pcard"><b>' + esc(r.type || "Góp ý") + '</b><p>' + esc(r.text) + '</p>'
+        + '<small>' + (r.read ? "Đã đọc" : "Chưa đọc") + '</small>'
+        + (r.reply ? '<p class="rep">Phản hồi: ' + esc(r.reply) + '</p>' : "") + '</div>';
+    }).join("");
+  }).catch(function () {});
+}
+function openReport() {
+  closeMenu();
+  closePops();
+  if (!state.user) { toast("Đăng nhập để gửi báo cáo."); openAuth(); return; }
+  openPop("#mdReport");
+  loadReports();
+}
+$("#rpSend").addEventListener("click", function () {
+  var u = uidNow(), t = clean($("#rpText").value, 1500).trim();
+  if (!u || !db) return;
+  if (t.length < 5) { toast("Nội dung quá ngắn."); return; }
+  db.ref("nox_reports/" + u).push({ type: $("#rpType").value, text: t, email: state.user.email, read: false, createdAt: SVT() })
+    .then(function () { $("#rpText").value = ""; toast("Đã gửi, cảm ơn bạn."); loadReports(); })
+    .catch(function () { toast("Gửi thất bại."); });
+});
+
+/* ---------- Dev: Chờ duyệt + Báo cáo ---------- */
+function setTabLabel(t, txt) { TABS.forEach(function (x) { if (x[0] === t) x[1] = txt; }); }
+function badge() {
+  setTabLabel("pending", "Chờ duyệt (" + pendAll.length + ")");
+  setTabLabel("reports", "Báo cáo (" + repAll.filter(function (r) { return !r.read; }).length + ")");
+  if ($("#dev").classList.contains("on")) {
+    var cur = document.querySelector("#dev .tab.on");
+    buildTabs();
+    showTab(cur ? cur.dataset.t : "content");
+  }
+}
+function renderPending() {
+  var box = $("#pdList");
+  if (!pendAll.length) { box.innerHTML = '<div class="utilNote" style="color:#b4bed3">Không có bài chờ duyệt.</div>'; return; }
+  box.innerHTML = pendAll.map(function (x) {
+    var c = catOf(x.cat);
+    var id = esc(x.uid + "|" + x.key);
+    return '<div class="pcard"><b>' + esc(x.name) + '</b><small>' + esc(c ? c.label : x.cat) + ' · ' + esc(x.by || "") + '</small>'
+      + (x.desc ? '<p>' + esc(x.desc) + '</p>' : "")
+      + (x.code ? '<pre class="cprev">' + esc(String(x.code).slice(0, 300)) + '</pre>' : "")
+      + (x.url ? '<div class="url">' + esc(x.url) + '</div>' : "")
+      + '<div class="cfoot"><button class="btn btn-p" data-ap="' + id + '">Duyệt</button><button class="btn btn-g" data-rj="' + id + '">Từ chối</button></div></div>';
+  }).join("");
+}
+function renderReports() {
+  var box = $("#rpAll");
+  if (!repAll.length) { box.innerHTML = '<div class="utilNote" style="color:#b4bed3">Chưa có báo cáo.</div>'; return; }
+  box.innerHTML = repAll.map(function (r) {
+    var id = esc(r.uid + "|" + r.key);
+    return '<div class="pcard"><b>' + esc(r.type || "Góp ý") + '</b><small>' + esc(r.email || "") + ' · ' + (r.read ? "đã đọc" : "chưa đọc") + '</small>'
+      + '<p>' + esc(r.text) + '</p>' + (r.reply ? '<p class="rep">Đã phản hồi: ' + esc(r.reply) + '</p>' : "")
+      + '<div class="fld"><input data-rin="' + id + '" placeholder="Phản hồi…" maxlength="500"></div>'
+      + '<div class="cfoot"><button class="btn btn-p" data-rrep="' + id + '">Phản hồi</button>'
+      + (r.read ? "" : '<button class="btn btn-g" data-rread="' + id + '">Đánh dấu đã đọc</button>') + '</div></div>';
+  }).join("");
+}
+$("#pdList").addEventListener("click", function (e) {
+  if (!state.dev || !db) return;
+  var ap = e.target.closest("[data-ap]"), rj = e.target.closest("[data-rj]");
+  if (ap) {
+    var a = ap.dataset.ap.split("|");
+    var x = pendAll.find(function (i) { return i.uid === a[0] && i.key === a[1]; });
+    var c = x && catOf(x.cat);
+    if (!c) { toast("Danh mục không còn tồn tại."); return; }
+    var nk = db.ref(ND + "/" + c.node).push().key;
+    var it = { name: x.name, desc: x.desc || "", by: x.by || "", ownerUid: x.uid, createdAt: SVT() };
+    if (x.code) it.code = x.code;
+    if (x.url) it.url = x.url;
+    var up = {};
+    up[ND + "/" + c.node + "/" + nk] = it;
+    up["nox_pending/" + x.uid + "/" + x.key] = null;
+    db.ref().update(up).then(function () { toast("Đã duyệt & công khai."); }).catch(function () { toast("Duyệt thất bại (kiểm tra rules)."); });
+  }
+  if (rj && confirm("Từ chối bài này?")) {
+    db.ref("nox_pending/" + rj.dataset.rj.split("|").join("/")).remove().then(function () { toast("Đã từ chối."); }).catch(function () { toast("Thất bại."); });
+  }
+});
+$("#rpAll").addEventListener("click", function (e) {
+  if (!state.dev || !db) return;
+  var rep = e.target.closest("[data-rrep]"), rd = e.target.closest("[data-rread]");
+  if (rd) db.ref("nox_reports/" + rd.dataset.rread.split("|").join("/")).update({ read: true }).catch(function () { toast("Thất bại."); });
+  if (rep) {
+    var id = rep.dataset.rrep, inp = document.querySelector('[data-rin="' + id + '"]');
+    var t = clean(inp ? inp.value : "", 500).trim();
+    if (!t) { toast("Nhập nội dung phản hồi."); return; }
+    db.ref("nox_reports/" + id.split("|").join("/")).update({ reply: t, read: true, repliedAt: SVT() })
+      .then(function () { toast("Đã phản hồi."); }).catch(function () { toast("Thất bại."); });
+  }
+});
+function devWatch() {
+  if (!state.dev || !db) { devUnwatch(); return; }
+  if (devRefs.length) return;
+  var p = db.ref("nox_pending"), r = db.ref("nox_reports");
+  p.on("value", function (s) { pendAll = flat(s.val()); renderPending(); badge(); }, function () { toast("Không đọc được hàng chờ."); });
+  r.on("value", function (s) { repAll = flat(s.val()); renderReports(); badge(); }, function () { toast("Không đọc được báo cáo."); });
+  devRefs = [p, r];
+}
+function devUnwatch() {
+  devRefs.forEach(function (x) { x.off(); });
+  devRefs = [];
+  pendAll = [];
+  repAll = [];
+}
+
+/* ---------- Liên kết chia sẻ #/p/<danh-mục>/<khóa> ---------- */
+var hashDone = false;
+function tryHash() {
+  var m = location.hash.match(/^#\/p\/([^/]+)\/([^/]+)$/);
+  if (!m || hashDone) return;
+  var c = decodeURIComponent(m[1]), k = decodeURIComponent(m[2]);
+  if (catOf(c) && (state.data[c] || []).some(function (x) { return x.key === k; })) {
+    hashDone = true;
+    openDetail(c, k);
+  }
+}
+addEventListener("hashchange", function () { hashDone = false; tryHash(); });
+var _afterData = afterData;
+afterData = function () { _afterData(); tryHash(); };
+var _openDetail = openDetail;
+openDetail = function (ci, k) {
+  _openDetail(ci, k);
+  var f = $("#dtBody .cfoot");
+  if (f && !f.querySelector('[data-act="share"]')) {
+    f.insertAdjacentHTML("beforeend", '<button class="btn btn-g" data-act="share" data-cat="' + esc(ci) + '" data-key="' + esc(k) + '">' + IC.share + 'Chia sẻ</button>');
+  }
+};
+document.addEventListener("click", function (e) {
+  var t = e.target.closest('[data-act="share"]');
+  if (!t) return;
+  var link = location.origin + location.pathname + "#/p/" + encodeURIComponent(t.dataset.cat) + "/" + encodeURIComponent(t.dataset.key);
+  var job = navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject();
+  job.then(function () { toast("Đã sao chép liên kết chia sẻ."); }, function () { toast(link); });
+});
+
+/* ---------- Menu & theo dõi tài khoản ---------- */
+$("#mUtil").addEventListener("click", function () { closeMenu(); openUtil("script"); });
+$("#mRep").addEventListener("click", openReport);
+$("#mSet").addEventListener("click", openSettings);
+var _applyUser = applyUser;
+applyUser = function () {
+  _applyUser();
+  devWatch();
+  if (uidNow()) loadProf(); else prof = null;
+};
+
+/* ---------- Khởi động ---------- */
+applyPref();
+if (!(pref.bg && pref.st)) showSetup();
+devWatch();
+</script>
+</body>
+  </html>
