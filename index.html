@@ -1,871 +1,1077 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="nox">
+<!-- FILE: index.html — SKIBIDI SCRIPT WEB v4 (LIQUID GLASS EDITION) -->
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SKIBIDI SCRIPT — Cộng đồng & Tiện ích</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+<title>SKIBIDI SCRIPT — Scripts, APK, iOS & Utilities</title>
+<meta name="description" content="SKIBIDI SCRIPT — nền tảng chia sẻ Script, APK, iOS, Link và kết nối cộng đồng trong không gian thiên nhiên sống động với thiết kế Liquid Glass.">
+<link rel="canonical" href="https://skibidiscript.vercel.app/">
+<meta property="og:title" content="SKIBIDI SCRIPT">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0a0e16">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%230e1420'/%3E%3Cpath d='M65 35C63 28 57 25 50 25C42 25 36 29 36 36C36 44 44 46 50 49C57 52 64 55 64 63C64 70 58 75 50 75C42 75 36 71 34 64' fill='none' stroke='%2329d6c5' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* ============ NỀN TẢNG BIẾN THEO CHỦ ĐỀ ============ */
 :root{
-  --r:18px; --r-s:12px; --pad:16px; --maxw:1080px;
-  --g-alpha:.34; --g-blur:18px; --g-edge:.55; --g-tint:255,255,255; --g-mode:1;
-  --anim:.28s; --part:24;
+  --sky-top:#0a0e16;--sky-bot:#14203c;
+  --m1:#16223c;--m2:#101a30;--mt1:#16223c;--mt2:#101a30;
+  --grassB:#2a5f38;--grass:#1d4a2c;--grassF:#12301f;
+  --tree:#0e2418;--treeL:#2f5a3a;--treeD:#07140d;
+  --leafA:#0e2418;--leafB:#2f5a3a;--leafC:#2f5a3a;--bark:#2a1c14;--sil:#0a1226;
+  --sn1:#f2f8ff;--sn2:#dcebf8;--sn3:#c4dcf0;
+  --sea1:#52d6ee;--sea2:#0b7fb3;--sand:#f8f1dc;--sand2:#e8d8ae;--foam:#fff;--palm:#2f9a55;--trunkp:#8a5a2e;
+  --wind:.4;
+  --ap:#7c5cff;--as:#29d6c5;--acc-grad:linear-gradient(135deg,#7c5cff 0%,#3b9eff 52%,#29d6c5 100%);
+  --danger:#ff6b7a;--warn:#ffb545;--ok:#2ee59d;
+  --t1:#f4f7fb;--t2:#c8d3e6;--t3:#8f9eb8;
+  --bs:rgba(255,255,255,.22);
+  --glass-alpha:.34;
+  --glass-blur:22px;
+  --glass-sat:1.85;
+  --tint:rgba(12,20,38,var(--glass-alpha));
+  --pop-tint:rgba(13,21,42,.68);
+  --ez:cubic-bezier(.22,1,.36,1);
+  --sp:cubic-bezier(.34,1.56,.64,1);
 }
-html[data-theme="nox"]{
-  --bg:#07090d; --bg2:#0b1017; --sf:#121822; --sf2:#1a2230; --tx:#eaf0f7; --mu:#8b98ab;
-  --ac:#5eead4; --ac2:#818cf8; --bd:#232d3d; --sh:0 12px 32px rgba(0,0,0,.45); --glow:0 0 24px rgba(94,234,212,.16);
-  --blur:0px; --sf-al:1; --edge:transparent;
+body.day{
+  --t1:#0d192b;--t2:#2d3c56;--t3:#546584;
+  --bs:rgba(255,255,255,.48);
+  --tint:rgba(255,255,255,var(--glass-alpha));
+  --pop-tint:rgba(240,247,255,.72);
 }
-html[data-theme="turbo"]{
-  --bg:#0d0714; --bg2:#160b22; --sf:#1d1030; --sf2:#2a1745; --tx:#fff3e8; --mu:#b39ccf;
-  --ac:#ff7a18; --ac2:#ff2d95; --bd:#3a2059; --sh:0 10px 28px rgba(255,45,149,.18); --glow:0 0 26px rgba(255,122,24,.28);
-  --blur:0px; --sf-al:1; --edge:transparent;
+body.glass-frosted{
+  --glass-blur:34px;
+  --glass-sat:1.4;
 }
-html[data-theme="glass"]{
-  --bg:#0e2233; --bg2:#123a52; --sf:rgba(var(--g-tint),var(--g-alpha)); --sf2:rgba(var(--g-tint),calc(var(--g-alpha)*.6));
-  --tx:#f2fbff; --mu:#bcd9e8; --ac:#7dd3fc; --ac2:#a5b4fc; --bd:rgba(255,255,255,calc(var(--g-edge)*.5));
-  --sh:0 18px 44px rgba(2,20,34,.35); --glow:0 0 30px rgba(125,211,252,.25);
-  --blur:var(--g-blur); --sf-al:1; --edge:rgba(255,255,255,calc(var(--g-edge)));
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#0a0e16;scroll-behavior:smooth}
+body{
+  font-family:"Be Vietnam Pro",system-ui,-apple-system,sans-serif;
+  color:var(--t1);
+  min-height:100vh;
+  overflow-x:hidden;
+  background:linear-gradient(var(--sky-top),var(--sky-bot)) fixed;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
 }
-html[data-theme="natural"]{
-  --bg:#0e2233; --bg2:#1b3a53; --sf:rgba(255,255,255,.62); --sf2:rgba(255,255,255,.45);
-  --tx:#12283a; --mu:#4c6577; --ac:#2f9e6e; --ac2:#e8a13c; --bd:rgba(255,255,255,.7);
-  --sh:0 12px 30px rgba(20,50,70,.18); --glow:none; --blur:6px; --sf-al:1; --edge:rgba(255,255,255,.8);
-}
-html[data-theme="natural"][data-event="halloween"]{
-  --bg:#160b1e; --bg2:#2a1030; --sf:rgba(30,12,40,.72); --sf2:rgba(48,20,60,.6); --tx:#ffe9c9; --mu:#c9a08a;
-  --ac:#ff8c2e; --ac2:#9d4dff; --bd:rgba(255,140,46,.35); --glow:0 0 26px rgba(255,140,46,.25);
-}
-html[data-theme="natural"][data-event="christmas"]{ --ac:#3fae6a; --ac2:#e05252; }
-html[data-theme="natural"][data-event="tet"]{ --ac:#d43a2f; --ac2:#f0b429; }
-html[data-perf="low"]{ --anim:0s; --part:0; }
-html[data-perf="balanced"]{ --part:14; }
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;user-select:none}
+input,select,textarea{font-family:inherit}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:rgba(145,165,200,.38);border-radius:99px}
+:focus-visible{outline:2px solid var(--as);outline-offset:2px}
 
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%}
-body{font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--tx); overflow-x:hidden}
-body[data-font="serif"]{font-family:Georgia,"Times New Roman",serif}
-body[data-font="mono"]{font-family:ui-monospace,Consolas,monospace}
-body[data-font="round"]{font-family:"Quicksand","Comic Sans MS",system-ui,sans-serif}
-img{max-width:100%;display:block}
-button{font:inherit;color:inherit}
-::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:8px}
+/* LIQUID GLASS 2.0 (MagicOS 11 Inspired) */
+.lg{
+  position:relative;
+  border-radius:24px;
+  background:
+    radial-gradient(120% 95% at 0% 0%,rgba(255,255,255,.36),transparent 48%),
+    radial-gradient(100% 90% at 100% 100%,rgba(120,220,255,.18),transparent 54%),
+    var(--tint);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(1.08);
+  backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(1.08);
+  box-shadow:
+    inset 0 1.5px 2px rgba(255,255,255,.65),
+    inset 0 -1.5px 3px rgba(255,255,255,.22),
+    inset 0 0 0 1px rgba(255,255,255,.16),
+    inset 0 0 26px rgba(255,255,255,.07),
+    0 14px 34px -10px rgba(4,10,24,.38);
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+.lg::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1.25px;pointer-events:none;
+  background:conic-gradient(from 205deg at 50% 50%,
+    rgba(255,255,255,.95),
+    rgba(125,215,255,.55) 18%,
+    rgba(255,255,255,.1) 36%,
+    rgba(255,255,255,.1) 56%,
+    rgba(255,165,235,.48) 76%,
+    rgba(255,255,255,.95));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+}
+.lg::after{
+  content:"";position:absolute;inset:1px;border-radius:inherit;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.24),transparent 36%),
+    radial-gradient(75% 42% at 50% 105%,rgba(255,255,255,.24),transparent 70%);
+}
+.lg>*{position:relative;z-index:1}
+body:not(.day) .lg{text-shadow:0 1px 3px rgba(0,0,0,.32)}
 
-/* ============ NỀN & LỚP CẢNH ============ */
-#bg{position:fixed;inset:0;z-index:-2;overflow:hidden;background:linear-gradient(180deg,var(--bg),var(--bg2))}
-#bgMedia img,#bgMedia video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#bgMedia::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.42))}
-html[data-theme="glass"] #bgMedia::after{background:linear-gradient(180deg,rgba(10,40,60,.25),rgba(6,26,40,.5))}
-/* Cảnh thiên nhiên */
-#scene{position:absolute;inset:0;display:none}
-html[data-theme="natural"] #scene{display:block}
-#scene .sky{position:absolute;inset:0;background:linear-gradient(180deg,#8ecdf0 0%,#cfe9f7 45%,#eef7ee 70%)}
-html[data-event="halloween"] #scene .sky{background:linear-gradient(180deg,#1b0f2b 0%,#3d1440 45%,#7a2c17 80%)}
-html[data-event="christmas"] #scene .sky{background:linear-gradient(180deg,#9fc6e8,#e8f2fa)}
-html[data-event="tet"] #scene .sky{background:linear-gradient(180deg,#f7d9a0,#fbeedd)}
-#scene .sun{position:absolute;top:9%;right:14%;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7d6,#ffd76a 60%,rgba(255,215,106,0));box-shadow:0 0 60px 22px rgba(255,220,120,.5)}
-html[data-event="halloween"] #scene .sun{background:radial-gradient(circle at 40% 40%,#ffd9a0,#ff8c2e 65%,rgba(255,140,46,0));box-shadow:0 0 70px 26px rgba(255,120,30,.35);width:92px;height:92px}
-#scene .mtn{position:absolute;left:-5%;right:-5%;background:#5f87a8;opacity:.75}
-#scene .m1{bottom:34%;height:30%;clip-path:polygon(0 100%,12% 42%,26% 78%,41% 20%,58% 72%,74% 34%,88% 70%,100% 46%,100% 100%)}
-#scene .m2{bottom:22%;height:26%;background:#3f6b8f;clip-path:polygon(0 100%,18% 30%,34% 70%,52% 12%,70% 66%,86% 30%,100% 62%,100% 100%)}
-html[data-event="halloween"] #scene .m1,html[data-event="halloween"] #scene .m2{background:#241031}
-#scene .ground{position:absolute;bottom:0;height:26%;background:linear-gradient(180deg,#356b4f,#1d4634)}
-html[data-event="halloween"] #scene .ground{background:linear-gradient(180deg,#241a12,#120b08)}
-#scene .tree{position:absolute;bottom:20%;width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:86px solid #1d4634;filter:drop-shadow(0 6px 6px rgba(0,0,0,.25))}
-html[data-event="halloween"] #scene .tree{border-bottom-color:#0d070a}
-#scene .fog{position:absolute;left:-40%;width:120%;height:22%;background:radial-gradient(ellipse at center,rgba(255,255,255,.5),rgba(255,255,255,0) 70%);animation:fog 46s linear infinite}
-#scene .fog.f2{bottom:16%;animation-duration:64s;animation-direction:reverse;opacity:.7}
-#scene .fog.f1{bottom:30%}
-html[data-event="halloween"] #scene .fog{background:radial-gradient(ellipse at center,rgba(190,140,255,.28),rgba(0,0,0,0) 70%)}
-@keyframes fog{from{transform:translateX(-12%)}50%{transform:translateX(12%)}to{transform:translateX(-12%)}}
-#parts{position:absolute;inset:0;pointer-events:none}
-#parts i{position:absolute;top:-4%;border-radius:50%;animation:fall linear infinite}
-@keyframes fall{to{transform:translateY(112vh) rotate(340deg)}}
+/* Tối ưu hiệu năng cho thẻ con bên trong hộp thoại để cuộn 60fps không giật lag */
+.pop .lg,.pane .lg,#main .card.lg,#main .ccard.lg{
+  -webkit-backdrop-filter:blur(12px) saturate(1.4);
+  backdrop-filter:blur(12px) saturate(1.4);
+}
+.pop .lg{
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.05));
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.14),0 8px 20px -6px rgba(0,0,0,.22);
+}
+body.day .pop .lg{
+  background:linear-gradient(145deg,rgba(255,255,255,.68),rgba(255,255,255,.4));
+}
 
-/* ============ KHUNG ỨNG DỤNG ============ */
-#app{max-width:var(--maxw);margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 14px calc(76px + env(safe-area-inset-bottom))}
-@media(min-width:900px){#app{padding-bottom:24px}}
-header#top{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:12px 2px;margin-bottom:6px}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px;cursor:pointer;user-select:none}
-.logo .mk{width:34px;height:34px;border-radius:10px;background:conic-gradient(from 210deg,var(--ac),var(--ac2),var(--ac));box-shadow:var(--glow);display:grid;place-items:center;font-size:17px;color:#041018;font-weight:900}
-.spacer{flex:1}
-.icobtn{position:relative;width:40px;height:40px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);backdrop-filter:blur(var(--blur));display:grid;place-items:center;cursor:pointer;transition:transform var(--anim)}
-.icobtn:active{transform:scale(.93)}
-.dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 0 2px var(--bg);display:none}
-.dot.on{display:block}
-nav#bar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;justify-content:center;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--bd)}
-@media(min-width:900px){nav#bar{position:sticky;top:70px;justify-content:flex-start;background:none;backdrop-filter:none;border:0;padding:0 0 12px;order:-1}#app{padding-top:0}}
-nav#bar button{flex:1;max-width:120px;border:0;background:none;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;cursor:pointer;padding:6px 4px;border-radius:14px;transition:color var(--anim)}
-nav#bar button .ni{font-size:19px;line-height:1}
-nav#bar button.on{color:var(--tx);background:var(--sf2);box-shadow:inset 0 0 0 1px var(--bd)}
-@media(min-width:900px){nav#bar button{flex-direction:row;gap:8px;font-size:14px;flex:0 0 auto;padding:9px 16px}}
+.pressed{animation:press .32s var(--sp)}
+@keyframes press{40%{transform:scale(1.035)}}
 
-/* ============ THẺ / NÚT / Ô NHẬP ============ */
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);backdrop-filter:blur(var(--blur));padding:var(--pad);position:relative;overflow:hidden}
-html[data-theme="glass"] .card{backdrop-filter:blur(var(--g-blur)) saturate(1.5);background:linear-gradient(155deg,rgba(var(--g-tint),var(--g-alpha)),rgba(var(--g-tint),calc(var(--g-alpha)*.42)))}
-html[data-theme="glass"] .card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,calc(var(--g-edge)*.9)),rgba(255,255,255,0) 22%,rgba(255,255,255,0) 78%,rgba(255,255,255,calc(var(--g-edge)*.35)));mix-blend-mode:screen}
-html[data-theme="glass"] .card::after{content:"";position:absolute;top:-40%;left:-30%;width:60%;height:180%;transform:rotate(18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,calc(var(--g-edge)*.22)),transparent);pointer-events:none;animation:sheen 9s ease-in-out infinite}
-@keyframes sheen{0%,72%{left:-60%}88%{left:120%}100%{left:120%}}
-html[data-theme="turbo"] .card{border:1px solid transparent;background:linear-gradient(var(--sf),var(--sf)) padding-box,linear-gradient(135deg,var(--ac),var(--ac2)) border-box;border-radius:22px 8px 22px 8px}
-html[data-theme="nox"] .card::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 60% at 50% -10%,rgba(255,255,255,.05),transparent 60%)}
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.col{display:flex;flex-direction:column;gap:12px}
-h1{font-size:24px;margin:4px 0 2px}h2{font-size:18px;margin:0 0 4px}h3{font-size:15px;margin:0}
-.mu{color:var(--mu);font-size:13px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);border-radius:14px;padding:10px 16px;cursor:pointer;font-weight:600;transition:transform var(--anim),box-shadow var(--anim),filter var(--anim);user-select:none}
-.btn:active{transform:scale(.96)}
-.btn.pri{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#081018;box-shadow:var(--glow)}
-html[data-theme="natural"] .btn.pri{color:#fff}
-.btn.dgr{background:#3a1220;border-color:#7a2440;color:#ffb4c0}
-.btn.gho{background:transparent}
-.btn.sm{padding:7px 12px;font-size:13px;border-radius:11px}
-.btn[disabled]{opacity:.5;pointer-events:none}
-.inp,select.inp,textarea.inp{width:100%;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);border-radius:13px;padding:11px 13px;font:inherit;outline:none;transition:box-shadow var(--anim)}
-.inp:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 30%,transparent)}
-textarea.inp{min-height:96px;resize:vertical}
-label.fl{font-size:12.5px;color:var(--mu);margin:8px 0 4px;display:block}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--bd);background:var(--sf2);cursor:pointer;font-size:13px}
-.chip.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#081018;border-color:transparent;font-weight:700}
-.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center;font-weight:800;color:#081018;overflow:hidden;flex:none;position:relative}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.avatar.fr1{box-shadow:0 0 0 3px var(--ac),0 0 14px var(--ac)}
-.avatar.fr2{box-shadow:0 0 0 3px var(--ac2),0 0 0 6px color-mix(in srgb,var(--ac2) 40%,transparent)}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--sf2);border:1px solid var(--bd);color:var(--mu)}
-.badge.dev{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#081018;border:0;font-weight:800}
-.badge.st-pending{color:#ffcf6a;border-color:#6b5320}.badge.st-approved{color:#7ce7a2;border-color:#265c3a}.badge.st-rejected{color:#ff9aa8;border-color:#6b2433}.badge.st-edit{color:#8ab4ff;border-color:#2c4470}
-.nmfx1{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
-.nmfx2{animation:glowl 2.2s ease-in-out infinite}
-@keyframes glowl{50%{text-shadow:0 0 12px var(--ac)}}
-.empty{text-align:center;color:var(--mu);padding:34px 12px}
-.empty .big{font-size:38px;margin-bottom:8px}
-.loader{display:flex;justify-content:center;padding:26px}
-.loader i{width:10px;height:10px;margin:0 4px;border-radius:50%;background:var(--ac);animation:bnc 1s infinite ease-in-out}
-.loader i:nth-child(2){animation-delay:.15s;background:var(--ac2)}.loader i:nth-child(3){animation-delay:.3s}
-@keyframes bnc{40%{transform:translateY(-10px)}}
-.skel{border-radius:var(--r);background:linear-gradient(90deg,var(--sf2) 25%,var(--sf) 50%,var(--sf2) 75%);background-size:200% 100%;animation:sk 1.2s infinite;min-height:90px}
-@keyframes sk{to{background-position:-200% 0}}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.hr{height:1px;background:var(--bd);margin:14px 0;border:0}
-.sw{width:46px;height:27px;border-radius:999px;background:var(--sf2);border:1px solid var(--bd);position:relative;cursor:pointer;transition:background var(--anim)}
-.sw::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:var(--mu);transition:transform var(--anim),background var(--anim)}
-.sw.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent}
-.sw.on::after{transform:translateX(19px);background:#081018}
-input[type=range]{width:100%;accent-color:var(--ac)}
-.thumb{border-radius:14px;aspect-ratio:16/10;object-fit:cover;width:100%;background:var(--sf2)}
-.list{display:flex;flex-direction:column;gap:10px}
-.li{display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r-s);background:var(--sf2);border:1px solid var(--bd);cursor:pointer;transition:transform var(--anim)}
-.li:active{transform:scale(.985)}
-.li .tt{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.li .ss{font-size:12.5px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.grow{flex:1;min-width:0}
-.msg{max-width:78%;padding:10px 13px;border-radius:16px;background:var(--sf2);border:1px solid var(--bd);margin:3px 0;word-break:break-word}
-.msg.me{margin-left:auto;background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 30%,var(--sf2)),color-mix(in srgb,var(--ac2) 30%,var(--sf2)))}
-.msg .tm{display:block;font-size:10.5px;color:var(--mu);margin-top:4px}
-.bubble{width:100%;height:120px;border-radius:20px;background:var(--sf2);display:grid;place-items:center;color:var(--mu);cursor:pointer;border:1px dashed var(--bd)}
-.bubble.rec{border-color:#ff4d5e;color:#ff8b98;animation:glowl 1.4s infinite}
+/* MÔI TRƯỜNG (Tối ưu GPU Layer) */
+#envWrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+#clouds,#fauna{position:absolute;inset:0}
+#stars{position:absolute;width:2px;height:2px;border-radius:50%;opacity:0;transition:opacity 1.2s}
+body.tod-night #stars,body.tod-deepnight #stars,body.tod-twilight #stars{opacity:1}
+#sun,#moon{position:absolute;width:68px;height:68px;border-radius:50%;will-change:left,top;transition:opacity .8s,width .6s,height .6s}
+#sun{background:radial-gradient(circle at 35% 35%,#fff9e2,#ffd35c);box-shadow:0 0 65px 22px rgba(255,220,130,.38)}
+#moon{background:radial-gradient(circle at 35% 35%,#f6f9ff,#b6c4e2);box-shadow:0 0 50px 16px rgba(190,208,255,.32)}
+body.theme-halloween #moon{
+  width:108px;height:108px;
+  background:radial-gradient(circle at 36% 34%,#ffe6ad,#ff7a1f 68%,#b82900 100%);
+  box-shadow:0 0 110px 38px rgba(255,110,20,.48),inset -10px -10px 24px rgba(90,10,0,.45);
+}
+.cloud{position:absolute;left:0;color:#fff;opacity:.32;will-change:transform;animation:cl linear infinite;transition:color 1.5s,opacity 1.5s}
+body.day .cloud{opacity:.9}
+body.tod-sunrise .cloud,body.tod-sunset .cloud{opacity:.62;color:#ffd8c2}
+body.wx-rain .cloud,body.wx-storm .cloud{color:#8492a8;opacity:.78}
+body.theme-halloween .cloud{color:#3c234d;opacity:.68}
+@keyframes cl{from{transform:translate3d(-320px,0,0)}to{transform:translate3d(calc(100vw + 320px),0,0)}}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .35s}
+#wind{position:absolute;inset:0;overflow:hidden}
+.wstreak{position:absolute;height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);animation:wst linear infinite;opacity:0;transition:opacity 1s}
+body.wx-wind .wstreak,body.wx-storm .wstreak{opacity:.42}
+@keyframes wst{from{transform:translate3d(-30%,0,0)}to{transform:translate3d(130%,0,0)}}
+#envSvg{position:absolute;left:0;right:0;bottom:0;width:100%;height:65vh;transform:translateZ(0)}
+#gGrassBack path,#gGrassMid path,#gGrassFront path{transform-box:fill-box;transform-origin:50% 100%;animation:gsway calc(3.6s/max(var(--wind),.3)) ease-in-out infinite alternate}
+@keyframes gsway{from{transform:skewX(calc(var(--wind)*-2.8deg))}to{transform:skewX(calc(var(--wind)*2.8deg))}}
+.tree{transform-box:fill-box;transform-origin:50% 100%;animation:tw calc(4.8s/max(var(--wind),.3)) ease-in-out infinite alternate}
+@keyframes tw{from{transform:rotate(calc(var(--wind)*-1.2deg))}to{transform:rotate(calc(var(--wind)*1.2deg))}}
+.sw1{transform-box:fill-box;transform-origin:50% 0;animation:lsw 3.2s ease-in-out infinite alternate}
+@keyframes lsw{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.wv{animation:wv 7s ease-in-out infinite alternate}
+@keyframes wv{to{transform:translateX(40px)}}
+.br,.mm,.sn,.web,#gSummer,#gSnowB,#gSnowF{display:none}
+body.theme-halloween .br,body.theme-tet .br,body.theme-tet .mm,body.theme-halloween .web{display:block}
+body.theme-halloween .can,body.theme-tet .can{display:none}
+body.snowy .sn,body.snowy #gSnowB,body.snowy #gSnowF{display:block}
+body.snowy #gGrassBack,body.snowy #gGrassMid,body.snowy #gGrassFront{display:none}
+body.season-summer .mtn,body.season-summer #gTrees,body.season-summer #gGrassBack,body.season-summer #gGrassMid,body.season-summer #gGrassFront{display:none}
+body.season-summer #gSummer{display:block}
+.bird,.bat{position:absolute;opacity:0;transition:opacity 1.2s;animation:fly linear infinite;will-change:transform}
+.bird .wl,.bat .wl{transform-origin:20px 10px;animation:flap .48s ease-in-out infinite alternate}
+.bird .wr,.bat .wr{transform-origin:20px 10px;animation:flapR .48s ease-in-out infinite alternate}
+.bat .wl,.bat .wr{transform-origin:23px 12px;animation-duration:.22s}
+@keyframes flap{from{transform:rotate(14deg)}to{transform:rotate(-10deg)}}
+@keyframes flapR{from{transform:rotate(-14deg)}to{transform:rotate(10deg)}}
+@keyframes fly{0%{transform:translate3d(-12vw,0,0)}50%{transform:translate3d(50vw,-5vh,0)}100%{transform:translate3d(112vw,0,0)}}
+body.birds-on .bird{opacity:1}body.theme-halloween .bat{opacity:1}
+.pf{animation:flick 2.4s infinite}
+@keyframes flick{0%,100%{opacity:1}45%{opacity:.8}50%{opacity:.55}55%{opacity:.95}}
+#gTHallow,#gTXmas,#gTTet{display:none}
+body.theme-halloween #gTHallow{display:block}
+body.theme-christmas #gTXmas{display:block}
+body.theme-tet #gTTet{display:block}
+#webL,#webR{display:none;position:fixed;top:0;z-index:2;width:min(44vmin,320px);height:min(44vmin,320px);pointer-events:none;overflow:hidden}
+#webL{left:0}#webR{right:0;transform:scaleX(-1)}
+body.theme-halloween #webL,body.theme-halloween #webR{display:block}
+.bobg{animation:bob 3.4s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(16px)}}
+#fog{position:absolute;inset:0;opacity:0;transition:opacity 1s;background:linear-gradient(180deg,transparent,rgba(200,210,225,.18),transparent)}
+body.wx-rain #fog,body.wx-snow #fog{opacity:.5}
+body.wx-fog #fog{opacity:.82}
+body.theme-halloween #fog{opacity:.72;background:linear-gradient(180deg,transparent 35%,rgba(140,50,180,.18) 68%,rgba(255,120,30,.24) 100%)}
+#fx{position:absolute;inset:0}
+body.modal-open #envWrap *{animation-play-state:paused!important}
+.ml{display:none}body.season-autumn .ml{display:block}
+body.season-summer #gHills,body.season-summer #gFar{display:none}
+body.snowy .hl{fill:var(--sn3)}
+#sun::after{content:"";position:absolute;inset:-140px;border-radius:50%;opacity:0;transition:opacity 1s;background:repeating-conic-gradient(rgba(255,244,190,.16) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 66%);mask:radial-gradient(circle,#000 8%,transparent 66%);animation:spin 80s linear infinite}
+body.day #sun::after,body.tod-sunrise #sun::after,body.tod-sunset #sun::after{opacity:1}
+body.wx-rain #sun::after,body.wx-storm #sun::after,body.wx-fog #sun::after{opacity:0}
+#rainbow{position:absolute;left:50%;width:min(150vw,150vh);height:min(150vw,150vh);bottom:calc(min(150vw,150vh)*-.35);transform:translateX(-50%);border-radius:50%;opacity:0;transition:opacity 2.5s;filter:blur(1.5px);background:radial-gradient(circle,transparent 0 62%,rgba(255,60,60,.28) 62.5%,rgba(255,150,40,.28) 64%,rgba(255,225,60,.28) 65.5%,rgba(80,200,90,.26) 67%,rgba(60,150,255,.26) 68.5%,rgba(110,80,220,.26) 70%,transparent 71.5%)}
+body.rainbow #rainbow{opacity:1}
+#shoot{position:absolute;top:12%;left:70%;width:120px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff);opacity:0}
+body.tod-night #shoot,body.tod-deepnight #shoot{animation:shoot 13s linear infinite}
+@keyframes shoot{0%,90%{opacity:0;transform:translate(0,0) rotate(25deg)}91%{opacity:1}100%{opacity:0;transform:translate(-340px,160px) rotate(25deg)}}
 
-/* ============ LỚP PHỦ ============ */
-#modalWrap{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5)}
-#modalWrap.on{display:flex}
-@media(min-width:760px){#modalWrap{align-items:center;padding:20px}}
-#modal{width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:24px 24px 0 0;padding:18px;background:var(--sf);border:1px solid var(--bd);backdrop-filter:blur(20px);box-shadow:var(--sh);animation:up .3s cubic-bezier(.2,.9,.25,1)}
-@media(min-width:760px){#modal{border-radius:24px}}
-@keyframes up{from{transform:translateY(40px);opacity:0}}
-#toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:99;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}
-.toast{padding:11px 16px;border-radius:14px;background:var(--sf);border:1px solid var(--bd);box-shadow:var(--sh);backdrop-filter:blur(14px);animation:up .25s;font-size:14px}
-.toast.err{border-color:#7a2440}.toast.ok{border-color:#265c3a}
-#splash{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--bg),var(--bg2));transition:opacity .45s}
-#splash.off{opacity:0;pointer-events:none}
-#splash .mk{width:74px;height:74px;border-radius:22px;background:conic-gradient(from 210deg,var(--ac),var(--ac2),var(--ac));display:grid;place-items:center;font-size:34px;font-weight:900;color:#041018;box-shadow:var(--glow);animation:pul 1.6s ease-in-out infinite}
-@keyframes pul{50%{transform:scale(1.07) rotate(3deg)}}
-html[data-theme="glass"] #splash .mk{background:rgba(255,255,255,.2);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);color:#fff}
-html[data-theme="natural"] #splash .mk{background:rgba(255,255,255,.55);border:1px solid #fff;color:#1d4634}
-.pill{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;background:rgba(10,12,16,.86);color:#fff;backdrop-filter:blur(12px);box-shadow:0 8px 26px rgba(0,0,0,.4);font-size:13px;max-width:92vw}
-.pill .grn{color:#7ce7a2;font-weight:700}
+/* LOADER LIQUID GLASS */
+#loader{
+  position:fixed;inset:0;z-index:900;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  background:radial-gradient(circle at 50% 35%,#1a294d 0%,#090d16 75%);
+  transition:opacity .55s var(--ez),visibility .55s;
+}
+#loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.lorb{
+  position:relative;width:128px;height:128px;border-radius:38px;
+  display:grid;place-items:center;
+  background:radial-gradient(120% 120% at 20% 15%,rgba(255,255,255,.45),rgba(124,92,255,.2) 55%,rgba(41,214,197,.15));
+  box-shadow:inset 0 2px 6px rgba(255,255,255,.75),inset 0 -4px 10px rgba(41,214,197,.35),0 20px 50px rgba(0,0,0,.55);
+  animation:floatOrb 2.4s ease-in-out infinite alternate;
+}
+@keyframes floatOrb{from{transform:translateY(-6px) scale(.98)}to{transform:translateY(6px) scale(1.03)}}
+.lring{
+  position:absolute;inset:-8px;border-radius:44px;
+  border:2px solid transparent;
+  background:conic-gradient(from 0deg,transparent 15%,#7c5cff,#29d6c5,#fff) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:spin 2.2s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lS{font-size:52px;font-weight:800;background:linear-gradient(135deg,#fff,#9be8ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lbar-wrap{width:220px;height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+.lbar{height:100%;width:18%;border-radius:99px;background:var(--acc-grad);transition:width .35s var(--ez)}
+.ltxt{font-size:13px;font-weight:600;color:#c8d3e6;letter-spacing:.03em}
+
+/* HEADER & NAVIGATION */
+#hdr{position:fixed;top:max(12px,env(safe-area-inset-top));left:14px;right:14px;z-index:130;max-width:1160px;margin:0 auto}
+#hdr .in{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:22px}
+.ibtn{position:relative;width:42px;height:42px;flex:none;border-radius:14px;display:grid;place-items:center;transition:transform .2s var(--sp),background .2s}
+.ibtn:hover{background:rgba(255,255,255,.14)}
+.ibtn:active{transform:scale(.92)}
+.ibtn svg{width:19px;height:19px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px;letter-spacing:.03em}
+.brand .lg-sm{width:36px;height:36px;border-radius:12px;display:grid;place-items:center}
+.brand .lg-sm svg{width:24px;height:24px;display:block}
+.brand .tx{line-height:1}
+.sp{flex:1}
+.mod{display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:14px;font-size:12.5px;font-weight:700}
+.mod svg{width:15px;height:15px}
+.hdr-av{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.7)}
+
+/* BADGE CHẤM ĐỎ */
+.dot-badge{
+  position:absolute;top:5px;right:5px;
+  min-width:10px;height:10px;padding:0 3px;
+  border-radius:99px;background:#ff3b5c;
+  box-shadow:0 0 0 2px rgba(12,20,38,.8),0 0 10px #ff3b5c;
+  font-size:9px;font-weight:800;color:#fff;
+  display:none;align-items:center;justify-content:center;
+  animation:pulseDot 1.8s infinite;
+}
+.dot-badge.on{display:inline-flex}
+@keyframes pulseDot{50%{transform:scale(1.18)}}
+
+@media(max-width:580px){.brand .tx{display:none}}
+@media(max-width:430px){#sndMod{display:none}}
+
+/* NÚT TIỆN ÍCH FLOATING LIQUID GLASS */
+#fabUtil{
+  position:fixed;left:0;right:0;margin:0 auto;width:max-content;
+  bottom:max(24px,env(safe-area-inset-bottom));z-index:125;
+  display:flex;align-items:center;gap:10px;
+  padding:14px 34px;border-radius:99px;
+  font-weight:800;font-size:15px;letter-spacing:.02em;
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.85),
+    inset 0 -3px 6px rgba(41,214,197,.35),
+    0 16px 36px -6px rgba(18,12,48,.55);
+  transition:transform .28s var(--sp),box-shadow .28s;
+}
+#fabUtil:hover{transform:translateY(-3px) scale(1.02)}
+#fabUtil:active{transform:scale(.95)}
+#fabUtil svg{width:19px;height:19px}
+
+/* MENU CHÍNH (CHỈ GỒM 4 MỤC THEO YÊU CẦU) */
+#menu{
+  --tint:var(--pop-tint);
+  position:fixed;top:calc(max(12px,env(safe-area-inset-top)) + 64px);right:16px;z-index:185;
+  width:248px;padding:10px;display:flex;flex-direction:column;gap:5px;
+  transform:scale(.9) translateY(-10px);transform-origin:top right;
+  opacity:0;pointer-events:none;
+  transition:transform .3s var(--sp),opacity .24s;
+}
+#menu.on{transform:none;opacity:1;pointer-events:auto}
+.mlink{
+  position:relative;display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:16px;
+  font-weight:700;font-size:14px;color:var(--t1);text-align:left;width:100%;
+  transition:background .2s,transform .2s;
+}
+.mlink:hover{background:rgba(255,255,255,.15);transform:translateX(2px)}
+.mlink svg{width:19px;height:19px;flex:none}
+.mlink .m-badge{
+  margin-left:auto;padding:2px 7px;border-radius:99px;
+  background:#ff3b5c;color:#fff;font-size:10.5px;font-weight:800;display:none;
+}
+.mlink .m-badge.on{display:inline-block}
+
+/* MAIN LAYOUT */
+#main{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:96px 16px 130px}
+#brandTag{
+  position:fixed;left:0;right:0;bottom:6px;z-index:110;
+  text-align:center;font-size:10.5px;font-weight:600;letter-spacing:.32em;
+  opacity:.55;pointer-events:none;
+}
+#ov{
+  position:fixed;inset:0;z-index:170;
+  background:rgba(4,9,20,.42);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+#ov.on{opacity:1;pointer-events:auto}
+
+/* POPUP CHUNG */
+.pop{
+  --tint:var(--pop-tint);
+  position:fixed;left:50%;top:50%;z-index:190;
+  width:min(620px,94vw);max-height:86vh;
+  display:flex;flex-direction:column;border-radius:30px;
+  transform:translate(-50%,-50%) scale(.94);
+  opacity:0;pointer-events:none;
+  transition:opacity .32s var(--ez),transform .32s var(--ez);
+  overflow:hidden;
+}
+.pop.pop-lg{width:min(880px,95vw);height:min(700px,88vh);max-height:88vh}
+.pop.on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+.p-h{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,.12);flex:none;
+}
+.p-h h3{flex:1;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
+.p-b{
+  flex:1;min-height:0;overflow-y:auto;padding:16px 20px 22px;
+  display:flex;flex-direction:column;gap:14px;
+  overscroll-behavior:contain;
+}
+
+/* CỬA SỐ TIỆN ÍCH (LIQUID GLASS REDESIGN) */
+.util-top{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  padding:12px 20px 6px;flex:none;
+}
+.utabs{
+  position:relative;display:flex;gap:4px;padding:5px;
+  border-radius:20px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.16);
+  overflow-x:auto;flex:1;min-width:240px;
+  scrollbar-width:none;
+}
+.utabs::-webkit-scrollbar{display:none}
+.utab{
+  position:relative;z-index:1;flex:1 0 auto;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 14px;border-radius:15px;font-size:13px;font-weight:700;
+  color:var(--t2);transition:color .25s;white-space:nowrap;
+}
+.utab svg{width:16px;height:16px}
+.utab small{opacity:.75;font-size:11px;padding:1px 6px;border-radius:99px;background:rgba(0,0,0,.18)}
+.utab.on{color:#fff}
+.uind{
+  position:absolute;top:5px;bottom:5px;left:0;border-radius:15px;
+  background:var(--acc-grad);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.75),0 6px 18px rgba(80,120,255,.45);
+  transition:transform .42s var(--ez),width .42s var(--ez);
+}
+.util-actions{display:flex;gap:8px;flex:none}
+.usearch-row{display:flex;gap:10px;margin:4px 20px 4px;flex:none}
+.usearch{
+  flex:1;display:flex;align-items:center;gap:10px;padding:0 14px;
+  border-radius:18px;background:rgba(255,255,255,.1);
+  border:1px solid var(--bs);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.25);
+}
+.usearch span{display:grid;place-items:center}
+.usearch svg{width:17px;height:17px;opacity:.8}
+.usearch input{
+  flex:1;min-width:0;background:none;border:none;outline:none;
+  color:var(--t1);font-size:14px;padding:11px 0;
+}
+.usearch input::placeholder{color:var(--t2);opacity:.78}
+
+#ulist{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:14px;transition:opacity .18s,transform .18s;
+}
+#ulist.out{opacity:0;transform:translateY(8px)}
+.utilNote{
+  border-radius:16px;padding:12px 15px;font-size:13px;color:var(--t2);
+  background:rgba(255,255,255,.08);border:1px dashed var(--bs);
+}
+
+/* THẺ BÀI ĐĂNG (CÓ ẢNH, TIÊU ĐỀ, NGƯỜI ĐĂNG, NGÀY GIỜ & NĂM) */
+.card{
+  border-radius:24px;padding:12px;
+  display:flex;flex-direction:column;gap:10px;overflow:hidden;
+  transition:transform .28s var(--sp),box-shadow .28s;
+}
+.card:hover{transform:translateY(-3px)}
+.card-thumb{
+  position:relative;width:100%;height:142px;border-radius:16px;
+  overflow:hidden;background:linear-gradient(135deg,rgba(124,92,255,.28),rgba(41,214,197,.22));
+  display:flex;align-items:center;justify-content:center;
+}
+.card-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s var(--ez)}
+.card:hover .card-thumb img{transform:scale(1.04)}
+.card-thumb .fallback-ic{width:44px;height:44px;opacity:.45;color:#fff}
+.card-thumb .cat-pill{
+  position:absolute;top:8px;left:8px;
+  padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;
+  background:rgba(10,16,32,.65);color:#fff;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.25);
+}
+.card h3{font-size:15px;font-weight:800;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .desc{color:var(--t2);font-size:12.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding-top:6px;border-top:1px solid rgba(255,255,255,.1);
+  font-size:11.5px;color:var(--t2);
+}
+.author-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  font-weight:700;color:var(--t1);max-width:58%;
+  cursor:pointer;padding:2px 6px 2px 2px;border-radius:99px;
+  transition:background .2s;
+}
+.author-chip:hover{background:rgba(255,255,255,.14)}
+.author-chip img{width:20px;height:20px;border-radius:50%;object-fit:cover;flex:none}
+.author-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.post-time{font-size:11px;opacity:.85;white-space:nowrap}
+pre.cprev{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;color:#8de8dd;
+  background:rgba(6,12,24,.48);border:1px solid rgba(255,255,255,.14);
+  border-radius:12px;padding:8px 10px;max-height:62px;
+  overflow:hidden;white-space:pre-wrap;word-break:break-all;
+}
+.cfoot{display:flex;gap:7px;margin-top:auto;flex-wrap:wrap;align-items:center}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  font-weight:700;font-size:12.5px;padding:9px 14px;border-radius:14px;
+  transition:transform .22s var(--sp),filter .2s,background .2s;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.94)}
+.btn svg{width:15px;height:15px;flex:none}
+.btn-p{
+  color:#fff;background:var(--acc-grad);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.6),0 6px 16px rgba(90,110,255,.35);
+}
+.btn-g{color:var(--t1);background:rgba(255,255,255,.12);border:1px solid var(--bs)}
+.btn-g:hover{background:rgba(255,255,255,.2)}
+.btn-d{color:#fff;background:linear-gradient(135deg,#ff5b72,#d92b4b);box-shadow:0 4px 12px rgba(255,75,100,.3)}
+.btn-sm{padding:6px 10px;font-size:11.5px;border-radius:11px}
+.empty{grid-column:1/-1;padding:28px 18px;text-align:center;color:var(--t2);font-size:13.5px}
+
+/* HERO & TRANG CHỦ */
+.hero{padding:28px 26px;border-radius:32px;display:flex;flex-direction:column;gap:14px}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hero h1{font-size:clamp(26px,5.5vw,44px);font-weight:800;line-height:1.08;letter-spacing:-.02em}
+.hero p{color:var(--t2);font-size:14px;line-height:1.68;max-width:60ch}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:7px 14px;border-radius:99px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:16px}
+.ccard{
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  padding:18px;border-radius:26px;text-align:left;
+  transition:transform .28s var(--sp);
+}
+.ccard:hover{transform:translateY(-4px)}
+.ccard:active{transform:scale(.97)}
+.ccard .cic{
+  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+  background:var(--acc-grad);color:#fff;margin-bottom:4px;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.65),0 6px 16px rgba(90,110,255,.35);
+}
+.ccard .cic svg{width:21px;height:21px}
+.ccard b{font-size:15.5px;font-weight:800}
+.ccard small{color:var(--t2);font-size:12px;font-weight:600}
+.ccard em{font-style:normal;font-size:12px;opacity:.82;display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.feed-sec{margin-top:18px;padding:20px;border-radius:30px;display:flex;flex-direction:column;gap:14px}
+.feed-hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.feed-hdr h2{font-size:17px;font-weight:800}
+.home-posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+
+/* FORMS & INPUTS */
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:11.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.04em}
+.fld input,.fld select,.fld textarea{
+  padding:12px 14px;border-radius:16px;font-size:14px;color:var(--t1);
+  background:rgba(255,255,255,.1);border:1px solid var(--bs);outline:none;min-height:44px;
+  transition:border-color .2s,background .2s;
+}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--t2);opacity:.65}
+.fld input[type=range]{padding:0;min-height:28px;accent-color:var(--as);background:none;border:none}
+.fld textarea{min-height:92px;resize:vertical}
+.fld select option{color:#0f1a2e;background:#fff}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--as);background:rgba(255,255,255,.15)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{
+  padding:9px 14px;border-radius:14px;font-size:12.5px;font-weight:700;
+  color:var(--t2);background:rgba(255,255,255,.09);border:1px solid var(--bs);
+  transition:all .2s;
+}
+.seg button.on{color:#fff;background:var(--acc-grad);border-color:transparent;box-shadow:0 4px 12px rgba(90,110,255,.35)}
+.sw{position:relative;width:46px;height:26px;flex:none}
+.sw input{position:absolute;inset:0;opacity:0;z-index:1;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.22);transition:background .25s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .28s var(--sp)}
+.sw input:checked+i{background:var(--as)}
+.sw input:checked+i::after{transform:translateX(20px)}
+.srow{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 16px;border-radius:18px;
+  background:rgba(255,255,255,.09);border:1px solid var(--bs);
+  font-size:13.5px;font-weight:600;
+}
+
+/* HỒ SƠ CÁ NHÂN (PROFILE) */
+.prof-card{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:20px;border-radius:24px;text-align:center;
+  background:radial-gradient(120% 100% at 50% 0%,rgba(124,92,255,.25),rgba(41,214,197,.08));
+  border:1px solid var(--bs);
+}
+.prof-av-wrap{position:relative;width:92px;height:92px}
+.prof-av{
+  width:92px;height:92px;border-radius:28px;object-fit:cover;
+  border:2.5px solid rgba(255,255,255,.85);
+  box-shadow:0 10px 26px rgba(0,0,0,.35);
+  background:rgba(255,255,255,.15);
+}
+.prof-av-edit{
+  position:absolute;bottom:-4px;right:-4px;
+  width:32px;height:32px;border-radius:11px;
+  background:var(--acc-grad);color:#fff;
+  display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,.35);
+}
+.prof-av-edit svg{width:15px;height:15px}
+.prof-name{font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+.role-badge{
+  padding:3px 10px;border-radius:99px;font-size:10.5px;font-weight:800;
+  background:var(--acc-grad);color:#fff;letter-spacing:.04em;
+}
+.uid-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700;
+  background:rgba(0,0,0,.25);border:1px solid var(--bs);color:var(--as);
+}
+.prof-bio{font-size:13.5px;color:var(--t2);line-height:1.6;max-width:48ch;white-space:pre-wrap}
+.prof-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12.5px;font-weight:700;color:var(--as);
+  padding:6px 14px;border-radius:99px;background:rgba(41,214,197,.12);
+  border:1px solid rgba(41,214,197,.3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* NHẮN TIN & HỘP THƯ (MESSAGING & INBOX) */
+.chat-shell{
+  display:grid;grid-template-columns:280px 1fr;gap:14px;
+  flex:1;min-height:0;overflow:hidden;
+}
+@media(max-width:700px){
+  .chat-shell{grid-template-columns:1fr}
+  .chat-shell.in-conv .chat-side{display:none}
+  .chat-shell:not(.in-conv) .chat-main{display:none}
+}
+.chat-side{
+  display:flex;flex-direction:column;gap:10px;min-height:0;
+  padding-right:4px;border-right:1px solid rgba(255,255,255,.12);
+}
+@media(max-width:700px){.chat-side{border-right:none;padding-right:0}}
+.chat-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.chat-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:16px;background:rgba(255,255,255,.06);
+  border:1px solid transparent;text-align:left;width:100%;
+  transition:background .2s,border-color .2s;
+}
+.chat-item:hover,.chat-item.on{background:rgba(255,255,255,.15);border-color:var(--bs)}
+.chat-item img{width:40px;height:40px;border-radius:14px;object-fit:cover;flex:none}
+.chat-item-info{flex:1;min-width:0}
+.chat-item-info b{display:block;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-item-info small{display:block;font-size:11.5px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.chat-main{
+  display:flex;flex-direction:column;min-height:0;
+  border-radius:22px;background:rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.12);
+  overflow:hidden;
+}
+.chat-hdr{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);
+}
+.chat-hdr img{width:36px;height:36px;border-radius:12px;object-fit:cover;cursor:pointer}
+.chat-hdr-info{flex:1;min-width:0;cursor:pointer}
+.chat-hdr-info b{display:block;font-size:14px}
+.chat-hdr-info small{font-size:11px;color:var(--t2)}
+.chat-msgs{
+  flex:1;overflow-y:auto;padding:14px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.msg-row{display:flex;flex-direction:column;max-width:78%;gap:3px}
+.msg-row.me{align-self:flex-end;align-items:flex-end}
+.msg-row.them{align-self:flex-start;align-items:flex-start}
+.msg-bub{
+  padding:10px 14px;border-radius:18px;font-size:13.5px;line-height:1.5;
+  word-break:break-word;
+}
+.msg-row.me .msg-bub{
+  background:var(--acc-grad);color:#fff;border-bottom-right-radius:5px;
+  box-shadow:0 4px 14px rgba(90,110,255,.3);
+}
+.msg-row.them .msg-bub{
+  background:rgba(255,255,255,.14);color:var(--t1);
+  border:1px solid var(--bs);border-bottom-left-radius:5px;
+}
+.msg-bub img.msg-img{max-width:220px;max-height:220px;border-radius:12px;display:block;cursor:pointer}
+.msg-bub audio{max-width:220px;height:36px;display:block}
+.msg-file{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;
+  border-radius:12px;background:rgba(0,0,0,.22);color:#fff;font-size:12.5px;font-weight:600;
+}
+.msg-time{font-size:10px;color:var(--t2);opacity:.78;padding:0 4px}
+.chat-bar{
+  display:flex;align-items:center;gap:7px;padding:10px 12px;
+  border-top:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);
+}
+.chat-bar input[type=text]{
+  flex:1;min-width:0;padding:10px 14px;border-radius:99px;
+  background:rgba(255,255,255,.1);border:1px solid var(--bs);
+  color:var(--t1);font-size:13.5px;outline:none;
+}
+/* Thanh ghi âm giọng nói phong cách MagicOS 11 */
+.rec-bar{
+  display:none;align-items:center;gap:10px;flex:1;
+  padding:8px 14px;border-radius:99px;
+  background:linear-gradient(90deg,rgba(255,59,92,.28),rgba(124,92,255,.28));
+  border:1px solid rgba(255,100,130,.5);
+}
+.rec-bar.on{display:flex}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:#ff3b5c;animation:pulseDot 1s infinite}
+.rec-wave{display:flex;align-items:center;gap:3px;height:18px;flex:1}
+.rec-wave i{display:block;width:3px;background:#fff;border-radius:99px;animation:wbar .6s ease-in-out infinite alternate}
+@keyframes wbar{from{height:4px}to{height:18px}}
+
+/* BÁO CÁO & GÓP Ý */
+.rep-card{
+  padding:13px 15px;border-radius:18px;
+  background:rgba(255,255,255,.08);border:1px solid var(--bs);
+  display:flex;flex-direction:column;gap:8px;
+}
+.rep-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.st-badge{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800}
+.st-pending{background:rgba(255,181,69,.2);color:#ffc86b;border:1px solid rgba(255,181,69,.4)}
+.st-reviewing{background:rgba(59,158,255,.2);color:#7ac0ff;border:1px solid rgba(59,158,255,.4)}
+.st-resolved{background:rgba(46,229,157,.2);color:#5ff5b8;border:1px solid rgba(46,229,157,.4)}
+.st-rejected{background:rgba(255,107,122,.2);color:#ff8f9b;border:1px solid rgba(255,107,122,.4)}
+
+/* DEV PANEL */
+#dev{
+  position:fixed;inset:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));
+  z-index:320;display:none;flex-direction:column;border-radius:30px;overflow:hidden;
+  color:#f4f7fb;
+  background:radial-gradient(120% 80% at 0% 0%,rgba(255,255,255,.16),transparent 50%),rgba(12,18,36,.86);
+  -webkit-backdrop-filter:blur(28px) saturate(1.8);backdrop-filter:blur(28px) saturate(1.8);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.14),0 24px 60px -12px rgba(0,0,0,.65);
+}
+#dev.on{display:flex}
+#dev .m-h{display:flex;align-items:center;gap:10px;padding:16px 20px 10px;border-bottom:1px solid rgba(255,255,255,.12)}
+#dev .m-h h3{flex:1;font-size:16px;font-weight:800;letter-spacing:.04em}
+#dev .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 18px;flex:none}
+#dev .tab{
+  position:relative;flex:none;padding:9px 16px;border-radius:99px;
+  font-size:13px;font-weight:700;color:#c3cce0;background:rgba(255,255,255,.08);
+}
+#dev .tab.on{color:#fff;background:var(--acc-grad);box-shadow:0 4px 14px rgba(124,92,255,.4)}
+#dev .body{flex:1;overflow-y:auto;padding:10px 20px 26px}
+#dev .pane{display:none}#dev .pane.on{display:flex;flex-direction:column;gap:12px;max-width:820px;margin:0 auto}
+#devList details{border-radius:18px;overflow:hidden;background:rgba(255,255,255,.07);margin-bottom:8px}
+#devList summary{padding:12px 15px;font-weight:700;cursor:pointer}
+.drow{display:flex;gap:8px;align-items:center;padding:9px 14px;border-top:1px solid rgba(255,255,255,.1)}
+.drow span{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* TOAST */
+#toasts{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);z-index:850;display:flex;flex-direction:column;gap:8px;max-width:92vw;pointer-events:none}
+.toast{border-radius:16px;padding:11px 18px;font-size:13px;font-weight:700;animation:tin .35s var(--sp);--tint:rgba(10,16,32,.78);color:#fff;box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.toast.out{animation:tout .28s forwards}
+@keyframes tin{from{opacity:0;transform:translateY(18px)}}
+@keyframes tout{to{opacity:0;transform:translateY(18px)}}
+
+/* IMAGE PREVIEW BOX */
+.img-up-box{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:10px;border-radius:16px;background:rgba(255,255,255,.07);border:1px dashed var(--bs);
+}
+.img-up-prev{
+  width:72px;height:72px;border-radius:14px;object-fit:cover;
+  background:rgba(0,0,0,.25);display:none;
+}
+.img-up-prev.on{display:block}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 </style>
 </head>
-<body>
-<div id="bg"><div id="bgMedia"></div><div id="scene">
-  <div class="sky"></div><div class="sun"></div><div class="mtn m1"></div><div class="mtn m2"></div>
-  <div class="ground"></div><div class="fog f1"></div><div class="fog f2"></div><div id="parts"></div>
-</div></div>
-<div id="splash"><div class="mk">S</div><div style="font-weight:800;letter-spacing:1px">SKIBIDI SCRIPT</div><div class="mu" id="splashTx">Đang khởi động…</div></div>
-<div id="toasts"></div>
-<div id="modalWrap"><div id="modal"></div></div>
-<div id="app">
-  <header id="top">
-    <div class="logo" data-act="go" data-to="home"><div class="mk">S</div><span>SKIBIDI SCRIPT</span></div>
-    <div class="spacer"></div>
-    <button class="icobtn" data-act="go" data-to="mailbox" title="Hộp thư">✉️<span class="dot" id="dotMail"></span></button>
-    <button class="icobtn" data-act="go" data-to="shop" title="Shop">🛍️</button>
-    <button class="icobtn" id="avaTop" data-act="me"><span class="avatar" id="avaTopIn" style="width:30px;height:30px;font-size:13px">?</span><span class="dot" id="dotDev"></span></button>
-  </header>
-  <nav id="bar">
-    <button data-act="go" data-to="utils"><span class="ni">🧰</span>Tiện ích</button>
-    <button data-act="go" data-to="audio"><span class="ni">🎧</span>Âm thanh</button>
-    <button data-act="go" data-to="report"><span class="ni">📮</span>Báo cáo</button>
-    <button data-act="go" data-to="chat"><span class="ni">💬</span>Nhắn tin<span class="dot" id="dotChat" style="position:static;box-shadow:none;margin-left:2px"></span></button>
-  </nav>
-  <main id="view" style="flex:1;padding-top:6px"></main>
+<body class="theme-normal tod-night">
+<!-- KHÔNG GIAN THIÊN NHIÊN & HIỆU ỨNG THỜI TIẾT -->
+<div id="envWrap" aria-hidden="true">
+  <div id="stars"></div><div id="sun"></div><div id="moon"></div><div id="rainbow"></div><i id="shoot"></i>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><g id="cld"><g fill="currentColor"><ellipse cx="55" cy="50" rx="42" ry="17"/><ellipse cx="105" cy="46" rx="52" ry="21"/><circle cx="84" cy="30" r="24"/><circle cx="128" cy="32" r="19"/><ellipse cx="152" cy="50" rx="38" ry="15"/></g><ellipse cx="100" cy="60" rx="86" ry="9" fill="#000" opacity=".08"/></g></defs></svg>
+  <div id="clouds"></div>
+  <div id="wind"></div><div id="flash"></div>
+  <div id="fauna"></div>
+  <svg id="envSvg" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <radialGradient id="pkg" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#ffb552"/><stop offset=".55" stop-color="#f06a10"/><stop offset="1" stop-color="#93320a"/></radialGradient>
+      <radialGradient id="pkh"><stop offset="0" stop-color="#ffc24a" stop-opacity=".68"/><stop offset="1" stop-color="#ffc24a" stop-opacity="0"/></radialGradient>
+      <radialGradient id="pkf" cx=".5" cy=".35" r=".75"><stop offset="0" stop-color="#fff7c4"/><stop offset="1" stop-color="#ffb41f"/></radialGradient>
+      <linearGradient id="stg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a3a9c2"/><stop offset=".6" stop-color="#707591"/><stop offset="1" stop-color="#4a4f68"/></linearGradient>
+      <linearGradient id="seag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sea1)"/><stop offset="1" style="stop-color:var(--sea2)"/></linearGradient>
+      <linearGradient id="m1g" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="0" y2="360"><stop offset="0" style="stop-color:var(--mt1)"/><stop offset=".42" style="stop-color:var(--mt1)"/><stop offset=".75" style="stop-color:var(--m1)"/></linearGradient>
+      <linearGradient id="m2g" gradientUnits="userSpaceOnUse" x1="0" y1="240" x2="0" y2="440"><stop offset="0" style="stop-color:var(--mt2)"/><stop offset=".38" style="stop-color:var(--mt2)"/><stop offset=".72" style="stop-color:var(--m2)"/></linearGradient>
+      <g id="pkb"><ellipse cx="-20" cy="2" rx="16" ry="25" fill="url(#pkg)"/><ellipse cx="20" cy="2" rx="16" ry="25" fill="url(#pkg)"/><ellipse cx="-10" cy="1" rx="17" ry="28" fill="url(#pkg)"/><ellipse cx="10" cy="1" rx="17" ry="28" fill="url(#pkg)"/><ellipse cx="0" cy="0" rx="15" ry="29" fill="url(#pkg)"/><path d="M-10 -27Q-17 0 -10 27M10 -27Q17 0 10 27M-21 -20Q-28 2 -21 22M21 -20Q28 2 21 22" stroke="#8a2f03" stroke-opacity=".55" stroke-width="1.5" fill="none"/><ellipse cx="-14" cy="-14" rx="6" ry="9" fill="#fff" opacity=".14" transform="rotate(-20 -14 -14)"/><path d="M-4 -27Q-6 -36 -1 -40L5 -38Q2 -34 3 -27Z" fill="#5a3f1a"/><path d="M4 -33q10 -6 14 2q2 6 -4 6" stroke="#4a8a2e" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M-4 -31q-14 -2 -16 -12q10 0 16 12z" fill="#3f7a28"/></g>
+      <g id="pk1"><ellipse cx="0" cy="29" rx="48" ry="8" fill="rgba(255,150,40,.35)"/><use href="#pkb"/><g class="pf"><circle cx="0" cy="0" r="36" fill="url(#pkh)"/><g fill="url(#pkf)" stroke="#7a2a00" stroke-width=".8" stroke-linejoin="round"><path d="M-18 -6 l7 -12 l7 12z M4 -6 l7 -12 l7 12z M-3 3 l3 -6 l3 6z"/><path d="M-22 4Q0 30 22 4Q0 12 -22 4Z"/></g><path d="M-10 8 h6 v7 h-6z M3 9 h6 v7 h-6z" fill="#e8620f" stroke="none"/></g></g>
+      <g id="pk2"><ellipse cx="0" cy="29" rx="48" ry="8" fill="rgba(255,150,40,.35)"/><use href="#pkb"/><g class="pf"><circle cx="0" cy="0" r="36" fill="url(#pkh)"/><g fill="url(#pkf)" stroke="#7a2a00" stroke-width=".8" stroke-linejoin="round"><circle cx="-12" cy="-8" r="6"/><circle cx="12" cy="-8" r="6"/><path d="M-24 2Q0 34 24 2Q0 16 -24 2Z"/></g><path d="M-10 8 h6 v7 h-6z M3 9 h6 v7 h-6z" fill="#e8620f" stroke="none"/></g></g>
+      <g id="pk3"><ellipse cx="0" cy="29" rx="48" ry="8" fill="rgba(255,150,40,.35)"/><use href="#pkb"/><g class="pf"><circle cx="0" cy="0" r="36" fill="url(#pkh)"/><g fill="url(#pkf)" stroke="#7a2a00" stroke-width=".8" stroke-linejoin="round"><path d="M-22 -17L-6 -8L-22 -3Z M22 -17L6 -8L22 -3Z"/><path d="M-16 7L-9 14L-3 8L3 14L9 8L16 7L16 20Q0 29 -16 20Z"/></g></g></g>
+      <g id="tb1"><path d="M-22 0V-48a22 22 0 0 1 44 0V0Z" fill="url(#stg)"/><path d="M-22 0V-48a22 22 0 0 1 8 -17" stroke="#d4d8ee" stroke-opacity=".55" stroke-width="2" fill="none"/><path d="M0 -58v22M-8 -50h16" stroke="#2f3248" stroke-width="3.5" stroke-linecap="round"/><rect x="-26" y="-4" width="52" height="7" rx="2" fill="#3e4259"/></g>
+      <g id="tb2"><path d="M-6 0V-62H-20V-74H-6V-92H8V-74H22V-62H8V0Z" fill="url(#stg)"/><path d="M-6 -62V-92" stroke="#d4d8ee" stroke-opacity=".5" stroke-width="1.6"/><rect x="-16" y="-5" width="32" height="7" rx="2" fill="#3e4259"/></g>
+      <g id="tb3"><path d="M-30 0V-34q0 -12 12 -12H18q12 0 12 12V0Z" fill="url(#stg)"/><path d="M-30 0V-34q0 -12 12 -12" stroke="#d4d8ee" stroke-opacity=".5" stroke-width="2" fill="none"/><text x="0" y="-24" text-anchor="middle" font-size="13" font-weight="800" fill="#2f3248" font-family="Georgia,serif">RIP</text><rect x="-34" y="-4" width="68" height="7" rx="2" fill="#3e4259"/></g>
+    </defs>
+    <!-- DÃY NÚI ĐA LỚP NÂNG CẤP CÓ CHIỀU SÂU & SƯƠNG NÚI -->
+    <path class="mtn" fill="url(#m1g)" opacity=".55" d="M0 320 L110 230 L210 275 L340 155 L465 240 L590 130 L735 220 L860 115 L1010 215 L1145 140 L1290 225 L1390 165 L1440 195 L1440 640 L0 640Z"/>
+    <path class="mtn" fill="url(#m1g)" opacity=".82" d="M0 350 C110 300 195 225 310 195 C415 168 480 230 565 190 C665 145 735 105 835 142 C935 178 990 228 1090 192 C1190 156 1275 132 1370 175 L1440 212 L1440 640 L0 640Z"/>
+    <path class="mtn" fill="url(#m2g)" d="M0 420 C155 372 260 328 405 318 C525 310 605 356 725 344 C865 330 950 288 1090 312 C1210 332 1325 366 1440 344 L1440 640 L0 640Z"/>
+    <g id="gHills"></g><g id="gFar"></g><g id="gSnowB"></g>
+    <g id="gGrassBack" fill="var(--grassB)"></g>
+    <g id="gTrees"></g>
+    <g id="gGrassMid" fill="var(--grass)"></g>
+    <g id="gGrassFront" fill="var(--grassF)"></g>
+    <g id="gSnowF"></g>
+    <g id="gSummer"></g>
+    <!-- CẢNH QUAN HALLOWEEN NÂNG CẤP (LÂU ĐÀI MA ÁM, HÀNG RÀO CỔ, ĐÈN BÍ NGÔ, BIA MỘ) -->
+    <g id="gTHallow">
+      <g transform="translate(740 315) scale(.95)" fill="#12081f" opacity=".9">
+        <path d="M-90 40 L-90 -35 L-100 -35 L-80 -85 L-60 -35 L-70 -35 L-70 0 L-35 0 L-35 -70 L-45 -70 L-20 -135 L5 -70 L-5 -70 L-5 0 L35 0 L35 -50 L25 -50 L48 -105 L70 -50 L60 -50 L60 40 Z"/>
+        <rect x="-24" y="-52" width="8" height="16" rx="4" fill="#ff9a2e" class="pf"/>
+        <rect x="-12" y="-52" width="8" height="16" rx="4" fill="#ff9a2e" class="pf"/>
+        <circle cx="-20" cy="-82" r="5" fill="#ff6a1a" class="pf"/>
+        <rect x="44" y="-36" width="8" height="14" rx="4" fill="#ff9a2e" class="pf"/>
+      </g>
+      <use href="#tb1" transform="translate(510 598) scale(1.25) rotate(-3)"/><use href="#tb3" transform="translate(645 604) scale(.98) rotate(4)"/><use href="#tb2" transform="translate(1185 600) scale(1.22) rotate(2)"/><use href="#tb1" transform="translate(995 606) scale(.85) rotate(-5)"/><use href="#tb2" transform="translate(160 602) scale(1.05) rotate(-4)"/>
+      <use href="#pk1" transform="translate(220 580) scale(1.38)"/><use href="#pk2" transform="translate(370 594) scale(.88)"/><use href="#pk3" transform="translate(780 584) scale(1.18)"/><use href="#pk1" transform="translate(955 596) scale(.84)"/><use href="#pk2" transform="translate(1290 578) scale(1.45)"/><use href="#pk3" transform="translate(1100 600) scale(.75)"/>
+    </g>
+    <g id="gTXmas"></g>
+    <g id="gTTet"></g>
+  </svg>
+  <div id="fog"></div><canvas id="fx"></canvas>
 </div>
-<script>
-"use strict";
-/* ================= CẤU HÌNH HỆ THỐNG (chỉ dành cho nhà phát triển) ================= */
-const CFG={googleClientId:null, maxImg:1500000, maxFile:1000000, maxAudio:1500000};
-/* ================= TẦNG DỮ LIỆU ================= */
-const DB=(()=>{const P="skibidi.v2.";
- const rd=k=>{try{const v=localStorage.getItem(P+k);return v==null?null:JSON.parse(v)}catch(e){return null}};
- const wr=(k,v)=>{localStorage.setItem(P+k,JSON.stringify(v));emit(k)};
- const ls=[];const emit=k=>ls.forEach(f=>f(k));
- const col=(k,init)=>({get:()=>{const v=rd(k);return v==null?(wr(k,init),init):v},set:v=>wr(k,v),
-   tx:fn=>{const cur=rd(k);const v=fn(cur==null?JSON.parse(JSON.stringify(init)):cur);wr(k,v);return v}});
- return{rd,wr,col,onChange:f=>ls.push(f),
-  users:col("users",[]), session:col("session",null), cats:col("cats",null), items:col("items",[]),
-  sugg:col("sugg",[]), posts:col("posts",[]), reports:col("reports",[]), mails:col("mails",[]),
-  convos:col("convos",[]), shop:col("shop",null), media:col("media",null), notice:col("notice",null),
-  glassDef:col("glassDef",{mode:"liquid",alpha:.34,blur:18,edge:.55,tint:"255,255,255"})};
-})();
-if(DB.cats.get()==null)DB.cats.set([
- {id:"script",name:"Script",builtin:1,order:1},{id:"apk",name:"APK",builtin:1,order:2},
- {id:"ios",name:"iOS",builtin:1,order:3},{id:"link",name:"Link",builtin:1,order:4}]);
-if(DB.shop.get()==null)DB.shop.set([
- {id:"font-serif",type:"font",name:"Font Cổ điển",desc:"Chữ dạng serif sang trọng.",price:0,preview:{kind:"font",value:"serif"},hidden:0,order:1},
- {id:"font-mono",type:"font",name:"Font Kỹ thuật",desc:"Chữ đơn cách đều đặn.",price:0,preview:{kind:"font",value:"mono"},hidden:0,order:2},
- {id:"frame-glow",type:"frame",name:"Khung Viễn Quang",desc:"Viền phát sáng quanh ảnh đại diện.",price:0,preview:{kind:"frame",value:"fr1"},hidden:0,order:3},
- {id:"frame-double",type:"frame",name:"Khung Song Hoàn",desc:"Hai vòng viền lồng nhau.",price:0,preview:{kind:"frame",value:"fr2"},hidden:0,order:4},
- {id:"badge-star",type:"badge",name:"Huy hiệu Ngôi sao",desc:"Biểu tượng sao cạnh tên.",price:0,preview:{kind:"badge",value:"⭐"},hidden:0,order:5},
- {id:"nx-gradient",type:"namefx",name:"Tên Gradient",desc:"Tên chuyển màu chuyển động.",price:0,preview:{kind:"namefx",value:"nmfx1"},hidden:0,order:6},
- {id:"nx-glow",type:"namefx",name:"Tên Phát sáng",desc:"Tên nhấp nháy ánh sáng nhẹ.",price:0,preview:{kind:"namefx",value:"nmfx2"},hidden:0,order:7},
- {id:"dev-crown",type:"badge",name:"Huy hiệu Vương miện",desc:"Chỉ dành cho nhóm quản trị.",price:0,roles:["dev"],preview:{kind:"badge",value:"👑"},hidden:0,order:8}]);
-if(DB.media.get()==null)DB.media.set({nox:{audio:[]},turbo:{audio:[]},glass:{audio:[]},natural:{audio:[],event:"auto"}});
-if(DB.notice.get()==null)DB.notice.set({text:"",note:"",ts:0,id:0});
-/* ================= TIỆN ÍCH CHUNG ================= */
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const uid8=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
-const fmtDT=ts=>{const d=new Date(ts);return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
-const ago=ts=>{const s=(Date.now()-ts)/1000;if(s<60)return"Vừa xong";if(s<3600)return Math.floor(s/60)+" phút trước";if(s<86400)return Math.floor(s/3600)+" giờ trước";return Math.floor(s/86400)+" ngày trước"};
-function toast(msg,type=""){const t=document.createElement("div");t.className="toast "+type;t.textContent=msg;$("#toasts").append(t);setTimeout(()=>{t.style.opacity="0";setTimeout(()=>t.remove(),300)},3200)}
-const loadHTML=`<div class="loader"><i></i><i></i><i></i></div>`;
-function errBox(msg,act,label="Thử lại"){return `<div class="card empty"><div class="big">⚠️</div><div>${esc(msg)}</div><br><button class="btn pri sm" data-act="${act}">${label}</button></div>`}
-/* Ảnh nén trước khi lưu */
-function readImage(file,maxW=900){return new Promise((res,rej)=>{if(!file.type.startsWith("image/"))return rej("Tệp không phải hình ảnh.");
- const r=new FileReader();r.onerror=()=>rej("Không đọc được tệp.");r.onload=()=>{const im=new Image();im.onerror=()=>rej("Hình ảnh không hợp lệ.");
- im.onload=()=>{const sc=Math.min(1,maxW/im.width);const c=document.createElement("canvas");c.width=im.width*sc;c.height=im.height*sc;
- c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.82))};im.src=r.result};r.readAsDataURL(file)})}
-function readSmall(file,max,typeCheck){return new Promise((res,rej)=>{if(file.size>max)return rej("Tệp quá lớn. Vui lòng chọn tệp nhỏ hơn "+Math.round(max/1e6*10)/10+" MB.");
- if(typeCheck&&!typeCheck(file.type))return rej("Định dạng tệp không được hỗ trợ.");const r=new FileReader();r.onerror=()=>rej("Không đọc được tệp.");r.onload=()=>res(r.result);r.readAsDataURL(file)})}
-/* Ghi âm giọng nói */
-let recState=null;
-function toggleRec(btn,onDone){if(recState){recState.st.onstop=()=>{const rd2=new FileReader();rd2.onload=()=>{onDone(rd2.result)};rd2.readAsDataURL(recState.chunks.length?new Blob(recState.chunks,{type:recState.mime}):new Blob([]));recState=null;btn.classList.remove("rec");btn.textContent="🎤 Chạm để ghi âm"};recState.st.stop();return}
- if(!navigator.mediaDevices||!window.MediaRecorder){toast("Thiết bị không hỗ trợ ghi âm.","err");return}
- navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{const mr=new MediaRecorder(st);recState={st:st,mr:mr,chunks:[],mime:mr.mimeType||"audio/webm"};
- mr.ondataavailable=e=>recState.chunks.push(e.data);mr.start();btn.classList.add("rec");btn.textContent="⏹ Dừng ghi âm";setTimeout(()=>{if(recState)toggleRec(btn,onDone)},60000)}).catch(()=>toast("Không cấp quyền mic nên không ghi âm được.","err"))}
-/* ================= TÀI KHOẢN & PHÂN QUYỀN ================= */
-const Auth={
- me(){const s=DB.session.get();if(!s)return null;return DB.users.get().find(u=>u.uid===s.uid)||null},
- hash(pw,salt){const b=new TextEncoder().encode(salt+"::"+pw);return crypto.subtle.digest("SHA-256",b).then(h=>[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join(""))},
- async register(email,pass,name){email=String(email).trim().toLowerCase();name=String(name).trim();
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw"E-mail không hợp lệ.";
-  if(pass.length<6)throw"Mật khẩu cần ít nhất 6 ký tự.";
-  if(name.length<2||name.length>24)throw"Tên hiển thị cần từ 2 đến 24 ký tự.";
-  let out=null;DB.users.tx(us=>{if(us.some(u=>u.email===email))throw"E-mail này đã được đăng ký.";
-   const uid=Auth.freeUid(us,name);const salt=uid8()+uid8();
-   out={uid,uidOriginal:uid,uidChanged:0,email,pass:"",salt,displayName:name,nameChangedAt:0,role:us.length===0?"dev":"user",
-    postPerm:1,avatar:"",bio:"",links:[],createdAt:Date.now(),friends:[],reqIn:[],reqOut:[],blocked:[],owned:[],equip:{},seenNotices:[],mailRead:[],glass:null,perf:"balanced",vol:.8};
-   us.push(out);return us});
-  const h=await Auth.hash(pass,out.salt);DB.users.tx(us=>{const u=us.find(x=>x.uid===out.uid);u.pass=h;return us});
-  DB.session.set({uid:out.uid});return out},
- freeUid(us,name){const base=(name||"user").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,12)||"user";let cand=base,n=1;
-  const taken=c=>us.some(u=>u.uid.toLowerCase().replace(/\s/g,"")===c);while(taken(cand))cand=base+(++n);return cand},
- async login(email,pass){email=String(email).trim().toLowerCase();const u=DB.users.get().find(x=>x.email===email);
-  if(!u)throw"Tài khoản không tồn tại.";const h=await Auth.hash(pass,u.salt);if(h!==u.pass)throw"Mật khẩu không đúng.";
-  DB.session.set({uid:u.uid});return u},
- logout(){DB.session.set(null)},
- isDev(u){return!!u&&u.role==="dev"},
- canPost(u){return!!u&&(u.role==="dev"||u.postPerm===1)},
- /* Đổi tên: 7 ngày một lần — kiểm tra trong tầng dữ liệu */
- rename(u,name){name=String(name).trim();if(name.length<2||name.length>24)throw"Tên hiển thị cần từ 2 đến 24 ký tự.";
-  DB.users.tx(us=>{const t=us.find(x=>x.uid===u.uid);const now=Date.now();
-   if(t.nameChangedAt&&now-t.nameChangedAt<7*864e5)throw"Bạn vừa đổi tên gần đây. Vui lòng thử lại sau "+Math.ceil((7*864e5-(now-t.nameChangedAt))/864e5)+" ngày nữa.";
-   t.displayName=name;t.nameChangedAt=now;return us})},
- /* Đổi UID: đúng một lần, không trùng, so sánh không phân biệt hoa thường */
- changeUid(u,nu){nu=String(nu).trim().replace(/\s+/g,"");if(!/^[A-Za-z0-9_.-]{4,20}$/.test(nu))throw"UID cần 4–20 ký tự gồm chữ, số, dấu gạch dưới, chấm hoặc gạch ngang.";
-  DB.users.tx(us=>{const t=us.find(x=>x.uid===u.uid);
-   if(t.uidChanged)throw"UID chỉ được đổi một lần duy nhất.";
-   if(us.some(x=>x.uid.toLowerCase()!==t.uid.toLowerCase()&&x.uid.toLowerCase().replace(/\s/g,"")===nu.toLowerCase()))throw"UID này đã có người sử dụng.";
-   const old=t.uid;t.uid=nu;t.uidChanged=1;
-   us.forEach(o=>{const rep=a=>Array.isArray(a)?a.map(v=>v===old?nu:v):a;o.friends=rep(o.friends);o.reqIn=rep(o.reqIn);o.reqOut=rep(o.blocked?o.reqOut:o.reqOut);o.blocked=rep(o.blocked)});
-   DB.convos.tx(cs=>{cs.forEach(c=>{c.members=c.members.map(v=>v===old?nu:v);c.messages.forEach(m=>{if(m.from===old)m.from=nu})});return cs});
-   DB.posts.tx(ps=>{ps.forEach(p=>{if(p.byUid===old)p.byUid=nu});return ps});
-   DB.items.tx(ps=>{ps.forEach(p=>{if(p.byUid===old)p.byUid=nu});return ps});
-   DB.sugg.tx(ps=>{ps.forEach(p=>{if(p.fromUid===old)p.fromUid=nu});return ps});
-   DB.reports.tx(ps=>{ps.forEach(p=>{if(p.fromUid===old)p.fromUid=nu});return ps});
-   DB.mails.tx(ps=>{ps.forEach(p=>{if(p.toUid===old)p.toUid=nu});return ps});
-   if(DB.session.get()&&DB.session.get().uid===old)DB.session.set({uid:nu});
-   return us})},
- block(a,b){if(a.uid===b)throw"Không thể thao tác với chính mình.";DB.users.tx(us=>{const t=us.find(x=>x.uid===a.uid);
-  if(!t.blocked.includes(b))t.blocked.push(b);return us})},
- unblock(a,b){DB.users.tx(us=>{const t=us.find(x=>x.uid===a.uid);t.blocked=t.blocked.filter(v=>v!==b);return us})},
- friendRequest(a,b){if(a.uid===b)throw"Không thể kết bạn với chính mình.";
-  DB.users.tx(us=>{const A=us.find(x=>x.uid===a.uid),B=us.find(x=>x.uid===b);if(!B)throw"Không tìm thấy người dùng.";
-   if(A.friends.includes(b))throw"Hai bạn đã là bạn bè.";
-   if(B.blocked.includes(a.uid)||A.blocked.includes(b))throw"Không thể gửi lời mời đến người này.";
-   if(A.reqOut.includes(b))throw"Đã gửi lời mời trước đó.";
-   if(B.reqOut.includes(a.uid)){B.reqOut=B.reqOut.filter(v=>v!==a.uid);A.reqIn=A.reqIn.filter(v=>v!==b);A.friends.push(b);B.friends.push(a.uid);return us}
-   A.reqOut.push(b);B.reqIn.push(a.uid);return us})},
- acceptReq(a,b){DB.users.tx(us=>{const A=us.find(x=>x.uid===a.uid),B=us.find(x=>x.uid===b);if(!B)return us;
-  A.reqIn=A.reqIn.filter(v=>v!==b);B.reqOut=B.reqOut.filter(v=>v!==a.uid);
-  if(!A.friends.includes(b))A.friends.push(b);if(!B.friends.includes(a.uid))B.friends.push(a.uid);return us})},
- declineReq(a,b){DB.users.tx(us=>{const A=us.find(x=>x.uid===a.uid),B=us.find(x=>x.uid===b);if(!B)return us;
-  A.reqIn=A.reqIn.filter(v=>v!==b);B.reqOut=B.reqOut.filter(v=>v!==a.uid);return us})},
- unfriend(a,b){DB.users.tx(us=>{const A=us.find(x=>x.uid===a.uid),B=us.find(x=>x.uid===b);if(!B)return us;
-  A.friends=A.friends.filter(v=>v!==b);B.friends=B.friends.filter(v=>v!==a.uid);return us})},
- userByUid(q){q=String(q).trim().replace(/\s+/g,"");return DB.users.get().find(u=>u.uid.toLowerCase()===q.toLowerCase())},
- update(uid,fn){DB.users.tx(us=>{const t=us.find(x=>x.uid===uid);if(t)fn(t);return us})}
-};
-/* ================= TIN NHẮN (kiểm quyền trong tầng dữ liệu) ================= */
-const Chat={
- convoId(a,b){return[a,b].sort().join("~")},
- get(a,b){return DB.convos.get().find(c=>c.id===Chat.convoId(a,b))},
- ensure(a,b){const id=Chat.convoId(a,b);let c=Chat.get(a,b);if(!c){DB.convos.tx(cs=>{cs.push({id,members:[a,b],messages:[],blockedBy:[]});return cs});c=Chat.get(a,b)}return c},
- canSend(a,b){const me=Auth.userByUid(a),ot=Auth.userByUid(b);if(!me||!ot)return"Không tìm thấy cuộc trò chuyện.";
-  if(me.blocked.includes(b))return"Bạn đã chặn người này nên không thể gửi tin.";
-  if(ot.blocked.includes(a))return"Người nhận không nhận tin nhắn mới.";
-  if(!me.friends.includes(b))return"Hai bạn cần kết bạn trước khi nhắn tin.";return null},
- send(a,b,msg){const err=Chat.canSend(a,b);if(err)throw err;const id=Chat.convoId(a,b);Chat.ensure(a,b);
-  DB.convos.tx(cs=>{const c=cs.find(x=>x.id===id);c.messages.push({id:uid8(),from:a,...msg,ts:Date.now(),readBy:[a]});
-   if(c.messages.length>400)c.messages=c.messages.slice(-400);return cs});return true},
- markRead(a,b){const id=Chat.convoId(a,b);DB.convos.tx(cs=>{const c=cs.find(x=>x.id===id);if(c)c.messages.forEach(m=>{if(!m.readBy.includes(a))m.readBy.push(a)});return cs})},
- unread(a){return DB.convos.get().filter(c=>c.members.includes(a)).reduce((n,c)=>n+c.messages.filter(m=>m.from!==a&&!m.readBy.includes(a)).length,0)}
-};
-/* ================= Hộp thư cá nhân ================= */
-const Mail={
- push(toUid,title,body,kind){DB.mails.tx(ms=>{ms.push({id:uid8(),toUid,title,body,kind,ts:Date.now()});if(ms.length>300)ms=ms.slice(-300);return ms})},
- list(uid){return DB.mails.get().filter(m=>m.toUid===uid).sort((a,b)=>b.ts-a.ts)},
- unread(uid){const me=Auth.userByUid(uid);return Mail.list(uid).filter(m=>!me.mailRead.includes(m.id)).length},
- mark(uid,id){Auth.update(uid,u=>{if(!u.mailRead.includes(id))u.mailRead.push(id)})}
-};
-/* ================= CHỦ ĐỀ, NỀN, ÂM THANH ================= */
-const Theme={
- cur:localStorage.getItem("skibidi.theme")||"nox",
- set(t){Theme.cur=t;localStorage.setItem("skibidi.theme",t);Theme.apply();render()},
- apply(){const el=document.documentElement;el.dataset.theme=Theme.cur;
-  const me=Auth.me();el.dataset.perf=me?me.perf:"balanced";
-  const g=Theme.glass();el.style.setProperty("--g-alpha",g.alpha);el.style.setProperty("--g-blur",g.blur+"px");
-  el.style.setProperty("--g-edge",g.edge);el.style.setProperty("--g-tint",g.tint);
-  if(Theme.cur==="glass")el.dataset.gmode=g.mode;
-  Theme.event();Theme.bg();Theme.parts();Theme.font(me)},
- glass(){const me=Auth.me();return me&&me.glass?me.glass:DB.glassDef.get()},
- event(){const el=document.documentElement;let ev="default";
-  if(Theme.cur==="natural"){const m=DB.media.get();const lock=m.natural.event||"auto";
-   if(lock!=="auto")ev=lock;else{const mo=new Date().getMonth()+1,d=new Date().getDate();
-    if(mo===10)ev="halloween";else if(mo===12&&d>=15||mo===1&&d<=2)ev="christmas";else if(mo===1||mo===2)ev="tet"}}
-   el.dataset.event=ev},
- bg(){const m=DB.media.get()[Theme.cur]||{};const w=$("#bgMedia");w.innerHTML="";
-  if(m.bgVideo){const v=document.createElement("video");v.src=m.bgVideo;v.autoplay=!0;v.muted=!0;v.loop=!0;v.playsInline=!0;v.onerror=()=>v.remove();w.append(v)}
-  else if(m.bgImage){const i=document.createElement("img");i.src=m.bgImage;i.onerror=()=>i.remove();w.append(i)}},
- parts(){const w=$("#parts");w.innerHTML="";if(Theme.cur!=="natural")return;
-  const ev=document.documentElement.dataset.event;const n=+getComputedStyle(document.documentElement).getPropertyValue("--part")||0;
-  const cfg={default:{c:"rgba(255,255,255,.75)",s:[3,6]},halloween:{c:"rgba(255,140,46,.8)",s:[4,8]},christmas:{c:"#fff",s:[3,7]},tet:{c:"rgba(240,180,41,.85)",s:[4,8]}}[ev]||{c:"#fff",s:[3,6]};
-  for(let i=0;i<n;i++){const p=document.createElement("i");const sz=cfg.s[0]+Math.random()*(cfg.s[1]-cfg.s[0]);
-   p.style.cssText=`left:${Math.random()*100}%;width:${sz}px;height:${sz}px;background:${cfg.c};animation-duration:${7+Math.random()*9}s;animation-delay:-${Math.random()*12}s;opacity:${.4+Math.random()*.5}`;w.append(p)}},
- font(me){document.body.dataset.font="";if(!me)return;const f=me.equip.font;if(f){const it=DB.shop.get().find(s=>s.id===f);if(it)document.body.dataset.font=it.preview.value}},
- /* Trình phát âm thanh */
- au:new Audio(),auReady:false,
- init(){Theme.au.addEventListener("error",()=>{if(Theme.auReady)toast("Không phát được âm thanh này.","err")});
-  Theme.au.addEventListener("ended",()=>AudioUI.sync());
-  document.addEventListener("pointerdown",()=>{Theme.auReady=true},{once:true})},
- tracks(){const m=DB.media.get()[Theme.cur]||{};return m.audio||[]},
- play(i){const t=Theme.tracks()[i];if(!t){toast("Chưa có âm thanh nào cho giao diện này.","err");return}
-  const me=Auth.me();Theme.au.volume=me?me.vol:.8;Theme.au.src=t.dataUrl;Theme.au.currentIndex=i;
-  Theme.au.play().then(()=>AudioUI.sync()).catch(()=>toast("Trình duyệt chưa cho phép phát âm thanh. Hãy chạm nút phát.","err"))},
- toggle(){if(Theme.au.paused){if(!Theme.au.src){Theme.play(0);return}Theme.au.play().catch(()=>toast("Không phát được âm thanh.","err"))}else Theme.au.pause();AudioUI.sync()},
- vol(v){Theme.au.volume=v;Auth.me()&&Auth.update(Auth.me().uid,u=>u.vol=v)}
-};
-Theme.init();
-/* ================= ĐỊNH TUYẾN & RENDER ================= */
-let route={name:"home",param:null},viewState={};
-function nav(to,param){location.hash="#/"+to+(param?"/"+param:"")}
-function parseRoute(){const p=location.hash.replace(/^#\/?/,"").split("/").filter(Boolean);
- route={name:p[0]||"home",param:p[1]||null,param2:p[2]||null}}
-window.addEventListener("hashchange",()=>{parseRoute();render()});
-DB.onChange(()=>{if(!document.hidden)renderDots()});
-window.addEventListener("storage",e=>{if(e.key&&e.key.startsWith("skibidi.v2."))render()});
-function render(){parseRoute();Theme.apply();renderDots();
- $$("#bar button").forEach(b=>b.classList.toggle("on",b.dataset.to===route.name||(route.name==="home"&&b.dataset.to==="utils"&&false)));
- const v=$("#view");const R=Views[route.name]||Views.home;
- v.innerHTML=loadHTML;requestAnimationFrame(()=>{try{v.innerHTML=R()}catch(err){v.innerHTML=errBox("Không thể tải nội dung. Vui lòng thử lại.","retry")}});
- window.scrollTo({top:0})}
-function renderDots(){const me=Auth.me();
- $("#dotMail").classList.toggle("on",me?Mail.unread(me.uid)>0:false);
- $("#dotChat").classList.toggle("on",me?Chat.unread(me.uid)>0:false);
- $("#dotDev").classList.toggle("on",me&&Auth.isDev(me)?DB.sugg.get().filter(s=>s.status==="pending").length+DB.reports.get().filter(r=>r.status==="new").length>0:false);
- const a=$("#avaTopIn");if(me){a.innerHTML=me.avatar?`<img src="${me.avatar}">`:esc(me.displayName[0].toUpperCase());
-  const fr=me.equip.frame;const it=fr?DB.shop.get().find(s=>s.id===fr):null;a.className="avatar"+(it?" "+it.preview.value:"")}
- else{a.textContent="?";a.className="avatar"}}
-/* ================= THÀNH PHẦN UI ================= */
-function avaHTML(u,size=42){if(!u)return`<div class="avatar" style="width:${size}px;height:${size}px">?</div>`;
- const fr=u.equip&&u.equip.frame?DB.shop.get().find(s=>s.id===u.equip.frame):null;
- const bd=u.equip&&u.equip.badge?DB.shop.get().find(s=>s.id===u.equip.badge):null;
- const nx=u.equip&&u.equip.namefx?DB.shop.get().find(s=>s.id===u.equip.namefx):null;
- return`<div class="avatar${fr?" "+fr.preview.value:""}" style="width:${size}px;height:${size}px;font-size:${size/2.8}px">${u.avatar?`<img src="${u.avatar}">`:esc(u.displayName[0].toUpperCase())}</div>`}
-function nameHTML(u){if(!u)return"<i>Đã xóa</i>";const nx=u.equip&&u.equip.namefx?DB.shop.get().find(s=>s.id===u.equip.namefx):null;
- const bd=u.equip&&u.equip.badge?DB.shop.get().find(s=>s.id===u.equip.badge):null;
- return`<span class="${nx?nx.preview.value:""}">${esc(u.displayName)}</span>${bd?` <span title="Huy hiệu">${bd.preview.value}</span>`:""}${Auth.isDev(u)?' <span class="badge dev">DEV</span>':""}`}
-function modal(html){$("#modal").innerHTML=html;$("#modalWrap").classList.add("on")}
-function closeModal(){$("#modalWrap").classList.remove("on");$("#modal").innerHTML=""}
-$("#modalWrap").addEventListener("click",e=>{if(e.target.id==="modalWrap")closeModal()});
-let confirmCb=null;
-function askConfirm(msg,cb){confirmCb=cb;modal(`<h2>Xác nhận</h2><p>${esc(msg)}</p><div class="row" style="justify-content:flex-end;margin-top:14px">
- <button class="btn gho" data-act="mclose">Hủy</button><button class="btn dgr" data-act="cfm-yes">Xác nhận</button></div>`)}
-function authGate(){modal(`<h2>Đăng nhập cần thiết</h2><p class="mu">Bạn cần đăng nhập hoặc tạo tài khoản để dùng chức năng này.</p>
- <div class="col" style="margin-top:12px">${authFormHTML()}</div>`)}
-function authFormHTML(){return`
- <label class="fl">E-mail</label><input class="inp" id="lgEmail" type="email" placeholder="ban@vidu.com" autocomplete="username">
- <label class="fl">Mật khẩu</label><input class="inp" id="lgPass" type="password" placeholder="••••••••" autocomplete="current-password">
- <div class="row" style="margin-top:12px"><button class="btn pri grow" data-act="login">Đăng nhập</button>
- <button class="btn grow" data-act="reg-open">Tạo tài khoản</button></div>
- ${CFG.googleClientId?`<button class="btn grow" data-act="google">G</button>`:""}`}
-/* ================= CÁC MÀN HÌNH ================= */
-const Views={};
-Views.home=()=>{const me=Auth.me();const ps=DB.posts.get().sort((a,b)=>b.ts-a.ts);
- const nt=DB.notice.get();
- return`<div class="col">
- ${nt.text?`<div class="card row"><span style="font-size:22px">📢</span><div class="grow"><b>${esc(nt.text)}</b>${nt.note?`<div class="mu">${esc(nt.note)}</div>`:""}</div></div>`:""}
- <div class="card row" style="justify-content:space-between">
-  <div><h1 style="margin:0">Xin chào${me?", "+esc(me.displayName):""} 👋</h1><div class="mu">Cộng đồng SKIBIDI SCRIPT — chia sẻ, tiện ích và kết nối.</div></div>
-  ${me?`<button class="btn pri" data-act="post-new">＋ Đăng bài</button>`:`<button class="btn pri" data-act="auth-need">Đăng nhập</button>`}</div>
- <div class="row">${["utils:🧰 Khám phá tiện ích","shop:🛍️ Ghé Shop","report:📮 Góp ý & báo cáo"].map(x=>{const[t,l]=x.split(":");return`<button class="chip" data-act="go" data-to="${t}">${l}</button>`}).join("")}</div>
- <h2>Bài đăng cộng đồng</h2>
- ${ps.length?`<div class="grid">${ps.map(p=>{const u=Auth.userByUid(p.byUid);return`<div class="card" data-act="go" data-to="post" data-p="${p.id}" style="cursor:pointer">
-   ${p.img?`<img class="thumb" src="${p.img}" loading="lazy">`:""}
-   <h3 style="margin:10px 0 4px">${esc(p.title)}</h3><div class="mu" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(p.desc)}</div>
-   <div class="row mu" style="margin-top:10px">${avaHTML(u,22)}<span class="grow ss">${nameHTML(u)}</span><span>${ago(p.ts)}</span></div></div>`}).join("")}</div>`
- :`<div class="card empty"><div class="big">🌱</div>Chưa có bài đăng nào. Hãy là người đầu tiên chia sẻ!</div>`}</div>`};
-Views.utils=()=>{const cs=DB.cats.get().sort((a,b)=>a.order-b.order);const nt=DB.notice.get();
- return`<div class="col"><div class="card row" style="justify-content:space-between">
-  <div><h1 style="margin:0">Tiện ích</h1><div class="mu">Script, APK, iOS, Link và các danh mục khác.</div></div>
-  <button class="btn pri" data-act="sugg-new">📤 Đề xuất</button></div>
-  ${nt.note?`<div class="card mu">📌 ${esc(nt.note)}</div>`:""}
-  <input class="inp" id="uSearch" placeholder="🔍 Tìm tiện ích…" data-act="noop">
-  <div class="row tabs">${cs.map(c=>`<button class="chip" data-act="go" data-to="cat" data-p="${c.id}">${esc(c.name)} <span class="mu">(${DB.items.get().filter(i=>i.catId===c.id).length})</span></button>`).join("")}</div>
-  <div id="uList" class="grid">${utilsCards(DB.items.get())}</div></div>`};
-function utilsCards(list){if(!list.length)return`<div class="card empty" style="grid-column:1/-1"><div class="big"></div>Chưa có nội dung nào ở đây.</div>`;
- return list.sort((a,b)=>b.ts-a.ts).map(i=>{const u=Auth.userByUid(i.byUid);return`<div class="card" data-act="go" data-to="item" data-p="${i.id}" style="cursor:pointer">
-  ${i.img?`<img class="thumb" src="${i.img}" loading="lazy">`:`<div class="thumb" style="display:grid;place-items:center;font-size:34px">${{script:"📜",apk:"🤖",ios:"🍎",link:"🔗"}[DB.cats.get().find(c=>c.id===i.catId)?.id]||"📦"}</div>`}
-  <h3 style="margin:10px 0 3px">${esc(i.title)}</h3><div class="mu ss" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(i.desc)}</div>
-  <div class="row mu" style="margin-top:10px">${avaHTML(u,22)}<span class="grow">${nameHTML(u)}</span><span>${fmtDT(i.ts).slice(0,10)}</span></div></div>`}).join("")}
-Views.cat=()=>{const c=DB.cats.get().find(x=>x.id===route.param);if(!c)return errBox("Không tìm thấy danh mục.","go-utils","Về tiện ích");
- const list=DB.items.get().filter(i=>i.catId===c.id);
- return`<div class="col"><div class="row"><button class="btn gho sm" data-act="go" data-to="utils">← Quay lại</button><h1 style="margin:0">${esc(c.name)}</h1></div>
- <div class="grid">${utilsCards(list)}</div></div>`};
-Views.item=()=>{const i=DB.items.get().find(x=>x.id===route.param);if(!i)return errBox("Không thể tải nội dung. Vui lòng thử lại.","go-utils","Về tiện ích");
- const u=Auth.userByUid(i.byUid);const c=DB.cats.get().find(x=>x.id===i.catId);
- return`<div class="col"><div class="row"><button class="btn gho sm" data-act="go" data-to="cat" data-p="${i.catId}">← ${esc(c?c.name:"")}</button></div>
- <div class="card col">${i.img?`<img class="thumb" src="${i.img}">`:""}
-  <h1 style="margin:0">${esc(i.title)}</h1>
-  <div class="row mu">${avaHTML(u,30)}<span data-act="go" data-to="profile" data-p="${i.byUid}" style="cursor:pointer">${nameHTML(u)}</span><span>•</span><span>${fmtDT(i.ts)}</span>${i.updatedTs?`<span class="badge">Cập nhật ${fmtDT(i.updatedTs)}</span>`:""}</div>
-  <p style="white-space:pre-wrap">${esc(i.desc)}</p>
-  <div class="row">${i.link?`<a class="btn pri" href="${esc(i.link)}" target="_blank" rel="noopener">🔗 Mở liên kết</a>`:""}
-  ${i.file?`<a class="btn" href="${i.file}" download="${esc(i.title)}">⬇️ Tải tệp</a>`:""}</div></div></div>`};
-Views.post=()=>{const p=DB.posts.get().find(x=>x.id===route.param);if(!p)return errBox("Không thể tải nội dung. Vui lòng thử lại.","go-home","Về trang đầu");
- const u=Auth.userByUid(p.byUid),me=Auth.me();const can=me&&(me.uid===p.byUid||Auth.isDev(me));
- return`<div class="col"><div class="row"><button class="btn gho sm" data-act="go" data-to="home">← Quay lại</button>
-  ${can?`<div class="spacer"></div><button class="btn sm" data-act="post-edit" data-p="${p.id}">✏️ Sửa</button><button class="btn dgr sm" data-act="post-del" data-p="${p.id}">🗑 Xóa</button>`:""}</div>
- <div class="card col">${p.img?`<img class="thumb" src="${p.img}">`:""}<h1 style="margin:0">${esc(p.title)}</h1>
-  <div class="row mu">${avaHTML(u,34)}<span data-act="go" data-to="profile" data-p="${p.byUid}" style="cursor:pointer">${nameHTML(u)}</span><span>•</span><span>${fmtDT(p.ts)}</span>${p.updatedTs?`<span class="badge">Cập nhật ${fmtDT(p.updatedTs)}</span>`:""}</div>
-  <p style="white-space:pre-wrap">${esc(p.desc)}</p></div></div>`};
-Views.audio=()=>{const ts=Theme.tracks();const me=Auth.me();
- return`<div class="col"><div class="card col"><h1 style="margin:0">Âm thanh</h1>
- <div class="mu">Nhạc nền riêng của giao diện <b>${esc(themeName(Theme.cur))}</b>. Âm thanh chỉ phát khi bạn chạm nút.</div>
- ${ts.length?`<div class="list">${ts.map((t,i)=>`<div class="li" data-act="au-play" data-p="${i}"><span style="font-size:22px">🎵</span><div class="grow"><div class="tt">${esc(t.name)}</div><div class="ss">Chạm để phát / tạm dừng</div></div><span id="auIco${i}">▶</span></div>`).join("")}</div>
- <div class="row"><button class="btn pri" data-act="au-toggle" id="auBtn">▶ Phát / ⏸ Dừng</button>
- <div class="grow">🔊 <input type="range" min="0" max="1" step="0.05" value="${me?me.vol:.8}" data-act="au-vol"></div></div>`
- :`<div class="empty"><div class="big">🔇</div>Chưa có âm thanh nào cho giao diện này.${Auth.isDev(me)?" Thêm trong Dev Panel → Truyền thông.":""}</div>`}</div></div>`};
-const AudioUI={sync(){}};
-Views.report=()=>{const me=Auth.me();if(!me)return gateView("gửi báo cáo hoặc góp ý");
- return`<div class="col"><div class="card col"><h1 style="margin:0">Báo cáo & Góp ý</h1>
- <div class="mu">Tiếng nói của bạn giúp cộng đồng tốt hơn.</div>
- <div class="row"><button class="chip on" id="rpT-report" data-act="rp-type" data-p="report">🚨 Báo cáo</button><button class="chip" id="rpT-idea" data-act="rp-type" data-p="idea">💡 Góp ý</button></div>
- <textarea class="inp" id="rpBody" placeholder="Mô tả chi tiết nội dung của bạn…"></textarea>
- <div class="row"><button class="btn sm" data-act="rp-img">🖼 Ảnh</button><button class="btn sm" id="rpRecBtn" data-act="rp-rec">🎤 Ghi âm</button><button class="btn sm" data-act="rp-file">📎 Tệp</button></div>
- <div id="rpAtts" class="mu"></div>
- <button class="btn pri" data-act="rp-send">📨 Gửi đến hộp thư quản trị</button></div>
- <h2>Lịch sử của bạn</h2><div class="list">${DB.reports.get().filter(r=>r.fromUid===me.uid).sort((a,b)=>b.ts-a.ts).map(r=>`<div class="li" data-act="rp-open" data-p="${r.id}"><span>${r.type==="report"?"🚨":"💡"}</span><div class="grow"><div class="tt">${esc(r.content.slice(0,60))}</div><div class="ss">${fmtDT(r.ts)} • Trạng thái: ${{new:"Mới",reading:"Đang xử lý",done:"Hoàn tất"}[r.status]}</div></div>${r.replies&&r.replies.length?`<span class="badge">${r.replies.length} phản hồi</span>`:""}</div>`).join("")||`<div class="empty">Chưa có gửi nào.</div>`}</div></div>`};
-function gateView(what){return`<div class="card empty"><div class="big">🔐</div>Bạn cần đăng nhập để ${esc(what)}.<br><br><button class="btn pri" data-act="auth-need">Đăng nhập / Đăng ký</button></div>`}
-Views.chat=()=>{const me=Auth.me();if(!me)return gateView("nhắn tin và kết bạn");
- const cs=DB.convos.get().filter(c=>c.members.includes(me.uid)).sort((a,b)=>(b.messages.at(-1)?.ts||0)-(a.messages.at(-1)?.ts||0));
- return`<div class="col"><div class="card col"><h1 style="margin:0">Nhắn tin</h1>
- <div class="row"><input class="inp grow" id="chatUid" placeholder="Nhập UID để tìm thành viên…"><button class="btn pri" data-act="chat-find">Tìm</button></div>
- <div id="chatFind"></div></div>
- <div class="row tabs"><button class="chip on" data-act="chat-tab" data-p="convos">💬 Hội thoại</button><button class="chip" data-act="chat-tab" data-p="req">📥 Lời mời (${me.reqIn.length})</button><button class="chip" data-act="chat-tab" data-p="friends">👥 Bạn bè (${me.friends.length})</button><button class="chip" data-act="chat-tab" data-p="blocked">🚫 Đã chặn</button></div>
- <div id="chatPanel">${chatTab("convos",me,cs)}</div></div>`};
-function chatTab(t,me,cs){if(t==="convos")return cs.length?`<div class="list">${cs.map(c=>{const o=Auth.userByUid(c.members.find(m=>m!==me.uid));const l=c.messages.at(-1);const un=c.messages.filter(m=>m.from!==me.uid&&!m.readBy.includes(me.uid)).length;
- return`<div class="li" data-act="go" data-to="room" data-p="${o?o.uid:""}">${avaHTML(o,40)}<div class="grow"><div class="tt">${nameHTML(o)}</div><div class="ss">${l?(l.type==="text"?esc(l.text.slice(0,40)):("📎 "+l.type)):""}</div></div>${un?`<span class="badge dev">${un}</span>`:""}</div>`}).join("")}</div>`:`<div class="empty">Chưa có hội thoại nào.</div>`;
- if(t==="req")return me.reqIn.length?`<div class="list">${me.reqIn.map(u=>{const o=Auth.userByUid(u);return`<div class="li">${avaHTML(o,40)}<div class="grow"><div class="tt">${nameHTML(o)}</div><div class="ss">UID: ${esc(o?o.uid:"")}</div></div><button class="btn pri sm" data-act="fr-accept" data-p="${u}">Nhận</button><button class="btn sm" data-act="fr-decline" data-p="${u}">Từ chối</button></div>`}).join("")}</div>`:`<div class="empty">Không có lời mời chờ.</div>`;
- if(t==="friends")return me.friends.length?`<div class="list">${me.friends.map(u=>{const o=Auth.userByUid(u);return`<div class="li" data-act="go" data-to="profile" data-p="${u}">${avaHTML(o,40)}<div class="grow"><div class="tt">${nameHTML(o)}</div><div class="ss">${esc(o?o.uid:"")}</div></div><button class="btn sm" data-act="room-open" data-p="${u}">💬</button><button class="btn dgr sm" data-act="fr-remove" data-p="${u}">Hủy bạn</button></div>`}).join("")}</div>`:`<div class="empty">Chưa có bạn bè. Hãy tìm UID để kết bạn!</div>`;
- return me.blocked.length?`<div class="list">${me.blocked.map(u=>{const o=Auth.userByUid(u);return`<div class="li">${avaHTML(o,40)}<div class="grow"><div class="tt">${nameHTML(o)}</div></div><button class="btn sm" data-act="bl-un" data-p="${u}">Bỏ chặn</button></div>`}).join("")}</div>`:`<div class="empty">Không chặn ai.</div>`}
-Views.room=()=>{const me=Auth.me();if(!me)return gateView("nhắn tin");const o=Auth.userByUid(route.param);if(!o)return errBox("Không tìm thấy người dùng.","go-chat","Về nhắn tin");
- const c=Chat.get(me.uid,o.uid);setTimeout(()=>{Chat.markRead(me.uid,o.uid);const w=$("#msgScroll");if(w)w.scrollTop=w.scrollHeight},30);
- const err=Chat.canSend(me.uid,o.uid);
- return`<div class="col" style="height:calc(100vh - 190px)"><div class="card row">${avaHTML(o,38)}<div class="grow" data-act="go" data-to="profile" data-p="${o.uid}" style="cursor:pointer"><div class="tt">${nameHTML(o)}</div><div class="ss mu">${esc(o.uid)}</div></div>
- <button class="btn sm" data-act="bl-add" data-p="${o.uid}">🚫</button></div>
- <div class="card grow" id="msgScroll" style="overflow:auto;display:flex;flex-direction:column;justify-content:flex-end">${(c?c.messages:[]).map(m=>`<div class="msg${m.from===me.uid?" me":""}">${msgBody(m)}<span class="tm">${fmtDT(m.ts)}</span></div>`).join("")||`<div class="empty">Chưa có tin nhắn.</div>`}</div>
- ${err?`<div class="card mu">⚠️ ${esc(err)}</div>`:`<div class="card row"><input class="inp grow" id="msgIn" placeholder="Nhập tin nhắn…" data-act="noop">
- <button class="btn sm" data-act="msg-img">🖼</button><button class="btn sm" id="msgRec" data-act="msg-rec">🎤</button><button class="btn sm" data-act="msg-file">📎</button>
- <button class="btn pri sm" data-act="msg-send">➤</button></div>`}</div>`};
-function msgBody(m){if(m.type==="text")return esc(m.text);if(m.type==="image")return`<img src="${m.dataUrl}" style="max-height:180px;border-radius:10px">`;
- if(m.type==="voice")return`<audio controls src="${m.dataUrl}" style="width:200px"></audio>`;return`<a href="${m.dataUrl}" download="${esc(m.name||"tep")}">📎 ${esc(m.name||"Tệp đính kèm")}</a>`}
-Views.profile=()=>{const u=Auth.userByUid(route.param||"");if(!u)return errBox("Không tìm thấy hồ sơ.","go-home","Về trang đầu");
- const me=Auth.me();const mine=me&&me.uid===u.uid;const ps=DB.posts.get().filter(p=>p.byUid===u.uid).sort((a,b)=>b.ts-a.ts);
- const fr=me?me.friends.includes(u.uid):false;const reqOut=me?me.reqOut.includes(u.uid):false;const reqIn=me?me.reqIn.includes(u.uid):false;
- return`<div class="col"><div class="card col" style="align-items:center;text-align:center">
- ${avaHTML(u,84)}<h1 style="margin:6px 0 0">${nameHTML(u)}</h1><div class="mu">UID: ${esc(u.uid)}</div>
- <p style="margin:6px 0;white-space:pre-wrap">${esc(u.bio||"Chưa có giới thiệu.")}</p>
- ${u.links.length?`<div class="row" style="justify-content:center">${u.links.map(l=>`<a class="chip" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label||l.url)}</a>`).join("")}</div>`:""}
- <div class="mu">Tham gia: ${fmtDT(u.createdAt)}</div>
- <div class="row" style="justify-content:center">${mine?`<button class="btn pri" data-act="go" data-to="settings">⚙️ Chỉnh hồ sơ</button>`:me?`
-  ${fr?`<button class="btn" data-act="room-open" data-p="${u.uid}">💬 Nhắn tin</button><button class="btn dgr sm" data-act="fr-remove" data-p="${u.uid}">Hủy bạn</button>`
-   :reqIn?`<button class="btn pri" data-act="fr-accept" data-p="${u.uid}">Nhận lời mời</button>`
-   :reqOut?`<button class="btn" data-act="fr-cancel" data-p="${u.uid}">Hủy lời mời</button>`
-   :`<button class="btn pri" data-act="fr-send" data-p="${u.uid}">＋ Kết bạn</button><button class="btn" data-act="room-open" data-p="${u.uid}">💬</button>`}
-  <button class="btn sm" data-act="bl-add" data-p="${u.uid}">🚫 Chặn</button>`:`<button class="btn pri" data-act="auth-need">Đăng nhập để kết bạn</button>`}</div></div>
- <h2>Bài đăng (${ps.length})</h2>
- ${ps.length?`<div class="grid">${ps.map(p=>`<div class="card" data-act="go" data-to="post" data-p="${p.id}" style="cursor:pointer"><h3>${esc(p.title)}</h3><div class="mu">${fmtDT(p.ts)}</div></div>`).join("")}</div>`:`<div class="empty">Chưa có bài đăng.</div>`}</div>`};
-Views.mailbox=()=>{const me=Auth.me();if(!me)return gateView("xem hộp thư");const ms=Mail.list(me.uid);
- return`<div class="col"><h1>Hộp thư của bạn</h1>${ms.length?`<div class="list">${ms.map(m=>{const un=!me.mailRead.includes(m.id);
- return`<div class="li" data-act="mail-open" data-p="${m.id}" style="${un?"border-color:var(--ac)":""}">${un?`<span class="dot on" style="position:static;box-shadow:none"></span>`:"📩"}<div class="grow"><div class="tt">${esc(m.title)}</div><div class="ss">${fmtDT(m.ts)}</div></div></div>`}).join("")}</div>`:`<div class="card empty"><div class="big">📭</div>Hộp thư trống.</div>`}</div>`};
-Views.shop=()=>{const me=Auth.me();const its=DB.shop.get().filter(s=>!s.hidden).sort((a,b)=>a.order-b.order);
- const types={font:"Font chữ",frame:"Khung avatar",badge:"Huy hiệu",namefx:"Hiệu ứng tên",profilefx:"Hiệu ứng hồ sơ",accessory:"Phụ kiện"};
- return`<div class="col"><div class="card row"><h1 style="margin:0">Shop</h1><div class="mu">Vật phẩm trang trí cho hồ sơ của bạn.</div></div>
- ${Object.keys(types).map(t=>{const l=its.filter(s=>s.type===t);if(!l.length)return"";return`<h2>${types[t]}</h2><div class="grid">${l.map(s=>{
-  const allowed=!s.roles||(me&&s.roles.includes(me.role));const owned=me&&me.owned.includes(s.id);const eq=me&&me.equip[s.type]===s.id;
-  return`<div class="card col"><div class="thumb" style="display:grid;place-items:center;font-size:30px">${shopPrev(s)}</div>
-  <h3 style="margin:8px 0 2px">${esc(s.name)}</h3><div class="mu">${esc(s.desc)}</div>
-  <div class="row mu"><span class="badge">${s.price===0?"Miễn phí":s.price+" xu"}</span>${s.roles?`<span class="badge dev">Giới hạn</span>`:""}${owned?`<span class="badge st-approved">Đã sở hữu</span>`:""}</div>
-  ${!me?`<button class="btn sm" data-act="auth-need">Đăng nhập để nhận</button>`
-   :!allowed?`<button class="btn sm" disabled>Không dành cho bạn</button>`
-   :!owned?`<button class="btn pri sm" data-act="shop-claim" data-p="${s.id}">${s.price===0?"Nhận miễn phí":"Mua"}</button>`
-   :eq?`<button class="btn sm" data-act="shop-uneq" data-p="${s.id}">Gỡ trang bị</button>`
-   :`<button class="btn pri sm" data-act="shop-eq" data-p="${s.id}">Trang bị</button>`}</div>`}).join("")}</div>`}).join("")}</div>`};
-function shopPrev(s){const p=s.preview||{};if(p.kind==="badge")return p.value;if(p.kind==="frame")return`<span class="avatar ${p.value}" style="width:44px;height:44px">A</span>`;
- if(p.kind==="font")return`<span style="font-size:22px" data-fontprev="${p.value}">Abc</span>`;if(p.kind==="namefx")return`<span class="${p.value}">Tên</span>`;return"🎁"}
-Views.settings=()=>{const me=Auth.me();
- const themes=["nox:SkibidiNox — Mặc định tối cao cấp","turbo:SkibidiTurbo — Năng động nổi bật","glass:SkibidiGlass — Liquid Glass","natural:SkibidiNatural — Thiên nhiên sống động"];
- return`<div class="col"><h1>Cài đặt</h1>
- ${me?`<div class="card row">${avaHTML(me,52)}<div class="grow"><div class="tt" style="font-weight:700">${nameHTML(me)}</div><div class="ss mu">UID: ${esc(me.uid)}</div></div>
- <button class="btn sm" data-act="go" data-to="profile" data-p="${me.uid}">Hồ sơ</button></div>`:`<div class="card empty"><div class="big">🔐</div><button class="btn pri" data-act="auth-need">Đăng nhập / Đăng ký</button></div>`}
- <div class="card col"><h2> Giao diện</h2><div class="mu">Chọn phong cách yêu thích. Lựa chọn được ghi nhớ cho lần sau.</div>
- <div class="grid">${themes.map(t=>{const[id,nm]=t.split(":");return`<div class="card" style="cursor:pointer;${Theme.cur===id?"outline:2px solid var(--ac)":""}" data-act="theme-set" data-p="${id}"><div class="thumb" style="background:${{nox:"linear-gradient(135deg,#0b1017,#1a2230)",turbo:"linear-gradient(135deg,#ff7a18,#ff2d95)",glass:"linear-gradient(135deg,#7dd3fc88,#a5b4fc88)",natural:"linear-gradient(135deg,#8ecdf0,#356b4f)"}[id]}"></div><b style="display:block;margin-top:8px">${esc(nm)}</b>${Theme.cur===id?`<span class="badge st-approved">Đang dùng</span>`:""}</div>`}).join("")}</div>
- ${Theme.cur==="glass"?`<button class="btn pri" data-act="go" data-to="glass">💎 Tùy chỉnh Liquid Glass</button>`:""}</div>
- <div class="card col"><h2>⚙️ Cá nhân</h2>
- <label class="fl">Chế độ hiệu năng</label><div class="row">${["low:Thấp","balanced:Cân bằng","high:Cao"].map(x=>{const[v,l]=x.split(":");return`<button class="chip ${me&&me.perf===v?"on":""}" data-act="perf" data-p="${v}">${l}</button>`}).join("")}</div>
- <div class="mu">Âm lượng tổng và nhạc nền quản lý ở mục Âm thanh.</div></div>
- ${me?`<div class="card col"><h2>👤 Tài khoản</h2>
- <button class="btn" data-act="prof-edit">✏️ Sửa hồ sơ (tên, avatar, giới thiệu, liên kết)</button>
- <button class="btn" data-act="uid-edit">🔢 Đổi UID (${me.uidChanged?"đã dùng hết":"còn 1 lần"})</button>
- <button class="btn dgr" data-act="logout">🚪 Đăng xuất</button></div>`:""}
- ${me&&Auth.isDev(me)?`<div class="card col"><h2>🛠 Quản trị</h2><button class="btn pri" data-act="go" data-to="dev">🚀 Mở Dev Panel</button></div>`:""}
- </div>`};
-Views.glass=()=>{const g=Theme.glass();
- return`<div class="col"><div class="row"><button class="btn gho sm" data-act="go" data-to="settings">← Cài đặt</button><h1 style="margin:0">💎 Liquid Glass</h1></div>
- <div class="card col"><div class="row" style="justify-content:space-between"><b>Chế độ trong suốt</b><div class="sw ${g.mode==="liquid"?"on":""}" data-act="g-mode"></div></div>
- <div class="row"><button class="chip ${g.mode==="liquid"?"on":""}" data-act="g-mode" data-p="liquid">Liquid Glass</button><button class="chip ${g.mode==="frosted"?"on":""}" data-act="g-mode" data-p="frosted">Kính mờ</button></div>
- <label class="fl">Độ trong suốt — ${Math.round(g.alpha*100)}%</label><input type="range" min="0.08" max="0.8" step="0.02" value="${g.alpha}" data-act="g-alpha">
- <label class="fl">Cường độ mờ — ${g.blur}px</label><input type="range" min="0" max="40" step="1" value="${g.blur}" data-act="g-blur">
- <label class="fl">Viền sáng — ${Math.round(g.edge*100)}%</label><input type="range" min="0" max="1" step="0.05" value="${g.edge}" data-act="g-edge">
- <label class="fl">Màu kính</label><div class="row">${["255,255,255:Trắng","125,211,252:Xanh băng","165,180,252:Tím nhạt","255,214,165:Hoàng hôn"].map(x=>{const[v,l]=x.split(":");return`<button class="chip ${g.tint===v?"on":""}" data-act="g-tint" data-p="${v}">${l}</button>`}).join("")}</div>
- <div class="card" style="margin-top:6px"><h3>Xem trước trực tiếp</h3><p class="mu">Thẻ này phản ánh thiết lập kính của bạn theo thời gian thực.</p><button class="btn pri sm">Nút mẫu</button></div>
- <div class="row"><button class="btn pri" data-act="g-save">💾 Lưu thiết lập</button><button class="btn" data-act="g-reset">♻️ Khôi phục mặc định</button></div></div></div>`};
-/* ================= DEV PANEL ================= */
-Views.dev=()=>{const me=Auth.me();if(!Auth.isDev(me))return errBox("Bạn không có quyền truy cập khu vực này.","go-home","Về trang đầu");
- const t=route.param||"overview";
- const tabs=[["overview","📊 Tổng quan"],["sugg","📥 Đề xuất"],["content","📝 Bài & Danh mục"],["accounts","👥 Tài khoản"],["inbox","📨 Hộp thư"],["media","🖼 Truyền thông"],["themes","🎨 Giao diện"],["shopmg","🛍 Shop"],["tools","🧰 Công cụ"]];
- return`<div class="col"><div class="row"><h1 style="margin:0">Dev Panel</h1><span class="badge dev">QUYỀN QUẢN TRỊ</span></div>
- <div class="row tabs">${tabs.map(x=>`<button class="chip ${t===x[0]?"on":""}" data-act="go" data-to="dev" data-p="${x[0]}">${x[1]}</button>`).join("")}</div>
- <div id="devBody">${devTab(t,me)}</div></div>`};
-function devTab(t,me){
- if(t==="overview"){const s=DB.sugg.get(),r=DB.reports.get(),p=DB.posts.get(),u=DB.users.get();
-  return`<div class="grid">${[["Thành viên",u.length,"👥"],["Tiện ích đã duyệt",DB.items.get().length,"🧰"],["Đề xuất chờ",s.filter(x=>x.status==="pending").length,"⏳"],["Báo cáo mới",r.filter(x=>x.status==="new").length,"🚨"],["Bài đăng",p.length,"📝"],["Hội thoại",DB.convos.get().length,"💬"]].map(x=>`<div class="card"><div class="mu">${x[0]}</div><div style="font-size:30px;font-weight:800">${x[1]} <span>${x[2]}</span></div></div>`).join("")}</div>
- <div class="card mu">Thông báo hệ thống hoạt động bình thường. Dùng các tab bên trên để quản lý.</div>`}
- if(t==="sugg"){const s=DB.sugg.get().sort((a,b)=>b.ts-a.ts);
-  return`<input class="inp" id="devQ" placeholder="🔍 Tìm đề xuất…" data-act="noop"><div class="list" style="margin-top:10px">${s.map(x=>{const u=Auth.userByUid(x.fromUid);
-   return`<div class="li" style="flex-wrap:wrap"><div class="grow"><div class="tt">${esc(x.title)} <span class="badge st-${x.status}">${{pending:"Chờ duyệt",approved:"Đã duyệt",rejected:"Từ chối",edit:"Cần sửa"}[x.status]}</span></div><div class="ss">${esc(u?u.displayName:"?")} • ${esc(x.catName||x.catId)} • ${fmtDT(x.ts)}</div></div>
-   <button class="btn sm" data-act="sugg-open" data-p="${x.id}">Mở</button></div>`}).join("")||`<div class="empty">Không có đề xuất.</div>`}</div>`}
- if(t==="content"){const cs=DB.cats.get().sort((a,b)=>a.order-b.order);
-  return`<div class="card col"><h2>Danh mục</h2>${cs.map(c=>`<div class="row"><b class="grow">${esc(c.name)}</b>
-   <button class="btn sm" data-act="cat-up" data-p="${c.id}">↑</button><button class="btn sm" data-act="cat-down" data-p="${c.id}">↓</button>
-   <button class="btn sm" data-act="cat-ren" data-p="${c.id}">✏️</button>${c.builtin?"":`<button class="btn dgr sm" data-act="cat-del" data-p="${c.id}">🗑</button>`}</div>`).join("")}
-   <div class="row"><input class="inp grow" id="newCat" placeholder="Tên danh mục mới…"><button class="btn pri sm" data-act="cat-add">Thêm</button></div></div>
-  <div class="card col"><h2>Bài đăng cộng đồng</h2>${DB.posts.get().map(p=>`<div class="row"><span class="grow tt">${esc(p.title)}</span><button class="btn sm" data-act="go" data-to="post" data-p="${p.id}">Xem</button><button class="btn dgr sm" data-act="post-del" data-p="${p.id}">🗑</button></div>`).join("")||`<div class="mu">Chưa có bài.</div>`}</div>
-  <div class="card col"><h2>Mục tiện ích đã duyệt</h2>${DB.items.get().map(p=>`<div class="row"><span class="grow tt">${esc(p.title)}</span><button class="btn sm" data-act="item-edit" data-p="${p.id}">✏️</button><button class="btn dgr sm" data-act="item-del" data-p="${p.id}">🗑</button></div>`).join("")||`<div class="mu">Chưa có mục nào.</div>`}</div>`}
- if(t==="accounts"){return`<input class="inp" id="accQ" placeholder="🔍 Tìm theo tên / UID / email…" data-act="noop"><div class="list" style="margin-top:10px">${DB.users.get().map(u=>`<div class="li" style="flex-wrap:wrap">${avaHTML(u,36)}<div class="grow"><div class="tt">${nameHTML(u)}</div><div class="ss">${esc(u.uid)} • ${esc(u.email)}</div></div>
-  <button class="btn sm ${u.role==="dev"?"pri":""}" data-act="acc-role" data-p="${u.uid}">${u.role}</button>
-  <button class="btn sm ${u.postPerm?"pri":""}" data-act="acc-post" data-p="${u.uid}">Đăng bài: ${u.postPerm?"Bật":"Tắt"}</button>
-  ${u.uid!==me.uid?`<button class="btn dgr sm" data-act="acc-del" data-p="${u.uid}">🗑</button>`:""}</div>`).join("")}</div>`}
- if(t==="inbox"){const rs=DB.reports.get().sort((a,b)=>b.ts-a.ts);
-  return`<div class="row tabs"><button class="chip on" data-act="dev-inbox" data-p="report">🚨 Báo cáo</button><button class="chip" data-act="dev-inbox" data-p="idea">💡 Góp ý</button></div>
-  <div id="devInbox" class="list" style="margin-top:10px">${rs.filter(r=>r.type==="report").map(r=>{const u=Auth.userByUid(r.fromUid);
-   return`<div class="li" style="flex-wrap:wrap;${r.status==="new"?"border-color:#ff4d5e":""}"><div class="grow"><div class="tt">${esc(u?u.displayName:"?")} <span class="mu">(${esc(u?u.uid:"")})</span></div><div class="ss">${esc(r.content.slice(0,70))} • ${fmtDT(r.ts)}</div></div>
-   <button class="btn sm" data-act="rep-open" data-p="${r.id}">Mở</button></div>`}).join("")||`<div class="empty">Trống.</div>`}</div>`}
- if(t==="media"){const m=DB.media.get();
-  return["nox","turbo","glass","natural"].map(th=>`<div class="card col"><h2>${themeName(th)}</h2>
-   <div class="row"><button class="btn sm" data-act="md-bg" data-p="${th}">🖼 Tải hình nền</button><button class="btn sm" data-act="md-video" data-p="${th}">🎬 Tải video nền</button>
-   ${m[th].bgImage||m[th].bgVideo?`<button class="btn dgr sm" data-act="md-bgclear" data-p="${th}">Gỡ nền</button>`:""}</div>
-   <div class="row"><button class="btn sm" data-act="md-audio" data-p="${th}">🎵 Thêm nhạc nền</button></div>
-   <div class="list">${(m[th].audio||[]).map((a,i)=>`<div class="row"><span class="grow tt">🎵 ${esc(a.name)}</span><button class="btn dgr sm" data-act="md-audeld" data-p="${th}" data-p2="${i}">🗑</button></div>`).join("")||`<div class="mu">Chưa có nhạc.</div>`}</div></div>`).join("")+
-  `<div class="card col"><h2>🌦 Thiên nhiên & Sự kiện</h2><div class="row">${["auto:Tự động theo ngày","default:Bốn mùa","halloween:Halloween","christmas:Giáng sinh","tet:Tết"].map(x=>{const[v,l]=x.split(":");return`<button class="chip ${m.natural.event===v?"on":""}" data-act="md-event" data-p="${v}">${l}</button>`}).join("")}</div></div>
-  <div class="card col"><h2>📢 Thông báo toàn hệ thống</h2><input class="inp" id="ntText" placeholder="Nội dung thông báo popup…" value="${esc(DB.notice.get().text)}">
-  <input class="inp" id="ntNote" placeholder="Dòng ghi chú trong Tiện ích…" value="${esc(DB.notice.get().note)}">
-  <button class="btn pri" data-act="nt-save">Lưu & gửi thông báo</button></div>`}
- if(t==="themes"){return`<div class="card col"><h2>Cấu hình bốn giao diện</h2><div class="mu">Mỗi giao diện giữ tài nguyên nền, hiệu ứng và âm thanh riêng biệt — không dùng chung. Chuyển sang tab Truyền thông để tải tệp, tab này tổng quan trạng thái.</div>
- ${["nox","turbo","glass","natural"].map(th=>{const m=DB.media.get()[th];return`<div class="row"><b class="grow">${themeName(th)}</b><span class="badge">${m.bgVideo?"Video":m.bgImage?"Hình":"Nền mặc định"}</span><span class="badge">${(m.audio||[]).length} nhạc</span>${th==="glass"?`<span class="badge dev">Kính bật</span>`:""}</div>`}).join("")}</div>`}
- if(t==="shopmg"){return`<div class="card col"><h2>Quản lý vật phẩm</h2>${DB.shop.get().map(s=>`<div class="row"><span class="grow tt">${esc(s.name)} <span class="mu">(${s.type})</span></span>
-  <button class="btn sm" data-act="sh-hide" data-p="${s.id}">${s.hidden?"Hiện":"Ẩn"}</button>
-  <button class="btn sm" data-act="sh-edit" data-p="${s.id}">✏️</button>
-  <button class="btn dgr sm" data-act="sh-del" data-p="${s.id}">🗑</button></div>`).join("")}
-  <button class="btn pri" data-act="sh-add">＋ Tạo vật phẩm</button></div>`}
- if(t==="tools"){return`<div class="card col"><h2>Công cụ quản trị</h2>
-  <button class="btn" data-act="tl-export">⬇️ Xuất bản sao dữ liệu</button>
-  <button class="btn" data-act="tl-import">⬆️ Nhập bản sao dữ liệu</button>
-  <button class="btn dgr" data-act="tl-wipe"> Xóa toàn bộ dữ liệu cục bộ</button>
-  <div class="mu">Bản sao dùng để chuyển máy hoặc sao lưu. Giữ an toàn, không chia sẻ công khai.</div></div>`}
- return""}
-const themeName=t=>({nox:"SkibidiNox",turbo:"SkibidiTurbo",glass:"SkibidiGlass",natural:"SkibidiNatural"}[t]||t);
-/* ================= XỬ LÝ HÀNH ĐỘNG ================= */
-let tmp={rpType:"report",rpAtts:[],msgRec:null,editPost:null,editItem:null};
-document.addEventListener("click",async e=>{const el=e.target.closest("[data-act]");if(!el)return;
- const act=el.dataset.act,p=el.dataset.p,p2=el.dataset.p2,me=Auth.me();
- const need=()=>{if(!me){authGate();return false}return true};
- switch(act){
- case"noop":break;
- case"go":nav(el.dataset.to,el.dataset.p);break;
- case"me":me?nav("settings"):authGate();break;
- case"mclose":closeModal();break;
- case"cfm-yes":closeModal();confirmCb&&confirmCb();break;
- case"retry":render();break;
- case"go-utils":nav("utils");break;case"go-home":nav("home");break;case"go-chat":nav("chat");break;
- case"theme-set":Theme.set(p);toast("Đã chuyển sang "+themeName(p),"ok");break;
- case"perf":if(!need())break;Auth.update(me.uid,u=>u.perf=p);Theme.apply();toast("Đã đặt chế độ hiệu năng.","ok");render();break;
- case"auth-need":authGate();break;
- case"login":{const em=$("#lgEmail").value,pa=$("#lgPass").value;Auth.login(em,pa).then(()=>{closeModal();toast("Chào mừng trở lại!","ok");render()}).catch(er=>toast(er,"err"));break}
- case"reg-open":modal(`<h2>Tạo tài khoản</h2><div class="col"><label class="fl">Tên hiển thị</label><input class="inp" id="rgName" placeholder="Tên của bạn">
-  <label class="fl">E-mail</label><input class="inp" id="rgEmail" type="email"><label class="fl">Mật khẩu (≥ 6 ký tự)</label><input class="inp" id="rgPass" type="password">
-  <button class="btn pri" data-act="register">Đăng ký</button></div>`);break;
- case"register":{Auth.register($("#rgEmail").value,$("#rgPass").value,$("#rgName").value).then(()=>{closeModal();toast("Tạo tài khoản thành công!","ok");render()}).catch(er=>toast(er,"err"));break}
- case"google":toast("Đăng nhập Google sẽ bật khi quản trị cấu hình kết nối.","err");break;
- case"logout":askConfirm("Bạn muốn đăng xuất?",()=>{Auth.logout();nav("home");render();toast("Đã đăng xuất.","ok")});break;
- case"post-new":if(!need())break;if(!Auth.canPost(me)){toast("Bạn chưa được cấp quyền đăng bài.","err");break}postForm(null);break;
- case"post-edit":if(!need())break;postForm(DB.posts.get().find(x=>x.id===p));break;
- case"post-del":{if(!need())break;const po=DB.posts.get().find(x=>x.id===p);if(!po)break;
-  if(!(me.uid===po.byUid||Auth.isDev(me))){toast("Bạn không có quyền xóa bài này.","err");break}
-  askConfirm("Xóa bài đăng này?",()=>{DB.posts.tx(ps=>ps.filter(x=>x.id!==p));toast("Đã xóa bài.","ok");render()});break}
- case"sugg-new":if(!need())break;suggForm();break;
- case"sugg-open":suggDetail(p);break;
- case"au-play":Theme.play(+p);break;
- case"au-toggle":Theme.toggle();break;
- case"rp-type":tmp.rpType=p;$("#rpT-report").classList.toggle("on",p==="report");$("#rpT-idea").classList.toggle("on",p==="idea");break;
- case"rp-img":pickFile(f=>readImage(f).then(d=>{tmp.rpAtts.push({kind:"img",dataUrl:d});toast("Đã đính kèm ảnh.","ok");renderAtts()}).catch(er=>toast(er,"err")),"image/*");break;
- case"rp-file":pickFile(f=>readSmall(f,CFG.maxFile).then(d=>{tmp.rpAtts.push({kind:"file",name:f.name,dataUrl:d});renderAtts()}).catch(er=>toast(er,"err")));break;
- case"rp-rec":toggleRec($("#rpRecBtn"),d=>{tmp.rpAtts.push({kind:"voice",dataUrl:d});renderAtts();toast("Đã đính kèm ghi âm.","ok")});break;
- case"rp-send":{if(!need())break;const body=$("#rpBody").value.trim();if(body.length<5){toast("Vui lòng nhập nội dung đủ rõ.","err");break}
-  DB.reports.tx(rs=>{rs.push({id:uid8(),fromUid:me.uid,type:tmp.rpType,content:body,files:tmp.rpAtts,ts:Date.now(),status:"new",replies:[]});return rs});
-  tmp.rpAtts=[];toast("Đã gửi. Quản trị sẽ xem trong hộp thư.","ok");render();break}
- case"rp-open":repUserDetail(p);break;
- case"chat-find":{if(!need())break;const u=Auth.userByUid($("#chatUid").value);
-  $("#chatFind").innerHTML=u?`<div class="li">${avaHTML(u,40)}<div class="grow"><div class="tt">${nameHTML(u)}</div><div class="ss">UID: ${esc(u.uid)}</div></div>
-   <button class="btn sm" data-act="go" data-to="profile" data-p="${u.uid}">Hồ sơ</button>
-   ${me.friends.includes(u.uid)?`<button class="btn pri sm" data-act="room-open" data-p="${u.uid}">💬</button>`:`<button class="btn pri sm" data-act="fr-send" data-p="${u.uid}">＋ Kết bạn</button>`}</div>`
-   :`<div class="mu" style="padding:8px">Không tìm thấy tài khoản phù hợp.</div>`;break}
- case"chat-tab":{const cs=DB.convos.get().filter(c=>c.members.includes(me.uid));$("#chatPanel").innerHTML=chatTab(p,me,cs);
-  $$("#chat .chip,[data-act=chat-tab]").forEach(c=>c.classList.toggle("on",c.dataset.p===p));break}
- case"fr-send":if(!need())break;Auth.friendRequest(me,p).then?.(()=>{});try{Auth.friendRequest(me,p);toast("Đã gửi lời mời kết bạn.","ok")}catch(er){toast(er,"err")}render();break;
- case"fr-accept":Auth.acceptReq(me,p);toast("Đã kết bạn!","ok");render();break;
- case"fr-decline":Auth.declineReq(me,p);render();break;
- case"fr-cancel":Auth.declineReq(Auth.userByUid(p),me.uid);render();break;
- case"fr-remove":askConfirm("Hủy kết bạn với người này?",()=>{Auth.unfriend(me,p);render()});break;
- case"bl-add":askConfirm("Chặn người này? Họ sẽ không thể mời kết bạn hoặc nhắn tin cho bạn.",()=>{Auth.block(me,p);render();toast("Đã chặn.","ok")});break;
- case"bl-un":Auth.unblock(me,p);render();break;
- case"room-open":nav("room",p);break;
- case"msg-send":{const inp=$("#msgIn");const tx=inp.value.trim();if(!tx)break;
-  try{Chat.send(me.uid,route.param,{type:"text",text:tx});inp.value="";render()}catch(er){toast(er,"err")}break}
- case"msg-img":pickFile(f=>readImage(f,700).then(d=>{try{Chat.send(me.uid,route.param,{type:"image",dataUrl:d});render()}catch(er){toast(er,"err")}}).catch(er=>toast(er,"err")),"image/*");break;
- case"msg-file":pickFile(f=>readSmall(f,CFG.maxFile).then(d=>{try{Chat.send(me.uid,route.param,{type:"file",name:f.name,dataUrl:d});render()}catch(er){toast(er,"err")}}).catch(er=>toast(er,"err")));break;
- case"msg-rec":toggleRec($("#msgRec"),d=>{try{Chat.send(me.uid,route.param,{type:"voice",dataUrl:d});render()}catch(er){toast(er,"err")}});break;
- case"mail-open":{const m=Mail.list(me.uid).find(x=>x.id===p);Mail.mark(me.uid,p);modal(`<h2>${esc(m.title)}</h2><div class="mu">${fmtDT(m.ts)}</div><p style="white-space:pre-wrap">${esc(m.body)}</p><button class="btn" data-act="mclose">Đóng</button>`);renderDots();break}
- case"shop-claim":{if(!need())break;const s=DB.shop.get().find(x=>x.id===p);
-  if(s.roles&&!s.roles.includes(me.role)){toast("Vật phẩm không dành cho nhóm của bạn.","err");break}
-  Auth.update(me.uid,u=>{if(!u.owned.includes(p))u.owned.push(p)});toast("Đã nhận vật phẩm!","ok");render();break}
- case"shop-eq":Auth.update(me.uid,u=>{const s=DB.shop.get().find(x=>x.id===p);u.equip[s.type]=p});Theme.apply();render();toast("Đã trang bị.","ok");break;
- case"shop-uneq":Auth.update(me.uid,u=>{const s=DB.shop.get().find(x=>x.id===p);delete u.equip[s.type]});Theme.apply();render();break;
- case"prof-edit":profForm();break;
- case"uid-edit":uidForm();break;
- case"g-mode":{const g=Theme.glass();g.mode=p||(g.mode==="liquid"?"frosted":"liquid");glassTmp=g;applyGlass(g);render();break}
- case"g-alpha":case"g-blur":case"g-edge":{const g=glassTmp||Theme.glass();const v=+el.value;
-  if(act==="g-alpha")g.alpha=v;if(act==="g-blur")g.blur=v;if(act==="g-edge")g.edge=v;
-  if(g.mode==="frosted"){g.blur=Math.max(g.blur,14)}applyGlass(g);glassTmp=g;break}
- case"g-tint":{const g=glassTmp||Theme.glass();g.tint=p;applyGlass(g);glassTmp=g;render();break}
- case"g-save":{const g=glassTmp||Theme.glass();Auth.update(me.uid,u=>u.glass={...g});glassTmp=null;toast("Đã lưu thiết lập kính.","ok");render();break}
- case"g-reset":{glassTmp={...DB.glassDef.get()};Auth.update(me.uid,u=>u.glass=null);applyGlass(glassTmp);render();toast("Đã khôi phục mặc định.","ok");break}
- /* ---- DEV ---- */
- case"sugg-approve":{const s=DB.sugg.get().find(x=>x.id===p);
-  DB.items.tx(is=>{is.push({id:uid8(),catId:s.catId||newCatId(s.catName),title:s.title,desc:s.desc,img:s.img,link:s.link,file:s.file,byUid:s.fromUid,ts:Date.now()});return is});
-  DB.sugg.tx(ss=>{ss.find(x=>x.id===p).status="approved";return ss});
-  Mail.push(s.fromUid,"Đề xuất được duyệt","Chúc mừng! Đề xuất “"+s.title+"” đã xuất hiện công khai.","suggest");
-  toast("Đã duyệt và đăng nội dung.","ok");closeModal();render();break}
- case"sugg-reject":DB.sugg.tx(ss=>{ss.find(x=>x.id===p).status="rejected";return ss});Mail.push(DB.sugg.get().find(x=>x.id===p).fromUid,"Đề xuất chưa được duyệt","Rất tiếc, đề xuất của bạn chưa phù hợp ở thời điểm này.","suggest");closeModal();render();break;
- case"sugg-neededit":DB.sugg.tx(ss=>{ss.find(x=>x.id===p).status="edit";return ss});closeModal();render();break;
- case"sugg-del":askConfirm("Xóa đề xuất này?",()=>{DB.sugg.tx(ss=>ss.filter(x=>x.id!==p));closeModal();render()});break;
- case"sugg-reply":{const tx=$("#sgReply").value.trim();if(!tx)break;DB.sugg.tx(ss=>{const s=ss.find(x=>x.id===p);(s.thread=s.thread||[]).push({from:me.uid,msg:tx,ts:Date.now()});return ss});suggDetail(p);break}
- case"cat-add":{const nm=$("#newCat").value.trim();if(!nm)break;DB.cats.tx(cs=>{cs.push({id:uid8(),name:nm,builtin:0,order:cs.length+1});return cs});render();toast("Đã thêm danh mục.","ok");break}
- case"cat-ren":{const c=DB.cats.get().find(x=>x.id===p);modal(`<h2>Đổi tên danh mục</h2><input class="inp" id="crN" value="${esc(c.name)}"><br><br><button class="btn pri" data-act="cat-ren-ok" data-p="${p}">Lưu</button>`);break}
- case"cat-ren-ok":{const nm=$("#crN").value.trim();if(nm)DB.cats.tx(cs=>{cs.find(x=>x.id===p).name=nm;return cs});closeModal();render();break}
- case"cat-up":case"cat-down":{DB.cats.tx(cs=>{const s=[...cs].sort((a,b)=>a.order-b.order);const i=s.findIndex(x=>x.id===p);const j=act==="cat-up"?i-1:i+1;if(j<0||j>=s.length)return cs;
-  const a=s[i].order;s[i].order=s[j].order;s[j].order=a;return cs});render();break}
- case"cat-del":askConfirm("Xóa danh mục? Các mục bên trong sẽ bị ẩn khỏi công khai.",()=>{DB.cats.tx(cs=>cs.filter(x=>x.id!==p));DB.items.tx(is=>is.filter(x=>x.catId!==p));render()});break;
- case"item-edit":itemForm(DB.items.get().find(x=>x.id===p));break;
- case"item-del":askConfirm("Xóa mục tiện ích này?",()=>{DB.items.tx(is=>is.filter(x=>x.id!==p));render()});break;
- case"acc-role":Auth.update(p,u=>u.role=u.role==="dev"?"user":"dev");render();toast("Đã cập nhật quyền.","ok");break;
- case"acc-post":Auth.update(p,u=>u.postPerm=u.postPerm?0:1);render();break;
- case"acc-del":askConfirm("Xóa tài khoản này khỏi hệ thống?",()=>{DB.users.tx(us=>us.filter(x=>x.uid!==p));render()});break;
- case"dev-inbox":{const rs=DB.reports.get().filter(r=>r.type===p).sort((a,b)=>b.ts-a.ts);
-  $("#devInbox").innerHTML=rs.map(r=>{const u=Auth.userByUid(r.fromUid);return`<div class="li" style="flex-wrap:wrap;${r.status==="new"?"border-color:#ff4d5e":""}"><div class="grow"><div class="tt">${esc(u?u.displayName:"?")} <span class="mu">(${esc(u?u.uid:"")})</span></div><div class="ss">${esc(r.content.slice(0,70))} • ${fmtDT(r.ts)}</div></div><button class="btn sm" data-act="rep-open" data-p="${r.id}">Mở</button></div>`}).join("")||`<div class="empty">Trống.</div>`;break}
- case"rep-open":repDevDetail(p);break;
- case"rep-status":DB.reports.tx(rs=>{rs.find(x=>x.id===p).status=p2;return rs});repDevDetail(p);toast("Đã cập nhật trạng thái.","ok");break;
- case"rep-reply":{const tx=$("#repR").value.trim();if(!tx)break;const r=DB.reports.get().find(x=>x.id===p);
-  DB.reports.tx(rs=>{const t=rs.find(x=>x.id===p);(t.replies=t.replies||[]).push({from:me.uid,msg:tx,ts:Date.now()});return rs});
-  Mail.push(r.fromUid,"Phản hồi từ quản trị",tx,"report-reply");repDevDetail(p);toast("Đã phản hồi và gửi vào hộp thư người dùng.","ok");break}
- case"rep-del":askConfirm("Xóa báo cáo này?",()=>{DB.reports.tx(rs=>rs.filter(x=>x.id!==p));closeModal();render()});break;
- case"md-bg":pickFile(f=>readImage(f,1400).then(d=>{DB.media.tx(m=>{m[p].bgImage=d;delete m[p].bgVideo;return m});Theme.bg();toast("Đã đặt hình nền.","ok")}).catch(er=>toast(er,"err")),"image/*");break;
- case"md-video":pickFile(f=>readSmall(f,CFG.maxAudio,t=>t.startsWith("video/")).then(d=>{DB.media.tx(m=>{m[p].bgVideo=d;delete m[p].bgImage;return m});Theme.bg();toast("Đã đặt video nền.","ok")}).catch(er=>toast(er,"err")),"video/*");break;
- case"md-bgclear":DB.media.tx(m=>{delete m[p].bgImage;delete m[p].bgVideo;return m});Theme.bg();render();break;
- case"md-audio":pickFile(f=>readSmall(f,CFG.maxAudio,t=>t.startsWith("audio/")).then(d=>{DB.media.tx(m=>{(m[p].audio=m[p].audio||[]).push({id:uid8(),name:f.name,dataUrl:d});return m});render();toast("Đã thêm nhạc nền.","ok")}).catch(er=>toast(er,"err")),"audio/*");break;
- case"md-audeld":DB.media.tx(m=>{m[p].audio.splice(+p2,1);return m});render();break;
- case"md-event":DB.media.tx(m=>{m.natural.event=p;return m});Theme.event();Theme.parts();render();break;
- case"nt-save":{const id=Date.now();DB.notice.set({text:$("#ntText").value.trim(),note:$("#ntNote").value.trim(),ts:id,id});
-  DB.users.tx(us=>{us.forEach(u=>u.seenNotices=(u.seenNotices||[]).filter(v=>v!==id));return us});
-  toast("Đã lưu thông báo.","ok");break}
- case"sh-add":case"sh-edit":shopForm(act==="sh-edit"?DB.shop.get().find(x=>x.id===p):null);break;
- case"sh-hide":DB.shop.tx(ss=>{const s=ss.find(x=>x.id===p);s.hidden=s.hidden?0:1;return ss});render();break;
- case"sh-del":askConfirm("Xóa vật phẩm khỏi Shop?",()=>{DB.shop.tx(ss=>ss.filter(x=>x.id!==p));render()});break;
- case"tl-export":{const data={};["users","cats","items","sugg","posts","reports","mails","convos","shop","media","notice"].forEach(k=>data[k]=DB[k].get());
-  const b=new Blob([JSON.stringify(data)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="skibidi-sao-luu.json";a.click();break}
- case"tl-import":pickFile(f=>{const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);Object.keys(d).forEach(k=>DB[k]&&DB[k].set(d[k]));toast("Đã nhập dữ liệu.","ok");render()}catch(er){toast("Tệp không hợp lệ.","err")}};r.readAsText(f)},"application/json");break;
- case"tl-wipe":askConfirm("XÓA TOÀN BỘ dữ liệu? Hành động không thể hoàn tác.",()=>{Object.keys(localStorage).filter(k=>k.startsWith("skibidi.")).forEach(k=>localStorage.removeItem(k));location.reload()});break;
- }});
-let glassTmp=null;
-function applyGlass(g){const el=document.documentElement;el.style.setProperty("--g-alpha",g.alpha);el.style.setProperty("--g-blur",(g.mode==="frosted"?Math.max(g.blur,14):g.blur)+"px");el.style.setProperty("--g-edge",g.edge);el.style.setProperty("--g-tint",g.tint)}
-function pickFile(cb,accept){const i=document.createElement("input");i.type="file";if(accept)i.accept=accept;i.onchange=()=>i.files[0]&&cb(i.files[0]);i.click()}
-function renderAtts(){$("#rpAtts").innerHTML=tmp.rpAtts.map((a,i)=>`<span class="chip">${a.kind==="img"?"🖼":a.kind==="voice"?"🎤":"📎"} ${esc(a.name||"Đính kèm "+(i+1))}</span>`).join(" ")}
-/* Biểu mẫu */
-function postForm(po){tmp.editPost=po;modal(`<h2>${po?"Sửa bài đăng":"Đăng bài mới"}</h2><div class="col">
- <input class="inp" id="pT" placeholder="Tiêu đề…" value="${esc(po?po.title:"")}">
- <textarea class="inp" id="pD" placeholder="Nội dung bài viết…">${esc(po?po.desc:"")}</textarea>
- <div id="pImg">${po&&po.img?`<img class="thumb" src="${po.img}">`:""}</div>
- <button class="btn sm" data-act="p-img">${po&&po.img?"🖼 Đổi ảnh":"🖼 Thêm ảnh"}</button>
- <button class="btn pri" data-act="p-save">${po?"Lưu thay đổi":"Đăng bài"}</button></div>`)}
-document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;const act=el.dataset.act;
- if(act==="p-img")pickFile(f=>readImage(f).then(d=>{tmp.img=d;$("#pImg").innerHTML=`<img class="thumb" src="${d}">`}).catch(er=>toast(er,"err")),"image/*");
- if(act==="p-save"){const me=Auth.me();const t=$("#pT").value.trim(),d=$("#pD").value.trim();
-  if(t.length<3||d.length<3){toast("Tiêu đề và nội dung cần rõ ràng hơn.","err");return}
-  if(tmp.editPost){DB.posts.tx(ps=>{const x=ps.find(y=>y.id===tmp.editPost.id);x.title=t;x.desc=d;if(tmp.img)x.img=tmp.img;x.updatedTs=Date.now();return ps})}
-  else DB.posts.tx(ps=>{ps.push({id:uid8(),byUid:me.uid,title:t,desc:d,img:tmp.img||"",ts:Date.now()});return ps});
-  tmp.img=null;tmp.editPost=null;closeModal();render();toast("Đã đăng bài.","ok")}
- if(act==="s-img")pickFile(f=>readImage(f).then(d=>{tmp.img=d;$("#sImg").innerHTML=`<img class="thumb" src="${d}">`}).catch(er=>toast(er,"err")),"image/*");
- if(act==="s-file")pickFile(f=>readSmall(f,CFG.maxFile).then(d=>{tmp.file={name:f.name,dataUrl:d};$("#sFileTx").textContent="📎 "+f.name}).catch(er=>toast(er,"err")));
- if(act==="s-save"){const me=Auth.me();const t=$("#sT").value.trim(),d=$("#sD").value.trim(),lk=$("#sL").value.trim();
-  const catSel=$("#sC").value;const newCat=$("#sN").value.trim();
-  if(t.length<3||d.length<3){toast("Vui lòng điền tiêu đề và mô tả rõ ràng.","err");return}
-  DB.sugg.tx(ss=>{ss.push({id:uid8(),fromUid:me.uid,catId:catSel||null,catName:newCat||null,title:t,desc:d,img:tmp.img||"",link:lk||"",file:tmp.file||null,ts:Date.now(),status:"pending",thread:[]});return ss});
-  tmp.img=null;tmp.file=null;closeModal();render();toast("Đề xuất của bạn đang chờ phê duyệt.","ok")}
- if(act==="sg-reply-send"){const tx=$("#sgReply").value.trim();if(!tx)return;const p=el.dataset.p;
-  DB.sugg.tx(ss=>{const s=ss.find(x=>x.id===p);(s.thread=s.thread||[]).push({from:Auth.me().uid,msg:tx,ts:Date.now()});return ss});suggDetail(p)}
- if(act==="it-img")pickFile(f=>readImage(f).then(d=>{tmp.img=d;$("#itImg").innerHTML=`<img class="thumb" src="${d}">`}).catch(er=>toast(er,"err")),"image/*");
- if(act==="it-save"){const t=$("#itT").value.trim(),d=$("#itD").value.trim();if(!t||!d){toast("Điền đủ thông tin.","err");return}
-  DB.items.tx(is=>{const x=is.find(y=>y.id===tmp.editItem.id);x.title=t;x.desc=d;x.catId=$("#itC").value;x.link=$("#itL").value.trim();if(tmp.img)x.img=tmp.img;x.updatedTs=Date.now();return is});
-  tmp.img=null;tmp.editItem=null;closeModal();render();toast("Đã cập nhật.","ok")}
- if(act==="sh-save"){const o={id:tmp.shId||uid8(),type:$("#shType").value,name:$("#shName").value.trim(),desc:$("#shDesc").value.trim(),price:0,
-  roles:$("#shRole").checked?["dev"]:null,hidden:0,order:DB.shop.get().length+1,preview:JSON.parse($("#shPrev").value||'{"kind":"badge","value":"🎁"}')};
-  DB.shop.tx(ss=>{const i=ss.findIndex(x=>x.id===o.id);if(i>=0)ss[i]={...ss[i],...o};else ss.push(o);return ss});closeModal();render();toast("Đã lưu vật phẩm.","ok")}
-});
-function suggForm(){const cs=DB.cats.get().sort((a,b)=>a.order-b.order);tmp.img=null;tmp.file=null;
- modal(`<h2>Đề xuất tiện ích</h2><div class="col">
- <label class="fl">Danh mục hiện có</label><select class="inp" id="sC"><option value="">— Chọn danh mục —</option>${cs.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>
- <label class="fl">Hoặc đề xuất danh mục mới</label><input class="inp" id="sN" placeholder="Tên danh mục mới (nếu có)">
- <input class="inp" id="sT" placeholder="Tiêu đề tiện ích…"><textarea class="inp" id="sD" placeholder="Mô tả chi tiết…"></textarea>
- <input class="inp" id="sL" placeholder="Liên kết (nếu có)">
- <div id="sImg"></div><div class="row"><button class="btn sm" data-act="s-img">🖼 Ảnh</button><button class="btn sm" data-act="s-file">📎 Tệp</button></div><div class="mu" id="sFileTx"></div>
- <button class="btn pri" data-act="s-save">Gửi đề xuất</button><div class="mu">Mọi đề xuất đều qua kiểm duyệt trước khi công khai.</div></div>`)}
-function suggDetail(id){const s=DB.sugg.get().find(x=>x.id===id);if(!s)return;const u=Auth.userByUid(s.fromUid);const me=Auth.me();
- const isDev=Auth.isDev(me),mine=me&&me.uid===s.fromUid;
- modal(`<h2>${esc(s.title)} <span class="badge st-${s.status}">${{pending:"Chờ duyệt",approved:"Đã duyệt",rejected:"Từ chối",edit:"Cần sửa"}[s.status]}</span></h2>
- <div class="mu">${esc(u?u.displayName:"?")} • ${esc(s.catName||s.catId||"")} • ${fmtDT(s.ts)}</div>
- ${s.img?`<img class="thumb" src="${s.img}" style="margin:10px 0">`:""}<p style="white-space:pre-wrap">${esc(s.desc)}</p>
- ${s.link?`<a class="btn sm" href="${esc(s.link)}" target="_blank" rel="noopener">🔗 Liên kết</a>`:""} ${s.file?`<a class="btn sm" href="${s.file}" download>📎 ${esc(s.file.name||"Tệp")}</a>`:""}
- <hr class="hr"><h3>Trao đổi</h3><div class="list">${(s.thread||[]).map(t=>{const tu=Auth.userByUid(t.from);return`<div class="msg${Auth.isDev(tu)?" me":""}"><b>${esc(tu?tu.displayName:"")}</b>: ${esc(t.msg)}<span class="tm">${fmtDT(t.ts)}</span></div>`}).join("")||`<div class="mu">Chưa có trao đổi.</div>`}</div>
- <div class="row" style="margin-top:8px"><input class="inp grow" id="sgReply" placeholder="Viết phản hồi…"><button class="btn sm" data-act="sg-reply-send" data-p="${id}">Gửi</button></div>
- ${isDev?`<hr class="hr"><div class="row"><button class="btn pri sm" data-act="sugg-approve" data-p="${id}">✔ Duyệt</button>
- <button class="btn sm" data-act="sugg-neededit" data-p="${id}">✏️ Yêu cầu sửa</button>
- <button class="btn sm" data-act="sugg-reject" data-p="${id}">✖ Từ chối</button>
- <button class="btn dgr sm" data-act="sugg-del" data-p="${id}">🗑</button></div>`:""}`)}
-function itemForm(it){tmp.editItem=it;tmp.img=null;const cs=DB.cats.get();
- modal(`<h2>Sửa mục tiện ích</h2><div class="col"><select class="inp" id="itC">${cs.map(c=>`<option value="${c.id}" ${c.id===it.catId?"selected":""}>${esc(c.name)}</option>`).join("")}</select>
- <input class="inp" id="itT" value="${esc(it.title)}"><textarea class="inp" id="itD">${esc(it.desc)}</textarea><input class="inp" id="itL" value="${esc(it.link||"")}" placeholder="Liên kết">
- <div id="itImg">${it.img?`<img class="thumb" src="${it.img}">`:""}</div><button class="btn sm" data-act="it-img">🖼 Ảnh</button>
- <button class="btn pri" data-act="it-save">Lưu</button></div>`)}
-function repUserDetail(id){const r=DB.reports.get().find(x=>x.id===id);
- modal(`<h2>${r.type==="report"?"🚨 Báo cáo":"💡 Góp ý"} <span class="badge">${{new:"Mới",reading:"Đang xử lý",done:"Hoàn tất"}[r.status]}</span></h2>
- <div class="mu">${fmtDT(r.ts)}</div><p style="white-space:pre-wrap">${esc(r.content)}</p>${attHTML(r.files)}
- <h3>Phản hồi từ quản trị</h3><div class="list">${(r.replies||[]).map(t=>`<div class="msg"><b>Quản trị</b>: ${esc(t.msg)}<span class="tm">${fmtDT(t.ts)}</span></div>`).join("")||`<div class="mu">Chưa có phản hồi.</div>`}</div>
- <button class="btn" data-act="mclose" style="margin-top:10px">Đóng</button>`)}
-function repDevDetail(id){const r=DB.reports.get().find(x=>x.id===id);const u=Auth.userByUid(r.fromUid);
- if(r.status==="new")DB.reports.tx(rs=>{rs.find(x=>x.id===id).status="reading";return rs});
- modal(`<h2>${r.type==="report"?"🚨 Báo cáo":"💡 Góp ý"}</h2><div class="mu">${nameHTML(u)} • UID: ${esc(u?u.uid:"")} • ${fmtDT(r.ts)}</div>
- <p style="white-space:pre-wrap">${esc(r.content)}</p>${attHTML(r.files)}
- <div class="row"><button class="btn sm" data-act="rep-status" data-p="${id}" data-p2="reading">Đang xử lý</button><button class="btn pri sm" data-act="rep-status" data-p="${id}" data-p2="done">Hoàn tất</button><button class="btn dgr sm" data-act="rep-del" data-p="${id}">🗑</button></div>
- <hr class="hr"><div class="list">${(r.replies||[]).map(t=>`<div class="msg me">${esc(t.msg)}</div>`).join("")}</div>
- <div class="row"><input class="inp grow" id="repR" placeholder="Phản hồi cho người gửi…"><button class="btn pri sm" data-act="rep-reply" data-p="${id}">Gửi</button></div>`)}
-function attHTML(fs){return(fs||[]).map(f=>f.kind==="img"?`<img class="thumb" src="${f.dataUrl}">`:f.kind==="voice"?`<audio controls src="${f.dataUrl}" style="width:100%"></audio>`:`<a class="chip" href="${f.dataUrl}" download="${esc(f.name)}">📎 ${esc(f.name)}</a>`).join("")}
-function profForm(){const me=Auth.me();
- modal(`<h2>Chỉnh hồ sơ</h2><div class="col">
- <div class="row">${avaHTML(me,56)}<button class="btn sm" data-act="pf-ava">🖼 Đổi avatar</button></div>
- <label class="fl">Tên hiển thị ${me.nameChangedAt?`(đổi lại sau ${Math.max(0,Math.ceil((7*864e5-(Date.now()-me.nameChangedAt))/864e5))} ngày)`:""}</label>
- <input class="inp" id="pfName" value="${esc(me.displayName)}" ${me.nameChangedAt&&Date.now()-me.nameChangedAt<7*864e5?"disabled":""}>
- <label class="fl">Giới thiệu bản thân</label><textarea class="inp" id="pfBio">${esc(me.bio)}</textarea>
- <label class="fl">Liên kết cá nhân (mỗi dòng: nhãn | url)</label><textarea class="inp" id="pfLinks">${me.links.map(l=>esc(l.label+" | "+l.url)).join("\n")}</textarea>
- <button class="btn pri" data-act="pf-save">Lưu hồ sơ</button></div>`)}
-document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;
- if(el.dataset.act==="pf-ava")pickFile(f=>readImage(f,200).then(d=>{Auth.update(Auth.me().uid,u=>u.avatar=d);renderDots();toast("Đã cập nhật avatar.","ok")}).catch(er=>toast(er,"err")),"image/*");
- if(el.dataset.act==="pf-save"){const me=Auth.me();const nm=$("#pfName").value.trim();
-  try{if(nm&&nm!==me.displayName)Auth.rename(me,nm)}catch(er){toast(er,"err");return}
-  Auth.update(me.uid,u=>{u.bio=$("#pfBio").value.trim();u.links=$("#pfLinks").value.split("\n").filter(Boolean).map(l=>{const[a,b]=l.split("|");return{label:(a||"").trim(),url:(b||a||"").trim()}})});
-  closeModal();render();toast("Đã lưu hồ sơ.","ok")}
- if(el.dataset.act==="uid-save"){try{Auth.changeUid(Auth.me(),$("#uidIn").value);closeModal();render();toast("Đã đổi UID. Nhớ UID mới của bạn!","ok")}catch(er){toast(er,"err")}}});
-function uidForm(){const me=Auth.me();if(me.uidChanged){toast("UID chỉ được đổi một lần và bạn đã dùng.","err");return}
- modal(`<h2>Đổi UID (một lần duy nhất)</h2><div class="mu">UID hiện tại: ${esc(me.uid)}. Sau khi đổi, mọi tham chiếu sẽ tự cập nhật.</div>
- <input class="inp" id="uidIn" placeholder="UID mới…"><br><br><button class="btn pri" data-act="uid-save">Xác nhận đổi UID</button>`)}
-function shopForm(s){tmp.shId=s?s.id:null;
- modal(`<h2>${s?"Sửa vật phẩm":"Tạo vật phẩm"}</h2><div class="col">
- <select class="inp" id="shType">${["font","frame","badge","namefx","profilefx","accessory"].map(t=>`<option ${s&&s.type===t?"selected":""}>${t}</option>`).join("")}</select>
- <input class="inp" id="shName" placeholder="Tên vật phẩm" value="${esc(s?s.name:"")}">
- <textarea class="inp" id="shDesc" placeholder="Mô tả">${esc(s?s.desc:"")}</textarea>
- <label class="fl">Xem trước (JSON)</label><input class="inp" id="shPrev" value='${esc(JSON.stringify(s?s.preview:{kind:"badge",value:"🎁"}))}'>
- <label class="row"><input type="checkbox" id="shRole" ${s&&s.roles?"checked":""}> Chỉ dành cho quản trị</label>
- <button class="btn pri" data-act="sh-save">Lưu vật phẩm</button></div>`)}
-function newCatId(name){let id=uid8();DB.cats.tx(cs=>{cs.push({id,name:name||"Khác",builtin:0,order:cs.length+1});return cs});return id}
-/* ================= KHỞI ĐỘNG ================= */
-(function boot(){$("#splashTx").textContent="Đang tải nội dung…";
- const finish=()=>{$("#splash").classList.add("off");setTimeout(()=>$("#splash").remove(),500);
-  const me=Auth.me();const nt=DB.notice.get();
-  if(me&&nt.text&&!(me.seenNotices||[]).includes(nt.id)){Auth.update(me.uid,u=>{(u.seenNotices=u.seenNotices||[]).push(nt.id)});
-   modal(`<div style="text-align:center"><div style="font-size:40px">📢</div><h2>Thông báo</h2><p>${esc(nt.text)}</p><button class="btn pri" data-act="mclose">Đã hiểu</button></div>`)}
-  render()};
- Promise.resolve().then(()=>{Theme.apply();setTimeout(finish,350)});
- setInterval(()=>{if(route.name==="room")render()},4000);
-})();
-</script>
+<svg id="webL" viewBox="0 0 200 200" aria-hidden="true"></svg><svg id="webR" viewBox="0 0 200 200" aria-hidden="true"></svg>
+
+<!-- LOADING CHỈ KẾT THÚC KHI DỮ LIỆU CẦN THIẾT TẢI XONG -->
+<div id="loader">
+  <div class="lorb"><div class="lring"></div><div class="lS">S</div></div>
+  <div class="lbar-wrap"><div class="lbar" id="lbar"></div></div>
+  <div class="ltxt" id="ltxt">Đang khởi tạo không gian & đồng bộ dữ liệu…</div>
+</div>
+
+<!-- HEADER -->
+<header id="hdr"><div class="in lg">
+  <a class="brand" href="#/"><span class="lg-sm lg" data-ic="logo"></span><span class="tx">SKIBIDI SCRIPT</span></a>
+  <span class="sp"></span>
+  <button class="mod lg" id="wtMod" data-ic="clock" aria-label="Giờ trong web"></button>
+  <button class="ibtn lg" id="sndMod" data-ic="sndOff" aria-label="Âm thanh"></button>
+  <button class="ibtn lg" id="btnChatHdr" data-ic="chat" aria-label="Nhắn tin & Hộp thư">
+    <span class="dot-badge" id="dotChatHdr"></span>
+  </button>
+  <button class="ibtn lg" id="btnProfileHdr" data-ic="user" aria-label="Hồ sơ cá nhân"></button>
+  <button class="ibtn lg" id="btnSettingsHdr" data-ic="settings" aria-label="Cài đặt">
+    <span class="dot-badge" id="dotDevHdr"></span>
+  </button>
+  <button class="ibtn lg" id="btnMenu" data-ic="menu" aria-label="Menu">
+    <span class="dot-badge" id="dotMenuHdr"></span>
+  </button>
+</div></header>
+
+<!-- NÚT TIỆN ÍCH NỔI PHONG CÁCH LIQUID GLASS -->
+<button id="fabUtil" class="lg" data-ic="grid"><span>Tiện ích</span></button>
+
+<!-- MENU CHÍNH (CHỈ GỒM: TIỆN ÍCH, ÂM THANH, BÁO CÁO & GÓP Ý, NHẮN TIN) -->
+<nav id="menu" class="lg" aria-label="Menu chính">
+  <button class="mlink" id="mUtil" data-ic="grid"><span>Tiện ích</span></button>
+  <button class="mlink" id="mSound" data-ic="sndOff"><span>Âm thanh</span></button>
+  <button class="mlink" id="mReport" data-ic="flag"><span>Báo cáo & Góp ý</span><span class="m-badge" id="mRepBadge"></span></button>
+  <button class="mlink" id="mChat" data-ic="chat"><span>Nhắn tin</span><span class="m-badge" id="mChatBadge"></span></button>
+</nav>
+
+<main id="main"></main>
+<div id="brandTag">SKIBIDI SCRIPT</div>
+<div id="ov"></div>
+
+<!-- 1. CỬA SỔ TIỆN ÍCH (LIQUID GLASS) -->
+<div class="pop pop-lg lg" id="shUtil">
+  <div class="p-h">
+    <h3 data-ic="grid"><span>Kho Tiện Ích</span></h3>
+    <div class="util-actions">
+      <button class="btn btn-g btn-sm" id="btnNewCat" data-ic="folderPlus"><span>+ Danh mục</span></button>
+      <button class="btn btn-p btn-sm" id="btnNewPost" data-ic="plus"><span>+ Đăng bài</span></button>
+    </div>
+    <button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button>
+  </div>
+  <div class="util-top">
+    <div class="utabs" id="utabs"></div>
+  </div>
+  <div class="usearch-row">
+    <div class="usearch"><span data-ic="search"></span><input id="uq" type="search" placeholder="Tìm kiếm bài đăng, người đăng…" autocomplete="off"></div>
+  </div>
+  <div class="p-b">
+    <div class="utilNote" id="utilNote" style="display:none"></div>
+    <div id="ulist"></div>
+  </div>
+</div>
+
+<!-- 2. CHI TIẾT BÀI ĐĂNG -->
+<div class="pop lg" id="mdDetail">
+  <div class="p-h"><h3>Chi tiết bài đăng</h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div>
+  <div class="p-b" id="dtBody"></div>
+</div>
+
+<!-- 3. ĐĂNG BÀI / CHỈNH SỬA BÀI ĐĂNG (DÀNH CHO NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP & DEV) -->
+<div class="pop lg" id="mdPostForm">
+  <div class="p-h"><h3 id="pfTitle">Đăng bài mới</h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div>
+  <div class="p-b">
+    <div class="fld"><label>Chọn danh mục</label><div class="seg" id="pfCatSeg"></div></div>
+    <div class="fld"><label>Tiêu đề bài đăng *</label><input id="pfName" maxlength="100" placeholder="Nhập tiêu đề bài đăng…"></div>
+    <div class="fld"><label>Mô tả chi tiết *</label><textarea id="pfDesc" maxlength="1200" placeholder="Mô tả tính năng, hướng dẫn sử dụng…"></textarea></div>
+    <div class="fld">
+      <label>Hình ảnh minh họa (Tải ảnh lên hoặc dán liên kết ảnh)</label>
+      <div class="img-up-box">
+        <img id="pfImgPrev" class="img-up-prev" alt="Xem trước">
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:180px">
+          <input id="pfImgUrl" type="url" placeholder="https://… (hoặc chọn ảnh từ thiết bị)">
+          <div style="display:flex;gap:8px">
+            <label class="btn btn-g btn-sm" style="cursor:pointer"><span data-ic="image"></span>Chọn ảnh máy<input id="pfImgFile" type="file" accept="image/*" style="display:none"></label>
+            <button class="btn btn-g btn-sm" type="button" id="pfImgClear">Xóa ảnh</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fld" id="pfUrlWrap"><label>Liên kết (URL)</label><input id="pfUrl" type="url" placeholder="https://…"></div>
+    <div class="fld" id="pfCodeWrap"><label>Mã Script / Nội dung Code</label><textarea id="pfCode" placeholder="Dán mã lệnh hoặc script tại đây…"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+      <button class="btn btn-g" type="button" data-close>Hủy</button>
+      <button class="btn btn-p" type="button" id="pfSubmit">Đăng bài ngay</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. TẠO DANH MỤC MỚI -->
+<div class="pop lg" id="mdCatForm">
+  <div class="p-h"><h3>Quản lý & Tạo danh mục</h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div>
+  <div class="p-b">
+    <div class="utilNote">Tạo danh mục riêng bên cạnh Script, APK, iOS, Link để phân loại bài đăng rõ ràng hơn.</div>
+    <div class="fld"><label>Tên danh mục mới</label><input id="ucxName" maxlength="24" placeholder="VD: Mod Skin, Công cụ, Hướng dẫn…"></div>
+    <div class="fld"><label>Định dạng chính</label><div class="seg" id="ucxMode"><button type="button" data-m="url" class="on">Liên kết (Link)</button><button type="button" data-m="code">Mã lệnh (Code)</button></div></div>
+    <button class="btn btn-p" type="button" id="ucxAdd">Tạo danh mục</button>
+    <div id="ucxList" style="display:flex;flex-direction:column;gap:8px;margin-top:6px"></div>
+  </div>
+</div>
+
+<!-- 5. CÀI ĐẶT (GỒM: HỒ SƠ, THAY ĐỔI GIAO DIỆN, DEV PANEL) -->
+<div class="pop lg" id="mdSettings">
+  <div class="p-h"><h3 data-ic="settings"><span>Cài đặt</span></h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div>
+  <div class="p-b">
+    <div class="seg" id="setNav">
+      <button type="button" data-st="profile" class="on">Hồ sơ</button>
+      <button type="button" data-st="theme">Thay đổi giao diện</button>
+      <button type="button" data-st="dev" id="setDevTab" style="display:none">Dev Panel <span class="dot-badge" id="dotDevTab" style="position:static;margin-left:6px"></span></button>
+    </div>
+
+    <!-- Tab 1: Tóm tắt Hồ sơ trong Cài đặt -->
+    <div id="stPaneProfile" style="display:flex;flex-direction:column;gap:12px">
+      <div id="stGuestBox" class="prof-card">
+        <p style="font-size:14px;color:var(--t2)">Đăng nhập để đăng bài, tùy chỉnh hồ sơ cá nhân, đổi UID duy nhất và nhắn tin kết bạn.</p>
+        <button class="btn btn-p" id="btnOpenAuthFromSet">Đăng nhập / Đăng ký tài khoản</button>
+      </div>
+      <div id="stUserBox" style="display:none;flex-direction:column;gap:12px">
+        <div class="prof-card">
+          <img id="stAv" class="prof-av" src="" alt="Avatar">
+          <div class="prof-name"><span id="stName"></span><span id="stRole" class="role-badge">THÀNH VIÊN</span></div>
+          <div class="uid-pill">UID: <span id="stUid"></span></div>
+          <p id="stBio" class="prof-bio"></p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px">
+            <button class="btn btn-p" id="btnOpenMyProfile">Mở trang cá nhân & Chỉnh sửa</button>
+            <button class="btn btn-g" id="btnLogoutSet">Đăng xuất</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Thay đổi giao diện (Liquid Glass / Frosted Glass & Độ trong suốt như video MagicOS 11) -->
+    <div id="stPaneTheme" style="display:none;flex-direction:column;gap:12px">
+      <div class="srow">
+        <div>
+          <div>Phong cách mặt kính</div>
+          <small style="color:var(--t2);font-weight:400">Chuyển đổi giữa Kính lỏng trong suốt và Kính mờ sương</small>
+        </div>
+        <div class="seg" id="glassModeSeg">
+          <button type="button" data-gm="liquid" class="on">Kính lỏng (Liquid)</button>
+          <button type="button" data-gm="frosted">Kính mờ (Frosted)</button>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Độ trong suốt mặt kính (<span id="glassOpVal">34%</span>)</label>
+        <input type="range" id="glassOpRange" min="18" max="65" value="34">
+      </div>
+      <div class="srow">
+        <div>
+          <div>Chế độ mượt mà (Hiệu năng)</div>
+          <small style="color:var(--t2);font-weight:400">Tối ưu tốc độ khung hình cho thiết bị của bạn</small>
+        </div>
+        <div class="seg" id="userPerfSeg">
+          <button type="button" data-up="low">Tiết kiệm</button>
+          <button type="button" data-up="balanced" class="on">Cân bằng</button>
+          <button type="button" data-up="high">Cao cấp</button>
+        </div>
+      </div>
+      <div class="srow">
+        <div>
+          <div>Chủ đề không gian hiện tại</div>
+          <small style="color:var(--t2);font-weight:400" id="curThemeDesc">Đồng bộ tự động theo hệ thống</small>
+        </div>
+        <span class="chip lg" id="curThemeBadge">Thường</span>
+      </div>
+    </div>
+
+    <!-- Tab 3: Truy cập nhanh Dev Panel dành riêng cho Dev -->
+    <div id="stPaneDev" style="display:none;flex-direction:column;gap:12px">
+      <div class="prof-card">
+        <h4 style="font-size:16px;font-weight:800">Trung tâm Quản trị Hệ thống (Dev Panel)</h4>
+        <p style="font-size:13px;color:var(--t2)">Quản lý toàn bộ bài đăng, danh mục, chuyển đổi chủ đề giao diện (Halloween, Giáng sinh, Tết, Mùa hè, Mùa thu), phát thông báo và xử lý Báo cáo & Góp ý.</p>
+        <button class="btn btn-p" id="btnLaunchDevCenter">Mở Dev Control Center toàn màn hình</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. TRANG HỒ SƠ CÁ NHÂN (XEM & CHỈNH SỬA HỒ SƠ RIÊNG) -->
+<div class="pop lg" id="mdProfile">
+  <div class="p-h"><h3 id="prModalTitle" data-ic="user"><span>Hồ sơ cá nhân</span></h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div>
+  <div class="p-b">
+    <div class="prof-card">
+      <div class="prof-av-wrap">
+        <img id="prAvatar" class="prof-av" src="" alt="Ảnh đại diện">
+        <label class="prof-av-edit" id="prAvEditBtn" title="Đổi ảnh đại diện" style="display:none">
+          <span data-ic="camera"></span>
+          <input id="prAvFile" type="file" accept="image/*" style="display:none">
+        </label>
+      </div>
+      <div class="prof-name">
+        <span id="prDispName">Người dùng</span>
+        <span id="prRoleBadge" class="role-badge">THÀNH VIÊN</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center">
+        <span class="uid-pill">UID: <b id="prUidText">---</b></span>
+        <button class="btn btn-g btn-sm" id="prCopyUid" type="button" data-ic="copy">Sao chép UID</button>
+      </div>
+      <p id="prBioText" class="prof-bio"></p>
+      <a id="prLinkAnchor" class="prof-link" href="#" target="_blank" rel="noopener" style="display:none"></a>
+      <!-- Nút tương tác khi xem hồ sơ người khác -->
+      <div id="prOtherActions" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px">
+        <button class="btn btn-p" id="prBtnMessage" type="button" data-ic="chat">Nhắn tin</button>
+        <button class="btn btn-g" id="prBtnFriend" type="button" data-ic="userPlus">Kết bạn</button>
+        <button class="btn btn-d btn-sm" id="prBtnBlock" type="button">Chặn</button>
+      </div>
+    </div>
+
+    <!-- Form chỉnh sửa hồ sơ (chỉ hiện khi xem hồ sơ của chính mình) -->
+    <div id="prEditWrap" style="display:none;flex-direction:column;gap:12px">
+      <h4 style="font-size:14px;font-weight:800;margin-top:4px">Cập nhật thông tin cá nhân</h4>
+      <div class="fld">
+        <label>Tên hiển thị (Đổi tối đa 7 ngày / lần) — <span id="prNameCooldown" style="color:var(--as)">Có thể đổi</span></label>
+        <input id="prInName" maxlength="36" placeholder="Nhập tên hiển thị của bạn…">
+      </div>
+      <div class="fld">
+        <label>Mã định danh UID duy nhất (Chỉ được đổi 1 lần duy nhất) — <span id="prUidStatus" style="color:var(--as)">Còn 1 lần đổi</span></label>
+        <input id="prInUid" maxlength="20" placeholder="VD: MINH2026 (chỉ gồm chữ và số, 4-20 ký tự)">
+      </div>
+      <div class="fld">
+        <label>Liên kết ảnh đại diện (Hoặc bấm biểu tượng máy ảnh ở trên để tải ảnh)</label>
+        <input id="prInAvUrl" type="url" placeholder="https://…">
+      </div>
+      <div class="fld">
+        <label>Giới thiệu bản thân</label>
+        <textarea id="prInBio" maxlength="300" placeholder="Viết đôi dòng giới thiệu về bạn…"></textarea>
+      </div>
+      <div class="fld">
+        <label>Liên kết cá nhân (Website / Mạng xã hội)</label>
+        <input id="prInLink" type="url" placeholder="https://…">
+      </div>
+      <button class="btn btn-p" type="button" id="prSaveBtn">Lưu hồ sơ cá nhân</button>
+    </div>
+
+    <!-- Danh sách bài đã đăng của người dùng này -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+      <h4 style="font-size:14px;font-weight:800">Bài đăng của thành viên này (<span id="prPostCount">0</span>)</h4>
+      <div id="prUserPosts" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. BÁO CÁO & GÓP Ý -->
+<div class="pop lg" id="mdReport">
+  <div class="p-h"><h3 data-ic="flag"><span>Báo cáo & Góp ý</span></h3><button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button></div>
+  <div class="p-b">
+    <div class="seg" id="repTabs">
+      <button type="button" data-rt="send" class="on">Gửi mới</button>
+      <button type="button" data-rt="mine">Lịch sử của tôi</button>
+      <button type="button" data-rt="all" id="repAllTab" style="display:none">Quản lý tất cả (Dev)</button>
+    </div>
+
+    <!-- Gửi báo cáo / góp ý -->
+    <div id="repPaneSend" style="display:flex;flex-direction:column;gap:12px">
+      <div class="fld">
+        <label>Phân loại</label>
+        <div class="seg" id="repTypeSeg">
+          <button type="button" data-rtp="report" class="on">Báo cáo lỗi / Vi phạm</button>
+          <button type="button" data-rtp="feedback">Góp ý & Đề xuất tính năng</button>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Tiêu đề tóm tắt *</label>
+        <input id="repTitle" maxlength="100" placeholder="Nhập tiêu đề báo cáo hoặc góp ý…">
+      </div>
+      <div class="fld">
+        <label>Nội dung chi tiết *</label>
+        <textarea id="repContent" maxlength="1500" placeholder="Mô tả rõ vấn đề bạn gặp phải hoặc ý tưởng đóng góp…"></textarea>
+      </div>
+      <button class="btn btn-p" type="button" id="repSubmitBtn">Gửi tới Quản trị viên</button>
+    </div>
+
+    <!-- Danh sách báo cáo -->
+    <div id="repPaneList" style="display:none;flex-direction:column;gap:10px"></div>
+  </div>
+</div>
+
+<!-- 8. HỘP THƯ & NHẮN TIN (TÌM UID, KẾT BẠN, CHAT TEXT/VOICE/ẢNH/TỆP, CHẶN) -->
+<div class="pop pop-lg lg" id="mdChat">
+  <div class="p-h">
+    <h3 data-ic="chat"><span>Nhắn tin & Hộp thư</span></h3>
+    <div class="seg" id="chatTopTabs">
+      <button type="button" data-ct="chats" class="on">Trò chuyện</button>
+      <button type="button" data-ct="friends">Bạn bè & Tìm UID</button>
+      <button type="button" data-ct="inbox">Hộp thư <span class="dot-badge" id="dotInboxTab" style="position:static;margin-left:5px"></span></button>
+    </div>
+    <button class="ibtn" data-close data-ic="x" aria-label="Đóng"></button>
+  </div>
+  <div class="p-b" style="overflow:hidden;display:flex;flex-direction:column">
+    <!-- Pane 1: Trò chuyện trực tiếp -->
+    <div id="ctPaneChats" class="chat-shell">
+      <div class="chat-side">
+        <div class="usearch" style="margin:0"><span data-ic="search"></span><input id="chatQuickUid" type="search" placeholder="Nhập UID để tìm nhanh…"></div>
+        <div class="chat-list" id="chatConvList"></div>
+      </div>
+      <div class="chat-main" id="chatMainView">
+        <div class="chat-hdr" id="chatActiveHdr" style="display:none">
+          <button class="ibtn btn-sm" id="chat
+            </script>
 </body>
-  </html>
+            </html>
