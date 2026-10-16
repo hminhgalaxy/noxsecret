@@ -60,3 +60,5 @@ label{display:block;font-weight:600;font-size:13px;margin:14px 0 6px}
   .au-sub{max-width:none}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:2s!important}}
+a.g-btn{display:flex;align-items:center;justify-content:center;gap:10px;height:44px;border:1px solid var(--bd);border-radius:12px;background:var(--s1);color:var(--tx);font-weight:600;text-decoration:none;transition:border-color .15s}
+@media(hover:hover){a.g-btn:hover{border-color:var(--tx)}}
