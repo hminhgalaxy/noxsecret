@@ -7,7 +7,7 @@
 <meta name="description" content="SKIBIDISCRIPT is a community hub for sharing game scripts, APKs, iOS files and useful links. Create a free account to post, like and rate.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="theme-color" content="#f4f4f5" id="tc"><script>try{var s=localStorage.getItem("theme")||"light";if(s==="system")s=matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";document.documentElement.dataset.theme=s}catch(e){document.documentElement.dataset.theme="light"}</script>
 <link rel="canonical" href="https://skibidiscript.vercel.app/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2309090b'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
@@ -21,7 +21,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"SKIBIDISCRIPT","url":"https://skibidiscript.vercel.app/","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -306,29 +306,6 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
   <div id="dauth"></div>
 </aside></div>
 
-<!-- Đăng nhập / đăng ký -->
-<div class="modal" id="mAuth" onclick="if(event.target===this)closeAuth()"><div class="box" style="max-width:420px">
-  <button class="x ic" onclick="closeAuth()" data-ia="close"><span data-ic="x" data-s="16"></span></button>
-  <b class="hd" id="aTitle"></b>
-  <div class="tabs"><button type="button" id="tLogin" onclick="authTab('login')" data-i="login"></button><button type="button" id="tReg" onclick="authTab('reg')" data-i="register"></button></div>
-  <form id="aForm" onsubmit="authGo();return false" novalidate>
-    <div id="fReg"><label for="aName" data-i="a.name"></label><input id="aName" maxlength="24" autocomplete="nickname" autocapitalize="off" spellcheck="false" oninput="nameTaken=false;onName()" onblur="onName(1)" data-ip="a.name.ph"><div class="fm" id="nameMsg"></div></div>
-    <label for="aEmail">Gmail</label><input id="aEmail" type="email" inputmode="email" maxlength="40" placeholder="example@gmail.com" autocomplete="email" autocapitalize="off" spellcheck="false" oninput="onEmail()" onblur="onEmail(1)"><div class="fm" id="emMsg"></div>
-    <label for="aPass" data-i="a.pw"></label>
-    <div class="pw"><input id="aPass" type="password" maxlength="64" autocomplete="current-password" oninput="onPw()" onblur="onPw(1)"><button type="button" class="eye" onclick="eye('aPass',this)" data-ic="eye"></button></div>
-    <div class="fm" id="pwMsg"></div>
-    <div id="pwBox"><div class="sm" id="pwBar"><i></i><i></i><i></i></div><div class="fm" id="pwLbl"></div><div class="rq" id="pwReq"></div></div>
-    <div id="fReg2"><label for="aPass2" data-i="a.pw2"></label>
-      <div class="pw"><input id="aPass2" type="password" maxlength="64" autocomplete="new-password" oninput="onPw2()" onblur="onPw2(1)"><button type="button" class="eye" onclick="eye('aPass2',this)" data-ic="eye"></button></div>
-      <div class="fm" id="pw2Msg"></div></div>
-    <div class="row"><button class="pri" type="submit" id="aGo" style="flex:1"></button></div>
-    <div class="fm al" id="aMsg" role="alert"></div>
-  </form>
-  <div class="dsep" style="margin:14px 0"></div>
-  <div id="gbtn3" style="display:flex;justify-content:center;align-items:center;min-height:44px"></div>
-  <div class="fm" id="gMsg" style="text-align:center" role="alert"></div>
-</div></div>
-
 <!-- Chi tiết bài -->
 <div class="modal" id="mDetail" onclick="if(event.target===this)closeDetail()"><div class="box">
   <button class="x ic" onclick="closeDetail()" data-ia="close"><span data-ic="x" data-s="16"></span></button>
@@ -433,21 +410,8 @@ body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(
 <div id="toast" role="status"></div>
 <script>
 /* ===== CẤU HÌNH ===== */
-/* Firebase: project skibidiscriptdvminh. Toàn bộ tính năng (tài khoản, bài đăng, thả tim, World, nhóm chat, hòm thư, Dev Panel)
-   chạy thẳng bằng Firebase Auth + Realtime Database ở trình duyệt, không cần backend /api.
-   databaseURL: nếu Realtime Database của bạn tạo ở khu vực khác Mỹ, hãy chép đúng URL trong Firebase Console → Realtime Database
-   (dạng https://skibidiscriptdvminh-default-rtdb.<khu-vực>.firebasedatabase.app) và dán vào đây. */
-const firebaseConfig={
-  apiKey:"AIzaSyDGqHQt893hj0VGkjgapwM5sfwq2vP-6Mk",
-  authDomain:"skibidiscriptdvminh.firebaseapp.com",
-  databaseURL:"https://skibidiscriptdvminh-default-rtdb.firebaseio.com",
-  projectId:"skibidiscriptdvminh",
-  storageBucket:"skibidiscriptdvminh.firebasestorage.app",
-  messagingSenderId:"361948203038",
-  appId:"1:361948203038:web:b165d2843bdf5a9a67860f",
-  measurementId:"G-LLV0PKPH40"
-};
-const GOOGLE_CLIENT_ID="971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
+/* Cấu hình Firebase nằm ở js/firebase-config.js (tách riêng, không liên quan Google). Đăng nhập/đăng ký nằm ở login.html + register.html. */
+const firebaseConfig=window.FIREBASE_CONFIG||{};
 let DB_URL=firebaseConfig.databaseURL; // đọc dữ liệu công khai (bài, game, mục, cấu hình) — tự dò lại đúng khu vực ở pickDb()
 const API="/api"; // chỉ còn là đường dự phòng; mọi thao tác đã được xử lý bằng Firebase trong localApi()
 const $=id=>document.getElementById(id);
@@ -770,7 +734,7 @@ async function pickDb(){
 }
 function fbInit(){
   if(fbAuth)return true;
-  if(!sdkOk())return false;
+  if(!sdkOk()||!firebaseConfig.apiKey)return false;
   if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
   fbAuth=firebase.auth();fbDb=firebase.database();try{fbDb.ref(".info/serverTimeOffset").on("value",s=>{srvOff=+s.val()||0})}catch(e){}return true;
 }
@@ -871,46 +835,14 @@ async function claimName(n,uid){
     throw fbErr(409,t("auth.nametaken"));
   }
 }
-async function fbRegister(b){
-  if(!await nameFree(b.name))throw fbErr(409,t("auth.nametaken"));
-  let cr;try{cr=await fbAuth.createUserWithEmailAndPassword(b.email,b.password)}catch(e){throw mapFb(e)}
-  const u=cr.user;
-  /* chỉ hủy tài khoản khi tên THẬT SỰ bị người khác lấy (409); lỗi quyền ghi thì vẫn cho đăng ký, hồ sơ sẽ tự tạo lại */
-  try{await claimName(b.name,u.uid)}catch(e){if(e&&e.status===409){await u.delete().catch(()=>{});throw e}console.warn("[name]",e)}
-  try{await fbDb.ref("pub/users/"+u.uid).set({name:b.name,pic:"",bio:"",createdAt:firebase.database.ServerValue.TIMESTAMP})}catch(e){console.warn("[profile]",e)}
-  try{await u.updateProfile({displayName:b.name})}catch(e){}
-  return fbMe(u);
-}
-async function fbLogin(b){
-  let cr;try{cr=await fbAuth.signInWithEmailAndPassword(b.email,b.password)}catch(e){throw mapFb(e)}
-  return fbMe(cr.user);
-}
-async function fbGoogle(credential){
-  let r;try{r=await fbAuth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(credential))}catch(e){throw mapFb(e,true)}
-  return fbGoogleDone(r.user);
-}
-async function fbGooglePopup(){
-  let r;try{r=await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){throw mapFb(e)}
-  return fbGoogleDone(r.user);
-}
-/* Google đã xác thực xong là VÀO LUÔN: hồ sơ thiếu thì fbMe tự tạo, lỗi ghi hồ sơ không còn chặn đăng nhập */
-async function fbGoogleDone(u){
-  const m=await fbMe(u);
-  if(m.name&&u.displayName!==m.name)u.updateProfile({displayName:m.name}).catch(()=>{});
-  return m;
-}
 async function authApi(path,method,body){
   const k=method+" "+path;
   const um=path.match(/^\/users\/([^/]+)$/);
-  if(!(k==="POST /auth/register"||k==="POST /auth/login"||k==="POST /auth/google"||k==="POST /auth/google-popup"||k==="POST /me/link-popup"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/handle"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
+  if(!(k==="POST /me/link-popup"||k==="POST /auth/logout"||k==="GET /me"||k==="POST /me/link-google"||k==="POST /me/profile"||k==="POST /me/name"||k==="POST /me/handle"||k==="POST /me/password"||(method==="GET"&&um)))return undefined;
   if(!fbInit())throw fbErr(0,t("fb.noload"));
   const u=fbAuth.currentUser;
   if(um)return profileOf(decodeURIComponent(um[1]));
   switch(k){
-    case "POST /auth/register":return busy(()=>fbRegister(body));
-    case "POST /auth/login":return busy(()=>fbLogin(body));
-    case "POST /auth/google":return busy(()=>fbGoogle(body.credential));
-    case "POST /auth/google-popup":return busy(()=>fbGooglePopup());
     case "POST /auth/logout":await fbAuth.signOut();return{ok:true};
   }
   if(!u)throw fbErr(401,t("e.expired"));
@@ -1347,7 +1279,6 @@ async function loadCfg(){
 function addCat(){if(!isDev())return toast(t("f.onlydev"));closeM($("mForm"));devTab="cats";openDev()}
 
 /* ===== TÀI KHOẢN ===== */
-let aMode="login",nt,nseq=0,nameTaken=false,fails=0,lockUntil=0;
 function renderAuth(){
   const a=$("accBtn"),d=$("dauth");
   $("inboxBtn").hidden=!me;
@@ -1361,19 +1292,12 @@ function renderAuth(){
   renderNav();renderPop();
 }
 const onAcc=()=>me?openProfile(me.userId):openAuth();
-function openAuth(m){gTries=0;authTab(m||"login");openM($("mAuth"));gRender("gbtn3","gMsg","login")}
-function closeAuth(){$("aPass").value=$("aPass2").value="";resetEyes();closeM($("mAuth"))}
-function authTab(m){
-  aMode=m;const r=m==="reg";
-  $("fReg").hidden=$("fReg2").hidden=$("pwBox").hidden=!r;
-  $("tLogin").className=r?"":"pri";$("tReg").className=r?"pri":"";
-  $("aGo").textContent=r?t("a.title.reg"):t("login");$("aTitle").textContent=r?t("a.title.reg"):t("login");
-  $("aPass").autocomplete=r?"new-password":"current-password";
-  ["nameMsg","emMsg","pwMsg","pw2Msg","aMsg","gMsg"].forEach(i=>setMsg(i,""));
-  if(r)onPw();
+/* Đăng nhập / đăng ký là TRANG RIÊNG (login.html / register.html), không còn popup. Quay lại đúng chỗ đang xem sau khi xong. */
+function openAuth(m){
+  const next=location.pathname+location.search+location.hash;
+  location.href=(m==="reg"?"register.html":"login.html")+"?next="+encodeURIComponent(next);
 }
 function eye(id,b){const i=$(id),s=i.type==="password";i.type=s?"text":"password";b.innerHTML=svg(s?"eyeoff":"eye");b.setAttribute("aria-label",t(s?"a.hidepw":"a.showpw"))}
-function resetEyes(){["aPass","aPass2"].forEach(id=>{const i=$(id);i.type="password";i.parentElement.querySelector(".eye").innerHTML=svg("eye")})}
 function vName(v){
   if(!v)return t("v.name.empty");
   if(/\s/.test(v))return t("v.name.space");
@@ -1415,64 +1339,6 @@ function pwErr(p){
   if(pwCheck(p).lv<2)return t("v.pw.weak");
   return"";
 }
-function onName(force){
-  clearTimeout(nt);const v=$("aName").value.trim(),e=vName(v);
-  if(!v&&!force){setMsg("nameMsg","");return e}
-  if(e){setMsg("nameMsg",e,"bad");return e}
-  setMsg("nameMsg",t("n.checking"));
-  const s=++nseq;
-  nt=setTimeout(async()=>{
-    try{
-      const j=await dbGet(nameKey(v));
-      if(s!==nseq)return;
-      nameTaken=!!j;setMsg("nameMsg",j?t("n.taken"):t("n.ok"),j?"bad":"ok");
-    }catch(x){if(s===nseq)setMsg("nameMsg",t("n.nocheck"))}
-  },350);
-  return"";
-}
-function onEmail(force){
-  const v=$("aEmail").value.trim().toLowerCase(),e=vEmail(v);
-  if(!force&&!v.includes("@")){setMsg("emMsg","");return e}
-  setMsg("emMsg",e||t("v.em.ok"),e?"bad":"ok");return e;
-}
-function onPw(force){
-  const p=$("aPass").value,c=pwCheck(p),e=pwErr(p);
-  if(aMode==="reg"){
-    $("pwBar").className="sm"+(p?" l"+c.lv:"");
-    setMsg("pwLbl",p&&c.lv?t("pw.l"+c.lv):"",["","bad","warn","ok"][c.lv]);
-    $("pwReq").innerHTML=[[c.r.len,t("pw.r1")],[c.r.up,t("pw.r2")],[c.r.sp,t("pw.r3")]].map(([o,x])=>`<span class="${o?"ok":""}">${o?"✓":"○"} ${esc(x)}</span>`).join("");
-    if($("aPass2").value)onPw2();
-  }
-  setMsg("pwMsg",force?e:"","bad");return e;
-}
-function onPw2(force){
-  if(aMode!=="reg")return"";
-  const a=$("aPass").value,b=$("aPass2").value;let e="";
-  if(!b)e=force?t("v.pw.again"):"";
-  else if(a!==b)e=t("v.pw.diff");
-  setMsg("pw2Msg",e||(b?t("v.pw.same"):""),e?"bad":b?"ok":"");
-  return!b?(force?e:""):e;
-}
-async function authGo(){
-  const reg=aMode==="reg",now=Date.now();
-  if(now<lockUntil)return setMsg("aMsg",t("auth.locked",Math.ceil((lockUntil-now)/1000)),"bad");
-  const eN=reg?onName(1):"",eE=onEmail(1),eP=onPw(1),eP2=reg?onPw2(1):"";
-  if(eN||eE||eP||eP2)return setMsg("aMsg",t("auth.invalid"),"bad");
-  if(reg&&nameTaken)return setMsg("aMsg",t("auth.nametaken"),"bad");
-  const name=$("aName").value.trim(),email=$("aEmail").value.trim().toLowerCase(),pw=$("aPass").value;
-  setMsg("aMsg","");$("aGo").disabled=true;$("aGo").textContent=t("auth.wait");
-  try{
-    me=await api(reg?"/auth/register":"/auth/login","POST",reg?{name,email,password:pw}:{email,password:pw});
-    fails=0;closeAuth();afterAuth();toast(reg?t("auth.hello.reg",me.name,idOf(me)):t("auth.hello",me.name));
-  }catch(e){
-    let m=e.message;
-    if(!reg&&e.status===401)m=t("auth.wrong");
-    else if(reg&&e.status===409)m=t("auth.exists");
-    if(e.status&&e.status<500&&++fails>=5){lockUntil=Date.now()+30000;fails=0;m+=t("auth.lock30")}
-    setMsg("aMsg",m,"bad");
-  }
-  $("aGo").disabled=false;$("aGo").textContent=reg?t("a.title.reg"):t("login");
-}
 function afterAuth(){
   /* làm mới toàn bộ dữ liệu theo tài khoản mới, không cần tải lại trang */
   wList=[];wRep={};wGroups=[];homeDirty=true;unreadFails=0;
@@ -1500,48 +1366,11 @@ async function restore(){
   loadRoles();authReady=true;
 }
 
-/* --- Google Identity Services (đăng nhập + gắn Gmail) --- */
-let gInit=false,gTries=0,gMode="login";
-function gSetup(){
-  if(gInit)return true;
-  if(!(window.google&&google.accounts&&google.accounts.id))return false;
-  google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:onCred,auto_select:false,cancel_on_tap_outside:true});
-  gInit=true;return true;
-}
-function gRender(boxId,msgId,mode){
-  const el=$(boxId);if(!el)return;gMode=mode;setMsg(msgId,"");
-  if(!gSetup()){
-    if(++gTries>40){el.innerHTML="";gFail(msgId,t("g.fail"),mode==="link");return}
-    el.innerHTML='<div class="sp" style="width:22px;height:22px;border-width:2px"></div>';
-    setTimeout(()=>{const e2=$(boxId);if(e2&&e2.offsetParent!==null)gRender(boxId,msgId,mode)},250);return;
-  }
-  el.innerHTML="";
-  try{google.accounts.id.renderButton(el,{theme:"outline",size:"large",text:"continue_with",shape:"pill",width:Math.max(200,Math.min(280,innerWidth-90)),locale:lang})}
-  catch(e){gFail(msgId,t("g.fail"),mode==="link")}
-}
-/* Khi nút Google (GIS) lỗi/bị từ chối: hiện thêm nút đăng nhập Google bằng popup của Firebase (không cần Client ID riêng) */
-function gFail(msgId,text,link){
-  setMsg(msgId,text,"bad");
-  const el=$(msgId);if(!el)return;
-  const b=document.createElement("button");b.type="button";b.className="pri";b.style.marginTop="8px";b.textContent=t("g.popup");
-  b.onclick=()=>gPopup(link,msgId,b);
-  el.appendChild(document.createElement("br"));el.appendChild(b);
-}
-async function gPopup(link,msgId,btn){
-  btn.disabled=true;
-  try{
-    if(link){const u=await api("/me/link-popup","POST");Object.assign(me,u,{googleLinked:true});renderAuth();renderSettings();toast(t("s.gmail.done"))}
-    else{me=await api("/auth/google-popup","POST");closeAuth();afterAuth();toast(t("auth.hello",me.name))}
-  }catch(e){gFail(msgId,e.message,link)}
-}
-async function onCred(r){
-  const link=!!me,msg=link?"gLinkMsg":"gMsg";   /* đã đăng nhập mà nhận thêm credential Google => đang gắn Gmail; chưa đăng nhập => đăng nhập */
-  if(!r||!r.credential)return setMsg(msg,t("g.nocred"),"bad");
-  setMsg(msg,t("g.verify"));
-  try{
-    if(link){const u=await api("/me/link-google","POST",{credential:r.credential});Object.assign(me,u,{googleLinked:true});renderAuth();renderSettings();toast(t("s.gmail.done"))}
-    else{me=await api("/auth/google","POST",{credential:r.credential});closeAuth();afterAuth();toast(t("auth.hello",me.name))}
-  }catch(e){if(e.google)gFail(msg,e.message,link);else setMsg(msg,e.message,"bad")}
+/* --- Gắn Gmail vào tài khoản đang đăng nhập (đăng nhập Google nằm ở login.html) --- */
+async function linkGoogle(btn){
+  if(btn)btn.disabled=true;setMsg("gLinkMsg",t("g.verify"));
+  try{const u=await api("/me/link-popup","POST");Object.assign(me,u,{googleLinked:true});renderAuth();renderSettings();toast(t("s.gmail.done"))}
+  catch(e){setMsg("gLinkMsg",e.message,"bad");if(btn)btn.disabled=false}
 }
 
 /* ===== ĐIỀU HƯỚNG ===== */
@@ -1625,7 +1454,7 @@ document.addEventListener("keydown",e=>{
   if($("mImg").classList.contains("on"))return closeM($("mImg"));
   closePop();toggleMenu(false);
   const ms=[...document.querySelectorAll(".modal.on")],m=ms[ms.length-1];if(!m)return;
-  if(m.id==="mDetail")closeDetail();else if(m.id==="mAuth")closeAuth();else if(m.id==="mRoom")closeRoom();else closeM(m);
+  if(m.id==="mDetail")closeDetail();else if(m.id==="mRoom")closeRoom();else closeM(m);
 });
 
 /* ===== GAME ===== */
@@ -1751,8 +1580,8 @@ function copyCode(id){navigator.clipboard.writeText(curPosts[id].code).then(()=>
    Trên Vercel, api/share.js trả trang có thẻ Open Graph (bản xem trước khi gửi qua app nhắn tin) rồi chuyển người mở sang #/post/{id} hoặc #/w/{id}.
    Link luôn trỏ tới bản ghi gốc trong Firebase (không tạo bản sao). Bài đã xóa/bị ẩn/không có quyền => hiện thông báo tương ứng. */
 const SITE="https://skibidiscript.vercel.app";
-const shareBase=()=>/^https?:$/.test(location.protocol)?location.origin:SITE;
-const shareUrl=(k,id)=>shareBase()+"/"+k+"/"+encodeURIComponent(id);
+const shareBase=()=>/^https?:$/.test(location.protocol)?location.origin+location.pathname.replace(/[^\/]*$/,""):SITE+"/";
+const shareUrl=(k,id)=>shareBase()+"#/"+(k==="p"?"post":"w")+"/"+encodeURIComponent(id);
 const oneLine=(s,n)=>String(s||"").replace(/\s+/g," ").trim().slice(0,n);
 let shCtx=null;
 /* đọc dữ liệu công khai: ưu tiên SDK (mang theo đăng nhập, tuân theo Rules), dự phòng REST */
@@ -2283,11 +2112,10 @@ function renderSettings(){
       <div class="pw" style="margin-top:8px"><input id="pwNew2" type="password" maxlength="64" autocomplete="new-password" placeholder="${esc(t("s.pass.new2"))}"><button type="button" class="eye" onclick="eye('pwNew2',this)">${svg("eye")}</button></div>
       <div class="fm" id="stPwMsg"></div><div class="row" style="margin-top:0"><button class="pri" onclick="savePass()">${esc(t("save"))}</button></div></div>
     <div class="sec"><h3>Gmail</h3><p class="mu" style="font-size:13px">${me.email?esc(me.email):esc(t("s.gmail.none"))}</p>
-      ${me.googleLinked?`<p class="fm ok">${esc(t("s.gmail.done"))}</p>`:`<p class="mu" style="margin:4px 0 8px">${esc(t("s.gmail.link"))}</p><div id="gLinkBtn" style="display:flex;min-height:44px;align-items:center"></div>`}
+      ${me.googleLinked?`<p class="fm ok">${esc(t("s.gmail.done"))}</p>`:`<p class="mu" style="margin:4px 0 8px">${esc(t("s.gmail.link"))}</p><button class="pri" onclick="linkGoogle(this)">Google</button>`}
       <div class="fm" id="gLinkMsg"></div></div>`;
   }
   $("setBody").innerHTML=h;
-  if(me&&!me.googleLinked){gTries=0;gRender("gLinkBtn","gLinkMsg","link")}
 }
 function setTheme(p){applyTheme(p,true);renderSettings()}
 function setAvatar(id){
