@@ -1297,15 +1297,25 @@ function applyUser(){
   $("#btnDev").style.display=state.dev?"grid":"none";
   if(!state.dev&&$("#dev").classList.contains("on"))closeDev();
 }
-async function onGoogle(resp){
-  if(!resp||!resp.credential||!auth)return;
+function jwtPayload(t){
   try{
-    await auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(resp.credential));
-    toast("Đăng nhập Google thành công.");
-    closePops();
-  }catch(e){
-    toast("Đăng nhập Google thất bại.");
-  }
+    var p=String(t).split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
+    p+="=".repeat((4-p.length%4)%4);
+    return JSON.parse(decodeURIComponent(atob(p).split("").map(function(c){return"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)}).join("")));
+  }catch(_){return null}
+}
+function onGoogle(resp){
+  var p=resp&&resp.credential?jwtPayload(resp.credential):null;
+  if(!p){toast("Đăng nhập Google thất bại: phản hồi không hợp lệ.");return}
+  if(p.aud!==GIS_ID){toast("Google Client ID không khớp với cấu hình web.");return}
+  if(!/^(https:\/\/)?accounts\.google\.com$/.test(p.iss||"")||!(p.exp*1000>Date.now())||!p.email){toast("Phản hồi Google không hợp lệ hoặc đã hết hạn.");return}
+  var g={email:p.email,name:p.name||p.email,picture:p.picture||"",ok:true,google:true};
+  state.user=g;
+  try{localStorage.setItem("ssw_gsession",JSON.stringify({email:g.email,name:g.name,picture:g.picture,exp:Date.now()+7*864e5}))}catch(_){}
+  applyUser();
+  closePops();
+  toast("Đăng nhập Google thành công.");
+  if(auth&&!auth.currentUser&&auth.signInAnonymously)auth.signInAnonymously().catch(function(){});
 }
 function initGIS(t){
   if(window.google&&google.accounts){
@@ -1344,7 +1354,8 @@ $("#loginForm").addEventListener("submit",function(e){
 });
 function doSignOut(){
   try{
-    localStorage.removeItem("ssw_session")
+    localStorage.removeItem("ssw_gsession");
+    if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect();
   }catch(_){}
   state.user=null;
   applyUser();
@@ -1358,13 +1369,18 @@ $("#setOut").addEventListener("click",function(){
   doSignOut();
 });
 if(auth)auth.onAuthStateChanged(function(u){
-  if(u){
+  if(u&&!u.isAnonymous){
     state.user={
       email:u.email,name:u.displayName||u.email,picture:u.photoURL||"",ok:true
     };
     applyUser();
-  }
+  }else if(u)applyUser();
 });
+try{
+  var gs=JSON.parse(localStorage.getItem("ssw_gsession")||"null");
+  if(gs&&gs.exp>Date.now()){state.user={email:gs.email,name:gs.name,picture:gs.picture,ok:true,google:true};applyUser()}
+  else if(gs)localStorage.removeItem("ssw_gsession");
+}catch(_){}
 /* DEV PANEL: danh mục động, nội dung, đề xuất */
 const TABS=[["pending","Chờ duyệt"],["reqs","Đề xuất DM"],["reports","Báo cáo"],["content","Nội dung"],["cats","Danh mục"],["notice","Thông báo"],["util","Ghi chú"],["settings","Settings"]];
 var reqAll=[];
