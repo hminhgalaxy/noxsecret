@@ -2,652 +2,256 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>SKIBIDI SCRIPT | Premium Hub</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SKIBIDI SCRIPT</title>
+<meta name="description" content="SKIBIDI SCRIPT — Script, APK, iOS và Link hữu ích.">
+<link rel="canonical" href="https://skibidiscript.vercel.app/">
+<meta name="theme-color" content="#070b12">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%230e1420'/%3E%3Cpath d='M65 35C63 28 57 25 50 25C42 25 36 29 36 36C36 44 44 46 50 49C57 52 64 55 64 63C64 70 58 75 50 75C42 75 36 71 34 64' fill='none' stroke='%2329d6c5' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-  :root {
-    /* BASE VARIABLES - WILL BE OVERRIDDEN BY THEME CLASSES */
-    --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
-    --transition-ez: cubic-bezier(0.16, 1, 0.3, 1);
-    --transition-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    
-    /* COLORS (Default to NOX - Dark Solid) */
-    --bg-base: #050505;
-    --bg-surface: #121212;
-    --bg-surface-hover: #1e1e1e;
-    --bg-elevated: #1a1a1a;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.15);
-    
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0a0;
-    --text-tertiary: #666666;
-    
-    --brand-primary: #7c5cff;
-    --brand-secondary: #29d6c5;
-    --brand-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-    
-    --danger: #ff4b4b;
-    --success: #00d26a;
-    --warning: #ffb800;
-
-    /* LIQUID GLASS VARIABLES (Default off) */
-    --glass-blur: blur(0px);
-    --glass-bg: var(--bg-surface);
-    --glass-border: var(--border-subtle);
-    --glass-shadow: none;
-
-    --sidebar-w: 260px;
-    --bottom-nav-h: 65px;
-  }
-
-  /* =========================================================
-     THEME OVERRIDES
-  ========================================================= */
-  
-  /* 1. STYLE: LIQUID GLASS */
-  body.style-liquid {
-    --glass-blur: blur(24px) saturate(150%);
-    --glass-bg: rgba(20, 20, 25, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.3);
-    --bg-surface: var(--glass-bg);
-    --bg-elevated: rgba(30, 30, 40, 0.5);
-    --bg-surface-hover: rgba(255, 255, 255, 0.08);
-  }
-
-  /* 2. CONTEXT: NATURAL */
-  body.context-natural {
-    background-color: #0a0e16;
-    /* In actual implementation, Canvas/SVG weather will be injected behind #app */
-  }
-
-  /* 3. CONTEXT: DYNAMIC */
-  body.context-dynamic {
-    background-color: #03000a;
-    background-image: 
-      radial-gradient(circle at 15% 50%, rgba(124, 92, 255, 0.15), transparent 50%),
-      radial-gradient(circle at 85% 30%, rgba(41, 214, 197, 0.15), transparent 50%);
-    background-attachment: fixed;
-  }
-
-  /* =========================================================
-     GLOBAL RESET & TYPOGRAPHY
-  ========================================================= */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { 
-    font-family: var(--font-main); 
-    background: var(--bg-base); 
-    color: var(--text-primary); 
-    height: 100vh; 
-    overflow: hidden; 
-    -webkit-tap-highlight-color: transparent;
-  }
-  a { text-decoration: none; color: inherit; }
-  ul { list-style: none; }
-  button, input, textarea { font-family: inherit; border: none; outline: none; background: none; }
-  button { cursor: pointer; }
-  
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
-
-  /* =========================================================
-     LAYOUT (SPA)
-  ========================================================= */
-  #app-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    position: relative;
-    z-index: 10;
-  }
-
-  /* BACKGROUND CANVAS (For Contexts) */
-  #env-canvas {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  /* SIDEBAR (Desktop) */
-  .sidebar {
-    width: var(--sidebar-w);
-    height: 100vh;
-    background: var(--bg-surface);
-    backdrop-filter: var(--glass-blur);
-    border-right: 1px solid var(--glass-border);
-    display: flex;
-    flex-direction: column;
-    padding: 24px 16px;
-    z-index: 50;
-    transition: transform 0.3s var(--transition-ez);
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 12px 32px;
-    font-weight: 800;
-    font-size: 18px;
-    letter-spacing: -0.5px;
-    background: var(--brand-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .brand svg { fill: url(#brandGrad); width: 28px; height: 28px; }
-
-  .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
-    border-radius: 16px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 14.5px;
-    transition: all 0.25s var(--transition-ez);
-  }
-  .nav-item svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  .nav-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
-  .nav-item.active {
-    background: var(--brand-gradient);
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(124, 92, 255, 0.25);
-  }
-
-  .user-profile-mini {
-    margin-top: auto;
-    padding: 12px;
-    border-radius: 16px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-  }
-  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--border-strong); object-fit: cover; }
-  .user-info { flex: 1; min-width: 0; }
-  .user-info h4 { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-info p { font-size: 11px; color: var(--text-secondary); }
-
-  /* MAIN CONTENT AREA */
-  .main-content {
-    flex: 1;
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: relative;
-    scroll-behavior: smooth;
-  }
-
-  .view-section {
-    display: none;
-    padding: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    animation: fadeIn 0.4s var(--transition-ez) forwards;
-  }
-  .view-section.active { display: block; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  /* =========================================================
-     COMPONENTS
-  ========================================================= */
-  /* GLASS CARDS */
-  .g-card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    border-radius: 24px;
-    padding: 24px;
-  }
-
-  /* BUTTONS */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 14px;
-    transition: transform 0.2s var(--transition-spring), opacity 0.2s;
-  }
-  .btn:active { transform: scale(0.95); }
-  .btn-primary { background: var(--brand-gradient); color: #fff; box-shadow: 0 4px 16px rgba(124, 92, 255, 0.3); }
-  .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-subtle); }
-
-  /* ONBOARDING (Force Choice) */
-  #onboarding-screen {
-    position: fixed; inset: 0; z-index: 9999;
-    background: var(--bg-base);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  .ob-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; text-align: center; }
-  .ob-desc { color: var(--text-secondary); margin-bottom: 40px; text-align: center; }
-  
-  .ob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 800px; width: 100%; margin-bottom: 40px;}
-  .ob-group { display: flex; flex-direction: column; gap: 16px; }
-  .ob-group h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); }
-  
-  .ob-card {
-    background: var(--bg-surface);
-    border: 2px solid var(--border-subtle);
-    border-radius: 20px;
-    padding: 20px;
-    cursor: pointer;
-    transition: all 0.3s var(--transition-ez);
-    position: relative;
-    overflow: hidden;
-  }
-  .ob-card:hover { border-color: var(--text-secondary); transform: translateY(-2px); }
-  .ob-card.selected { border-color: var(--brand-primary); background: rgba(124, 92, 255, 0.05); }
-  .ob-card.selected::after {
-    content: ''; position: absolute; top: 16px; right: 16px; width: 12px; height: 12px;
-    border-radius: 50%; background: var(--brand-primary); box-shadow: 0 0 10px var(--brand-primary);
-  }
-  .ob-card h4 { font-size: 18px; margin-bottom: 4px; }
-  .ob-card p { font-size: 13px; color: var(--text-secondary); }
-
-  /* UTILITY TABS & SEARCH */
-  .util-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; flex-wrap: wrap;}
-  .tabs { display: flex; gap: 8px; background: var(--bg-elevated); padding: 6px; border-radius: 16px; border: 1px solid var(--border-subtle); }
-  .tab-btn { padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 14px; color: var(--text-secondary); transition: all 0.2s; }
-  .tab-btn.active { background: var(--bg-surface-hover); color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-  
-  .search-box {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--bg-elevated); border: 1px solid var(--border-subtle);
-    padding: 10px 16px; border-radius: 16px; width: 300px;
-  }
-  .search-box input { flex: 1; color: var(--text-primary); }
-
-  /* GRID ITEMS */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-  
-  /* MOBILE BOTTOM NAV */
-  @media (max-width: 768px) {
-    .sidebar { position: fixed; bottom: 0; left: 0; width: 100vw; height: var(--bottom-nav-h); flex-direction: row; padding: 0 16px; border-right: none; border-top: 1px solid var(--glass-border); justify-content: space-around; align-items: center; z-index: 100; border-radius: 24px 24px 0 0; }
-    .brand, .user-profile-mini { display: none; }
-    .nav-menu { flex-direction: row; justify-content: space-around; width: 100%; gap: 0; }
-    .nav-item { flex-direction: column; gap: 4px; padding: 8px; border-radius: 12px; font-size: 10px; }
-    .nav-item span { display: none; } /* Hide text on mobile for clean look */
-    .main-content { padding-bottom: calc(var(--bottom-nav-h) + 20px); }
-    .view-section { padding: 20px 16px; }
-    .ob-grid { grid-template-columns: 1fr; }
-  }
+:root{--a:#7c5cff;--b:#29d6c5;--t1:#f4f7fb;--t2:#b9c3d8;--bad:#ff7b7b;--r:22px;--ez:cubic-bezier(.22,1,.36,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#070b12}
+body{font-family:Manrope,system-ui,sans-serif;color:var(--t1);min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;background:linear-gradient(160deg,#070b12,#0f1b33)}
+body.b-natural{background:linear-gradient(180deg,#0b1d2a,#12331f 70%,#0a1a12)}
+body.b-dynamic{background:radial-gradient(120% 80% at 70% 0%,#1a1550,#070b12 60%)}
+button,input,select,textarea{font:inherit;color:inherit}button{background:none;border:0;cursor:pointer}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:2px solid var(--b);outline-offset:2px}
+/* kiểu: Liquid Glass & Nox */
+.g{position:relative;border-radius:var(--r)}
+body.s-glass .g{background:radial-gradient(120% 90% at 0 0,rgba(255,255,255,.22),transparent 50%),rgba(14,22,40,.38);-webkit-backdrop-filter:blur(20px) saturate(1.7);backdrop-filter:blur(20px) saturate(1.7);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 2px 3px 8px -3px rgba(255,255,255,.55),0 14px 30px -12px rgba(0,0,0,.5)}
+body.s-glass .g::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;background:conic-gradient(from 200deg,rgba(255,255,255,.8),rgba(124,92,255,.3) 25%,rgba(255,255,255,.04) 45%,rgba(41,214,197,.3) 75%,rgba(255,255,255,.8));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+body.s-nox .g,body:not(.s-glass):not(.s-nox) .g{background:#10151e;border:1px solid #232b3a}
+.g>*{position:relative}
+#app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 12px) 14px 40px}
+.bar{display:flex;align-items:center;gap:6px;padding:8px 10px;margin-bottom:18px;position:sticky;top:calc(env(safe-area-inset-top) + 8px);z-index:5}
+.brand{font-weight:800;letter-spacing:.04em;margin-right:auto;padding:0 8px;display:flex;gap:8px;align-items:center}
+.nb{display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:99px;font-weight:600;font-size:14px;color:var(--t2);transition:.25s var(--ez)}
+.nb:hover,.nb.on{color:var(--t1);background:rgba(255,255,255,.12)}
+@media(max-width:640px){.nb span{display:none}.nb{padding:10px}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;font-weight:700;background:rgba(255,255,255,.1);transition:.25s var(--ez)}
+.btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.18)}
+.btn.p{background:linear-gradient(135deg,var(--a),var(--b));color:#06101a}
+.btn[disabled]{opacity:.4;pointer-events:none}.btn.d{color:var(--bad)}
+h1{font-size:clamp(30px,6vw,52px);line-height:1.1;font-weight:800}h2{font-size:20px;margin-bottom:12px}
+.hero{padding:clamp(24px,6vw,56px)}.hero p{color:var(--t2);margin:14px 0 22px;max-width:60ch;line-height:1.6}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));margin-top:14px}
+.card{padding:16px;text-align:left;display:flex;flex-direction:column;gap:6px;transition:.3s var(--ez)}
+.card:hover{transform:translateY(-3px)}.card small{color:var(--t2)}.card b{display:flex;gap:8px;align-items:center}
+.card p{color:var(--t2);font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.in{width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.28);outline:0}
+.in:focus{border-color:var(--b)}textarea.in{min-height:110px;resize:vertical}
+.chip{padding:8px 14px;border-radius:99px;background:rgba(255,255,255,.08);font-weight:600;font-size:13px}.chip.on{background:var(--b);color:#06101a}
+.ov{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(3,6,12,.6);animation:fi .25s}
+.box{width:min(560px,100%);max-height:88dvh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:12px;animation:up .4s var(--ez)}
+.box label{font-size:12px;color:var(--t2);font-weight:700}
+.opt{padding:14px;border-radius:16px;text-align:left;border:1px solid rgba(255,255,255,.16);flex:1;min-width:140px}.opt.on{border-color:var(--b);background:rgba(41,214,197,.14)}
+.opt small{display:block;color:var(--t2);font-weight:400;margin-top:4px}
+pre{white-space:pre-wrap;word-break:break-all;background:rgba(0,0,0,.4);padding:12px;border-radius:12px;max-height:40dvh;overflow:auto;font-size:12.5px}
+.li{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}.li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#loader{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:#070b12;transition:opacity .5s}
+#loader.h{opacity:0;pointer-events:none}.sp{width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:var(--b);animation:rot 1s linear infinite}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);z-index:60;padding:12px 18px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;max-width:90vw}#toast.on{opacity:1}
+.empty{color:var(--t2);padding:26px;text-align:center}
+@keyframes rot{to{transform:rotate(360deg)}}@keyframes fi{from{opacity:0}}@keyframes up{from{opacity:0;transform:translateY(18px) scale(.98)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-code" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></symbol>
+<symbol id="i-apk" viewBox="0 0 24 24"><path d="M7 10h10v7a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zM8 10a4 4 0 0 1 8 0M9 5L8 3.5M15 5l1-1.5"/></symbol>
+<symbol id="i-ios" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+</defs></svg>
 
-<!-- SVG DEFINITIONS FOR ICONS -->
-<svg style="display:none;">
-  <defs>
-    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7c5cff" />
-      <stop offset="100%" stop-color="#29d6c5" />
-    </linearGradient>
-  </defs>
-  <!-- Custom UI SVGs -->
-  <g id="ic-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></g>
-  <g id="ic-grid"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></g>
-  <g id="ic-message"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></g>
-  <g id="ic-settings"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></g>
-  <g id="ic-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></g>
-  <g id="ic-user"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></g>
-  <g id="ic-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></g>
-  <g id="ic-logo"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></g>
-</svg>
-
-<!-- BACKGROUND ENGINE -->
-<canvas id="env-canvas"></canvas>
-
-<!-- ONBOARDING SCREEN (Hidden if setup complete) -->
-<div id="onboarding-screen" style="display:none;">
-  <h1 class="ob-title">Thiết lập Trải nghiệm</h1>
-  <p class="ob-desc">Chọn phong cách và bối cảnh để bắt đầu. Bạn có thể thay đổi sau trong Cài đặt.</p>
-  
-  <div class="ob-grid">
-    <div class="ob-group">
-      <h3>1. Bối cảnh (Context)</h3>
-      <div class="ob-card" data-ctx="natural">
-        <h4>Natural</h4>
-        <p>Phong cảnh thiên nhiên, sương mù, thời tiết động.</p>
-      </div>
-      <div class="ob-card" data-ctx="dynamic">
-        <h4>Dynamic</h4>
-        <p>Không gian kỹ thuật số, gradient ánh sáng trừu tượng.</p>
-      </div>
-    </div>
-    
-    <div class="ob-group">
-      <h3>2. Phong cách (Style)</h3>
-      <div class="ob-card" data-sty="nox">
-        <h4>Nox</h4>
-        <p>Tối giản, màu sắc đặc, viền sắc nét, độ tương phản cao.</p>
-      </div>
-      <div class="ob-card" data-sty="liquid">
-        <h4>Liquid Glass</h4>
-        <p>Kính mờ trong suốt, blur 3D, hiệu ứng ánh sáng nổi.</p>
-      </div>
-    </div>
-  </div>
-  
-  <button id="btn-finish-ob" class="btn btn-primary" style="width: 200px; opacity: 0.5; pointer-events: none;">Vào Website</button>
+<div id="loader"><div class="sp"></div><div id="ltx">Đang tải dữ liệu…</div><button class="btn p" id="retry" hidden>Thử lại</button></div>
+<canvas id="fx"></canvas>
+<div id="app">
+ <header class="bar g">
+  <div class="brand"><svg class="ic"><use href="#i-code"/></svg>SKIBIDI SCRIPT</div>
+  <button class="nb" data-go="home"><svg class="ic"><use href="#i-grid"/></svg><span>Trang chủ</span></button>
+  <button class="nb" data-go="util"><svg class="ic"><use href="#i-code"/></svg><span>Tiện ích</span></button>
+  <button class="nb" data-go="report"><svg class="ic"><use href="#i-flag"/></svg><span>Báo cáo &amp; Góp ý</span></button>
+  <button class="nb" id="devBtn" data-go="dev" hidden><svg class="ic"><use href="#i-shield"/></svg><span>Dev</span></button>
+  <button class="nb" data-go="set"><svg class="ic"><use href="#i-gear"/></svg><span>Cài đặt</span></button>
+ </header>
+ <main id="main"></main>
 </div>
+<div id="toast" class="g"></div>
 
-<!-- MAIN APP -->
-<div id="app-container" style="display:none;">
-  <!-- SIDEBAR NAVIGATION -->
-  <nav class="sidebar">
-    <div class="brand">
-      <svg><use href="#ic-logo"></use></svg>
-      SKIBIDI
-    </div>
-    <ul class="nav-menu">
-      <li><a href="#home" class="nav-item active" data-target="home"><svg><use href="#ic-home"></use></svg><span>Tổng quan</span></a></li>
-      <li><a href="#utils" class="nav-item" data-target="utils"><svg><use href="#ic-grid"></use></svg><span>Tiện ích</span></a></li>
-      <li><a href="#chat" class="nav-item" data-target="chat"><svg><use href="#ic-message"></use></svg><span>Nhắn tin</span></a></li>
-      <li><a href="#settings" class="nav-item" data-target="settings"><svg><use href="#ic-settings"></use></svg><span>Cài đặt</span></a></li>
-    </ul>
-    
-    <div class="user-profile-mini" id="btn-auth-trigger">
-      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" class="avatar" id="nav-avatar" alt="User">
-      <div class="user-info">
-        <h4 id="nav-username">Khách</h4>
-        <p>Chưa đăng nhập</p>
-      </div>
-    </div>
-  </nav>
-
-  <!-- VIEWS CONTAINER -->
-  <main class="main-content">
-    
-    <!-- 1. HOME VIEW -->
-    <section id="view-home" class="view-section active">
-      <div class="g-card" style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px;">
-        <h1 style="font-size: 32px; font-weight: 800;">Chào mừng trở lại.</h1>
-        <p style="color: var(--text-secondary); max-width: 600px; line-height: 1.6;">
-          SKIBIDI SCRIPT Hub v4 — Môi trường lưu trữ Script, APK, iOS an toàn và nhanh chóng. Nâng cấp hoàn toàn mới với giao diện Tùy biến Không gian và Kính lỏng.
-        </p>
-        <div>
-          <button class="btn btn-primary" onclick="window.location.hash='#utils'">Khám phá Tiện ích</button>
-        </div>
-      </div>
-      
-      <div class="grid">
-        <div class="g-card">
-          <h3 style="margin-bottom: 8px;">Thông báo Hệ thống</h3>
-          <p style="color: var(--text-secondary); font-size: 14px;">Hệ thống đang hoạt động ổn định. Đã áp dụng giao diện Argon mới nhất.</p>
-        </div>
-        <div class="g-card">
-          <h3 style="margin-bottom: 8px;">Thống kê Nhanh</h3>
-          <p style="color: var(--text-secondary); font-size: 14px;">Đang tải dữ liệu từ máy chủ...</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. UTILITIES VIEW -->
-    <section id="view-utils" class="view-section">
-      <div class="util-header">
-        <div class="tabs" id="util-tabs">
-          <button class="tab-btn active" data-type="script">Script</button>
-          <button class="tab-btn" data-type="apk">APK</button>
-          <button class="tab-btn" data-type="ios">iOS</button>
-          <button class="tab-btn" data-type="link">Link</button>
-        </div>
-        <div class="search-box">
-          <svg style="width:18px;height:18px;stroke:var(--text-secondary);fill:none;stroke-width:2;"><use href="#ic-search"></use></svg>
-          <input type="text" id="search-utils" placeholder="Tìm kiếm tiện ích...">
-        </div>
-        <button class="btn btn-primary" id="btn-create-post" style="display:none;">+ Đăng bài</button>
-      </div>
-      
-      <div class="grid" id="util-grid">
-        <!-- Rendered by JS -->
-      </div>
-    </section>
-
-    <!-- 3. CHAT VIEW (Placeholder cho Giai đoạn 2) -->
-    <section id="view-chat" class="view-section">
-      <div class="g-card" style="text-align: center; padding: 60px 20px;">
-        <h2>Hệ thống Nhắn tin & Mạng xã hội</h2>
-        <p style="color: var(--text-secondary); margin-top: 10px;">Tính năng gửi tin nhắn Realtime, Upload Tệp, Kết bạn theo UID sẽ có mặt trong Giai đoạn 2.</p>
-      </div>
-    </section>
-
-    <!-- 4. SETTINGS / PROFILE VIEW -->
-    <section id="view-settings" class="view-section">
-      <h2 style="margin-bottom: 24px;">Cài đặt Hệ thống</h2>
-      <div class="grid">
-        <div class="g-card">
-          <h3 style="margin-bottom: 16px;">Giao diện (Theme Engine)</h3>
-          <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-            <button class="btn btn-secondary" onclick="resetOnboarding()">Đổi Bối cảnh / Phong cách</button>
-          </div>
-        </div>
-        <div class="g-card">
-          <h3 style="margin-bottom: 16px;">Tài khoản</h3>
-          <div id="profile-settings-area">
-             <p style="color: var(--text-secondary); font-size: 14px; margin-bottom:16px;">Vui lòng đăng nhập để quản lý UID, Tên hiển thị và Hồ sơ cá nhân.</p>
-             <button class="btn btn-primary" onclick="alert('Đăng nhập Google/Firebase ở Giai đoạn 2')">Đăng nhập</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-</div>
-
-<!-- FIREBASE SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <script>
-/**
- * ---------------------------------------------------------
- * CORE ENGINE & STATE MANAGEMENT (GIAI ĐOẠN 1)
- * ---------------------------------------------------------
- */
-const firebaseConfig = {
-  apiKey: "AIzaSyCwxeePF5Q96k_JfglAz0IAcWyVly17eVs",
-  authDomain: "noxsecret-dd77f.firebaseapp.com",
-  databaseURL: "https://noxsecret-dd77f-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "noxsecret-dd77f",
-  storageBucket: "noxsecret-dd77f.firebasestorage.app",
-  messagingSenderId: "618477082488",
-  appId: "1:618477082488:web:38741735ef243d85b4da8d"
-};
+"use strict";
+const firebaseConfig={apiKey:"AIzaSyCwxeePF5Q96k_JfglAz0IAcWyVly17eVs",authDomain:"noxsecret-dd77f.firebaseapp.com",databaseURL:"https://noxsecret-dd77f-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"noxsecret-dd77f",storageBucket:"noxsecret-dd77f.firebasestorage.app",messagingSenderId:"618477082488",appId:"1:618477082488:web:38741735ef243d85b4da8d",measurementId:"G-BK25G56E0C"};
+const GIS_ID="971947846929-as186hmb8lmv293t79fgf4lrhp215kka.apps.googleusercontent.com";
+const DEV_EMAIL="hminhgalaxy@gmail.com",ND="nox_data",WEEK=6048e5;
+const BASE=[{id:"script",label:"Script",node:"scripts",ic:"code",mode:"code"},{id:"apk",label:"APK",node:"apks",ic:"apk",mode:"url"},{id:"ios",label:"iOS",node:"ios",ic:"ios",mode:"url"},{id:"link",label:"Link",node:"links",ic:"link",mode:"url"}];
+let CATS=BASE.slice(),db=null,auth=null;
+try{firebase.initializeApp(firebaseConfig);db=firebase.database();auth=firebase.auth();auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});}catch(e){}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clean=(s,n)=>String(s||"").replace(/[<>]/g,"").slice(0,n||500);
+const vUrl=u=>/^https?:\/\/[^\s]+$/i.test(String(u||"").trim());
+const IC=n=>'<svg class="ic"><use href="#i-'+n+'"/></svg>';
+const TS=()=>firebase.database.ServerValue.TIMESTAMP;
+const S={user:null,dev:false,data:{},cx:{},page:"home",cat:"script",q:"",pend:[],reps:[],prof:null,pref:null};
+try{S.pref=JSON.parse(localStorage.getItem("ssw_pref")||"null");}catch(e){}
+const catOf=id=>CATS.find(c=>c.id===id);
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2800);}
 
-let db = null, auth = null;
-try {
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  db = firebase.database();
-  auth = firebase.auth();
-} catch (e) { console.error("Firebase Init Error:", e); }
+/* ---------- Giao diện: bối cảnh + phong cách ---------- */
+function applyPref(){const p=S.pref||{};document.body.classList.remove("b-natural","b-dynamic","s-glass","s-nox");
+ if(p.bg)document.body.classList.add("b-"+p.bg);if(p.st)document.body.classList.add("s-"+p.st);startFx();}
+function savePref(p){S.pref=Object.assign({},S.pref,p);try{localStorage.setItem("ssw_pref",JSON.stringify(S.pref));}catch(e){}applyPref();}
 
-const AppState = {
-  prefs: JSON.parse(localStorage.getItem('skibidi_prefs') || 'null'),
-  user: null,
-  currentView: 'home',
-  currentUtilTab: 'script',
-  data: { script: [], apk: [], ios: [], link: [] }
-};
-
-const $ = (sel) => document.querySelector(sel); const $$ = (sel) => document.querySelectorAll(sel);
-
-/**
- * ---------------------------------------------------------
- * THEME ENGINE (Context x Style)
- * ---------------------------------------------------------
- */
-function initThemeEngine() {
-  if (!AppState.prefs || !AppState.prefs.context || !AppState.prefs.style) {
-    showOnboarding();
-  } else {
-    applyTheme(AppState.prefs.context, AppState.prefs.style);
-    bootApp();
-  }
+/* ---------- Three.js (tải khi cần, giải phóng khi đổi) ---------- */
+const FX={r:null,raf:0,sc:null,loading:false};
+function stopFx(){cancelAnimationFrame(FX.raf);FX.raf=0;if(FX.sc){FX.sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();});}
+ if(FX.r){FX.r.dispose();FX.r=null;}FX.sc=null;removeEventListener("pointermove",FX.mv);}
+function startFx(){stopFx();const p=S.pref;if(!p||!p.bg)return;
+ if(!window.THREE){if(FX.loading)return;FX.loading=true;const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+  s.onload=()=>{FX.loading=false;startFx();};s.onerror=()=>{FX.loading=false;};document.head.appendChild(s);return;}
+ const T=THREE,cv=$("#fx"),low=(navigator.deviceMemory&&navigator.deviceMemory<=4)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4)||p.lite;
+ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+ let r;try{r=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:false,powerPreference:"low-power"});}catch(e){return;}
+ r.setPixelRatio(Math.min(devicePixelRatio||1,low?1:1.5));r.setSize(innerWidth,innerHeight,false);FX.r=r;
+ const sc=new T.Scene(),cam=new T.PerspectiveCamera(60,innerWidth/innerHeight,.1,200);cam.position.z=30;FX.sc=sc;
+ const nat=p.bg==="natural",N=low?(nat?160:260):(nat?420:700),pos=new Float32Array(N*3),col=new Float32Array(N*3),vel=new Float32Array(N);
+ const pal=nat?[[.5,.9,.45],[.95,.85,.4],[.3,.75,.55]]:[[.2,.85,.8],[.5,.4,1],[.9,.4,.9]];
+ for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*80;pos[i*3+1]=(Math.random()-.5)*50;pos[i*3+2]=(Math.random()-.5)*60;vel[i]=.2+Math.random();const c=pal[i%3];col.set(c,i*3);}
+ const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(pos,3));g.setAttribute("color",new T.BufferAttribute(col,3));
+ const pts=new T.Points(g,new T.PointsMaterial({size:nat?.55:.32,vertexColors:true,transparent:true,opacity:.8,depthWrite:false,blending:T.AdditiveBlending}));sc.add(pts);
+ let mx=0,my=0;FX.mv=e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;};addEventListener("pointermove",FX.mv,{passive:true});
+ let last=0;const fps=low?30:60;
+ function tick(t){FX.raf=requestAnimationFrame(tick);if(document.hidden||t-last<1000/fps-1)return;last=t;const a=g.attributes.position.array;
+  for(let i=0;i<N;i++){const k=i*3;if(nat){a[k+1]-=vel[i]*.02;a[k]+=Math.sin(t*.0004+i)*.012;if(a[k+1]<-26)a[k+1]=26;}else{a[k+2]+=vel[i]*.12;if(a[k+2]>30)a[k+2]=-30;}}
+  g.attributes.position.needsUpdate=true;cam.position.x+=(mx*8-cam.position.x)*.03;cam.position.y+=(-my*5-cam.position.y)*.03;cam.lookAt(0,0,0);r.render(sc,cam);}
+ reduce?r.render(sc,cam):FX.raf=requestAnimationFrame(tick);
 }
+addEventListener("resize",()=>{if(FX.r){FX.r.setSize(innerWidth,innerHeight,false);}});
 
-function applyTheme(ctx, sty) {
-  document.body.className = '';
-  document.body.classList.add(`context-${ctx}`);
-  document.body.classList.add(`style-${sty}`);
-  // In Phase 2: Canvas Environmental logic (Rain/Snow/Particles) is triggered here based on `ctx`.
-}
+/* ---------- Hộp thoại ---------- */
+function modal(html,mount,locked){const o=document.createElement("div");o.className="ov";o.innerHTML='<div class="box g" role="dialog" aria-modal="true">'+html+'</div>';
+ const close=()=>o.remove();if(!locked)o.addEventListener("pointerdown",e=>{if(e.target===o)close();});document.body.appendChild(o);mount&&mount(o.firstChild,close);return close;}
 
-/* Onboarding Flow */
-let tempCtx = null, tempSty = null;
-$$('.ob-card').forEach(card => {
-  card.addEventListener('click', (e) => {
-    const target = e.currentTarget;
-    if (target.dataset.ctx) {
-      $$('[data-ctx]').forEach(c => c.classList.remove('selected')); target.classList.add('selected'); tempCtx = target.dataset.ctx; } if (target.dataset.sty) { $$
-('[data-sty]').forEach(c => c.classList.remove('selected'));
-      target.classList.add('selected');
-      tempSty = target.dataset.sty;
-    }
-    
-    if (tempCtx && tempSty) {
-      $('#btn-finish-ob').style.opacity = '1';
-      $('#btn-finish-ob').style.pointerEvents = 'auto';
-    }
-  });
-});
+/* ---------- Thiết lập lần đầu (bắt buộc) ---------- */
+function setup(){let bg=null,st=null;
+ modal('<h2>Thiết lập giao diện</h2><label>BỐI CẢNH</label><div class="row"><button class="opt" data-k="bg" data-v="natural"><b>Natural</b><small>Thiên nhiên, hạt phấn trôi nhẹ</small></button><button class="opt" data-k="bg" data-v="dynamic"><b>Dynamic</b><small>Không gian kỹ thuật số</small></button></div><label>PHONG CÁCH</label><div class="row"><button class="opt" data-k="st" data-v="nox"><b>Nox</b><small>Tối giản, không kính mờ</small></button><button class="opt" data-k="st" data-v="glass"><b>Liquid Glass</b><small>Kính trong, blur, phản chiếu</small></button></div><button class="btn p" id="ok" disabled>Bắt đầu</button>',(b,close)=>{
+  b.addEventListener("click",e=>{const o=e.target.closest(".opt");if(o){b.querySelectorAll('[data-k="'+o.dataset.k+'"]').forEach(x=>x.classList.toggle("on",x===o));
+    if(o.dataset.k==="bg")bg=o.dataset.v;else st=o.dataset.v;b.querySelector("#ok").disabled=!(bg&&st);document.body.classList.remove("s-glass","s-nox");if(st)document.body.classList.add("s-"+st);}
+   if(e.target.id==="ok"){savePref({bg,st});close();render();}});},true);}
 
-$('#btn-finish-ob').addEventListener('click', () => {
-  AppState.prefs = { context: tempCtx, style: tempSty };
-  localStorage.setItem('skibidi_prefs', JSON.stringify(AppState.prefs));
-  applyTheme(tempCtx, tempSty);
-  $('#onboarding-screen').style.display = 'none';
-  bootApp();
-});
+/* ---------- Đăng nhập ---------- */
+function applyUser(u){S.user=u?{uid:u.uid,email:u.email,name:u.displayName||u.email,photo:u.photoURL||"",ver:u.emailVerified}:null;
+ S.dev=!!(S.user&&S.user.ver&&S.user.email.toLowerCase()===DEV_EMAIL);$("#devBtn").hidden=!S.dev;
+ if(S.user&&db){db.ref("nox_profiles/"+S.user.uid).once("value").then(s=>{S.prof=s.val();if(S.page==="set")render();}).catch(()=>{});}
+ if(!S.dev&&S.page==="dev")go("home");else render();}
+function loginUI(){modal('<h2>Đăng nhập</h2><div id="gBtn"></div><label>HOẶC EMAIL</label><input class="in" id="em" type="email" placeholder="Email"><input class="in" id="pw" type="password" placeholder="Mật khẩu"><div id="er" style="color:var(--bad);font-size:13px"></div><button class="btn p" id="go">Đăng nhập</button>',(b,close)=>{
+  const init=n=>{if(window.google&&google.accounts){google.accounts.id.initialize({client_id:GIS_ID,callback:r=>auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(r.credential)).then(()=>{close();toast("Đã đăng nhập.");}).catch(()=>toast("Đăng nhập Google thất bại."))});
+    google.accounts.id.renderButton(b.querySelector("#gBtn"),{theme:"filled_black",shape:"pill"});}else if(n>0)setTimeout(()=>init(n-1),400);};init(15);
+  b.querySelector("#go").onclick=()=>auth.signInWithEmailAndPassword(b.querySelector("#em").value.trim(),b.querySelector("#pw").value).then(()=>{close();toast("Đã đăng nhập.");}).catch(()=>{b.querySelector("#er").textContent="Sai email hoặc mật khẩu.";});});}
 
-function showOnboarding() {
-  $('#app-container').style.display = 'none';
-  $('#onboarding-screen').style.display = 'flex'; }  function resetOnboarding() { tempCtx = null; tempSty = null; $$('.ob-card').forEach(c => c.classList.remove('selected'));$('#btn-finish-ob').style.opacity = '0.5';
-  $('#btn-finish-ob').style.pointerEvents = 'none';
-  showOnboarding();
-}
+/* ---------- Điều hướng ---------- */
+function go(p){S.page=p;document.querySelectorAll(".nb").forEach(b=>b.classList.toggle("on",b.dataset.go===p));render();scrollTo({top:0});}
+document.querySelector(".bar").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b)go(b.dataset.go);});
+function render(){if(!S.pref||!S.pref.bg)return;const m=$("#main");({home:rHome,util:rUtil,report:rReport,set:rSet,dev:rDev}[S.page]||rHome)(m);}
 
-/**
- * ---------------------------------------------------------
- * ROUTER & NAVIGATION
- * ---------------------------------------------------------
- */
-function handleRoute() {
-  const hash = window.location.hash.replace('#', '') || 'home';
-  
-  // Update Nav Active State
-  $$('.nav-item').forEach(el => { el.classList.toggle('active', el.dataset.target === hash); });    // Switch View $$
-('.view-section').forEach(view => {
-    view.classList.remove('active');
-  });
-  const targetView = $(`#view-${hash}`);
-  if (targetView) targetView.classList.add('active');
-}
+function rHome(m){m.innerHTML='<section class="hero g"><h1>SKIBIDI SCRIPT</h1><p>Nơi tập hợp Script, APK, iOS và Link hữu ích do cộng đồng đóng góp và được quản trị viên kiểm duyệt trước khi công khai.</p><div class="row"><button class="btn p" data-go2="util">'+IC("code")+'Mở Tiện ích</button>'+(S.user?"":'<button class="btn" data-go2="login">Đăng nhập</button>')+'</div></section>';
+ m.onclick=e=>{const b=e.target.closest("[data-go2]");if(!b)return;b.dataset.go2==="login"?loginUI():go(b.dataset.go2);};}
 
-window.addEventListener('hashchange', handleRoute);
+/* ---------- Tiện ích ---------- */
+function rUtil(m){const items=(S.data[S.cat]||[]).filter(x=>!S.q||(x.name+" "+x.desc).toLowerCase().includes(S.q));
+ m.innerHTML='<div class="row"><div style="flex:1;min-width:200px;position:relative"><input class="in" id="q" placeholder="Tìm kiếm…" value="'+esc(S.q)+'"></div><button class="btn p" id="add">'+IC("plus")+'Đăng bài</button></div><div class="row" style="margin-top:12px">'+CATS.map(c=>'<button class="chip '+(c.id===S.cat?"on":"")+'" data-c="'+esc(c.id)+'">'+esc(c.label)+' ('+(S.data[c.id]||[]).length+')</button>').join("")+'</div>'
+ +(items.length?'<div class="grid">'+items.map(x=>'<button class="card g" data-k="'+esc(x.key)+'"><b>'+IC(catOf(S.cat).ic)+esc(x.name)+'</b><p>'+esc(x.desc)+'</p><small>'+new Date(x.ts||0).toLocaleDateString("vi-VN")+'</small></button>').join("")+'</div>':'<div class="empty g">Chưa có mục nào.</div>');
+ const q=$("#q");q.oninput=()=>{S.q=q.value.toLowerCase();const p=q.selectionStart;rUtil(m);const n=$("#q");n.focus();n.setSelectionRange(p,p);};
+ m.onclick=e=>{const c=e.target.closest("[data-c]"),k=e.target.closest("[data-k]");if(c){S.cat=c.dataset.c;rUtil(m);}else if(k)detail(S.cat,k.dataset.k);else if(e.target.closest("#add"))S.user?submitUI():loginUI();};}
+function detail(cid,key){const c=catOf(cid),x=(S.data[cid]||[]).find(i=>i.key===key);if(!c||!x)return;const link=location.origin+location.pathname+"#p/"+cid+"/"+key;
+ modal('<h2>'+esc(x.name)+'</h2><small style="color:var(--t2)">'+esc(c.label)+'</small><p style="color:var(--t2);line-height:1.6">'+esc(x.desc)+'</p>'+(x.code?'<pre id="cd"></pre>':'')+'<div class="row">'+(x.code?'<button class="btn p" id="cp">'+IC("copy")+'Sao chép</button>':(vUrl(x.url)?'<a class="btn p" href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">'+IC("link")+'Mở liên kết</a>':""))+'<button class="btn" id="sh">'+IC("share")+'Chia sẻ</button></div>',b=>{
+  if(x.code)b.querySelector("#cd").textContent=x.code;
+  const cp=b.querySelector("#cp");if(cp)cp.onclick=()=>navigator.clipboard.writeText(x.code).then(()=>toast("Đã sao chép."),()=>toast("Không sao chép được."));
+  b.querySelector("#sh").onclick=()=>navigator.clipboard.writeText(link).then(()=>toast("Đã chép liên kết."),()=>toast(link));});}
+function submitUI(){modal('<h2>Đăng bài (chờ Dev duyệt)</h2><label>DANH MỤC</label><select class="in" id="sc">'+CATS.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.label)+'</option>').join("")+'</select><input class="in" id="sn" placeholder="Tên" maxlength="80"><textarea class="in" id="sd" placeholder="Mô tả" maxlength="500"></textarea><input class="in" id="su" placeholder="https://…"><textarea class="in" id="sx" placeholder="Mã script"></textarea><button class="btn p" id="sb">Gửi duyệt</button>',(b,close)=>{
+  const sync=()=>{const c=catOf(b.querySelector("#sc").value);b.querySelector("#su").style.display=c.mode==="code"?"none":"";b.querySelector("#sx").style.display=c.mode==="code"?"":"none";};b.querySelector("#sc").onchange=sync;sync();
+  b.querySelector("#sb").onclick=()=>{const c=catOf(b.querySelector("#sc").value),n=clean(b.querySelector("#sn").value,80).trim();if(!n)return toast("Nhập tên.");
+   const p={cat:c.id,name:n,desc:clean(b.querySelector("#sd").value),by:clean(S.user.name,60),createdAt:TS()};
+   if(c.mode==="code"){p.code=b.querySelector("#sx").value.slice(0,20000);if(!p.code.trim())return toast("Nhập mã.");}else{const u=b.querySelector("#su").value.trim();if(!vUrl(u))return toast("Link phải bắt đầu bằng http(s)://");p.url=u;}
+   db.ref("nox_pending/"+S.user.uid).push(p).then(()=>{close();toast("Đã gửi, chờ Dev duyệt.");}).catch(()=>toast("Gửi thất bại (kiểm tra quyền)."));};});}
 
-/**
- * ---------------------------------------------------------
- * DATA FETCHING & RENDER (Utilities)
- * ---------------------------------------------------------
- */
-function fetchUtilities() {
-  if (!db) return;
-  const nodes = ['scripts', 'apks', 'ios', 'links'];
-  const keys = ['script', 'apk', 'ios', 'link'];
-  
-  nodes.forEach((node, idx) => {
-    db.ref(`nox_data/${node}`).on('value', snap => {
-      const val = snap.val() || {};
-      AppState.data[keys[idx]] = Object.keys(val).map(k => ({
-        id: k,
-        ...val[k]
-      })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      
-      if (AppState.currentUtilTab === keys[idx]) renderUtilityGrid();
-    });
-  });
-}
+/* ---------- Báo cáo & góp ý ---------- */
+function rReport(m){if(!S.user){m.innerHTML='<div class="empty g">Đăng nhập để gửi báo cáo.<br><br><button class="btn p" id="lg">Đăng nhập</button></div>';$("#lg").onclick=loginUI;return;}
+ m.innerHTML='<section class="g" style="padding:20px;display:flex;flex-direction:column;gap:12px"><h2>Gửi báo cáo / góp ý</h2><textarea class="in" id="rt" maxlength="1500" placeholder="Nội dung…"></textarea><button class="btn p" id="rs">Gửi</button></section><section class="g" style="padding:20px;margin-top:14px"><h2>Đã gửi</h2><div id="rl"></div></section>';
+ $("#rs").onclick=()=>{const t=clean($("#rt").value,1500).trim();if(!t)return toast("Nhập nội dung.");db.ref("nox_reports/"+S.user.uid).push({text:t,email:S.user.email,read:false,createdAt:TS()}).then(()=>{$("#rt").value="";toast("Đã gửi.");}).catch(()=>toast("Gửi thất bại."));};
+ db.ref("nox_reports/"+S.user.uid).limitToLast(20).once("value").then(s=>{const v=s.val()||{};$("#rl")&&($("#rl").innerHTML=Object.keys(v).reverse().map(k=>'<div class="li"><span>'+esc(v[k].text)+(v[k].reply?'<br><small style="color:var(--b)">Phản hồi: '+esc(v[k].reply)+'</small>':"")+'</span><small>'+(v[k].read?"Đã đọc":"Chưa đọc")+'</small></div>').join("")||'<div class="empty">Chưa có.</div>');}).catch(()=>{});}
 
-function renderUtilityGrid() {
-  const grid = $('#util-grid');
-  const items = AppState.data[AppState.currentUtilTab];
-  const query = ($('#search-utils').value || '').toLowerCase();
-  
-  const filtered = items.filter(item => 
-    (item.name || '').toLowerCase().includes(query) || 
-    (item.desc || '').toLowerCase().includes(query)
-  );
+/* ---------- Cài đặt ---------- */
+function rSet(m){const p=S.pref||{},u=S.user;
+ m.innerHTML='<section class="g" style="padding:20px;display:flex;flex-direction:column;gap:12px"><h2>Hồ sơ</h2>'+(u?'<div class="li"><span>'+esc((S.prof&&S.prof.displayName)||u.name)+'<br><small style="color:var(--t2)">'+esc(u.email)+'</small></span></div><input class="in" id="dn" maxlength="24" placeholder="Tên hiển thị mới"><button class="btn" id="sn">Đổi tên (7 ngày/lần)</button><button class="btn d" id="so">Đăng xuất</button>':'<button class="btn p" id="lg">Đăng nhập</button>')+'</section>'
+ +'<section class="g" style="padding:20px;margin-top:14px;display:flex;flex-direction:column;gap:12px"><h2>Giao diện</h2><label>Bối cảnh</label><div class="row">'+["natural","dynamic"].map(v=>'<button class="chip '+(p.bg===v?"on":"")+'" data-p="bg" data-v="'+v+'">'+(v==="natural"?"Natural":"Dynamic")+'</button>').join("")+'</div><label>Phong cách</label><div class="row">'+["nox","glass"].map(v=>'<button class="chip '+(p.st===v?"on":"")+'" data-p="st" data-v="'+v+'">'+(v==="nox"?"Nox":"Liquid Glass")+'</button>').join("")+'</div><label>Hiệu ứng</label><div class="row"><button class="chip '+(p.lite?"on":"")+'" data-p="lite" data-v="1">Tiết kiệm (máy yếu)</button><button class="chip '+(!p.lite?"on":"")+'" data-p="lite" data-v="">Đầy đủ</button></div></section>';
+ m.onclick=e=>{const c=e.target.closest("[data-p]");if(c){savePref({[c.dataset.p]:c.dataset.p==="lite"?!!c.dataset.v:c.dataset.v});rSet(m);return;}
+  if(e.target.id==="lg")loginUI();if(e.target.id==="so")auth.signOut().then(()=>toast("Đã đăng xuất."));
+  if(e.target.id==="sn"){const n=clean($("#dn").value,24).trim(),last=(S.prof&&S.prof.nameChangedAt)||0;if(n.length<2)return toast("Tên quá ngắn.");
+   if(Date.now()-last<WEEK)return toast("Chỉ đổi tên mỗi 7 ngày.");
+   db.ref("nox_profiles/"+u.uid).set({displayName:n,nameChangedAt:TS()}).then(()=>db.ref("nox_profiles/"+u.uid).once("value")).then(s=>{S.prof=s.val();toast("Đã đổi tên.");rSet(m);}).catch(()=>toast("Không đổi được (chưa đủ 7 ngày hoặc thiếu quyền)."));}};}
 
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="g-card" style="grid-column: 1/-1; text-align:center; color: var(--text-secondary);">Không có dữ liệu hoặc không tìm thấy kết quả.</div>`;
-    return;
-  }
+/* ---------- Dev Panel (quyền thật nằm ở database.rules.json) ---------- */
+let devTab="pend";
+function rDev(m){if(!S.dev){go("home");return;}
+ const T=[["pend","Chờ duyệt ("+S.pend.length+")"],["post","Bài đăng"],["rep","Báo cáo ("+S.reps.filter(r=>!r.read).length+")"],["cat","Danh mục"]];
+ let h='<div class="row">'+T.map(t=>'<button class="chip '+(devTab===t[0]?"on":"")+'" data-t="'+t[0]+'">'+t[1]+'</button>').join("")+'</div><section class="g" style="padding:18px;margin-top:12px">';
+ if(devTab==="pend")h+=S.pend.map(x=>'<div class="li"><span><b>'+esc(x.name)+'</b> · '+esc((catOf(x.cat)||{label:x.cat}).label)+'<br><small style="color:var(--t2)">'+esc(x.by)+'</small></span><button class="btn p" data-ap="'+esc(x.uid+"/"+x.key)+'">'+IC("plus")+'Duyệt</button><button class="btn d" data-rj="'+esc(x.uid+"/"+x.key)+'">'+IC("x")+'</button></div>').join("")||'<div class="empty">Không có bài chờ.</div>';
+ if(devTab==="post")h+=CATS.map(c=>(S.data[c.id]||[]).map(x=>'<div class="li"><span>'+esc(x.name)+' <small>· '+esc(c.label)+'</small></span><button class="btn d" data-dl="'+esc(c.id+"/"+x.key)+'">Xóa</button></div>').join("")).join("")||'<div class="empty">Trống.</div>';
+ if(devTab==="rep")h+=S.reps.map(r=>'<div class="li"><span>'+esc(r.text)+'<br><small style="color:var(--t2)">'+esc(r.email)+(r.read?" · đã đọc":"")+(r.reply?" · đã phản hồi":"")+'</small></span><button class="btn" data-rr="'+esc(r.uid+"/"+r.key)+'">Phản hồi</button></div>').join("")||'<div class="empty">Chưa có.</div>';
+ if(devTab==="cat")h+='<div class="row"><input class="in" id="cn" placeholder="Tên danh mục" maxlength="24" style="flex:1"><select class="in" id="cm" style="width:auto"><option value="url">Link</option><option value="code">Code</option></select><button class="btn p" id="ca">Thêm</button></div>'+Object.keys(S.cx).map(k=>'<div class="li"><span>'+esc(S.cx[k].label)+'</span><button class="btn d" data-cd="'+esc(k)+'">Xóa</button></div>').join("");
+ m.innerHTML=h+'</section>';
+ m.onclick=e=>{const t=e.target.closest("[data-t]");if(t){devTab=t.dataset.t;return rDev(m);}
+  const q=a=>e.target.closest("["+a+"]"),ap=q("data-ap"),rj=q("data-rj"),dl=q("data-dl"),rr=q("data-rr"),cd=q("data-cd");
+  if(ap){const [uid,k]=ap.dataset.ap.split("/"),x=S.pend.find(i=>i.uid===uid&&i.key===k),c=x&&catOf(x.cat);if(!c)return toast("Danh mục không tồn tại.");
+   const nk=db.ref(ND+"/"+c.node).push().key,it={name:x.name,desc:x.desc||"",by:x.by||"",ownerUid:uid,createdAt:TS()};if(x.code)it.code=x.code;if(x.url)it.url=x.url;
+   db.ref().update({[ND+"/"+c.node+"/"+nk]:it,["nox_pending/"+uid+"/"+k]:null}).then(()=>toast("Đã duyệt.")).catch(()=>toast("Thất bại (kiểm tra rules)."));}
+  if(rj&&confirm("Từ chối bài này?"))db.ref("nox_pending/"+rj.dataset.rj).remove().catch(()=>toast("Thất bại."));
+  if(dl&&confirm("Xóa bài?")){const [ci,k]=dl.dataset.dl.split("/");db.ref(ND+"/"+catOf(ci).node+"/"+k).remove().catch(()=>toast("Thất bại."));}
+  if(rr){const [uid,k]=rr.dataset.rr.split("/"),t=prompt("Nội dung phản hồi:");if(t)db.ref("nox_reports/"+uid+"/"+k).update({reply:clean(t,500),read:true}).then(()=>toast("Đã phản hồi.")).catch(()=>toast("Thất bại."));}
+  if(e.target.closest("#ca")){const n=clean($("#cn").value,24).trim();if(n)db.ref("nox_cats").push({label:n,mode:$("#cm").value,createdAt:TS()}).catch(()=>toast("Thất bại."));}
+  if(cd&&confirm("Xóa danh mục và toàn bộ bài trong đó?")){const k=cd.dataset.cd;db.ref().update({["nox_cats/"+k]:null,[ND+"/cx_"+k]:null}).catch(()=>toast("Thất bại."));}};}
 
-  grid.innerHTML = filtered.map(item => `
-    <div class="g-card" style="display:flex; flex-direction:column; gap:8px;">
-      <h3 style="font-size: 16px; font-weight: 700;">${escapeHTML(item.name || '(Không tên)')}</h3>
-      <p style="color: var(--text-secondary); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(item.desc || '')}</p>
-      <div style="margin-top: auto; padding-top: 12px; display: flex; gap: 8px;">
-        <button class="btn btn-secondary" style="flex:1; padding: 8px; font-size: 12px;">Chi tiết</button>
-        ${item.url ? `<a href="${escapeHTML(item.url)}" target="_blank" class="btn btn-primary" style="padding: 8px; font-size: 12px;">Mở Link</a>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-// Escaper for Security
-function escapeHTML(str) {
-  return String(str).replace(/[&<>"']/g, m => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  })[m]);
-}
-
-// Util Tabs Event
-$$('.tab-btn').forEach(btn => { btn.addEventListener('click', (e) => { $$
-('.tab-btn').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    AppState.currentUtilTab = e.target.dataset.type;
-    renderUtilityGrid();
-  });
-});
-
-$('#search-utils').addEventListener('input', () => renderUtilityGrid());
-
-/**
- * ---------------------------------------------------------
- * INIT APP
- * ---------------------------------------------------------
- */
-function bootApp() {
-  $('#app-container').style.display = 'flex';
-  handleRoute();
-  fetchUtilities();
-}
-
-// Start
-initThemeEngine();
-
+/* ---------- Dữ liệu & loading có lỗi/thử lại ---------- */
+const nI=(k,o)=>{o=o&&typeof o==="object"?o:{name:String(o||"")};return{key:k,name:o.name||o.title||"(không tên)",desc:o.desc||o.description||o.note||"",url:o.url||o.link||o.href||"",code:o.code||o.script||"",ts:+(o.updatedAt||o.createdAt||0)||0};};
+const listened={};
+function listenCat(c){if(listened[c.id])return;listened[c.id]=1;db.ref(ND+"/"+c.node).on("value",s=>{const v=s.val()||{};S.data[c.id]=Object.keys(v).map(k=>nI(k,v[k])).sort((a,b)=>b.ts-a.ts);if(S.page==="util"||S.page==="dev")render();},()=>{S.data[c.id]=S.data[c.id]||[];});}
+function listenDev(){if(!S.dev||listenDev.on)return;listenDev.on=1;
+ db.ref("nox_pending").on("value",s=>{const v=s.val()||{};S.pend=[];Object.keys(v).forEach(u=>Object.keys(v[u]||{}).forEach(k=>S.pend.push(Object.assign({uid:u,key:k},v[u][k]))));if(S.page==="dev")render();},()=>{});
+ db.ref("nox_reports").on("value",s=>{const v=s.val()||{};S.reps=[];Object.keys(v).forEach(u=>Object.keys(v[u]||{}).forEach(k=>S.reps.push(Object.assign({uid:u,key:k},v[u][k]))));if(S.page==="dev")render();},()=>{});}
+function openHash(){const m=location.hash.match(/^#p\/([^/]+)\/([^/]+)$/);if(m){S.cat=m[1];go("util");detail(m[1],m[2]);}}
+function boot(){$("#retry").hidden=true;$("#ltx").textContent="Đang tải dữ liệu…";$("#loader").classList.remove("h");
+ if(!db){$("#ltx").textContent="Không kết nối được Firebase.";$("#retry").hidden=false;return;}
+ const fail=setTimeout(()=>{$("#ltx").textContent="Tải quá lâu hoặc mất kết nối.";$("#retry").hidden=false;},9000);
+ db.ref("nox_cats").once("value").then(s=>{S.cx=s.val()||{};CATS=BASE.concat(Object.keys(S.cx).map(k=>({id:"c_"+k,label:clean(S.cx[k].label,24)||"Mục",node:"cx_"+k,ic:S.cx[k].mode==="code"?"code":"link",mode:S.cx[k].mode==="code"?"code":"url"})));
+  return Promise.all(CATS.map(c=>db.ref(ND+"/"+c.node).once("value")));}).then(()=>{clearTimeout(fail);CATS.forEach(listenCat);
+  db.ref("nox_cats").on("value",s=>{S.cx=s.val()||{};CATS=BASE.concat(Object.keys(S.cx).map(k=>({id:"c_"+k,label:clean(S.cx[k].label,24)||"Mục",node:"cx_"+k,ic:S.cx[k].mode==="code"?"code":"link",mode:S.cx[k].mode==="code"?"code":"url"})));CATS.forEach(listenCat);if(!catOf(S.cat))S.cat="script";if(S.page==="util"||S.page==="dev")render();},()=>{});
+  $("#loader").classList.add("h");render();openHash();}).catch(()=>{clearTimeout(fail);$("#ltx").textContent="Không tải được dữ liệu.";$("#retry").hidden=false;});}
+$("#retry").onclick=boot;
+if(auth)auth.onAuthStateChanged(u=>{applyUser(u);listenDev();});
+document.addEventListener("visibilitychange",()=>{});
+applyPref();if(!S.pref||!S.pref.bg||!S.pref.st)setup();
+go("home");boot();
 </script>
 </body>
 </html>
