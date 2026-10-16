@@ -1,6 +1,8 @@
-/* ===== Giao diện trang đăng nhập / đăng ký — nối SkibidiFB (email) và SkibidiGoogle (Google) với nhau ở ĐÚNG MỘT chỗ này ===== */
+/* ===== Giao diện trang đăng nhập / đăng ký — CHỈ email + mật khẩu (Firebase). Google nằm riêng ở google.html ===== */
 (function () {
   "use strict";
+  /* Google quay về địa chỉ login.html (đã khai báo trong Google Cloud) -> chuyển nguyên sang trang Google riêng, trang này KHÔNG xử lý Google */
+  if (/(^|&)(id_token|error)=/.test(location.hash.replace(/^#/, ""))) { location.replace("google.html" + location.hash); return; }
   const $ = id => document.getElementById(id);
   const REG = document.body.dataset.page === "register";
   let lang = "en"; try { lang = localStorage.getItem("lang") === "vi" ? "vi" : "en"; } catch (e) {}
@@ -11,7 +13,6 @@
   D("login.title", "Đăng nhập", "Log in"); D("login.sub", "Vào tài khoản để đăng bài, thả tim và trò chuyện trong World.", "Log in to post, like and chat in World.");
   D("reg.title", "Tạo tài khoản", "Create account"); D("reg.sub", "Miễn phí. Mỗi tên hiển thị là duy nhất.", "Free. Every display name is unique.");
   D("login.go", "Đăng nhập", "Log in"); D("reg.go", "Đăng ký", "Sign up"); D("register", "Đăng ký", "Sign up"); D("login", "Đăng nhập", "Log in");
-  D("g.btn", "Tiếp tục với Google", "Continue with Google"); D("or", "hoặc dùng Gmail", "or use Gmail");
   D("no.acc", "Chưa có tài khoản?", "No account yet?"); D("has.acc", "Đã có tài khoản?", "Already have an account?"); D("back", "Về trang chủ", "Back to home");
   D("wait", "Đang xử lý…", "Working…"); D("pw", "Mật khẩu", "Password"); D("a.name", "Tên hiển thị (không có khoảng trắng)", "Display name (no spaces)");
   D("a.name.ph", "vd: skibidi_fan", "e.g. skibidi_fan"); D("a.pw2", "Nhập lại mật khẩu", "Repeat password");
@@ -44,17 +45,11 @@
   D("e.off", "Cách đăng nhập này chưa bật: Firebase Console → Authentication → Sign-in method → bật Email/Password (và Google nếu dùng Google).", "This sign-in method is off: Firebase Console → Authentication → Sign-in method → enable Email/Password (and Google).");
   D("e.domain", "Tên miền này chưa được phép: Firebase Console → Authentication → Settings → Authorized domains.", "This domain isn't authorized: Firebase Console → Authentication → Settings → Authorized domains.");
   D("e.disabled", "Tài khoản này đã bị khóa.", "This account is disabled."); D("e.weak", "Mật khẩu quá yếu.", "Password is too weak.");
-  D("e.popup", "Cửa sổ Google bị đóng hoặc bị chặn. Cho phép popup rồi thử lại.", "The Google window was closed or blocked. Allow popups and try again.");
-  D("e.client", "Google đã xác nhận bạn, nhưng Firebase chưa chấp nhận Client ID này. Thêm nó vào Firebase Console → Authentication → Sign-in method → Google → Safelist client IDs from external projects, hoặc dùng nút bên dưới.", "Google verified you, but Firebase doesn't accept this Client ID yet. Add it under Firebase Console → Authentication → Sign-in method → Google → Safelist client IDs from external projects, or use the button below.");
   D("e.other", "Chưa thực hiện được. Hãy thử lại.", "That didn't work. Please try again.");
-  D("g.verify", "Đang xác thực với Google…", "Verifying with Google…"); D("g.cancel", "Bạn đã hủy đăng nhập Google.", "Google sign-in was cancelled.");
-  D("g.bad", "Phiên Google không hợp lệ hoặc đã hết hạn. Hãy thử lại.", "The Google session is invalid or expired. Please try again.");
-  D("g.noclient", "Chưa cấu hình Google Client ID (js/google-config.js).", "Google Client ID is missing (js/google-config.js).");
   D("pn.title", "Một tài khoản cho cả cộng đồng.", "One account for the whole community.");
   D("pn.1", "Script, APK, iOS và link do mọi người chia sẻ", "Scripts, APKs, iOS files and links shared by everyone");
   D("pn.2", "World: đăng bài và trò chuyện trong nhóm chat", "World: post and talk in group chats");
   D("pn.3", "Thả tim, chấm sao và lưu những bài bạn thích", "Like, rate and keep the posts you love");
-  D("g.alt", "Đăng nhập Google qua Firebase (cửa sổ phụ)", "Sign in with Google via Firebase (small window)");
 
   /* ---- tiện ích ---- */
   const msg = (id, s, c) => { const e = $(id); if (e) { e.textContent = s || ""; e.className = "fm" + (c ? " " + c : "") + (id.endsWith("Msg") && /^(a|g)Msg$/.test(id) ? " al" : ""); } };
@@ -68,7 +63,7 @@
   }
   let NEXT = safeNext(new URLSearchParams(location.search).get("next")), working = false, fails = 0, lockUntil = 0, nTimer, nSeq = 0, nameTaken = false;
   const done = () => location.replace(NEXT);
-  const busy = on => { working = on; ["go", "gBtn", "gAltBtn"].forEach(i => { if ($(i)) $(i).disabled = on; }); if ($("go")) $("go").textContent = on ? t("wait") : t(REG ? "reg.go" : "login.go"); };
+  const busy = on => { working = on; ["go"].forEach(i => { if ($(i)) $(i).disabled = on; }); if ($("go")) $("go").textContent = on ? t("wait") : t(REG ? "reg.go" : "login.go"); };
 
   /* ---- kiểm tra dữ liệu (giữ nguyên luật của trang chính) ---- */
   function vName(v) { if (!v) return t("v.name.empty"); if (/\s/.test(v)) return t("v.name.space"); if (v.length < 3) return t("v.name.short"); if (v.length > 24) return t("v.name.long"); if (!/^[\p{L}\p{N}_]+$/u.test(v)) return t("v.name.chars"); return ""; }
@@ -135,19 +130,6 @@
     }
   }
 
-  /* ---- Google: Google lấy id_token (auth-google.js) -> Firebase đổi lấy phiên (auth-firebase.js) ---- */
-  function showAlt() { $("gAlt").hidden = false; }
-  async function googleReturned(r) {
-    if (r.error) return msg("gMsg", r.error === "access_denied" ? t("g.cancel") : t("g.bad"), "bad");
-    NEXT = safeNext(r.next); busy(true); msg("gMsg", t("g.verify"));
-    try { await SkibidiFB.googleIdToken(r.idToken); done(); }
-    catch (e) { busy(false); msg("gMsg", fbText(e), "bad"); if (e.code === "client" || e.code === "off") showAlt(); }
-  }
-  async function googleViaFirebase() {
-    busy(true); msg("gMsg", "");
-    try { await SkibidiFB.googlePopup(); done(); } catch (e) { busy(false); msg("gMsg", fbText(e), "bad"); }
-  }
-
   /* ---- khởi động ---- */
   function init() {
     document.querySelectorAll("[data-i]").forEach(e => { e.textContent = t(e.dataset.i); });
@@ -166,11 +148,7 @@
       const inp = b.parentElement.querySelector("input"); b.innerHTML = EYE.on; b.setAttribute("aria-label", t("a.showpw"));
       b.addEventListener("click", () => { const s = inp.type === "password"; inp.type = s ? "text" : "password"; b.innerHTML = s ? EYE.off : EYE.on; b.setAttribute("aria-label", t(s ? "a.hidepw" : "a.showpw")); });
     });
-    $("gBtn").addEventListener("click", () => { try { msg("gMsg", ""); SkibidiGoogle.start(NEXT); } catch (e) { msg("gMsg", t("g.noclient"), "bad"); } });
-    $("gAltBtn").addEventListener("click", googleViaFirebase);
-
-    const r = SkibidiGoogle.readReturn();      /* quay về từ Google? */
-    if (r) return googleReturned(r);
+    $("gLink").href = "google.html" + (NEXT !== "./" ? "?next=" + encodeURIComponent(NEXT) : "");
     /* đã đăng nhập sẵn => vào thẳng trang chính (không làm gián đoạn lúc đang đăng ký) */
     SkibidiFB.onceUser(u => { if (u && !working) done(); }).catch(e => { if (e.code === "noload" || e.code === "config") msg("aMsg", fbText(e), "bad"); });
   }
