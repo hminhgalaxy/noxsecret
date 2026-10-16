@@ -1,10 +1,12 @@
-/* ===== FIREBASE (độc lập) — đăng ký / đăng nhập email + mật khẩu, và nhận id_token Google từ nơi khác =====
+/* ===== FIREBASE (độc lập) — đăng ký / đăng nhập email + mật khẩu, (KHÔNG có Google) =====
    Không biết Google Client ID là gì. Mọi lỗi được chuẩn hóa thành Error có .code (chữ ngắn) để UI tự dịch. */
 (function () {
   "use strict";
   const SDK = "https://www.gstatic.com/firebasejs/10.14.1/firebase-";
-  const mk = (code, e) => { const x = new Error(code); x.code = code; x.raw = e; return x; };
-  const load = src => new Promise(r => { const s = document.createElement("script"); s.src = src; s.onload = () => r(true); s.onerror = () => { s.remove(); r(false); }; document.head.appendChild(s); });
+  const mk = (code, e) => { const x = new Error(code); x.code = code; x.raw = e; x.sk = true; return x; };
+  /* Mọi thao tác mạng đều có hạn chót: không bao giờ để trang đứng ở "Đang xử lý…" mãi */
+  const within = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(mk("timeout")), ms))]);
+  const load = src => new Promise(r => { const s = document.createElement("script"); s.src = src; const to = setTimeout(() => { s.remove(); r(false); }, 8000); s.onload = () => { clearTimeout(to); r(true); }; s.onerror = () => { clearTimeout(to); s.remove(); r(false); }; document.head.appendChild(s); });
   const sdkOk = () => !!(window.firebase && firebase.initializeApp && firebase.auth && firebase.database);
   async function sdk() {
     for (let i = 0; i < 3 && !sdkOk(); i++)
@@ -42,46 +44,41 @@
     disabled: ["auth/user-disabled"],
     weak: ["auth/weak-password"]
   };
-  function norm(e, google) {
-    if (e && e.raw !== undefined) return e;
+  function norm(e) {
+    if (e && e.sk) return e;
     const c = (e && e.code) || "";
     console.warn("[firebase]", c, e && e.message);
-    /* Token Google hợp lệ nhưng Firebase không nhận Client ID này => lỗi "client", không phải sai mật khẩu */
-    if (google && ["auth/invalid-credential", "auth/invalid-oauth-client-id", "auth/invalid-idp-response", "auth/argument-error", "auth/internal-error"].includes(c)) return mk("client", e);
     for (const k in MAP) if (MAP[k].includes(c)) return mk(k, e);
     return mk("other", e);
   }
 
+  /* null = tên còn trống · chuỗi = đã có người dùng · undefined = chưa kiểm tra được (mạng chậm / chưa cấp quyền đọc) */
   async function nameOwner(n) {
-    try { const { db } = await ready(); return (await db.ref("pub/names/" + n.toLowerCase()).once("value")).val(); }
-    catch (e) { return undefined; } /* không đọc được => coi như chưa kiểm tra */
+    const cfg = window.FIREBASE_CONFIG || {};
+    if (!cfg.databaseURL) return undefined;
+    const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 5000);
+    try {
+      const r = await fetch(cfg.databaseURL.replace(/\/$/, "") + "/pub/names/" + encodeURIComponent(String(n).toLowerCase()) + ".json", { signal: ac.signal });
+      if (!r.ok) return undefined;
+      return (await r.json()) || null;
+    } catch (e) { return undefined; } finally { clearTimeout(tm); }
   }
 
   async function register(b) {
-    const { auth, db } = await ready(), lower = b.name.toLowerCase();
+    const { auth, db } = await within(ready(), 25000), lower = b.name.toLowerCase();
     if (await nameOwner(lower)) throw mk("nametaken");
     let u;
-    try { u = (await auth.createUserWithEmailAndPassword(b.email, b.password)).user; } catch (e) { throw norm(e); }
+    try { u = (await within(auth.createUserWithEmailAndPassword(b.email, b.password), 20000)).user; } catch (e) { throw norm(e); }
     /* chỉ hủy tài khoản khi tên THẬT SỰ bị người khác lấy; lỗi quyền ghi thì vẫn cho đăng ký (trang chính tự tạo lại hồ sơ) */
-    try { await db.ref("pub/names/" + lower).set(u.uid); }
+    try { await within(db.ref("pub/names/" + lower).set(u.uid), 6000); }
     catch (e) { const o = await nameOwner(lower); if (o && o !== u.uid) { await u.delete().catch(() => {}); throw mk("nametaken"); } console.warn("[name]", e); }
-    try { await db.ref("pub/users/" + u.uid).set({ name: b.name, pic: "", bio: "", createdAt: firebase.database.ServerValue.TIMESTAMP }); } catch (e) { console.warn("[profile]", e); }
-    try { await u.updateProfile({ displayName: b.name }); } catch (e) {}
+    try { await within(db.ref("pub/users/" + u.uid).set({ name: b.name, pic: "", bio: "", createdAt: firebase.database.ServerValue.TIMESTAMP }), 6000); } catch (e) { console.warn("[profile]", e); }
+    try { await within(u.updateProfile({ displayName: b.name }), 4000); } catch (e) {}
     return u;
   }
   async function login(b) {
-    const { auth } = await ready();
-    try { return (await auth.signInWithEmailAndPassword(b.email, b.password)).user; } catch (e) { throw norm(e); }
-  }
-  /* Nhận id_token Google (do auth-google.js lấy) và đổi lấy phiên Firebase */
-  async function googleIdToken(idToken) {
-    const { auth } = await ready();
-    try { return (await auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(idToken))).user; } catch (e) { throw norm(e, true); }
-  }
-  /* Dự phòng: Google của chính Firebase (không cần Client ID riêng) */
-  async function googlePopup() {
-    const { auth } = await ready();
-    try { return (await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())).user; } catch (e) { throw norm(e); }
+    const { auth } = await within(ready(), 25000);
+    try { return (await within(auth.signInWithEmailAndPassword(b.email, b.password), 20000)).user; } catch (e) { throw norm(e); }
   }
   /* gọi cb(user|null) đúng một lần với phiên đã lưu */
   async function onceUser(cb) {
@@ -89,5 +86,5 @@
     const un = auth.onAuthStateChanged(u => { un(); cb(u); });
   }
 
-  window.SkibidiFB = { ready, register, login, googleIdToken, googlePopup, nameOwner, onceUser };
+  window.SkibidiFB = { ready, register, login, nameOwner, onceUser };
 })();
