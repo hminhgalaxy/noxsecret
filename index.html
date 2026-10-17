@@ -491,13 +491,13 @@ D("auth.locked","Bạn đã thử sai nhiều lần. Vui lòng thử lại sau {
 D("auth.wrong","Sai Gmail hoặc mật khẩu.","Wrong Gmail or password.");D("auth.exists","Gmail hoặc tên hiển thị đã được đăng ký.","That Gmail or name is already registered.");
 D("auth.wait","Đang xử lý…","Working…");D("auth.hello","Xin chào {0}","Welcome, {0}");D("auth.hello.reg","Xin chào {0} · ID {1}","Welcome, {0} · ID {1}");
 D("g.fail","Không tải được nút đăng nhập Google. Hãy thử tải lại trang.","Google sign-in couldn't load. Try reloading the page.");
-D("fb.noload","Không tải được Firebase. Kiểm tra mạng rồi tải lại trang.","Firebase couldn't load. Check your connection and reload.");
-D("fb.off","Phương thức đăng nhập chưa được bật trong Firebase Console (Authentication → Sign-in method).","This sign-in method isn't enabled in Firebase Console (Authentication → Sign-in method).");
-D("fb.rules","Không ghi được dữ liệu. Hãy kiểm tra Rules của Realtime Database.","Couldn't write data. Check your Realtime Database rules.");
-D("fb.google","Google bị từ chối. Thêm Client ID vào Firebase → Authentication → Google → Safelist client IDs, và thêm tên miền vào Authorized domains.","Google was rejected. Add the Client ID under Firebase → Authentication → Google → Safelist client IDs, and add your domain to Authorized domains.");
-D("fb.diff","Gmail này đã đăng ký bằng cách khác. Hãy đăng nhập bằng mật khẩu rồi gắn Google trong Cài đặt.","This Gmail is registered another way. Log in with your password, then link Google in Settings.");
-D("fb.config","Firebase Authentication chưa được bật cho project này. Vào Firebase Console → Authentication → Get started, rồi bật Email/Password và Google.","Firebase Authentication isn't set up for this project. Open Firebase Console → Authentication → Get started, then enable Email/Password and Google.");
-D("fb.domain","Tên miền này chưa được cho phép. Thêm vào Firebase Console → Authentication → Settings → Authorized domains.","This domain isn't authorized. Add it in Firebase Console → Authentication → Settings → Authorized domains.");
+D("fb.noload","Không kết nối được. Kiểm tra mạng rồi tải lại trang.","Couldn't connect. Check your connection and reload the page.");
+D("fb.off","Cách đăng nhập này đang tạm thời chưa dùng được.","This sign-in method is temporarily unavailable.");
+D("fb.rules","Chưa thực hiện được thao tác này. Hãy thử lại sau hoặc đăng nhập lại.","That action couldn't be completed. Try again later or log in again.");
+D("fb.google","Đăng nhập Google chưa thành công. Hãy thử lại.","Google sign-in didn't work. Please try again.");
+D("fb.diff","Gmail này đã dùng cách đăng nhập khác. Hãy đăng nhập bằng cách bạn đã dùng lúc đầu.","This Gmail uses a different sign-in method. Log in the way you first did.");
+D("fb.config","Hệ thống đăng nhập đang tạm thời chưa dùng được. Hãy thử lại sau ít phút.","Sign-in is temporarily unavailable. Please try again in a few minutes.");
+D("fb.domain","Hệ thống đăng nhập đang tạm thời chưa dùng được. Hãy thử lại sau ít phút.","Sign-in is temporarily unavailable. Please try again in a few minutes.");
 D("g.popup","Đăng nhập Google bằng cửa sổ riêng","Sign in with Google in a popup");
 D("g.popup.closed","Cửa sổ Google đã bị đóng hoặc bị chặn. Hãy cho phép popup rồi thử lại.","The Google window was closed or blocked. Allow popups and try again.");
 D("fb.recent","Hãy đăng nhập lại rồi thử lần nữa.","Please log in again and retry.");
@@ -683,7 +683,8 @@ const yes=async o=>(await ask(o))===true;
 
 /* ===== DỮ LIỆU ===== */
 async function dbGet(path,qs=""){
-  const r=await fetch(DB_URL+"/"+path+".json"+qs);
+  const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),8000);
+  const r=await fetch(DB_URL+"/"+path+".json"+qs,{signal:ac.signal}).finally(()=>clearTimeout(tm));
   if(!r.ok){const er=new Error("db "+r.status+" "+path);er.status=r.status;throw er}
   return r.json();
 }
@@ -694,9 +695,18 @@ const NAME_CD=7*864e5,srvNow=()=>Date.now()+srvOff;
 /* Mọi thao tác đăng nhập chạy trong busy(); xong là tự đối chiếu lại phiên Firebase => dù API báo lỗi giữa chừng
    (ví dụ ghi hồ sơ bị chặn) mà Firebase đã đăng nhập thì giao diện vẫn vào đúng tài khoản, không cần tải lại trang */
 const busy=async f=>{authBusy++;try{return await f()}finally{authBusy--;setTimeout(()=>syncAuth(),0)}};
+/* ===== Phiên Google: độc lập hoàn toàn với Firebase Auth (do login.html lưu trong localStorage) ===== */
+const GKEY="skibidi_google_session";
+function googleSession(){try{const s=JSON.parse(localStorage.getItem(GKEY));return s&&s.sub&&s.exp>Date.now()?s:null}catch(e){return null}}
+async function googleMe(s){
+  const id="g_"+s.sub;let p=null;try{p=await Promise.race([rdb("pub/users/"+id),new Promise(r=>setTimeout(()=>r(null),4000))])}catch(e){}
+  return{userId:id,name:(p&&p.name)||s.name||(s.email||"user").split("@")[0],pic:(p&&p.pic)||s.picture||"",bio:(p&&p.bio)||"",handle:(p&&p.handle)||"",handleSet:!!(p&&(p.handleSet||p.handle)),nameChangedAt:(p&&p.nameChangedAt)||0,role:"user",email:s.email||"",createdAt:(p&&p.createdAt)||0,hasPassword:false,googleLinked:true,google:true};
+}
+/* người dùng hiện tại cho thao tác dữ liệu: Firebase (email) hoặc Google */
+const curUser=()=>(me&&me.google?{uid:me.userId}:null)||(fbAuth&&fbAuth.currentUser)||null;
 let syncSeq=0;
 async function syncAuth(silent){
-  if(!fbAuth||authBusy)return;
+  if(!fbAuth||authBusy||(me&&me.google))return;
   const u=fbAuth.currentUser,seq=++syncSeq;
   try{
     if(!u){if(me){me=null;myVotes={};setUnread(0);renderAuth();if(["mine","liked","inbox"].includes(view))go("");else show(view,viewArg,true)}return}
@@ -912,7 +922,7 @@ const R=p=>fbDb.ref(p),TS=()=>firebase.database.ServerValue.TIMESTAMP;
 const clean=o=>JSON.parse(JSON.stringify(o));
 const clip=(s,n)=>String(s==null?"":s).slice(0,n);
 const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,20)||"x";
-const snap=async p=>(await R(p).once("value")).val();
+const snap=async p=>{const v=await Promise.race([R(p).once("value"),new Promise((_,j)=>setTimeout(()=>j(new Error("db timeout")),6000))]);return v.val()};
 const kids=s=>{const a=[];s.forEach(c=>{const v=c.val();a.push(v&&typeof v==="object"?{id:c.key,...v}:{id:c.key,value:v})});return a};
 const isDevMe=()=>!!me&&me.role==="dev";
 const picRef=()=>me&&me.pic?(/^data:/.test(me.pic)?"u:"+me.userId:me.pic):"";
@@ -932,7 +942,7 @@ const upMeta=(aid,id,patch)=>R("userPosts/"+aid+"/"+id).update(clean(patch));
 const slimUser=async id=>{const [p]=await Promise.all([snap("pub/users/"+id)]);return p?{userId:id,name:p.name,pic:p.pic?(/^data:/.test(p.pic)?"u:"+id:p.pic):"",role:roleOf(id)}:{userId:id,name:id,pic:"",role:""}};
 
 async function savePost(b){
-  const x=fbAuth.currentUser,dev=isDevMe();
+  const x=curUser(),dev=isDevMe();
   const title=clip(b.title,120).trim();if(!title)throw fbErr(400,t("f.needt"));
   const type=clip(b.type,40);if(!/^[\w-]+$/.test(type))throw fbErr(400,t("f.needcat"));
   const light={title,type,gameId:clip(b.gameId,40),desc:clip(b.desc,2000),thumb:imgSrc(b.thumb)?b.thumb:"",url:safeUrl(b.url)||"",dl:safeUrl(b.dl)||"",version:clip(b.version,30),tags:(Array.isArray(b.tags)?b.tags:[]).map(v=>clip(v,30)).filter(Boolean).slice(0,10),note:clip(b.note,300)};
@@ -959,7 +969,7 @@ async function savePost(b){
   return{id,message:mod?t("f.pending"):t("f.sent")};
 }
 async function castVote(id,patch){
-  const x=fbAuth.currentUser,vr=R("votes/"+x.uid+"/"+id),old=(await vr.once("value")).val()||{};
+  const x=curUser(),vr=R("votes/"+x.uid+"/"+id),old=(await vr.once("value")).val()||{};
   const nv={liked:patch.liked!==undefined?patch.liked:!old.liked,stars:patch.stars!==undefined?patch.stars:(old.stars||0)};
   const pr=R("pub/posts/"+id);if(!(await pr.child("title").once("value")).exists())throw fbErr(404,t("e.404"));
   await vr.set(nv);
@@ -975,7 +985,7 @@ const wFix=(p,uid)=>{const l=p.likes||{};const o={...p,liked:!!(uid&&l[uid]),lik
 async function dataApi(path,method,body){
   const u=new URL(path,"http://x"),P=u.pathname,Q=u.searchParams,D=decodeURIComponent;let m;
   const M=r=>(m=P.match(r))!==null;
-  const user=()=>{const x=fbAuth.currentUser;if(!x||!me)throw fbErr(401,t("e.expired"));return x};
+  const user=()=>{const x=curUser();if(!x||!me)throw fbErr(401,t("e.expired"));return x};
   const dev=()=>{user();if(!isDevMe())throw fbErr(403,t("e.403"))};
   body=body||{};
   /* đã đăng nhập Firebase nhưng hồ sơ chưa nạp (me rỗng) => nạp ngay để không bị kẹt "chưa đăng nhập" khi gửi bài/tin */
@@ -1073,7 +1083,7 @@ async function dataApi(path,method,body){
   /* ---------- World: bài viết + trả lời ---------- */
   if(method==="GET"&&P==="/world/posts"){
     if(!rolesC)await loadRoles();
-    const lim=Math.min(40,+Q.get("limit")||20),before=+Q.get("before")||0,uid=fbAuth.currentUser&&fbAuth.currentUser.uid;
+    const lim=Math.min(40,+Q.get("limit")||20),before=+Q.get("before")||0,uid=(curUser()||{}).uid;
     let q=R("pub/world/posts").orderByChild("createdAt");if(before)q=q.endAt(before-1);
     const a=kids(await q.limitToLast(lim).once("value")).reverse();
     await liveAuthors(a);
@@ -1115,7 +1125,7 @@ async function dataApi(path,method,body){
 
   /* ---------- World: nhóm chat ---------- */
   if(method==="GET"&&P==="/world/groups"){
-    const x=fbAuth.currentUser,g=(await snap("pub/groups"))||{},j=x?((await snap("userGroups/"+x.uid))||{}):{};
+    const x=curUser(),g=(await snap("pub/groups"))||{},j=x?((await snap("userGroups/"+x.uid))||{}):{};
     const a=Object.entries(g).map(([id,v])=>({id,...v,joined:!!j[id]}));
     a.sort((p,q)=>(q.createdAt||0)-(p.createdAt||0));return{groups:a};
   }
@@ -1214,7 +1224,7 @@ async function api(path,method="GET",body){
   let L;
   try{L=await localApi(path,method,body)}
   catch(e){
-    if(e&&e.status===401&&me&&!path.startsWith("/auth/")&&!(fbAuth&&fbAuth.currentUser)){me=null;myVotes={};setUnread(0);renderAuth()}
+    if(e&&e.status===401&&me&&!path.startsWith("/auth/")&&!(fbAuth&&fbAuth.currentUser)&&!(me&&me.google)){me=null;myVotes={};setUnread(0);renderAuth()}
     throw e;
   }
   if(L!==undefined)return L;
@@ -1346,6 +1356,7 @@ function afterAuth(){
   show(view,viewArg,true);if(/^#\/post\//.test(location.hash)&&!openId)openFromHash();
 }
 async function logout(){
+  try{localStorage.removeItem(GKEY)}catch(e){}
   try{await api("/auth/logout","POST")}catch(e){}
   me=null;myVotes={};wList=[];wRep={};wGroups=[];setUnread(0);toggleMenu(false);closeRoom();renderAuth();
   if(["mine","liked","inbox"].includes(view))go("");else show(view,viewArg,true);
@@ -1353,6 +1364,8 @@ async function logout(){
 /* Khôi phục phiên: tối đa chờ 3 giây — web (bài, game, mục…) KHÔNG phụ thuộc đăng nhập nên luôn hiện được dù Auth chậm */
 let booted=false;
 async function restore(){
+  const gs=googleSession();
+  if(gs){try{me=await googleMe(gs)}catch(e){console.warn("[google]",e)}loadRoles();authReady=true;return}
   try{
     if(fbInit()){
       let first;const fp=new Promise(r=>first=r);
@@ -1802,7 +1815,7 @@ async function focusWPost(f){
     if(wFocus!==f)return;
     if(!d||typeof d!=="object"){f.st="gone";f.post=null;return}
     if(!rolesC)await loadRoles();
-    const uid=fbAuth&&fbAuth.currentUser?fbAuth.currentUser.uid:undefined;
+    const uid=(curUser()||{}).uid;
     f.post=wFix({id:f.id,...d},uid);f.st="ok";
   }catch(e){
     if(wFocus!==f)return;
@@ -2112,7 +2125,7 @@ function renderSettings(){
       <div class="pw" style="margin-top:8px"><input id="pwNew2" type="password" maxlength="64" autocomplete="new-password" placeholder="${esc(t("s.pass.new2"))}"><button type="button" class="eye" onclick="eye('pwNew2',this)">${svg("eye")}</button></div>
       <div class="fm" id="stPwMsg"></div><div class="row" style="margin-top:0"><button class="pri" onclick="savePass()">${esc(t("save"))}</button></div></div>
     <div class="sec"><h3>Gmail</h3><p class="mu" style="font-size:13px">${me.email?esc(me.email):esc(t("s.gmail.none"))}</p>
-      ${me.googleLinked?`<p class="fm ok">${esc(t("s.gmail.done"))}</p>`:`<p class="mu" style="margin:4px 0 8px">${esc(t("s.gmail.link"))}</p><button class="pri" onclick="linkGoogle(this)">Google</button>`}
+      ${me.google?`<p class="fm ok">Google</p>`:""}
       <div class="fm" id="gLinkMsg"></div></div>`;
   }
   $("setBody").innerHTML=h;
