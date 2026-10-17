@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kiểm tra hệ thống — SKIBIDISCRIPT</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com https://www.google.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebasedatabase.app wss://*.firebaseio.com https://*.googleapis.com https://www.google.com https://www.recaptcha.net; frame-src https://accounts.google.com https://*.firebaseapp.com https://www.google.com https://www.recaptcha.net; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="theme-color" content="#f4f4f5">
+<script src="theme.js"></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2309090b'/%3E%3Ctext x='32' y='44' font-size='34' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
+<style>.ck{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--bd)}.ck:first-of-type{border-top:0}.ck b{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;color:#fff}.ck.ok b{background:var(--ok)}.ck.bad b{background:var(--er)}.ck.warn b{background:var(--warn)}.ck p{margin-top:2px;color:var(--mu);font-size:13px;white-space:pre-line;overflow-wrap:anywhere}.au-frame.one{grid-template-columns:1fr;max-width:620px}</style>
+</head>
+<body>
+<main class="au-wrap">
+  <a class="au-logo au-logo-m" style="display:block" href="./">SKIBIDI<b>SCRIPT</b></a>
+  <div class="au-frame one">
+    <section class="au-card">
+      <h1>Kiểm tra hệ thống</h1>
+      <p class="au-sub">Trang này tự dò xem đăng ký, đăng nhập và database đã sẵn sàng chưa, và chỉ bạn cách sửa nếu thiếu.</p>
+      <div id="out"></div>
+      <button class="pri full" id="again" type="button">Kiểm tra lại</button>
+    </section>
+  </div>
+  <a class="back" style="display:block" href="./">Về trang chủ</a>
+</main>
+<script src="firebase-config.js"></script>
+<script src="google-config.js"></script>
+<script src="check.js"></script>
+</body>
+</html>
