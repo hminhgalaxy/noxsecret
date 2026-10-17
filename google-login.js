@@ -4,8 +4,16 @@
   "use strict";
   const KEY = "skibidi_google_session", $ = id => document.getElementById(id);
   let vi = false; try { vi = localStorage.getItem("lang") === "vi"; } catch (e) {}
-  const T = vi ? { cancel: "Bạn đã hủy đăng nhập Google.", bad: "Phiên Google không hợp lệ hoặc đã hết hạn. Hãy thử lại.", noc: "Đăng nhập Google tạm thời chưa dùng được.", wait: "Đang chuyển sang Google…" }
-               : { cancel: "Google sign-in was cancelled.", bad: "The Google session is invalid or expired. Please try again.", noc: "Google sign-in is temporarily unavailable.", wait: "Redirecting to Google…" };
+  const T = vi
+    ? { cancel: "Bạn đã hủy đăng nhập Google.", bad: "Đăng nhập Google chưa thành công. Hãy thử lại.", noc: "Đăng nhập Google tạm thời chưa dùng được.", wait: "Đang chuyển sang Google…",
+        lost: "Phiên đăng nhập bị gián đoạn (thường do trình duyệt mở Google ở tab khác). Hãy bấm nút Google và hoàn tất ngay trong cùng một tab.",
+        old: "Bạn để quá lâu nên phiên đã hết hạn. Hãy bấm nút Google để thử lại.",
+        clock: "Đồng hồ trên thiết bị của bạn đang lệch giờ. Hãy bật giờ tự động rồi thử lại." }
+    : { cancel: "Google sign-in was cancelled.", bad: "Google sign-in didn't work. Please try again.", noc: "Google sign-in is temporarily unavailable.", wait: "Redirecting to Google…",
+        lost: "The sign-in was interrupted (often the browser opens Google in another tab). Tap the Google button and finish in the same tab.",
+        old: "You waited too long and the session expired. Tap the Google button to try again.",
+        clock: "Your device clock is off. Turn on automatic time and try again." };
+  T.state = T.lost; T.token = T.bad; T.client = T.bad;
   const msg = (s, c) => { const e = $("gMsg"); if (e) { e.textContent = s || ""; e.className = "fm" + (c ? " " + c : ""); } };
   const safeNext = n => { try { const u = new URL(n || "./", location.href); if (u.origin !== location.origin || /\/(login|register)(\.html)?\/?$/.test(u.pathname)) return "./"; return u.pathname + u.search + u.hash; } catch (e) { return "./"; } };
   const NEXT = safeNext(new URLSearchParams(location.search).get("next"));
@@ -16,7 +24,7 @@
 
   const r = SkibidiGoogle.readReturn();
   if (r) {
-    if (r.error || !r.sub) msg(r.error === "access_denied" ? T.cancel : T.bad, "bad");
+    if (r.error || !r.sub) msg(r.error === "access_denied" ? T.cancel : (T[r.error] || (T.bad + (r.error ? " (" + r.error + ")" : ""))), "bad");
     else {
       try { localStorage.setItem(KEY, JSON.stringify({ sub: r.sub, email: r.email || "", name: r.name || "", picture: r.picture || "", exp: Date.now() + 30 * 864e5 })); location.replace(safeNext(r.next)); }
       catch (e) { msg(T.bad, "bad"); }
