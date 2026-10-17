@@ -19,15 +19,16 @@
   const NEXT = safeNext(new URLSearchParams(location.search).get("next"));
 
   $("gBtn").addEventListener("click", () => {
-    try { msg(T.wait); $("gBtn").disabled = true; SkibidiGoogle.start(NEXT); } catch (e) { $("gBtn").disabled = false; msg(T.noc, "bad"); }
+    try { msg(T.wait); $("gBtn").disabled = true; document.body.classList.add("loading"); SkibidiGoogle.start(NEXT); } catch (e) { $("gBtn").disabled = false; document.body.classList.remove("loading"); msg(T.noc, "bad"); }
   });
 
   const r = SkibidiGoogle.readReturn();
   if (r) {
-    if (r.error || !r.sub) msg(r.error === "access_denied" ? T.cancel : (T[r.error] || (T.bad + (r.error ? " (" + r.error + ")" : ""))), "bad");
+    document.body.classList.add("loading");
+    if (r.error || !r.sub) { document.body.classList.remove("loading"); msg(r.error === "access_denied" ? T.cancel : (T[r.error] || (T.bad + (r.error ? " (" + r.error + ")" : ""))), "bad"); }
     else {
       try { localStorage.setItem(KEY, JSON.stringify({ sub: r.sub, email: r.email || "", name: r.name || "", picture: r.picture || "", exp: Date.now() + 30 * 864e5 })); location.replace(safeNext(r.next)); }
-      catch (e) { msg(T.bad, "bad"); }
+      catch (e) { document.body.classList.remove("loading"); msg(T.bad, "bad"); }
     }
   }
 })();
