@@ -62,7 +62,7 @@
   }
   let NEXT = safeNext(new URLSearchParams(location.search).get("next")), working = false, fails = 0, lockUntil = 0, nTimer, nSeq = 0, nameTaken = false;
   const done = () => location.replace(NEXT);
-  const busy = on => { working = on; ["go"].forEach(i => { if ($(i)) $(i).disabled = on; }); if ($("go")) $("go").textContent = on ? t("wait") : t(REG ? "reg.go" : "login.go"); };
+  const busy = on => { working = on; document.body.classList.toggle("loading", on); ["go"].forEach(i => { if ($(i)) $(i).disabled = on; }); if ($("go")) $("go").textContent = on ? t("wait") : t(REG ? "reg.go" : "login.go"); };
 
   /* ---- kiểm tra dữ liệu (giữ nguyên luật của trang chính) ---- */
   function vName(v) { if (!v) return t("v.name.empty"); if (/\s/.test(v)) return t("v.name.space"); if (v.length < 3) return t("v.name.short"); if (v.length > 24) return t("v.name.long"); if (!/^[\p{L}\p{N}_]+$/u.test(v)) return t("v.name.chars"); return ""; }
