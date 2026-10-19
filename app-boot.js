@@ -16,4 +16,4 @@ setInterval(pollUnread,30000);
   hideBoot();
 })();
 setTimeout(hideBoot,7000);   /* dù có chuyện gì cũng không để vòng xoay che màn hình quá 7 giây */
-;(window.__ok=window.__ok||[]).push("app-boot.js");
+;(window.__ok = window.__ok || []).push("app-boot.js"); (window.__v = window.__v || {})["app-boot.js"] = "20261019c";
