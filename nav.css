@@ -1,0 +1,50 @@
+/* ===== Dock tìm kiếm ===== */
+#sbar{position:fixed;z-index:32;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:calc(100% - 24px);max-width:600px;display:flex;align-items:center;gap:6px;padding:4px 16px 4px 6px;border-radius:99px;background:var(--hdr);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--bd);box-shadow:var(--sh);color:var(--mu)}
+#sbar input{background:none;border:0;box-shadow:none;padding:10px 4px}#sbar input:focus{box-shadow:none}
+body:not([data-view=home]):not([data-view=games]) #sbar,body:not([data-view=home]):not([data-view=games]) #pop{display:none}
+.up{border-radius:50%;padding:8px;border-color:transparent}.up svg{transition:transform .25s}.up.open svg{transform:rotate(180deg)}
+#pop{position:fixed;z-index:31;left:50%;bottom:calc(74px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);width:calc(100% - 24px);max-width:600px;max-height:60vh;overflow:auto;background:var(--s1);border:1px solid var(--bd);border-radius:22px;box-shadow:var(--sh);padding:16px;opacity:0;pointer-events:none;transition:.25s}
+#pop.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#pop .x{top:10px;right:10px;width:30px;height:30px}
+.ph{font-size:12px;font-weight:600;color:var(--mu);margin:2px 0 8px;padding-right:36px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chips button{border-radius:99px;padding:6px 14px;font-size:13px}
+.chips button .ci{width:18px;height:18px;border-radius:50%}
+.chips button.on,.seg button.on{background:var(--acc);color:var(--acc-tx);border-color:var(--acc)}
+#toast{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--acc);color:var(--acc-tx);padding:9px 12px 9px 16px;border-radius:14px;display:none;align-items:center;gap:10px;z-index:99;box-shadow:var(--sh);font-weight:500;max-width:90vw}
+body:not([data-view=home]):not([data-view=games]) #toast{bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+#toast .tx{border:0;background:none;color:inherit;padding:0 4px;line-height:1}
+/* ===== Menu trượt ===== */
+.drawer{position:fixed;inset:0;z-index:60;background:var(--ov);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:none}
+.drawer.on{display:block}
+.drawer aside{position:absolute;left:0;top:0;bottom:0;width:min(310px,86vw);background:var(--s1);border-right:1px solid var(--bd);padding:16px;display:flex;flex-direction:column;gap:12px;overflow:auto;animation:slide .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes slide{from{transform:translateX(-100%)}}
+.dh{display:flex;justify-content:space-between;align-items:center}
+#dnav{display:flex;flex-direction:column;gap:2px;flex:1}
+#dnav button{width:100%;justify-content:flex-start;text-align:left;border-color:transparent;background:none;padding:10px 12px;border-radius:12px;gap:12px}
+#dnav button>svg{opacity:.75}
+#dnav button .tag{margin-left:auto}
+#dnav button:hover{background:var(--s2)}
+#dnav button.on,#dnav button.on:hover{background:var(--acc);color:var(--acc-tx);font-weight:600}
+#dnav button.on>svg{opacity:1}
+#dnav .dot.in{position:static;margin-left:auto;border-color:var(--s1)}
+.dsep{height:1px;background:var(--bd);margin:6px 0}
+#dauth{display:flex;flex-direction:column;gap:8px}
+/* ===== Tab, segmented, switch ===== */
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--s2);border:1px solid var(--bd);border-radius:14px;max-width:100%;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:11px;font-size:13px}
+.seg.full{display:flex}.seg.full button{flex:1}
+.tabs{display:flex;gap:8px;margin:12px 0 6px}.tabs button{flex:1}
+.sw{cursor:pointer;position:relative}
+.sw input{position:absolute;opacity:0;width:0;height:0}
+.sw i{width:40px;height:23px;border-radius:99px;background:var(--bd2);position:relative;transition:.2s;flex:none}
+.sw i:after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked+i{background:var(--acc)}.sw input:checked+i:after{left:20px;background:var(--acc-tx)}
+.sw input:focus-visible+i{outline:2px solid var(--tx);outline-offset:2px}
+/* ===== Form đăng nhập ===== */
+.pw{position:relative}.pw input{padding-right:46px}
+.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;padding:7px;line-height:0;color:var(--mu);border-radius:10px}
+.eye:hover{border:0;color:var(--tx)}
+.sm{display:flex;gap:4px;margin-top:8px}.sm i{flex:1;height:5px;border-radius:99px;background:var(--bd);transition:.25s}
+.sm.l1 i:nth-child(-n+1){background:#d92d20}.sm.l2 i:nth-child(-n+2){background:#f79009}.sm.l3 i{background:#12b76a}
+.rq{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--mu)}.rq .ok{color:var(--ok);font-weight:600}
