@@ -27,7 +27,12 @@
 <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://skibidiscript-566a4-default-rtdb.asia-southeast1.firebasedatabase.app" crossorigin>
-<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="modal.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="world.css">
+<link rel="stylesheet" href="profile.css">
+<link rel="stylesheet" href="ui.css">
 
 </head>
 <body data-view="home">
@@ -174,14 +179,51 @@
   <div class="row" style="justify-content:flex-end"><button id="askNo"></button><button id="askOk"></button></div>
 </div></div>
 <div class="modal" id="mImg" onclick="closeM(this)"><img id="bigImg" alt=""></div>
+<!-- Chọn mục (thay bảng chọn của điện thoại) -->
+<div class="modal" id="mPick" onclick="if(event.target===this)closeM(this)"><div class="box" style="max-width:420px">
+  <button class="x ic" onclick="closeM($('mPick'))" data-ia="close"><span data-ic="x" data-s="16"></span></button>
+  <b class="hd" id="pkTitle"></b>
+  <div id="pkList" class="pk-list"></div>
+</div></div>
+
+<!-- Kích hoạt tài khoản (người đăng nhập bằng Google) -->
+<div class="modal" id="mAct" onclick="if(event.target===this)closeM(this)"><div class="box" style="max-width:440px">
+  <button class="x ic" onclick="closeM($('mAct'))" data-ia="close"><span data-ic="x" data-s="16"></span></button>
+  <b class="hd" data-i="act.title"></b>
+  <p class="mu" style="margin-top:6px" data-i="act.sub"></p>
+  <label for="acName" data-i="act.name"></label><input id="acName" maxlength="24" autocomplete="nickname" autocapitalize="off" spellcheck="false">
+  <label for="acEmail">Gmail</label><input id="acEmail" disabled>
+  <label for="acPw" data-i="act.pw"></label>
+  <div class="pw"><input id="acPw" type="password" maxlength="64" autocomplete="new-password"><button type="button" class="eye ic" onclick="eye('acPw',this)" data-ia="a.showpw"><span data-ic="eye"></span></button></div>
+  <label for="acPw2" data-i="act.pw2"></label>
+  <div class="pw"><input id="acPw2" type="password" maxlength="64" autocomplete="new-password"><button type="button" class="eye ic" onclick="eye('acPw2',this)" data-ia="a.showpw"><span data-ic="eye"></span></button></div>
+  <div class="row"><button class="pri" id="acGo" onclick="submitActivate()" data-i="act.go"></button><button onclick="closeM($('mAct'))" data-i="cancel"></button></div>
+  <div class="fm" id="acMsg"></div>
+  <p class="mu" style="margin-top:10px;font-size:13px"><a href="login.html" data-i="act.have"></a></p>
+</div></div>
+
 <input type="file" id="fileX" accept="image/jpeg,image/png,image/webp" hidden onchange="onFile(this)">
 <div id="toast" role="status"></div>
+<script defer src="app-files.js"></script>
 <script defer src="app-core.js"></script>
-<script defer src="app-data.js"></script>
-<script defer src="app-ui.js"></script>
+<script defer src="app-lang.js"></script>
+<script defer src="app-icons.js"></script>
+<script defer src="app-utils.js"></script>
+<script defer src="app-firebase.js"></script>
+<script defer src="app-api.js"></script>
+<script defer src="app-nav.js"></script>
+<script defer src="app-posts.js"></script>
+<script defer src="app-profile.js"></script>
 <script defer src="app-world.js"></script>
-<script defer src="app-panels.js"></script>
+<script defer src="app-groups.js"></script>
+<script defer src="app-inbox.js"></script>
+<script defer src="app-report.js"></script>
+<script defer src="app-settings.js"></script>
+<script defer src="app-dev.js"></script>
+<script defer src="app-picker.js"></script>
+<script defer src="app-activate.js"></script>
 <script defer src="app-boot.js"></script>
+<script defer src="app-guard.js"></script>
 
 </body>
 </html>
