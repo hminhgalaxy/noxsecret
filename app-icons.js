@@ -42,4 +42,4 @@ function applyStatic(){
   document.querySelectorAll("[data-ip]").forEach(e=>{e.placeholder=t(e.dataset.ip)});
   document.querySelectorAll("[data-ia]").forEach(e=>{e.setAttribute("aria-label",t(e.dataset.ia))});
 }
-;(window.__ok=window.__ok||[]).push("app-icons.js");
+;(window.__ok = window.__ok || []).push("app-icons.js"); (window.__v = window.__v || {})["app-icons.js"] = "20261019c";
