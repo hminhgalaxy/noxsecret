@@ -1,3 +1,4 @@
+
 /* ===== CHỈ chứa cấu hình Firebase (Auth email/mật khẩu + Realtime Database). =====
    File này KHÔNG chứa và KHÔNG đọc Google Client ID. */
 window.FIREBASE_CONFIG = {
