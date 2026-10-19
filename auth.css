@@ -67,3 +67,5 @@ a.g-btn{display:flex;align-items:center;justify-content:center;gap:10px;height:4
 .ld{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(0,0,0,.38);backdrop-filter:blur(2px)}
 body.loading .ld{display:grid}
 .ld i{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .8s linear infinite}
+.fg{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--tx)}
+.fg:hover{text-decoration:underline}
