@@ -139,4 +139,4 @@ async function delReply(pid,rid){
     const p=wList.find(x=>x.id===pid);if(p)p.replyCount=Math.max(0,(p.replyCount||1)-1);repaintWP(pid);
   }catch(e){toast(e.message)}
 }
-;(window.__ok=window.__ok||[]).push("app-world.js");
+;(window.__ok = window.__ok || []).push("app-world.js"); (window.__v = window.__v || {})["app-world.js"] = "20261019c";
