@@ -43,6 +43,9 @@
   D("e.off", "Đăng nhập đang tạm thời chưa dùng được. Hãy thử lại sau ít phút.", "Sign-in is temporarily unavailable. Please try again in a few minutes.");
   D("e.domain", "Đăng nhập đang tạm thời chưa dùng được. Hãy thử lại sau ít phút.", "Sign-in is temporarily unavailable. Please try again in a few minutes.");
   D("e.disabled", "Tài khoản này đã bị khóa.", "This account is disabled."); D("e.weak", "Mật khẩu quá yếu.", "Password is too weak.");
+  D("g.btn", "Tiếp tục với Google", "Continue with Google"); D("or", "hoặc dùng Gmail", "or use Gmail");
+  D("forgot.link", "Quên mật khẩu?", "Forgot password?");
+  D("sys.check", "Kiểm tra hệ thống", "Run system check");
   D("e.timeout", "Kết nối đang chậm. Hãy kiểm tra mạng rồi thử lại.", "The connection is slow. Check your network and try again.");
   D("e.other", "Chưa thực hiện được. Hãy thử lại.", "That didn't work. Please try again.");
   D("pn.title", "Một tài khoản cho cả cộng đồng.", "One account for the whole community.");
@@ -127,6 +130,9 @@
       busy(false);
       if (e.code === "wrong" || e.code === "exists" || e.code === "nametaken") { if (++fails >= 5) { lockUntil = Date.now() + 30000; fails = 0; } }
       msg("aMsg", fbText(e), "bad");
+      if (["config", "off", "domain", "noload", "timeout", "other", "network"].includes(e.code)) {   /* lỗi từ phía hệ thống: chỉ đường tới trang tự kiểm tra */
+        const a = document.createElement("a"); a.href = "check.html"; a.textContent = " " + t("sys.check"); a.style.fontWeight = "600"; $("aMsg").appendChild(a);
+      }
     }
   }
 
