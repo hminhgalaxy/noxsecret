@@ -80,11 +80,17 @@
     const { auth } = await within(ready(), 25000);
     try { return (await within(auth.signInWithEmailAndPassword(b.email, b.password), 20000)).user; } catch (e) { throw norm(e); }
   }
+  /* Gửi email đặt lại mật khẩu (Firebase gửi miễn phí). Gmail không tồn tại: Firebase không báo lỗi để người lạ không dò được ai có tài khoản */
+  async function resetPassword(email) {
+    const { auth } = await within(ready(), 25000);
+    try { await within(auth.sendPasswordResetEmail(email), 20000); }
+    catch (e) { const n = norm(e); if (n.raw && n.raw.code === "auth/user-not-found") return; throw n; }
+  }
   /* gọi cb(user|null) đúng một lần với phiên đã lưu */
   async function onceUser(cb) {
     const { auth } = await ready();
     const un = auth.onAuthStateChanged(u => { un(); cb(u); });
   }
 
-  window.SkibidiFB = { ready, register, login, nameOwner, onceUser };
+  window.SkibidiFB = { ready, register, login, resetPassword, nameOwner, onceUser };
 })();
