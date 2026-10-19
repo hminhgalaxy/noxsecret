@@ -107,4 +107,4 @@ async function delRoom(){
   const g=roomG;if(!g||!await yes({title:t("g.delete"),text:t("g.delete.t"),ok:t("del"),danger:true}))return;
   try{await api("/world/groups/"+encodeURIComponent(g.id),"DELETE");wGroups=wGroups.filter(x=>x.id!==g.id);closeRoom();renderGroups();toast(t("deleted"))}catch(e){toast(e.message)}
 }
-;(window.__ok=window.__ok||[]).push("app-groups.js");
+;(window.__ok = window.__ok || []).push("app-groups.js"); (window.__v = window.__v || {})["app-groups.js"] = "20261019c";
