@@ -19,8 +19,19 @@
     try { const r = await fetch(url, { signal: ac.signal }); return { status: r.status }; } catch (e) { return { err: true }; } finally { clearTimeout(tm); }
   }
 
+  async function files() {
+    const F = window.SKIBIDI_FILES;
+    if (!F) return row("bad", "Thiếu file app-files.js", "Hãy tải file app-files.js lên cùng thư mục với index.html.");
+    const all = [...F.pages, ...F.css, ...F.js, "database.rules.json"], miss = [];
+    await Promise.all(all.map(async f => {
+      try { const r = await fetch(f + "?c=" + Date.now(), { cache: "no-store" }); if (!r.ok) miss.push(f); } catch (e) { miss.push(f); }
+    }));
+    if (miss.length) row("bad", "Web đang thiếu " + miss.length + " file", "Hãy tải lên các file này (cùng thư mục với index.html): " + miss.join(", "));
+    else row("ok", "Đủ " + all.length + " file của web", "");
+  }
   async function run() {
     out.innerHTML = ""; $("again").disabled = true;
+    await files();
     /* 1. Đăng ký / đăng nhập bằng Gmail + mật khẩu */
     if (!cfg.apiKey) row("bad", "Thiếu cấu hình đăng nhập", "File firebase-config.js chưa được tải lên cùng chỗ với trang web.");
     else {
