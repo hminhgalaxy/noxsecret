@@ -1,4 +1,5 @@
 /* ===== KHỞI ĐỘNG ===== */
+try{enhanceSelects()}catch(e){console.warn("[picker]",e)}
 applyTheme(themePref);applyStatic();applyIcons();
 {const m=location.pathname.match(/^\/(p|w)\/([\w-]{1,60})\/?$/);if(m)history.replaceState(null,"",(m[1]==="p"?"/#/post/":"/#/w/")+m[2])}
 window.addEventListener("hashchange",route);
@@ -15,3 +16,4 @@ setInterval(pollUnread,30000);
   hideBoot();
 })();
 setTimeout(hideBoot,7000);   /* dù có chuyện gì cũng không để vòng xoay che màn hình quá 7 giây */
+;(window.__ok=window.__ok||[]).push("app-boot.js");
