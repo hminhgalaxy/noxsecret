@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SKIBIDI SCRIPT WEB</title>
+<meta name="description" content="SKIBIDI SCRIPT WEB — Kho Script, APK, LINK và iOS cập nhật realtime. Simple. Fast. Connected.">
+<meta name="theme-color" content="#0a0e16">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='.55' stop-color='%2329d6c5'/%3E%3Cstop offset='1' stop-color='%23f471b5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230e1420'/%3E%3Cpath d='M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6' fill='none' stroke='url(%23g)' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/800.css">
+<script>/* áp dụng giao diện sáng/tối trước khi vẽ để không bị nháy */
+(function(){try{var p=localStorage.getItem("ssw_theme");var l=p==="light"||(p==="system"&&matchMedia("(prefers-color-scheme: light)").matches);document.documentElement.dataset.theme=l?"light":"dark"}catch(e){}})();</script>
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/pages.css">
+</head>
+<body>
+<a class="skip" href="#view">Bỏ qua tới nội dung</a>
+<div id="bg" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
+<div id="themeLayer" aria-hidden="true"></div>
+<div id="loadbar" aria-hidden="true"></div>
+<div id="scrollProg" aria-hidden="true"></div>
+<div id="sweepfx" aria-hidden="true"></div>
+<audio id="bgm" loop preload="auto"></audio>
+
+<div id="splash">
+  <div id="spLogoWrap"><div id="spGlow"></div>
+    <svg id="spLogo" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="spG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/></linearGradient></defs>
+      <circle class="ring" cx="50" cy="50" r="47"/><circle class="ring2" cx="50" cy="50" r="42"/><path class="hex" d="M50 8 85 28.5v41L50 90 15 69.5v-41Z"/>
+      <path class="smark" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/></svg></div>
+  <div id="spWord" aria-label="SKIBIDI SCRIPT WEB"></div><div id="spStage">Đang khởi tạo…</div><div id="spTrack"><div id="spBar"></div></div>
+</div>
+
+<div id="maint" role="alertdialog" aria-label="Website đang bảo trì">
+  <div class="mnt-orb mo1"></div><div class="mnt-orb mo2"></div>
+  <div class="mnt-ring"><svg class="gear" viewBox="0 0 100 100" aria-hidden="true"><path class="hx" d="M50 8 85 28.5v41L50 90 15 69.5v-41Z"/><path class="sm" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/></svg></div>
+  <h2>Website đang bảo trì</h2>
+  <p id="maintMsg">Hệ thống đang tạm đóng. Vui lòng quay lại sau.</p>
+  <div class="mnt-count"><small>Tự động mở sau</small><span id="mntClock">--:--</span><div id="mntBarWrap"><div id="mntBar"></div></div></div>
+  <div class="mnt-login"><a class="btn btn-g" href="/login">Đăng nhập (Dev)</a><small>Dành cho Dev</small></div>
+</div>
+
+<header id="hdr">
+  <div class="hdr-main">
+    <button id="btnMenu" type="button" aria-label="Mở menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <a class="brand" href="/" aria-label="SKIBIDI SCRIPT WEB — Trang chủ">
+      <span class="mark"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/></linearGradient></defs><path d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6" fill="none" stroke="url(#bg1)" stroke-width="10" stroke-linecap="round"/></svg></span>
+      <b>SKIBIDI SCRIPT WEB</b></a>
+    <span class="hdr-sp"></span>
+    <div class="searchbox" role="search"><svg class="si" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Tìm kiếm…" aria-label="Tìm kiếm" autocomplete="off">
+      <button class="clr" id="qClr" type="button" aria-label="Xóa từ khóa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <button id="btnSearchM" type="button" aria-label="Tìm kiếm"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <a id="btnAcc" href="/login" aria-label="Đăng nhập"><span id="connDot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg></a>
+  </div>
+  <div class="hdr-search" id="hdrSearch"><div class="searchbox" role="search"><svg class="si" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="qM" type="search" placeholder="Tìm kiếm…" aria-label="Tìm kiếm" autocomplete="off">
+    <button class="clr" id="qClrM" type="button" aria-label="Xóa từ khóa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
+</header>
+
+<div id="sideOv"></div>
+<aside id="side" aria-label="Điều hướng">
+  <span id="navpill" aria-hidden="true"></span>
+  <nav id="sideNav" aria-label="Menu chính"></nav>
+  <div class="side-acc" id="authZone"></div>
+</aside>
+
+<main id="main">
+  <div id="pagehead" hidden></div>
+  <div id="view" tabindex="-1" aria-live="polite"><noscript><p style="padding:24px">Website cần bật JavaScript để hoạt động.</p></noscript></div>
+  <footer id="footer"><b>SKIBIDI SCRIPT WEB</b>
+    <nav class="foot-links" aria-label="Liên kết chân trang"><a href="/">Trang chủ</a><a href="/categories">Danh mục</a><a href="/notifications">Thông báo</a><a href="/settings">Cài đặt</a></nav>
+    <span id="yr"></span></footer>
+</main>
+
+<div id="ov"></div>
+<div class="modal" id="mdNotice" role="dialog" aria-modal="true" aria-label="Thông báo">
+  <div class="m-grab"></div>
+  <div class="m-head"><h3><span class="nt-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9Z"/><path d="M10 20a2.5 2.5 0 0 0 4 0"/></svg>THÔNG BÁO</span></h3></div>
+  <div class="m-body"><h4 id="ntTitle">Thông báo</h4><p id="ntBody"></p>
+    <div class="nt-acts"><button class="btn btn-g" id="ntClose" type="button">Đóng</button><button class="btn btn-p" id="nt2h" type="button" style="--cat:var(--accent-primary)">Đóng trong 2h</button></div></div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script type="module" src="/assets/js/main.js"></script>
+</body>
+</html>

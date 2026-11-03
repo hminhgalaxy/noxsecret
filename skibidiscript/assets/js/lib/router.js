@@ -1,0 +1,125 @@
+/* Router History API: URL thật, deep link, Back/Forward, guard đăng nhập/DEV, lazy load, 404. */
+import { session, ready as authReady, onAuth } from "./auth.js";
+import { toast, RM } from "./util.js";
+
+const routes = [];
+const seen = new Set();
+export function compile(path) {
+  const keys = [];
+  const src = path.replace(/[.*+?^${}()|[\]\\]/g, m => (m === "/" ? m : "\\" + m)).replace(/:([A-Za-z]+)/g, (_, k) => { keys.push(k); return "([^/]+)"; });
+  return { re: new RegExp("^" + src.replace(/\/$/, "") + "/?$"), keys };
+}
+export function define(path, def) {
+  if (seen.has(path)) throw new Error("Route trùng lặp: " + path);
+  seen.add(path); routes.push({ path, ...compile(path), def });
+}
+export const routeTable = () => routes.map(r => ({ path: r.path, guard: r.def.guard || "public" }));
+export function match(pathname) {
+  for (const r of routes) {
+    const m = r.re.exec(pathname); if (!m) continue;
+    const params = {}; let ok = true;
+    r.keys.forEach((k, i) => { try { params[k] = decodeURIComponent(m[i + 1]); } catch (_) { ok = false; } });
+    if (ok) return { def: r.def, params, path: r.path };
+  }
+  return null;
+}
+/* Quyết định guard — hàm thuần để kiểm thử */
+export function decide(guard, s, here) {
+  if (!guard || guard === "public") return null;
+  if (guard === "guest") return s.user ? { to: "__next__", replace: true } : null;
+  if (!s.user) return { to: "/login?next=" + encodeURIComponent(here), replace: true };
+  if (guard === "dev" && !s.isDev) return { to: "/", replace: true, toast: s.devBlocked || "Bạn không có quyền truy cập khu vực DEV." };
+  return null;
+}
+
+let hooks = { setPage: () => {}, onRoute: () => {}, view: null, notFound: null, safeNext: x => x };
+export function configure(h) { hooks = Object.assign(hooks, h); }
+
+let navId = 0, cur = null, cleanups = [], histKey = 0;
+const scrollPos = new Map();
+export const current = () => cur;
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+export function navigate(to, opts = {}) {
+  let url; try { url = new URL(to, location.origin); } catch (_) { return Promise.resolve(); }
+  if (url.origin !== location.origin) { location.assign(url.href); return Promise.resolve(); }
+  const full = url.pathname + url.search + url.hash;
+  if (!opts.replace && full === location.pathname + location.search + location.hash && cur) { window.scrollTo(0, 0); return Promise.resolve(); }
+  scrollPos.set(history.state && history.state.k, window.scrollY);
+  const st = { k: ++histKey };
+  history[opts.replace ? "replaceState" : "pushState"](st, "", full);
+  return render({ pop: false });
+}
+window.addEventListener("popstate", e => { histKey = Math.max(histKey, (e.state && e.state.k) || 0); render({ pop: true }); });
+
+document.addEventListener("click", e => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
+  if (a.target && a.target !== "_self") return;
+  if (a.hasAttribute("download") || a.dataset.external != null) return;
+  const href = a.getAttribute("href"); if (!href || href[0] === "#" || /^(mailto:|tel:|javascript:)/i.test(href)) return;
+  let url; try { url = new URL(href, location.href); } catch (_) { return; }
+  if (url.origin !== location.origin) return;
+  e.preventDefault(); navigate(url.pathname + url.search + url.hash);
+});
+
+function runCleanups() { const c = cleanups; cleanups = []; c.forEach(f => { try { f(); } catch (e) { console.error(e); } }); }
+function bar() { const b = document.getElementById("loadbar"); if (!b) return; b.classList.remove("run"); void b.offsetWidth; b.classList.add("run"); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+export async function render({ pop = false } = {}) {
+  const id = ++navId, url = new URL(location.href), here = url.pathname + url.search;
+  bar();
+  let m = match(url.pathname) || { def: hooks.notFound, params: {}, path: "*" };
+  let def = m.def;
+  if (def.guard && def.guard !== "public") await authReady;
+  if (id !== navId) return;
+  const d = decide(def.guard, session, here);
+  if (d) {
+    if (d.toast) toast(d.toast, "err");
+    const to = d.to === "__next__" ? (hooks.safeNext(url.searchParams.get("next")) || "/") : d.to;
+    history.replaceState({ k: (history.state && history.state.k) || ++histKey }, "", to);
+    return render({ pop: false });
+  }
+  const view = hooks.view;
+  const prev = cur;
+  if (prev && !RM) { view.classList.add("leaving"); await sleep(110); if (id !== navId) return; }
+  let mod;
+  try { mod = await def.load(); } catch (e) {
+    if (id !== navId) return;
+    console.error(e); runCleanups(); view.classList.remove("leaving");
+    hooks.setPage({ title: "Lỗi tải trang", crumbs: [] });
+    view.innerHTML = `<div class="statebox err"><p>Không tải được trang này (lỗi mạng?).</p><button class="btn btn-g" id="retryRoute">Thử lại</button></div>`;
+    view.querySelector("#retryRoute").onclick = () => render({ pop: false }); cur = { def, params: m.params, path: url.pathname }; hooks.onRoute(cur); return;
+  }
+  if (id !== navId) return;
+  runCleanups();
+  view.classList.remove("leaving"); view.innerHTML = ""; hooks.setPage({ reset: true });
+  const el = document.createElement("div"); el.className = "page"; view.appendChild(el);
+  cur = { def, params: m.params, path: url.pathname, pattern: m.path };
+  const ctx = {
+    el, params: m.params, query: url.searchParams, path: url.pathname, def, navigate, setPage: hooks.setPage,
+    cleanup: f => cleanups.push(f), isCurrent: () => id === navId
+  };
+  hooks.onRoute(cur);
+  if (def.title) hooks.setPage({ title: def.title });
+  try {
+    const out = await mod[def.fn || "mount"](ctx);
+    if (id !== navId) { if (typeof out === "function") try { out(); } catch (_) {} return; }
+    if (typeof out === "function") cleanups.push(out);
+  } catch (e) {
+    console.error(e);
+    if (id === navId) el.innerHTML = `<div class="statebox err"><p>Trang gặp lỗi: ${String(e.message || e).replace(/[<>&]/g, "")}</p></div>`;
+  }
+  if (id !== navId) return;
+  if (pop) { const y = scrollPos.get(history.state && history.state.k); window.scrollTo(0, y || 0); } else window.scrollTo(0, 0);
+  view.focus && view.focus({ preventScroll: true });
+}
+
+/* Đăng nhập/đăng xuất khi đang ở trang có guard → đánh giá lại ngay */
+onAuth(() => {
+  if (!cur) return;
+  const here = location.pathname + location.search;
+  const d = decide(cur.def.guard, session, here);
+  if (d) { if (d.toast) toast(d.toast, "err"); const to = d.to === "__next__" ? (hooks.safeNext(new URL(location.href).searchParams.get("next")) || "/") : d.to; navigate(to, { replace: true }); }
+});
