@@ -22,14 +22,14 @@ export function setPage(p) {
       <div class="vtools">${pg.count != null ? `<span class="vcount">${esc(pg.count)}</span>` : ""}${pg.actions || ""}</div></div>`;
     document.title = pg.title + " · " + SITE;
   }
-  document.documentElement.style.setProperty("--cat", pg.color || "var(--accent-primary)");
+  document.documentElement.style.setProperty("--cat", "var(--accent-primary)");
 }
 
 const LINKS = {
   top: [{ href: "/", label: "Trang chủ", icon: "home", nc: "var(--accent-secondary)", exact: true },
         { href: "/notifications", label: "Thông báo", icon: "bell", nc: "var(--warning)", dot: "notice" }],
   cats: { href: "/categories", label: "Tất cả danh mục", icon: "grid", nc: "var(--accent-primary)", exact: true },
-  dev: [{ href: "/dev", label: "Dev Panel", icon: "shield", exact: true }, { href: "/dev/data", label: "Quản lý dữ liệu", icon: "box" },
+  dev: [{ href: "/dev", label: "Bảng quản trị", icon: "shield", exact: true }, { href: "/dev/data", label: "Quản lý dữ liệu", icon: "box" },
         { href: "/dev/categories", label: "Danh mục DEV", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
         { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/system", label: "Hệ thống", icon: "terminal" }]
 };
@@ -65,8 +65,9 @@ export function renderNav() {
   const side = $("#sideNav"); if (!side) return;
   const cats = store.cats.map(c => ({ href: "/" + c.path, label: c.label, icon: c.icon || c.id, nc: c.color, cnt: (store.data[c.id] || []).length, cid: c.id }));
   side.innerHTML = `<span class="navsec">Menu</span>${LINKS.top.map(item).join("")}
-    ${group("cats", "Danh mục", "grid", "var(--text-secondary)", `<div class="navcats">${item(LINKS.cats)}${cats.map(item).join("")}</div>`, cats.length, false)}
-    ${session.isDev ? `<a class="navitem dev-entry" href="/dev" data-exact="1">${ICO.shield}<span class="nl">Dev Panel</span></a>${group("dev", "Quản lý", "sliders", "var(--text-secondary)", LINKS.dev.filter(l => l.href !== "/dev").map(l => item({ ...l, nc: "var(--text-secondary)" })).join(""), null, false)}` : ""}
+    ${session.user ? item({ href:"/profile", label:"Hồ sơ", icon:"user", nc:"var(--accent-secondary)" }) : ""}
+    ${group("cats", "Danh mục", "grid", "var(--accent-primary)", `<div class="navcats">${item(LINKS.cats)}${cats.map(item).join("")}</div>`, cats.length, false)}
+    ${session.isDev ? item({ ...LINKS.dev[0], nc:"var(--accent-primary)" }) : ""}
     <span class="navsec">Hệ thống</span>
     <button id="btnSound" class="navitem" type="button" aria-label="Bật tắt nhạc nền"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="nl" style="text-align:left">Nhạc nền</span><span class="cnt" id="sndState">—</span></button>
     <a class="navitem" href="/settings" data-exact="0" style="--nc:var(--text-secondary)">${ICO.gear}<span class="nl">Cài đặt</span></a>`;
@@ -116,9 +117,8 @@ export function renderAccount() {
   }
   const z = $("#authZone"); if (!z) return;
   z.innerHTML = u
-    ? `<div class="acc-card"><span class="mail">${esc(u.displayName ? u.displayName + " · " : "")}${esc(u.email || "")}</span>${session.isDev ? '<span class="devtag">DEV</span>' : ""}</div>
-       <a class="btn btn-g btn-wide" href="/profile">${ICO.users}Hồ sơ của tôi</a>
-       ${session.isDev ? '<a class="btn btn-p btn-wide" href="/dev">Dev Panel</a>' : ""}
+    ? `<div class="acc-card"><span class="mail">${esc(u.displayName ? u.displayName + " · " : "")}${esc(u.email || "")}</span>${session.isDev ? '<span class="devtag">QUẢN TRỊ</span>' : ""}</div>
+       ${session.isDev ? '<a class="btn btn-p btn-wide" href="/dev" style="--cat:var(--accent-primary)">Bảng quản trị</a>' : ""}
        <button class="btn btn-g btn-wide" data-act="signout" type="button">${ICO.out}Đăng xuất</button>`
     : `<a class="btn btn-p btn-wide" href="/login" style="--cat:var(--accent-primary)">${ICO.key}Đăng nhập</a><a class="btn btn-g btn-wide" href="/register">Đăng ký</a>`;
 }

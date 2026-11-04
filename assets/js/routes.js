@@ -10,13 +10,13 @@ const catNeeds = extra => p => extra.catId ? ["data:" + extra.catId] : ["cats", 
 export function registerRoutes() {
   define("/", { load: L("home"), guard: "public", needs: ALL });
   define("/login", { load: L("auth"), fn: "login", guard: "guest", title: "Đăng nhập" });
+  define("/profile", { load: L("profile"), fn: "mount", guard: "user", title: "Hồ sơ" });
   define("/register", { load: L("auth"), fn: "register", guard: "guest", title: "Đăng ký" });
   define("/forgot-password", { load: L("auth"), fn: "forgot", guard: "guest", title: "Quên mật khẩu" });
   define("/search", { load: L("misc"), fn: "search", guard: "public", title: "Tìm kiếm", needs: ALL });
   define("/categories", { load: L("misc"), fn: "categories", guard: "public", title: "Danh mục", needs: ALL });
   define("/notifications", { load: L("misc"), fn: "notifications", guard: "public", title: "Thông báo", needs: ["notice"] });
   define("/settings", { load: L("misc"), fn: "settings", guard: "public", title: "Cài đặt", needs: ["theme"] });
-  define("/profile", { load: L("profile"), fn: "index", guard: "auth", title: "Hồ sơ tài khoản" });
   define("/404", notFoundDef);
 
   const family = (prefix, extra) => {

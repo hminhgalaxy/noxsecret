@@ -1,0 +1,13 @@
+{
+  "name": "skibidi-script-web",
+  "version": "2.0.0",
+  "private": true,
+  "description": "SKIBIDI SCRIPT website",
+  "scripts": {
+    "test": "node --test tests/rules.test.mjs tests/profile-rules.test.mjs tests/turnstile-api.test.cjs",
+    "test:e2e": "node --test tests/e2e.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

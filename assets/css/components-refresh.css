@@ -1,0 +1,27 @@
+
+/* Thành phần giao diện tối giản */
+.card,.tile,.lrow,.setcard,.authcard{border:1px solid var(--border-subtle);background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.018));box-shadow:0 12px 34px rgba(0,0,0,.12)}
+.card:hover,.tile:hover{border-color:rgba(255,255,255,.24);box-shadow:0 18px 40px rgba(0,0,0,.2)}
+.vhead h1{letter-spacing:-.035em}
+.vhead h1:after{background:#ddd}
+#splash{background:#080808}
+#spLogoWrap{filter:grayscale(1)}
+#spStage{color:#aaa}
+#spTrack,#spBar{background:rgba(255,255,255,.14)}
+#spBar{background:#eee}
+#loadbar{background:#eee}
+#pageload{color:#aaa}
+#bg .orb{opacity:.025!important}
+#bg .grid{opacity:.16}
+.ptcl{background:#ddd}
+.divider{color:#888}
+.authcard{width:min(460px,100%);padding:clamp(22px,5vw,34px);border-radius:26px}
+.authlogo{background:#f0f0f0;border-color:#fff}
+.authlogo svg{stroke:#111}
+.authcard h2{font-size:clamp(24px,5vw,30px);letter-spacing:-.03em}
+.fld input,.fld select,.fld textarea{border-radius:13px}
+.gwrap iframe{border-radius:14px}
+.gwrap{display:flex;justify-content:center;min-height:44px;max-width:100%}
+#btnMenu{background:rgba(255,255,255,.045)!important;box-shadow:none!important}
+#btnMenu:hover{box-shadow:none!important}
+.vhead h1:after{display:none}

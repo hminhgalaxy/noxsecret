@@ -78,7 +78,7 @@ function loadGis() {
   });
   return gisPromise;
 }
-export async function renderGoogleButton(container, { beforeSignIn, onDone, onError } = {}) {
+export async function renderGoogleButton(container, { onDone, onError, beforeSignIn } = {}) {
   try {
     await loadGis();
     const g = window.google.accounts.id;
@@ -86,7 +86,7 @@ export async function renderGoogleButton(container, { beforeSignIn, onDone, onEr
       client_id: GOOGLE_CLIENT_ID, auto_select: false, cancel_on_tap_outside: true,
       callback: async resp => {
         try {
-          if (!resp || !resp.credential) throw new Error("Không nhận được credential từ Google.");
+          if (!resp || !resp.credential) throw new Error("Không nhận được thông tin từ Google.");
           if (beforeSignIn) await beforeSignIn();
           const cred = GoogleProvider().credential(resp.credential);
           await need().signInWithCredential(cred);
@@ -100,10 +100,4 @@ export async function renderGoogleButton(container, { beforeSignIn, onDone, onEr
     container.innerHTML = '<span class="gnote">Không tải được nút Google. Kiểm tra kết nối mạng.</span>';
     dlog("er", "GIS: " + e.message);
   }
-}
-
-export async function updateAccountProfile({ displayName, photoURL } = {}) {
-  const u = need().currentUser; if (!u) throw new Error("Bạn cần đăng nhập.");
-  await u.updateProfile({ displayName: String(displayName || "").trim().slice(0, 48), photoURL: String(photoURL || "").trim().slice(0, 500) || null });
-  await touchProfile(u); apply(u); return u;
 }

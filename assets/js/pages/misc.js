@@ -56,7 +56,7 @@ export function settings(ctx) {
       <section class="setcard wide"><h3>${ICO.users}Tài khoản</h3>${u ? `<div class="acc-card"><span class="mail">${esc(u.displayName ? u.displayName + " · " : "")}${esc(u.email || "")}</span>${session.isDev ? '<span class="devtag">DEV</span>' : ""}</div>
         <p class="muted">Email: ${u.emailVerified ? "đã xác minh" : "<b>chưa xác minh</b>"}</p>
         ${session.devBlocked ? `<p class="form-err">${esc(session.devBlocked)}</p>` : ""}
-        <div class="uprow">${!u.emailVerified ? `<button class="btn btn-g" id="verify" type="button">Gửi lại email xác minh</button>` : ""}${session.isDev ? `<a class="btn btn-p" href="/dev" style="--cat:var(--accent-primary)">Dev Panel</a>` : ""}<button class="btn btn-g" data-act="signout" type="button">${ICO.out}Đăng xuất</button></div>`
+        <div class="uprow">${!u.emailVerified ? `<button class="btn btn-g" id="verify" type="button">Gửi lại email xác minh</button>` : ""}${session.isDev ? `<a class="btn btn-p" href="/dev" style="--cat:var(--accent-primary)">Bảng quản trị</a>` : ""}<button class="btn btn-g" data-act="signout" type="button">${ICO.out}Đăng xuất</button></div>`
         : `<p class="muted">Bạn chưa đăng nhập.</p><div class="uprow"><a class="btn btn-p" href="/login?next=/settings" style="--cat:var(--accent-primary)">Đăng nhập</a><a class="btn btn-g" href="/register">Đăng ký</a></div>`}</section></div>`;
     ctx.el.querySelectorAll("[data-theme]").forEach(b => b.addEventListener("click", () => { setThemePref(b.dataset.theme); draw(); }));
     const s = ctx.el.querySelector("#snd"); if (s) s.addEventListener("change", () => { toggleSound(); s.checked = !isMuted(); });

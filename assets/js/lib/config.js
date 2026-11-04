@@ -17,3 +17,7 @@ export const THEME_NODE = "nox_theme";
 export const USERS_NODE = "nox_users"; // MỚI (additive): hồ sơ đăng nhập, phục vụ /dev/users
 export const MAX_DATA_LEN = 9 * 1024 * 1024;
 export const THEME_PUBLIC_KEYS = ["bgType", "bgData", "audioData", "audioName"];
+
+export const TURNSTILE_SITE_KEY = "0x4AAAAAAFy8pCjf3xX4v_aO";
+export const PROFILES_NODE = "nox_profiles";
+export const PROFILE_IDS_NODE = "nox_profile_ids";

@@ -133,6 +133,47 @@
           ".validate": false
         }
       }
+    },
+    "nox_profiles": {
+      ".read": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && (!data.child('displayNameChangedAt').exists() || now - data.child('displayNameChangedAt').val() >= 604800000 || newData.child('displayName').val() === data.child('displayName').val()) && (!data.child('handle').exists() || newData.child('handle').val() === data.child('handle').val() || (!data.child('idChangedAt').exists() && newData.child('idChangedAt').isNumber() && newData.child('idChangedAt').val() <= now))",
+        "displayName": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+        },
+        "handle": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{3,20}$/)"
+        },
+        "avatarData": {
+          ".validate": "newData.isString() && newData.val().length <= 700000"
+        },
+        "coverData": {
+          ".validate": "newData.isString() && newData.val().length <= 1400000"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())"
+        },
+        "displayNameChangedAt": {
+          ".validate": "newData.isNumber() && newData.val() <= now && (!data.exists() || newData.val() >= data.val())"
+        },
+        "idChangedAt": {
+          ".validate": "newData.isNumber() && newData.val() <= now && (!data.exists() || newData.val() === data.val())"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "nox_profile_ids": {
+      ".read": "auth != null",
+      "$handle": {
+        ".write": "auth != null && newData.exists() && (!data.exists() || data.val() === auth.uid)",
+        ".validate": "newData.isString() && newData.val() === auth.uid"
+      }
     }
   }
 }

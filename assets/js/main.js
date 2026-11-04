@@ -38,7 +38,7 @@ function finishSplash() {
   $("#spBar").style.width = "100%";
   const fin = () => { splash.style.display = "none"; maybeNotice(); };
   if (RMq) { document.body.classList.add("welc"); return fin(); }
-  setTimeout(() => { splash.classList.add("out"); document.body.classList.add("welc"); setTimeout(fin, 900); }, 300);
+  setTimeout(() => { splash.classList.add("out"); document.body.classList.add("welc"); setTimeout(fin, 420); }, 180);
 }
 if (seen) { splash.style.display = "none"; splash.dataset.done = "1"; document.body.classList.add("welc"); }
 else {
@@ -49,7 +49,7 @@ else {
     w.appendChild(sp);
   });
   $("#spBar").style.width = "40%";
-  S.ready.then(finishSplash); setTimeout(finishSplash, 3000);
+  S.ready.then(finishSplash); setTimeout(finishSplash, 1200);
 }
 
 /* ── Hạt nền ── */
@@ -179,7 +179,7 @@ let sTick = false;
 addEventListener("scroll", () => {
   if (sTick) return; sTick = true;
   requestAnimationFrame(() => { sTick = false; $("#hdr").classList.toggle("scrolled", scrollY > 8);
-    const max = document.documentElement.scrollHeight - innerHeight; $("#scrollProg").style.width = (max > 0 ? Math.min(100, scrollY / max * 100) : 0).toFixed(2) + "%"; });
+    /* Thanh tiến trình ngang đã được bỏ để giao diện thoáng và không che nội dung. */ });
 }, { passive: true });
 
 /* ── Khởi động ── */

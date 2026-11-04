@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Thay YOUR-DOMAIN bằng tên miền triển khai thật trước khi gửi sitemap lên Google. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
- <url><loc>https://skibidiscript.vercel.app/</loc></url>
- <url><loc>https://skibidiscript.vercel.app/categories</loc></url>
- <url><loc>https://skibidiscript.vercel.app/scripts</loc></url>
- <url><loc>https://skibidiscript.vercel.app/apk</loc></url>
- <url><loc>https://skibidiscript.vercel.app/ios</loc></url>
- <url><loc>https://skibidiscript.vercel.app/links</loc></url>
+  <url><loc>https://YOUR-DOMAIN/</loc></url>
+  <url><loc>https://YOUR-DOMAIN/categories</loc></url>
 </urlset>

@@ -4,19 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SKIBIDI SCRIPT WEB</title>
-<meta name="description" content="SKIBIDI SCRIPT WEB — Kho Script, APK, LINK và iOS cập nhật realtime. Simple. Fast. Connected.">
-<meta name="theme-color" content="#080808">
-<meta name="color-scheme" content="dark light">
+<meta name="description" content="Khám phá thư viện Script, APK, iOS và liên kết được cập nhật liên tục. Trải nghiệm nhanh, gọn và dễ sử dụng.">
+<meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:type" content="website">
-<meta property="og:title" content="SKIBIDI SCRIPT">
-<meta property="og:description" content="Kho nội dung được cập nhật thường xuyên, giao diện tối giản và dễ sử dụng.">
-<meta property="og:url" content="https://skibidiscript.vercel.app/">
-<meta name="twitter:card" content="summary">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"SKIBIDI SCRIPT","url":"https://skibidiscript.vercel.app/","inLanguage":"vi"}
-</script>
-<link rel="canonical" href="https://skibidiscript.vercel.app/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='.55' stop-color='%2329d6c5'/%3E%3Cstop offset='1' stop-color='%23f471b5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230e1420'/%3E%3Cpath d='M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6' fill='none' stroke='url(%23g)' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta property="og:title" content="SKIBIDI SCRIPT — Thư viện tiện ích">
+<meta property="og:description" content="Khám phá thư viện Script, APK, iOS và liên kết trong một giao diện gọn gàng.">
+<meta property="og:image" content="/assets/og-cover.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="/">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#0a0e16">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%23f0f0f0%22/%3E%3Cpath d=%22M68 29c-4-7-11-10-19-10-10 0-17 5-17 13 0 17 36 10 36 28 0 8-8 14-18 14-8 0-15-3-19-9%22 fill=%22none%22 stroke=%22%23111%22 stroke-width=%2210%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/400.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/500.css">
@@ -26,15 +24,23 @@
 <script>/* áp dụng giao diện sáng/tối trước khi vẽ để không bị nháy */
 (function(){try{var p=localStorage.getItem("ssw_theme");var l=p==="light"||(p==="system"&&matchMedia("(prefers-color-scheme: light)").matches);document.documentElement.dataset.theme=l?"light":"dark"}catch(e){}})();</script>
 <link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/pages.css">\n<link rel="stylesheet" href="/assets/redesign.css">
+<link rel="stylesheet" href="/assets/pages.css">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/layout-refresh.css">
+<link rel="stylesheet" href="/assets/css/components-refresh.css">
+<link rel="stylesheet" href="/assets/css/responsive-refresh.css">
+<link rel="stylesheet" href="/assets/css/profile.css">
+<link rel="stylesheet" href="/assets/css/auth.css">
+<link rel="stylesheet" href="/assets/css/menu.css">
+<link rel="stylesheet" href="/assets/css/dev.css">
 </head>
 <body>
 <a class="skip" href="#view">Bỏ qua tới nội dung</a>
 <div id="bg" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid"></div></div>
 <div id="themeLayer" aria-hidden="true"></div>
 <div id="loadbar" aria-hidden="true"></div>
-<div id="pageload" role="status" aria-live="polite"><i aria-hidden="true"></i><span>Đang tải dữ liệu…</span></div>
-<div id="scrollProg" aria-hidden="true"></div>
+<div id="pageload" role="status" aria-live="polite"><i aria-hidden="true"></i><span>Đang chuẩn bị nội dung…</span></div>
+
 <div id="sweepfx" aria-hidden="true"></div>
 <audio id="bgm" loop preload="auto"></audio>
 
@@ -42,8 +48,8 @@
   <div id="spLogoWrap"><div id="spGlow"></div>
     <svg id="spLogo" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="spG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/></linearGradient></defs>
       <circle class="ring" cx="50" cy="50" r="47"/><circle class="ring2" cx="50" cy="50" r="42"/><path class="hex" d="M50 8 85 28.5v41L50 90 15 69.5v-41Z"/>
-      <path class="smark" d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6"/></svg></div>
-  <div id="spWord" aria-label="SKIBIDI SCRIPT WEB"></div><div id="spStage">Đang tải trải nghiệm…</div><div id="spTrack"><div id="spBar"></div></div>
+      <path class="smark" d="M68 29c-4-7-11-10-19-10-10 0-17 5-17 13 0 17 36 10 36 28 0 8-8 14-18 14-8 0-15-3-19-9"/></svg></div>
+  <div id="spWord" aria-label="SKIBIDI SCRIPT WEB"></div><div id="spStage">Một không gian dành cho bạn</div><div id="spTrack"><div id="spBar"></div></div>
 </div>
 
 <div id="maint" role="alertdialog" aria-label="Website đang bảo trì">
@@ -52,14 +58,14 @@
   <h2>Website đang bảo trì</h2>
   <p id="maintMsg">Hệ thống đang tạm đóng. Vui lòng quay lại sau.</p>
   <div class="mnt-count"><small>Tự động mở sau</small><span id="mntClock">--:--</span><div id="mntBarWrap"><div id="mntBar"></div></div></div>
-  <div class="mnt-login"><a class="btn btn-g" href="/login">Đăng nhập (Dev)</a><small>Dành cho Dev</small></div>
+  <div class="mnt-login"><a class="btn btn-g" href="/login">Đăng nhập quản trị</a><small>Dành cho quản trị viên</small></div>
 </div>
 
 <header id="hdr">
   <div class="hdr-main">
     <button id="btnMenu" type="button" aria-label="Mở menu" aria-expanded="false" aria-controls="side"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button>
     <a class="brand" href="/" aria-label="SKIBIDI SCRIPT WEB — Trang chủ">
-      <span class="mark"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/></linearGradient></defs><path d="M66 31C64 24 57 19.5 48.5 19.5c-9.5 0-17 5.2-17 12.7 0 15.8 35 9.4 35 27 0 8.4-8.3 14.3-17.8 14.3-8.4 0-14.9-3.4-17.7-9.6" fill="none" stroke="url(#bg1)" stroke-width="10" stroke-linecap="round"/></svg></span>
+      <span class="mark"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset=".55" stop-color="#29d6c5"/><stop offset="1" stop-color="#f471b5"/></linearGradient></defs><path d="M68 29c-4-7-11-10-19-10-10 0-17 5-17 13 0 17 36 10 36 28 0 8-8 14-18 14-8 0-15-3-19-9" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round"/></svg></span>
       <b>SKIBIDI SCRIPT WEB</b></a>
     <span class="hdr-sp"></span>
     <div class="searchbox" role="search"><svg class="si" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
