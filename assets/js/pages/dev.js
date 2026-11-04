@@ -11,8 +11,7 @@ const DEV = [{ href: "/dev/data", t: "Quản lý dữ liệu", d: "Script, APK, 
   { href: "/dev/categories", t: "Danh mục", d: "Thêm / xóa danh mục tùy chỉnh.", i: "grid", c: "var(--accent-secondary)" },
   { href: "/dev/users", t: "Người dùng", d: "Tài khoản đã đăng nhập vào website.", i: "users", c: "var(--cat-ios)" },
   { href: "/dev/theme", t: "Giao diện", d: "Nền ảnh/video và nhạc nền.", i: "paint", c: "var(--warning)" },
-  { href: "/dev/system", t: "Hệ thống", d: "Bảo trì, thông báo, nhật ký.", i: "terminal", c: "var(--success)" },
-  { href: "/bypass", t: "Bypass API", d: "Kết nối baconbypass.xyz.", i: "bolt", c: "var(--danger)" }];
+  { href: "/dev/system", t: "Hệ thống", d: "Bảo trì, thông báo, nhật ký.", i: "terminal", c: "var(--success)" }];
 const locked = ctx => { if (session.isDev) return false; ctx.setPage({ title: "Không có quyền" }); ctx.el.innerHTML = lockedHTML("Chỉ tài khoản DEV mới truy cập được khu vực này."); return true; };
 const devCrumb = [{ label: "Dev Panel", href: "/dev" }];
 const dataHref = c => "/dev/data/" + c.path;

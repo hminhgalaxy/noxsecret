@@ -15,7 +15,7 @@ const store = S.store, RMq = RM;
 registerRoutes();
 let lastBeforeSearch = "/";
 router.configure({
-  view: $("#view"), setPage, notFound: notFoundDef, safeNext,
+  view: $("#view"), setPage, notFound: notFoundDef, safeNext, waitFor: S.waitFor,
   onRoute(cur) {
     document.body.dataset.route = cur.pattern || cur.path; maybeNotice();
     markActive(); applyMaint(); renderAccount();

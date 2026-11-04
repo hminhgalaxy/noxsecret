@@ -57,7 +57,7 @@ let pushN=0;
 const ref=path=>{const segs=split(path);const R={key:segs[segs.length-1]||null,
  child:p=>ref(segs.concat(split(p)).join('/')),
  on(ev,cb,eb){window.__fbLog.reads.push('/'+segs.join('/'));if(!E.canRead(segs,A(),root)){window.__fbLog.denied.push('read /'+segs.join('/'));setTimeout(()=>eb&&eb(err('PERMISSION_DENIED','Permission denied')),5);return cb}
-   const l={segs,cb,err:eb,last:null};L.push(l);window.__fbLog.listeners=L.length;setTimeout(()=>fire(l,true),10);return cb},
+   const l={segs,cb,err:eb,last:null};L.push(l);window.__fbLog.listeners=L.length;setTimeout(()=>fire(l,true),window.__fbDelay||10);return cb},
  off(ev,cb){for(let i=L.length-1;i>=0;i--)if(L[i].segs.join('/')===segs.join('/')&&(!cb||L[i].cb===cb))L.splice(i,1);window.__fbLog.listeners=L.length},
  async once(){await later();if(!E.canRead(segs,A(),root))throw err('PERMISSION_DENIED');return snap(segs)},
  set(v){return commit([{segs,value:stamp(v)}])},

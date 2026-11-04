@@ -32,7 +32,7 @@ export function decide(guard, s, here) {
   return null;
 }
 
-let hooks = { setPage: () => {}, onRoute: () => {}, view: null, notFound: null, safeNext: x => x };
+let hooks = { setPage: () => {}, onRoute: () => {}, view: null, notFound: null, safeNext: x => x, waitFor: () => Promise.resolve() };
 export function configure(h) { hooks = Object.assign(hooks, h); }
 
 let navId = 0, cur = null, cleanups = [], histKey = 0;
@@ -64,15 +64,20 @@ document.addEventListener("click", e => {
 });
 
 function runCleanups() { const c = cleanups; cleanups = []; c.forEach(f => { try { f(); } catch (e) { console.error(e); } }); }
-function bar() { const b = document.getElementById("loadbar"); if (!b) return; b.classList.remove("run"); void b.offsetWidth; b.classList.add("run"); }
+function barStart() { const b = document.getElementById("loadbar"); if (!b) return; b.classList.remove("run", "busy", "done"); b.style.width = ""; void b.offsetWidth; b.classList.add("busy"); }
+function barEnd() {
+  const b = document.getElementById("loadbar"); if (!b || !b.classList.contains("busy")) return;
+  const w = getComputedStyle(b).width; b.classList.remove("busy"); b.style.width = w; void b.offsetWidth; b.classList.add("done"); b.style.width = "100%";
+}
+const setBusy = on => { document.body.classList.toggle("page-loading", on); if (hooks.view) hooks.view.classList.toggle("loading", on && !!cur); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 export async function render({ pop = false } = {}) {
   const id = ++navId, url = new URL(location.href), here = url.pathname + url.search;
-  bar();
+  barStart();
   let m = match(url.pathname) || { def: hooks.notFound, params: {}, path: "*" };
   let def = m.def;
-  if (def.guard && def.guard !== "public") await authReady;
+  await authReady;
   if (id !== navId) return;
   const d = decide(def.guard, session, here);
   if (d) {
@@ -83,16 +88,21 @@ export async function render({ pop = false } = {}) {
   }
   const view = hooks.view;
   const prev = cur;
-  if (prev && !RM) { view.classList.add("leaving"); await sleep(110); if (id !== navId) return; }
-  let mod;
-  try { mod = await def.load(); } catch (e) {
-    if (id !== navId) return;
-    console.error(e); runCleanups(); view.classList.remove("leaving");
+  const needs = typeof def.needs === "function" ? def.needs(m.params) : (def.needs || []);
+  const spin = setTimeout(() => { if (id === navId) setBusy(true); }, 140);
+  let mod, loadErr = null;
+  try { [mod] = await Promise.all([def.load(), hooks.waitFor(needs)]); } catch (e) { loadErr = e; }
+  clearTimeout(spin);
+  if (id !== navId) return;
+  setBusy(false);
+  if (!loadErr && prev && !RM) { view.classList.add("leaving"); await sleep(110); if (id !== navId) return; }
+  if (loadErr) {
+    const e = loadErr;
+    console.error(e); runCleanups(); view.classList.remove("leaving"); barEnd();
     hooks.setPage({ title: "Lỗi tải trang", crumbs: [] });
     view.innerHTML = `<div class="statebox err"><p>Không tải được trang này (lỗi mạng?).</p><button class="btn btn-g" id="retryRoute">Thử lại</button></div>`;
     view.querySelector("#retryRoute").onclick = () => render({ pop: false }); cur = { def, params: m.params, path: url.pathname }; hooks.onRoute(cur); return;
   }
-  if (id !== navId) return;
   runCleanups();
   view.classList.remove("leaving"); view.innerHTML = ""; hooks.setPage({ reset: true });
   const el = document.createElement("div"); el.className = "page"; view.appendChild(el);
@@ -112,6 +122,7 @@ export async function render({ pop = false } = {}) {
     if (id === navId) el.innerHTML = `<div class="statebox err"><p>Trang gặp lỗi: ${String(e.message || e).replace(/[<>&]/g, "")}</p></div>`;
   }
   if (id !== navId) return;
+  barEnd();
   if (pop) { const y = scrollPos.get(history.state && history.state.k); window.scrollTo(0, y || 0); } else window.scrollTo(0, 0);
   view.focus && view.focus({ preventScroll: true });
 }

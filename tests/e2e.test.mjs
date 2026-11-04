@@ -74,7 +74,7 @@ test("5 đăng xuất; trang cần quyền chuyển về login", async ({ page }
 });
 test("12 user thường bị chặn mọi trang DEV/ghi", async ({ page }) => {
   await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
-  for (const p of ["/dev", "/dev/data", "/dev/data/scripts", "/dev/data/apk", "/dev/data/ios", "/dev/data/links", "/dev/categories", "/dev/users", "/dev/theme", "/dev/system", "/bypass", "/scripts/create", "/apk/create", "/ios/create", "/links/create", "/scripts/-s1/edit", "/c/mod/create"]) {
+  for (const p of ["/dev", "/dev/data", "/dev/data/scripts", "/dev/data/apk", "/dev/data/ios", "/dev/data/links", "/dev/categories", "/dev/users", "/dev/theme", "/dev/system", "/scripts/create", "/apk/create", "/ios/create", "/links/create", "/scripts/-s1/edit", "/c/mod/create"]) {
     await go(page, p); eq(path(page), "/", "chặn " + p); }
   eq(await page.locator('#sideNav a[href="/dev"]').count(), 0, "không hiện menu DEV"); ok(!(await page.content()).includes("SECRET-KEY-123"), "lộ API key");
   const r = await page.evaluate(async () => { const out = {}; const d = firebase.database();
@@ -86,7 +86,7 @@ test("12b DEV chưa xác minh email không có quyền DEV", async ({ page }) =>
   eq(await page.locator("#btnAcc.dev").count(), 0);
 });
 test("12c khách chưa đăng nhập: mọi route DEV → /login?next=", async ({ page }) => {
-  for (const p of ["/dev", "/dev/data", "/dev/users", "/dev/theme", "/dev/system", "/dev/categories", "/bypass", "/scripts/create", "/links/-l1/edit"]) { await go(page, p); eq(path(page), "/login?next=" + encodeURIComponent(p), p); }
+  for (const p of ["/dev", "/dev/data", "/dev/users", "/dev/theme", "/dev/system", "/dev/categories", "/scripts/create", "/links/-l1/edit"]) { await go(page, p); eq(path(page), "/login?next=" + encodeURIComponent(p), p); }
 });
 test("đăng ký / quên mật khẩu", async ({ page }) => {
   await go(page, "/register"); await page.fill("#email", "moi@x.io"); await page.fill("#password", "abcdef"); await page.fill("#confirm", "khac"); await page.click("button[type=submit]");
@@ -145,11 +145,13 @@ test("tìm kiếm: URL, kết quả, Back", async ({ page }) => {
 });
 
 /* ───────── Bảo mật dữ liệu nhạy cảm ───────── */
-test("API key không bị tải về trình duyệt người thường; DEV thấy ở /bypass", async ({ page }) => {
+test("API key không bị tải về trình duyệt (kể cả DEV); không còn route /bypass", async ({ page }) => {
   await go(page, "/"); await go(page, "/scripts"); await go(page, "/settings"); const log = await page.evaluate(() => window.__fbLog);
   ok(!log.reads.includes("/nox_theme") && !log.reads.includes("/nox_theme/api"), "không đọc nox_theme/api: " + log.reads.filter(r => r.includes("theme")).join());
   eq(log.denied.filter(x => x.startsWith("read")), [], "không có lần đọc nào bị từ chối khi duyệt bình thường"); ok(!(await page.content()).includes("SECRET-KEY-123"));
-  await loginDev(page); await go(page, "/bypass"); await page.waitForFunction(() => document.querySelector("#key") && document.querySelector("#key").value === "SECRET-KEY-123"); ok((await page.textContent("#stx")).includes("có key"));
+  await loginDev(page); await go(page, "/bypass"); ok(await page.locator(".nf404").count() === 1, "/bypass → 404"); ok(!(await page.content()).includes("SECRET-KEY-123"), "DEV cũng không nhận API key");
+  ok(!(await page.evaluate(() => window.__fbLog.reads)).some(r => r.includes("nox_theme/api")), "không còn nghe nox_theme/api");
+  await go(page, "/dev"); eq(await page.locator('#view a[href="/bypass"], #sideNav a[href="/bypass"]').count(), 0, "không còn lối vào Bypass");
 });
 
 /* ───────── Router ───────── */
@@ -214,14 +216,13 @@ test("DEV: /dev/users hiển thị hồ sơ đăng nhập thật (nox_users)", a
   await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await page.waitForFunction(() => window.__fb.getDb().nox_users && Object.keys(window.__fb.getDb().nox_users).length === 1); await page.evaluate(() => firebase.auth().signOut());
   await loginDev(page); await go(page, "/dev/users"); await page.waitForSelector(".dtable"); const t = await page.textContent(".dtable"); ok(t.includes("user@example.com") && t.includes(DEV_EMAIL), "bảng người dùng: " + t.slice(0, 120));
 });
-test("DEV: theme/âm thanh ghi đúng khóa con; API key lưu/xóa", async ({ page }) => {
+test("DEV: theme/âm thanh ghi đúng khóa con; không đụng api", async ({ page }) => {
   await loginDev(page); await go(page, "/dev/theme"); await page.setInputFiles("#auF", { name: "a.mp3", mimeType: "audio/mpeg", buffer: Buffer.from("ID3fake") }); await page.click("#auA");
   await page.waitForFunction(() => window.__fb.getDb().nox_theme.audioName === "a.mp3"); let d = await db(page); ok(d.nox_theme.audioData.startsWith("data:audio/mpeg"), "audioData"); ok(d.nox_theme.api.key === "SECRET-KEY-123", "api không bị ghi đè khi update theme");
-  await go(page, "/bypass"); await page.fill("#key", "KEY-MOI"); await page.click("#save"); await page.waitForFunction(() => window.__fb.getDb().nox_theme.api.key === "KEY-MOI"); await page.click("#clear"); await page.waitForFunction(() => !window.__fb.getDb().nox_theme.api);
 });
 
 /* ───────── Smoke toàn bộ route + mobile ───────── */
-const ROUTES = ["/", "/login", "/register", "/forgot-password", "/search?q=a", "/categories", "/notifications", "/settings", "/404", "/scripts", "/scripts/-s1", "/apk", "/apk/-a1", "/ios", "/ios/-i1", "/links", "/links/-l1", "/c/mod", "/c/mod/-m1", "/bypass",
+const ROUTES = ["/", "/login", "/register", "/forgot-password", "/search?q=a", "/categories", "/notifications", "/settings", "/404", "/scripts", "/scripts/-s1", "/apk", "/apk/-a1", "/ios", "/ios/-i1", "/links", "/links/-l1", "/c/mod", "/c/mod/-m1",
   "/scripts/create", "/apk/create", "/ios/create", "/links/create", "/scripts/-s1/edit", "/apk/-a1/edit", "/ios/-i1/edit", "/links/-l1/edit", "/c/mod/create", "/c/mod/-m1/edit", "/dev", "/dev/data", "/dev/data/scripts", "/dev/data/apk", "/dev/data/ios", "/dev/data/links", "/dev/data/c/mod", "/dev/categories", "/dev/users", "/dev/theme", "/dev/system"];
 const GUESTONLY = ["/login", "/register", "/forgot-password"];
 test("13 URL của TẤT CẢ trang (DEV, tải trực tiếp, không lỗi console)", async ({ page }) => {
@@ -240,9 +241,64 @@ test("15 mobile (Pixel 5): drawer, điều hướng, không tràn ngang", async 
 }, { device: devices["Pixel 5"] });
 test("15b mobile DEV: form + dev panel", async ({ page }) => {
   await loginDev(page); const over = [];
-  for (const r of ["/scripts/create", "/dev", "/dev/data/scripts", "/dev/users", "/dev/system", "/dev/theme", "/bypass"]) { await go(page, r); await authed(page); await page.waitForTimeout(250); const w = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]); if (w[0] > w[1]) over.push(r + " " + w.join(">")); }
+  for (const r of ["/scripts/create", "/dev", "/dev/data/scripts", "/dev/users", "/dev/system", "/dev/theme"]) { await go(page, r); await authed(page); await page.waitForTimeout(250); const w = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]); if (w[0] > w[1]) over.push(r + " " + w.join(">")); }
   eq(over, [], "tràn ngang"); await go(page, "/scripts/create"); await page.screenshot({ path: SHOTS + "/mobile-form.png" });
 }, { device: devices["Pixel 5"] });
+/* ───────── Menu nhóm + nút 3 gạch ───────── */
+test("menu: nhóm Danh mục thu/gọn, nhớ trạng thái; Dev Panel chỉ DEV; trang đang xem tự mở nhóm", async ({ page }) => {
+  await go(page, "/"); await page.waitForSelector(".ngroup");
+  eq(await page.locator('.ngroup[data-g="dev"]').count(), 0, "khách không thấy nhóm Dev Panel");
+  ok(await page.locator('.ngroup[data-g="cats"].open').count() === 1, "Danh mục mở mặc định"); ok(await page.locator('.ngroup[data-g="cats"] a[href="/scripts"]').isVisible(), "thấy mục con");
+  await page.click('.ngroup[data-g="cats"] .ng-h'); await page.waitForFunction(() => getComputedStyle(document.querySelector('.ngroup[data-g="cats"] a[href="/scripts"]')).visibility === "hidden", null, { timeout: 4000 }).catch(() => {});
+  eq(await page.getAttribute('.ngroup[data-g="cats"] .ng-h', "aria-expanded"), "false"); ok(!(await page.locator('.ngroup[data-g="cats"] a[href="/scripts"]').isVisible()), "đã thu gọn → mục con ẩn");
+  ok(await page.locator('.ngroup[data-g="cats"] .ng-b[inert]').count() === 1, "mục ẩn không focus được (inert)");
+  await page.reload(); await page.waitForSelector(".ngroup"); eq(await page.locator('.ngroup[data-g="cats"].open').count(), 0, "nhớ trạng thái thu gọn sau refresh");
+  await go(page, "/apk"); await page.waitForFunction(() => document.querySelector('.ngroup[data-g="cats"]').classList.contains("open")); ok(await page.locator('.ngroup[data-g="cats"] a[href="/apk"].on').count() === 1, "vào /apk → nhóm tự mở + mục sáng");
+  await page.click('.ngroup[data-g="cats"] .ng-h'); await page.waitForTimeout(500); ok(await page.locator('.ngroup[data-g="cats"].has-on').count() === 1, "nhóm đóng nhưng đánh dấu đang ở trong");
+  const pill = await page.evaluate(() => getComputedStyle(document.querySelector("#navpill")).opacity); eq(pill, "0", "pill ẩn khi mục đang chọn bị thu gọn");
+});
+test("menu: nhóm Dev Panel cho DEV, đủ mục; điều hướng đúng; pill bám đúng mục", async ({ page }) => {
+  await loginDev(page); await page.waitForSelector('.ngroup[data-g="dev"]');
+  eq(await page.locator('.ngroup[data-g="dev"]').count(), 1); eq(await page.locator('.ngroup[data-g="dev"].open').count(), 0, "Dev Panel đóng mặc định");
+  await page.click('.ngroup[data-g="dev"] .ng-h'); await page.waitForTimeout(500);
+  eq(await page.locator('.ngroup[data-g="dev"] a.navitem').evaluateAll(a => a.map(x => x.getAttribute("href"))), ["/dev", "/dev/data", "/dev/categories", "/dev/users", "/dev/theme", "/dev/system"]);
+  await page.click('.ngroup[data-g="dev"] a[href="/dev/users"]'); await page.waitForURL(BASE + "/dev/users"); await page.waitForSelector("#view .page");
+  await page.mouse.move(700, 500); await page.waitForTimeout(700);
+  const r = await page.evaluate(() => { const a = document.querySelector("#sideNav a.on").getBoundingClientRect(), p = document.querySelector("#navpill").getBoundingClientRect(); return [Math.abs(a.top - p.top), Math.abs(a.left - p.left), Math.abs(a.width - p.width), document.querySelector("#sideNav a.on").getAttribute("href")]; });
+  eq(r[3], "/dev/users"); ok(r[0] < 3 && r[1] < 3 && r[2] < 3, "pill lệch mục đang chọn: " + r.join());
+});
+test("nút 3 gạch → X, aria-expanded + nhãn đổi theo; Esc đóng (mobile)", async ({ page }) => {
+  await go(page, "/"); const b = page.locator("#btnMenu");
+  eq(await b.locator(".bar").count(), 3); eq(await b.getAttribute("aria-expanded"), "false"); eq(await b.getAttribute("aria-label"), "Mở menu");
+  await b.click(); await page.waitForSelector("#side.open"); eq(await b.getAttribute("aria-expanded"), "true"); eq(await b.getAttribute("aria-label"), "Đóng menu"); await page.waitForTimeout(600);
+  const rot = await page.evaluate(() => getComputedStyle(document.querySelector("#btnMenu .bar:nth-child(1)")).transform); ok(rot !== "none" && /matrix/.test(rot) && !/matrix\(1, 0, 0, 1/.test(rot), "gạch trên đã xoay thành X: " + rot);
+  eq(await page.evaluate(() => getComputedStyle(document.querySelector("#btnMenu .bar:nth-child(2)")).opacity), "0"); await page.screenshot({ path: SHOTS + "/mobile-drawer-groups.png" });
+  await page.keyboard.press("Escape"); await page.waitForFunction(() => !document.querySelector("#side.open")); eq(await b.getAttribute("aria-expanded"), "false");
+}, { device: devices["Pixel 5"] });
+
+/* ───────── Tải đồng bộ với Firebase ───────── */
+test("tải đồng bộ: trang chỉ hiện khi dữ liệu Firebase đã về (có pill + thanh tiến trình)", async ({ page, ctx }) => {
+  await ctx.addInitScript(() => { window.__fbDelay = 900; });
+  await page.goto(BASE + "/scripts"); await page.waitForSelector("#view", { state: "attached" });
+  await page.waitForTimeout(450); eq(await page.locator("#view .page").count(), 0, "chưa có dữ liệu thì chưa dựng trang");
+  ok(await page.evaluate(() => document.body.classList.contains("page-loading")), "hiện trạng thái đang tải"); ok(await page.evaluate(() => document.querySelector("#loadbar").classList.contains("busy")), "thanh tiến trình đang chạy");
+  await page.waitForSelector("#view .page", { timeout: 8000 });
+  const n = await page.evaluate(() => document.querySelectorAll("#view .card").length); ok(n > 0, "trang vừa hiện đã có đủ thẻ dữ liệu (" + n + ")");
+  await page.waitForFunction(() => !document.body.classList.contains("page-loading") && !document.querySelector("#loadbar").classList.contains("busy"));
+});
+test("tải đồng bộ: chuyển mục trong app không hiện trang rỗng; Back/Forward vẫn đúng", async ({ page }) => {
+  await go(page, "/"); await page.waitForSelector(".tile");
+  for (const h of ["/scripts", "/apk", "/ios", "/links", "/categories"]) {
+    await page.click('#sideNav a[href="' + h + '"]'); await page.waitForURL(BASE + h);
+    await page.waitForFunction(() => document.querySelector("#view .page") && !document.querySelector("#view.loading"));
+    const empty = await page.evaluate(() => !document.querySelector("#view .page").children.length); ok(!empty, h + " hiện trang rỗng");
+  }
+  await page.goBack(); eq(path(page), "/links"); await page.waitForSelector("#view .page .card, #view .page .statebox"); await page.goForward(); eq(path(page), "/categories");
+});
+test("tải đồng bộ: Firebase lỗi/không có dữ liệu thì vẫn hiện trang (không treo)", async ({ page }) => {
+  await go(page, "/c/khong-ton-tai"); ok(await page.locator("#view .page").count() === 1, "danh mục không tồn tại vẫn hiện trang (không chờ mãi)");
+});
+
 test("ảnh chụp màn hình desktop", async ({ page }) => {
   await loginDev(page); for (const [r, n] of [["/", "home"], ["/scripts", "scripts"], ["/scripts/-s1", "detail"], ["/scripts/create", "form"], ["/dev", "dev"], ["/dev/system", "system"], ["/dev/users", "users"]]) { await go(page, r); await page.waitForTimeout(900); await page.screenshot({ path: `${SHOTS}/${n}.png` }); }
   await page.evaluate(() => firebase.auth().signOut()); await go(page, "/login"); await page.waitForTimeout(600); await page.screenshot({ path: SHOTS + "/login.png" });

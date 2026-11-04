@@ -1,12 +1,11 @@
-import { esc, fmtTime, vi, validUrl, toast } from "../lib/util.js";
+import { esc, fmtTime, vi, toast } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
 import { session, onAuth, resendVerification, signOut } from "../lib/auth.js";
 import { getThemePref, setThemePref, isMuted } from "../lib/prefs.js";
 import { hasMusic, toggleSound } from "../lib/media.js";
-import { cardHTML, observeAnim, emptyHTML, lockedHTML, skeletonHTML } from "../lib/ui.js";
+import { cardHTML, observeAnim, emptyHTML } from "../lib/ui.js";
 import { fillTiles } from "./home.js";
-import { dlog } from "../lib/log.js";
 
 export function notFound(ctx) {
   ctx.setPage({ title: "404 — Không tìm thấy trang", crumbs: [] });
@@ -64,36 +63,4 @@ export function settings(ctx) {
     const v = ctx.el.querySelector("#verify"); if (v) v.addEventListener("click", () => resendVerification().then(() => toast("Đã gửi email xác minh.")).catch(e => toast(e.message || "Gửi thất bại.", "err")));
   };
   draw(); const u1 = onAuth(draw), u2 = S.subscribe(t => { if (t === "theme") draw(); }); return () => { u1(); u2(); };
-}
-
-/* ───── /bypass — cấu hình API baconbypass.xyz (chỉ DEV, key không bao giờ gửi cho người dùng thường) ───── */
-export function bypass(ctx) {
-  if (!session.isDev) { ctx.setPage({ title: "Không có quyền" }); ctx.el.innerHTML = lockedHTML("Trang này chỉ dành cho DEV."); return; }
-  ctx.setPage({ title: "Bypass", sub: "Kết nối API baconbypass.xyz (chỉ DEV)." });
-  ctx.el.innerHTML = `<div class="formcard"><div class="api-status"><span class="dot" id="dot"></span><span class="stx" id="stx">Đang tải cấu hình…</span></div>
-    <div class="fld"><label for="ep">Endpoint</label><input id="ep" type="url" value="https://baconbypass.xyz" autocomplete="off" inputmode="url"></div>
-    <div class="fld"><label for="key">API Key</label><div class="pw"><input id="key" type="password" placeholder="Nhập API key…" autocomplete="off"><button class="eye" type="button" id="eye" aria-label="Hiện/ẩn key">${ICO.eye}</button></div></div>
-    <div class="uprow"><button class="btn btn-p" id="save" type="button" style="--cat:var(--accent-primary)">Lưu cấu hình</button><button class="btn btn-g" id="test" type="button">Kiểm tra kết nối</button><button class="btn btn-g" id="clear" type="button">Ngắt kết nối</button></div>
-    <div class="api-res" id="res">Chưa kiểm tra. Nhấn “Kiểm tra kết nối” để thử kết nối tới endpoint.</div></div>`;
-  const $ = s => ctx.el.querySelector(s); let filled = false;
-  const status = () => { const a = S.store.api, has = a && (a.key || a.endpoint); $("#dot").className = "dot" + (has ? " ok" : "");
-    $("#stx").textContent = has ? "Đã cấu hình · " + (a.endpoint || "https://baconbypass.xyz") + (a.key ? " · có key" : "") : "Chưa cấu hình";
-    if (!filled && a) { filled = true; $("#ep").value = a.endpoint || "https://baconbypass.xyz"; $("#key").value = a.key || ""; } };
-  status(); const u = S.subscribe(t => { if (t === "api") status(); });
-  $("#eye").onclick = () => { const i = $("#key"); i.type = i.type === "password" ? "text" : "password"; };
-  const res = h => { $("#res").innerHTML = h; };
-  $("#save").onclick = () => { const ep = ($("#ep").value || "").trim() || "https://baconbypass.xyz"; if (!validUrl(ep)) return res('<span class="er">Endpoint không hợp lệ (cần http/https).</span>');
-    S.saveApi(ep, ($("#key").value || "").trim()).then(() => toast("Đã lưu cấu hình API.")).catch(e => toast(e.message, "err")); };
-  $("#clear").onclick = () => S.clearApi().then(() => { filled = false; $("#key").value = ""; res("Đã ngắt kết nối / xóa cấu hình API."); toast("Đã ngắt kết nối API."); }).catch(e => toast(e.message, "err"));
-  $("#test").onclick = async () => {
-    const ep = ($("#ep").value || "https://baconbypass.xyz").trim(), key = ($("#key").value || "").trim();
-    if (!validUrl(ep)) return res('<span class="er">Endpoint không hợp lệ (cần bắt đầu bằng http/https).</span>');
-    $("#dot").className = "dot load"; res('<span class="in">Đang thử kết nối tới ' + esc(ep) + " …</span>");
-    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 8000), headers = {}; if (key) { headers.Authorization = "Bearer " + key; headers["X-API-Key"] = key; }
-    try { const r = await fetch(ep, { method: "GET", mode: "cors", signal: ctrl.signal, headers }); clearTimeout(t);
-      res(r.ok ? '<span class="ok">✓ Kết nối thành công.</span> HTTP ' + r.status : '<span class="er">✗ Lỗi HTTP ' + r.status + "</span>"); dlog(r.ok ? "ok" : "er", "API test: HTTP " + r.status);
-    } catch (e) { clearTimeout(t); res('<span class="er">✗ ' + (e && e.name === "AbortError" ? "Hết thời gian chờ (8s)." : "Không kết nối được (lỗi mạng hoặc CORS).") + "</span>"); }
-    status();
-  };
-  return u;
 }
