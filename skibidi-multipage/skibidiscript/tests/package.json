@@ -1,3 +1,0 @@
-{ "name": "skibidi-tests", "private": true, "type": "module",
-  "scripts": { "test": "node rules.test.mjs && node e2e.test.mjs" },
-  "//": "Cần Playwright + Chromium đã cài sẵn. Không có phụ thuộc npm nào khác." }
