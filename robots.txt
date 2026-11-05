@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /dev
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /profile
+Disallow: /settings
+Disallow: /search
+Disallow: /api/
+
+Sitemap: https://skibidiscript.vercel.app/sitemap.xml
