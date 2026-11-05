@@ -1,4 +1,0 @@
-
-/* Khu vực quản trị giữ tách biệt, đồng bộ bảng màu trung tính */
-#view .devhead,#view .devnav,#view .devcard,#view .dt-card{filter:grayscale(1)}
-#view .devtag{background:#e5e5e5;color:#111;border:1px solid #fff}

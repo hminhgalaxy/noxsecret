@@ -1,5 +1,0 @@
-
-.auth-eyebrow{font-size:10px;letter-spacing:.22em;color:var(--text-muted);font-weight:800;margin-top:-8px}
-.auth-between{display:flex;justify-content:flex-end;margin-top:-6px}
-.auth-between a,.gnote a,.alink{color:var(--text-primary);text-decoration:underline;text-decoration-color:#777;text-underline-offset:4px}
-.captcha-frame{display:flex;justify-content:center;max-width:100%;overflow-x:auto;border:1px solid rgba(255,255,255,.14);border-radius:13px;padding:9px;background:rgba(255,255,255,.025)}
