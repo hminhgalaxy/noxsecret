@@ -1,6 +1,6 @@
 /* Kho dữ liệu realtime dùng chung: mỗi node chỉ có MỘT listener cho cả ứng dụng. */
 import { db, TS } from "./firebase.js";
-import { DATA_ROOT, CATS_NODE, MAINT_NODE, NOTICE_NODE, THEME_NODE, USERS_NODE, UPDATES_NODE, THEME_PUBLIC_KEYS } from "./config.js";
+import { DATA_ROOT, CATS_NODE, MAINT_NODE, NOTICE_NODE, THEME_NODE, USERS_NODE, UPDATES_NODE, ADMIN_NODE, THEME_PUBLIC_KEYS } from "./config.js";
 import { session } from "./auth.js";
 import { pick, vi, validUrl } from "./util.js";
 import { dlog } from "./log.js";
@@ -13,7 +13,7 @@ export const BASE_CATS = [
 ];
 export const store = {
   cats: BASE_CATS.slice(), data: {}, status: {}, live: {}, maint: null, notice: null, updates: [], theme: {}, connected: false,
-  users: null, catsLoaded: false, started: false
+  users: null, admins: {}, catsLoaded: false, started: false
 };
 const subs = new Set();
 export const subscribe = fn => { subs.add(fn); return () => subs.delete(fn); };
@@ -158,14 +158,16 @@ export function syncDevListeners() {
     devOn = true;
     db.ref(USERS_NODE).on("value", s => { const v = s.val() || {}; store.users = Object.keys(v).map(k => ({ uid: k, ...v[k] })).sort((a, b) => (b.lastLogin || 0) - (a.lastLogin || 0)); mark("users"); emit("users"); },
       e => { store.users = null; dlog("er", "Users: " + (e.code || e.message)); mark("users"); emit("users"); });
+    db.ref(ADMIN_NODE).on("value", s => { store.admins = s.val() || {}; emit("users"); }, e => dlog("er", "Admin: " + (e.code || e.message)));
   } else if (!session.isDev && devOn) {
-    devOn = false; db.ref(USERS_NODE).off(); store.users = null; loadedKeys.delete("users"); emit("users");
+    devOn = false; db.ref(USERS_NODE).off(); db.ref(ADMIN_NODE).off(); store.admins = {}; store.users = null; loadedKeys.delete("users"); emit("users");
   }
 }
 
 /* ───────── GHI DỮ LIỆU (quyền thật do Firebase Rules quyết định) ───────── */
 const denied = e => { const x = new Error(e.code === "PERMISSION_DENIED" || e.code === "permission-denied" ? "Bạn không có quyền thực hiện thao tác này." : "Chưa lưu được. Vui lòng kiểm tra mạng và thử lại."); x.code = e.code; return x; };
 const guardDev = () => { if (!db) throw new Error("Chưa kết nối được dữ liệu. Vui lòng tải lại trang."); if (!session.isDev) throw new Error("Bạn không có quyền thực hiện thao tác này."); };
+const guardStaff = () => { if (!db) throw new Error("Chưa kết nối được dữ liệu. Vui lòng tải lại trang."); if (!session.isDev && !session.isEditor) throw new Error("Bạn không có quyền thực hiện thao tác này."); };
 const wrap = p => p.catch(e => { dlog("er", "Ghi: " + (e.code || e.message)); throw denied(e); });
 
 export const FIELD_RULES = { name: 200, desc: 2000, url: 2048, img: 2048, code: 200000 };
@@ -183,14 +185,14 @@ export function validateItem(cat, f) {
 }
 /* fields: chỉ các khóa CÓ MẶT trong form được ghi (rỗng → null để xóa); khóa khác giữ nguyên (không đổi schema cũ) */
 export function saveItem(catId, key, fields) {
-  guardDev();
+  guardStaff();
   const p = {}; Object.keys(fields).forEach(k => { const v = fields[k]; p[k] = (v === "" || v === false) ? null : v; });
   if (key) { p.updatedAt = TS(); return wrap(db.ref(nodePath(catId) + "/" + key).update(p)).then(() => key); }
   Object.keys(p).forEach(k => { if (p[k] === null) delete p[k]; });
   p.createdAt = TS(); if (p.code) p.copies = 0;
   const r = db.ref(nodePath(catId)).push(); return wrap(r.set(p)).then(() => r.key);
 }
-export function deleteItem(catId, key) { guardDev(); return wrap(db.ref(nodePath(catId) + "/" + key).remove()); }
+export function deleteItem(catId, key) { guardStaff(); return wrap(db.ref(nodePath(catId) + "/" + key).remove()); }
 export function incCopies(catId, it) {
   if (!db || it.copies == null) return Promise.resolve();
   return db.ref(nodePath(catId) + "/" + it.key + "/copies").set(it.copies + 1).catch(() => {});
@@ -217,6 +219,14 @@ export function addUpdate({ title, body }) {
   if (title.length > 120) return Promise.reject(new Error("Tiêu đề tối đa 120 ký tự."));
   if (body.length > 2000) return Promise.reject(new Error("Nội dung tối đa 2000 ký tự."));
   return wrap(db.ref(UPDATES_NODE).push({ title, body, ts: TS() }));
+}
+/* Quyền người dùng (chỉ DEV): vai trò, ban, mute. until = mốc thời gian (ms); PERM_UNTIL = vĩnh viễn */
+export const PERM_UNTIL = 4102444800000;
+export function setUserAdmin(uid, patch) {
+  guardDev(); if (!uid) return Promise.reject(new Error("Thiếu người dùng."));
+  const p = {}; Object.keys(patch).forEach(k => { p[k] = (patch[k] === "" || patch[k] === undefined) ? null : patch[k]; });
+  p.by = session.user.email || "DEV"; p.ts = TS();
+  return wrap(db.ref(ADMIN_NODE + "/" + uid).update(p));
 }
 export function deleteUpdate(key) { guardDev(); return wrap(db.ref(UPDATES_NODE + "/" + key).remove()); }
 export const setNotice = p => { guardDev(); return wrap(db.ref(NOTICE_NODE).update({ ...p, updatedAt: TS() })); };

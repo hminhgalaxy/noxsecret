@@ -23,7 +23,7 @@ export function mount(ctx) {
   };
   list.addEventListener("click", e => {
     const b = e.target.closest("[data-del]"); if (!b) return;
-    armDelete(b, () => S.deleteUpdate(b.dataset.del).then(() => toast("Đã xóa bài.")).catch(x => toast(friendly(x), "err")));
+    armDelete(b, () => S.deleteUpdate(b.dataset.del).then(() => toast("Đã xóa bài.")).catch(x => toast(friendly(x), "err")), { title: "Xóa bài cập nhật này?", message: "Bài sẽ biến mất khỏi trang chủ và trang Thông báo của mọi người." });
   });
   f.addEventListener("submit", async e => {
     e.preventDefault(); err.textContent = ""; f.querySelectorAll(".field-error").forEach(x => { x.textContent = ""; });

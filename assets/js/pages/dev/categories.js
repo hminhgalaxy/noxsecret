@@ -22,7 +22,7 @@ export function mount(ctx) {
   icons.addEventListener("click", e => { const b = e.target.closest("[data-ic]"); if (b) { icon = b.dataset.ic; drawIcons(); } }); drawIcons();
   const drawList = () => { list.innerHTML = S.store.cats.map(c => `<div class="drow"><span class="ci">${icoOf(c)}</span><span class="nm">${esc(c.label)} ${c.base ? '<span class="badge">Mặc định</span>' : ""}</span>
     <a class="ib" href="${S.catHref(c)}" aria-label="Mở ${esc(c.label)}">${ICO.eye}</a>${c.base ? "" : `<button class="ib del" type="button" data-cat="${esc(c.id)}" aria-label="Xóa danh mục ${esc(c.label)}">${ICO.trash}</button>`}</div>`).join(""); };
-  list.addEventListener("click", e => { const b = e.target.closest("[data-cat]"); if (b) armDelete(b, () => S.deleteCategory(b.dataset.cat).then(() => toast("Đã xóa danh mục.")).catch(x => toast(friendly(x), "err"))); });
+  list.addEventListener("click", e => { const b = e.target.closest("[data-cat]"); if (b) armDelete(b, () => S.deleteCategory(b.dataset.cat).then(() => toast("Đã xóa danh mục.")).catch(x => toast(friendly(x), "err")), { title: "Xóa danh mục này?", message: "Nội dung bên trong danh mục sẽ không bị xóa." }); });
   f.addEventListener("submit", async e => {
     e.preventDefault(); err.textContent = ""; const en = ctx.el.querySelector('[data-err="name"]'); en.textContent = "";
     const name = f.name.value.trim(); if (!name) { en.textContent = "Vui lòng nhập tên danh mục."; f.name.focus(); return; }

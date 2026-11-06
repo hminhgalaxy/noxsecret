@@ -12,7 +12,7 @@ export async function mount(ctx) {
   if (!cat) return notFound(ctx, "Danh mục này không tồn tại.");
   const base = S.catHref(cat), edit = ctx.def.mode === "edit", key = ctx.params.id;
   const crumbs = crumbsFor(cat).concat([{ label: cat.label, href: base }]);
-  if (!session.isDev) { ctx.setPage({ title: "Không có quyền", crumbs, noindex: true }); ctx.el.innerHTML = lockedHTML("Chỉ quản trị viên mới được thêm hoặc sửa nội dung."); return; }
+  if (!session.isDev && !session.isEditor) { ctx.setPage({ title: "Không có quyền", crumbs, noindex: true }); ctx.el.innerHTML = lockedHTML("Chỉ quản trị viên mới được thêm hoặc sửa nội dung."); return; }
   ctx.setPage({ title: edit ? "Chỉnh sửa" : "Thêm vào " + cat.label, crumbs, noindex: true });
   const fields = fieldsFor(cat);
   const render = it => {
@@ -33,7 +33,7 @@ export async function mount(ctx) {
       const v = {}; fields.forEach(f => { const el = fm.elements[f.k]; v[f.k] = f.check ? el.checked : (f.k === "code" ? el.value : el.value.trim()); });
       const full = { name: "", desc: "", url: "", code: "", img: "", ...v };
       const errs = S.validateItem(cat, full); fieldErrors(fm, errs); if (Object.keys(errs).length) return;
-      if (!session.isDev) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
+      if (!session.isDev && !session.isEditor) { err.textContent = "Bạn không có quyền thực hiện thao tác này."; return; }
       btn.classList.add("busy");
       try { await S.saveItem(cat.id, edit ? key : null, v); toast(edit ? "Đã lưu chỉnh sửa." : "Đã thêm nội dung mới."); ctx.navigate(base); }
       catch (ex) { err.textContent = friendly(ex); btn.classList.remove("busy"); }

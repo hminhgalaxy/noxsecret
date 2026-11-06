@@ -1,7 +1,7 @@
 /* Nền tùy chỉnh + nhạc nền (dữ liệu từ nox_theme, chỉ các khóa công khai) */
 import { $, esc, toast } from "./util.js";
 import { store } from "./store.js";
-import { isMuted, setMuted } from "./prefs.js";
+import { isMuted, setMuted, isBgHidden, getVolume } from "./prefs.js";
 
 const bgm = () => $("#bgm");
 let armed = false;
@@ -31,7 +31,7 @@ export function toggleSound() {
 }
 export function applyMedia() {
   const t = store.theme || {}, layer = $("#themeLayer"), a = bgm();
-  const hasBg = !!(t.bgData && t.bgType && t.bgType !== "none");
+  const hasBg = !!(t.bgData && t.bgType && t.bgType !== "none") && !isBgHidden();
   document.body.classList.toggle("has-bg", hasBg);
   if (hasBg) {
     const sig = t.bgType + "|" + String(t.bgData).length + "|" + String(t.bgData).slice(-40);
@@ -45,4 +45,4 @@ export function applyMedia() {
   else { a.pause(); if (a.dataset.src) { a.removeAttribute("src"); a.dataset.src = ""; } }
   renderSound();
 }
-export function initMedia() { const a = bgm(); a.volume = 0.55; a.addEventListener("play", renderSound); a.addEventListener("pause", renderSound); }
+export function initMedia() { const a = bgm(); a.volume = getVolume() / 100; document.addEventListener("prefs-change", () => { a.volume = getVolume() / 100; applyMedia(); }); a.addEventListener("play", renderSound); a.addEventListener("pause", renderSound); }

@@ -4,6 +4,7 @@ import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";
 import { friendly } from "../../lib/messages.js";
 import { locked, devCrumb } from "./shared.js";
+import { confirmDialog } from "../../lib/confirm.js";
 
 export function mount(ctx) {
   if (locked(ctx)) return;
@@ -23,7 +24,8 @@ export function mount(ctx) {
   const notice = () => { const n = S.store.notice; $("#nOn").checked = !!(n && n.enabled !== false); if (!filled && n) { filled = true; $("#nT").value = n.title || ""; $("#nB").value = n.body || ""; } };
   conn(); maint(); notice();
   const u1 = S.subscribe(t => { if (t === "conn") conn(); else if (t === "maint") maint(); else if (t === "notice") notice(); });
-  $("#mBtn").onclick = () => { const on = !!(S.store.maint && S.store.maint.enabled); let m = parseInt($("#mins").value, 10); if (!isFinite(m) || m < 1) m = 1;
+  $("#mBtn").onclick = async () => { const on = !!(S.store.maint && S.store.maint.enabled); let m = parseInt($("#mins").value, 10); if (!isFinite(m) || m < 1) m = 1;
+    if (!on && !(await confirmDialog({ title: "Bật chế độ bảo trì?", message: "Toàn bộ website sẽ đóng với mọi người cho tới khi hết " + m + " phút hoặc bạn mở lại.", ok: "Bật bảo trì", danger: true }))) return;
     S.setMaintenance(!on, m).then(() => toast(on ? "Website đã mở lại." : "Đã bật bảo trì (tự mở lại sau " + m + " phút).")).catch(x => toast(friendly(x), "err")); };
   $("#nOn").onchange = e => { const v = e.target.checked; S.setNotice({ enabled: v }).then(() => toast(v ? "Đã bật thông báo." : "Đã tắt thông báo.")).catch(x => { e.target.checked = !v; toast(friendly(x), "err"); }); };
   $("#nf").addEventListener("submit", e => { e.preventDefault(); $("#nE").textContent = ""; const title = $("#nT").value.trim(), body = $("#nB").value.trim();

@@ -1,11 +1,16 @@
 /* Phiên đăng nhập dùng chung. Một listener onAuthStateChanged duy nhất cho mọi trang. */
 import { auth, db, TS, GoogleProvider } from "./firebase.js";
-import { DEV_EMAIL, GOOGLE_CLIENT_ID, USERS_NODE } from "./config.js";
+import { DEV_EMAIL, GOOGLE_CLIENT_ID, USERS_NODE, ADMIN_NODE } from "./config.js";
 import { dlog } from "./log.js";
 import { authMessage, GENERIC } from "./messages.js";
 
 const subs = new Set();
-export const session = { user: null, ready: false, isDev: false, devBlocked: "" };
+export const session = { user: null, ready: false, isDev: false, devBlocked: "", isGuest: false, isEditor: false, adminLoaded: false, profile: null, admin: null, banned: null };
+/* Quyền theo hồ sơ quản trị của chính người dùng (do DEV cấp): vai trò, ban, mute */
+const active = t => typeof t === "number" && t > Date.now();
+export const banInfo = () => (session.admin && active(session.admin.banUntil)) ? { until: session.admin.banUntil, reason: session.admin.banReason || "" } : null;
+export const muteInfo = () => (session.admin && active(session.admin.muteUntil)) ? { until: session.admin.muteUntil, reason: session.admin.muteReason || "" } : null;
+export const isEditor = () => !!(session.user && !session.isGuest && session.user.emailVerified && session.admin && session.admin.role === "editor" && !banInfo());
 let readyResolve; export const ready = new Promise(r => { readyResolve = r; });
 
 export function computeDev(u) {
@@ -16,20 +21,36 @@ export function computeDev(u) {
   return { dev: true, why: "" };
 }
 function apply(u) {
-  session.user = u || null;
+  session.user = u || null; session.isGuest = !!(u && u.isAnonymous); session.isEditor = isEditor();
   const r = computeDev(u); session.isDev = r.dev; session.devBlocked = r.why;
   if (!session.ready) { session.ready = true; readyResolve(); }
   subs.forEach(f => { try { f(session); } catch (e) { console.error(e); } });
 }
+/* Chờ hồ sơ quyền (vai trò) của người dùng tải xong — tối đa 3 giây — trước khi quyết định trang chỉ dành cho nhân sự */
+export const adminReady = () => (!session.user || session.isGuest || session.adminLoaded) ? Promise.resolve() : new Promise(res => { const off = onAuth(() => { if (session.adminLoaded) { off(); res(); } }); setTimeout(() => { off(); res(); }, 3000); });
 export const onAuth = fn => { subs.add(fn); return () => subs.delete(fn); };
 
 if (auth) {
   auth.onAuthStateChanged(u => {
     dlog(u ? "ok" : "in", u ? "Auth: " + u.email : "Auth: chưa đăng nhập.");
-    apply(u); if (u) touchProfile(u);
+    apply(u); if (u && !u.isAnonymous) touchProfile(u); watchSelf(u);
   }, e => { dlog("er", "Auth: " + (e.code || e.message)); apply(null); });
   setTimeout(() => { if (!session.ready) apply(null); }, 8000); // không treo vô hạn nếu SDK lỗi
 } else apply(null);
+
+/* Theo dõi hồ sơ + hồ sơ quản trị của chính mình (mô tả, avatar, vai trò, ban/mute). Bị ban → đăng xuất ngay. */
+let offSelf = [], banShown = 0;
+function watchSelf(u) {
+  offSelf.forEach(f => f()); offSelf = []; session.profile = null; session.admin = null; session.isEditor = false; session.adminLoaded = false;
+  if (!u || !db) return;
+  const notify = () => subs.forEach(f => { try { f(session); } catch (e) { console.error(e); } });
+  if (!u.isAnonymous) { const r = db.ref(USERS_NODE + "/" + u.uid), h = r.on("value", sn => { session.profile = sn.val() || null; notify(); }, () => {}); offSelf.push(() => r.off("value", h)); }
+  const ra = db.ref(ADMIN_NODE + "/" + u.uid), ha = ra.on("value", sn => {
+    session.admin = sn.val() || null; session.adminLoaded = true; session.isEditor = isEditor(); const b = banInfo();
+    if (b) { session.banned = b; if (Date.now() - banShown > 4000) { banShown = Date.now(); import("./confirm.js").then(m => m.alertDialog({ title: "Account suspended", message: b.reason ? "Reason: " + b.reason : "Your account has been suspended by an administrator.", ok: "OK", danger: true })).catch(() => {}); } need().signOut().catch(() => {}); }
+    notify();
+  }, () => { session.adminLoaded = true; notify(); }); offSelf.push(() => ra.off("value", ha));
+}
 
 /* Ghi hồ sơ (best-effort) để /dev/users có dữ liệu thật. Rules chỉ cho ghi đúng node của chính mình. */
 async function touchProfile(u) {
@@ -54,6 +75,13 @@ export async function signUpEmail(e, p, name) {
 }
 export const resetPassword = e => need().sendPasswordResetEmail(e);
 export const signOut = () => need().signOut();
+/* Đăng nhập khách (ẩn danh): không phải người dùng thật, bị hạn chế một số thứ */
+export const signInGuest = () => need().signInAnonymously();
+/* Mô tả + avatar của chính mình */
+export async function saveProfileFields(fields) {
+  const u = need().currentUser; if (!u || u.isAnonymous || !db) throw new Error("Bạn cần đăng nhập để làm việc này.");
+  await db.ref(USERS_NODE + "/" + u.uid).update(fields);
+}
 export async function resendVerification() { const u = need().currentUser; if (!u) throw new Error("Bạn chưa đăng nhập."); return u.sendEmailVerification(); }
 /* Đổi tên hiển thị và làm mới phiên để mọi nơi trên web cập nhật ngay */
 export async function updateDisplayName(name) {

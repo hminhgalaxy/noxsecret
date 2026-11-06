@@ -1,13 +1,14 @@
-/* Ngôn ngữ giao diện: Tiếng Việt (mặc định, viết sẵn trong mã) và English.
+/* Ngôn ngữ giao diện: English (mặc định) và Tiếng Việt (chữ gốc viết sẵn trong mã).
    Khi chọn English, từ điển (i18n-en.js) được nạp và mọi chữ trên trang được dịch tại chỗ — kể cả nội dung dựng sau đó
    (thông báo, hộp thoại, trang mới). Chọn lại Tiếng Việt thì khôi phục nguyên bản. Nội dung do người quản trị nhập không bị dịch. */
 const K = "ssw_lang";
 const ATTRS = ["placeholder", "aria-label", "title", "alt", "value"];
-let dict = null, lang = "vi", mo = null;
+let dict = null, lang = "vi", mo = null; /* "vi" = chưa dịch (chữ gốc trong mã) cho tới khi initI18n chạy */
 const listeners = new Set();
 const textOrig = new WeakMap(), textDone = new WeakMap(), attrOrig = new WeakMap();
 
-export const getLang = () => { try { return localStorage.getItem(K) === "en" ? "en" : "vi"; } catch (_) { return "vi"; } };
+/* Ngôn ngữ chính của web là English; chỉ khi người dùng chủ động chọn Tiếng Việt mới dùng bản Việt */
+export const getLang = () => { try { return localStorage.getItem(K) === "vi" ? "vi" : "en"; } catch (_) { return "en"; } };
 export const onLangChange = fn => { listeners.add(fn); return () => listeners.delete(fn); };
 
 /* Dịch một chuỗi (giữ nguyên khoảng trắng đầu/cuối). Tiếng Việt → trả nguyên. */

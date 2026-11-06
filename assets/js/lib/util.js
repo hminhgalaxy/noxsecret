@@ -1,6 +1,6 @@
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-export const RM = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+export const RM = (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches) || (() => { try { return localStorage.getItem("ssw_rm") === "1"; } catch (_) { return false; } })();
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 export const pick = (o, ks) => { for (const k of ks) if (o && o[k] != null && o[k] !== "") return o[k]; return ""; };
 export const vi = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");

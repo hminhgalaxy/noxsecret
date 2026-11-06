@@ -1,6 +1,6 @@
 /* Điểm khởi động: nối các mô-đun lại với nhau. Mỗi việc cụ thể nằm trong file riêng ở lib/. */
-import { applyThemePref, applyGlass } from "./lib/prefs.js";
-applyThemePref(); applyGlass();
+import { applyThemePref, applyAllPrefs } from "./lib/prefs.js";
+applyThemePref(); applyAllPrefs();
 import { $, safeNext } from "./lib/util.js";
 import { dlog } from "./lib/log.js";
 import * as router from "./lib/router.js";

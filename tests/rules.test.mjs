@@ -3,10 +3,12 @@ import "./rules-engine.js";
 const { create, setAt, split } = globalThis.RulesEngine;
 const rules = JSON.parse(fs.readFileSync(new URL("../database.rules.json", import.meta.url)));
 const eng = create(rules);
-const DEV = { uid: "d1", token: { email: "HMinhGalaxy@gmail.com", email_verified: true } };
-const DEV_UNVERIFIED = { uid: "d2", token: { email: "hminhgalaxy@gmail.com", email_verified: false } };
-const USER = { uid: "u1", token: { email: "user@example.com", email_verified: true } };
-const OTHER = { uid: "u2", token: { email: "other@example.com", email_verified: true } };
+const DEV = { uid: "d1", token: { email: "HMinhGalaxy@gmail.com", email_verified: true, firebase: { sign_in_provider: "password" } } };
+const DEV_UNVERIFIED = { uid: "d2", token: { email: "hminhgalaxy@gmail.com", email_verified: false, firebase: { sign_in_provider: "password" } } };
+const USER = { uid: "u1", token: { email: "user@example.com", email_verified: true, firebase: { sign_in_provider: "password" } } };
+const OTHER = { uid: "u2", token: { email: "other@example.com", email_verified: true, firebase: { sign_in_provider: "password" } } };
+const GUEST = { uid: "g1", token: { firebase: { sign_in_provider: "anonymous" } } };
+const ED = { uid: "e1", token: { email: "editor@example.com", email_verified: true, firebase: { sign_in_provider: "password" } } };
 let root = {
   nox_data: { scripts: { s1: { name: "A", code: "x", copies: 3, createdAt: 1 }, legacy: { title: "Cũ", script: "y" } }, links: { l1: { name: "L", url: "https://a.b" } } },
   nox_categories: { c1: { name: "Mod", node: "mod" } }, nox_maintenance: { enabled: false }, nox_notice: { title: "t", body: "b", enabled: true },
@@ -94,5 +96,45 @@ t("thiếu tiêu đề bị chặn", W("nox_updates/u1", { body: "x", ts: 1 }, D
 t("tiêu đề quá dài bị chặn", W("nox_updates/u1", { title: "a".repeat(121), ts: 1 }, DEV), false);
 t("khóa lạ bị chặn", W("nox_updates/u1", { ...upd, evil: 1 }, DEV), false);
 t("DEV xóa cập nhật", W("nox_updates/u1", null, DEV), true);
+
+console.log("\nHỒ SƠ (mô tả + avatar), KHÁCH, QUYỀN, BAN, MUTE");
+const NOW = Date.now(), IMG = "data:image/jpeg;base64," + "A".repeat(2000);
+root.nox_admin = { e1: { role: "editor" }, u2: { banUntil: NOW + 3600000, banReason: "spam" }, m1: { muteUntil: NOW + 3600000 }, x1: { banUntil: NOW - 1000 } };
+root.nox_users.m1 = { email: "m@example.com", bio: "old" };
+const MUTED = { uid: "m1", token: { email: "m@example.com", email_verified: true, firebase: { sign_in_provider: "password" } } };
+const EXPIRED = { uid: "x1", token: { email: "x@example.com", email_verified: true, firebase: { sign_in_provider: "password" } } };
+t("người dùng ghi mô tả của mình", W("nox_users/u1/bio", "Xin chào", USER), true);
+t("mô tả 300 ký tự được", W("nox_users/u1/bio", "a".repeat(300), USER), true);
+t("mô tả 301 ký tự bị chặn", W("nox_users/u1/bio", "a".repeat(301), USER), false);
+t("không ghi mô tả của người khác", W("nox_users/u1/bio", "hack", OTHER), false);
+t("khách (ẩn danh) KHÔNG ghi hồ sơ", W("nox_users/g1/bio", "hi", GUEST) || U("nox_users/g1", { email: "", lastLogin: 1 }, GUEST), false);
+t("đặt avatar hợp lệ (ảnh nhỏ)", W("nox_users/u1/avatar", IMG, USER), true);
+t("avatar không phải ảnh bị chặn", W("nox_users/u1/avatar", "javascript:alert(1)", USER), false);
+t("avatar > 24000 ký tự bị chặn", W("nox_users/u1/avatar", "data:image/jpeg;base64," + "A".repeat(24000), USER), false);
+t("xóa avatar (chuỗi rỗng)", W("nox_users/u1/avatar", "", USER), true);
+t("không thể tự đặt role", W("nox_admin/u1/role", "editor", USER), false);
+t("không thể tự gỡ ban", W("nox_admin/u2/banUntil", null, OTHER), false);
+t("người dùng đọc hồ sơ quyền của MÌNH", R("nox_admin/u2", OTHER), true);
+t("người dùng KHÔNG đọc hồ sơ quyền người khác", R("nox_admin/u2", USER), false);
+t("khách KHÔNG đọc nox_admin", R("nox_admin", null), false);
+t("DEV đọc toàn bộ nox_admin", R("nox_admin", DEV), true);
+t("DEV cấp quyền editor", W("nox_admin/u1", { role: "editor", ts: NOW }, DEV), true);
+t("role lạ bị chặn", W("nox_admin/u1", { role: "root" }, DEV), false);
+t("DEV ban có thời hạn + lý do", W("nox_admin/u1", { banUntil: NOW + 1000, banReason: "x" }, DEV), true);
+t("DEV chưa xác minh email KHÔNG đổi quyền", W("nox_admin/u1", { role: "editor" }, DEV_UNVERIFIED), false);
+t("editor thêm nội dung", W("nox_data/scripts/n1", { name: "Mới", code: "x", createdAt: 1 }, ED), true);
+t("editor KHÔNG đăng cập nhật (chỉ DEV)", W("nox_updates/e1", { title: "Tin", ts: 1 }, ED), false);
+t("editor KHÔNG sửa danh mục", W("nox_categories/zz", { name: "X", node: "x" }, ED), false);
+t("editor KHÔNG bật bảo trì", W("nox_maintenance/enabled", true, ED), false);
+t("editor KHÔNG đổi giao diện", W("nox_theme/bgType", "none", ED), false);
+t("editor KHÔNG cấp quyền người khác", W("nox_admin/u1/role", "editor", ED), false);
+t("người thường KHÔNG thêm nội dung", W("nox_data/scripts/n2", { name: "Mới", code: "x", createdAt: 1 }, USER), false);
+t("editor bị ban KHÔNG thêm nội dung", eng.write([{ segs: split("nox_data/scripts/n3"), value: { name: "A", code: "x", createdAt: 1 } }], { ...ED, uid: "u2", token: { ...ED.token, email: "other@example.com" } }, { ...root, nox_admin: { ...root.nox_admin, u2: { role: "editor", banUntil: NOW + 5000 } } }).ok, false);
+t("người bị ban KHÔNG ghi hồ sơ", W("nox_users/u2/bio", "hi", OTHER), false);
+t("ban đã hết hạn thì ghi được", W("nox_users/x1/bio", "hi", EXPIRED), true);
+t("người bị mute KHÔNG đổi mô tả", W("nox_users/m1/bio", "new", MUTED), false);
+t("người bị mute KHÔNG đổi avatar", W("nox_users/m1/avatar", IMG, MUTED), false);
+t("người bị mute vẫn cập nhật lastLogin", W("nox_users/m1/lastLogin", NOW, MUTED), true);
+t("người bị mute ghi lại đúng mô tả cũ vẫn được (không đổi)", W("nox_users/m1/bio", "old", MUTED), true);
 
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

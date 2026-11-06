@@ -29,9 +29,9 @@ export function registerRoutes() {
   const family = (prefix, extra) => {
     const needs = catNeeds(extra);
     define(prefix, { load: L("items/list"), guard: "public", needs, ...extra });
-    define(prefix + "/create", { load: L("items/form"), guard: "dev", mode: "create", needs, ...extra });
+    define(prefix + "/create", { load: L("items/form"), guard: "staff", mode: "create", needs, ...extra });
     define(prefix + "/:id", { load: L("items/detail"), guard: "public", needs, ...extra });
-    define(prefix + "/:id/edit", { load: L("items/form"), guard: "dev", mode: "edit", needs, ...extra });
+    define(prefix + "/:id/edit", { load: L("items/form"), guard: "staff", mode: "edit", needs, ...extra });
   };
   BASE_PATHS.forEach(([seg, catId]) => family("/" + seg, { catId }));
   family("/c/:node", { custom: true });

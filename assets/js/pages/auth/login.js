@@ -4,7 +4,7 @@ import { ICO } from "../../lib/icons.js";
 import { signInEmail } from "../../lib/auth.js";
 import { dlog } from "../../lib/log.js";
 import { authMessage } from "../../lib/messages.js";
-import { emailError, EMAIL_EXAMPLE, nextOf, withNext, shell, field, pwField, wireEyes, setErr, busy, captchaHTML, googleHTML, setupSecurity } from "./shared.js";
+import { emailError, EMAIL_EXAMPLE, nextOf, withNext, shell, field, pwField, wireEyes, setErr, busy, captchaHTML, googleHTML, setupSecurity, guestHTML, wireGuest } from "./shared.js";
 
 export function mount(ctx) {
   ctx.setPage({ hero: true, title: "Đăng nhập", desc: "Đăng nhập để dùng đầy đủ tính năng của SKIBIDI SCRIPT WEB." });
@@ -17,11 +17,12 @@ export function mount(ctx) {
       ${captchaHTML}
       <p class="form-error" id="err" role="alert" aria-live="polite"></p>
       <button class="btn primary lg block" type="submit">Đăng nhập</button>
-    </form>${googleHTML}
+    </form>${googleHTML}${guestHTML}
     <p class="auth-foot">Chưa có tài khoản? <a href="${withNext("/register", ctx)}">Đăng ký ngay</a></p>`);
   const f = ctx.el.querySelector("#f"), err = ctx.el.querySelector("#err"), btn = f.querySelector("button[type=submit]");
   wireEyes(ctx.el);
   const sec = setupSecurity(ctx, err, { onGoogleDone: () => toast("Đăng nhập thành công.") });
+  wireGuest(ctx, err, () => toast("Đã vào với tư cách khách."));
   f.addEventListener("submit", async e => {
     e.preventDefault(); err.textContent = ""; const errs = {};
     const email = f.email.value.trim(), pass = f.password.value;

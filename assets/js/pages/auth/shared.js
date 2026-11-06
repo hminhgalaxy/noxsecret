@@ -1,9 +1,10 @@
 /* Phần dùng chung của đăng nhập / đăng ký / quên mật khẩu. */
 import { esc, safeNext } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
-import { renderGoogleButton } from "../../lib/auth.js";
+import { renderGoogleButton, signInGuest } from "../../lib/auth.js";
 import { mountCaptcha, verifyCaptcha } from "../../lib/turnstile.js";
 import { authMessage } from "../../lib/messages.js";
+import { navigate } from "../../lib/router.js";
 
 /* Email hợp lệ: có @, có tên miền và đuôi như .com / .vn (không khoảng trắng, không hai dấu chấm liền nhau) */
 export const EMAIL_RE = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$/;
@@ -30,6 +31,16 @@ export const busy = (btn, on) => { btn.classList.toggle("busy", on); btn.disable
 /* Khối captcha + nút Google: dùng chung cho đăng nhập và đăng ký */
 export const captchaHTML = `<div class="captcha" id="captcha" aria-label="Xác minh bạn không phải người máy"></div>`;
 export const googleHTML = `<div class="divider"><span>HOẶC</span></div><div class="gbtn" id="gbtn">${ICO.google}<span>Tiếp tục với Google</span><div class="g-real" id="g"></div></div>`;
+/* Đăng nhập khách: xem và sao chép được, nhưng không có hồ sơ riêng */
+export const guestHTML = `<button class="btn ghost block guest-btn" id="guestBtn" type="button">${ICO.user}<span>Tiếp tục với tư cách khách</span></button><p class="sub-note guest-note">Khách chỉ xem và sao chép nội dung, không có hồ sơ riêng.</p>`;
+export function wireGuest(ctx, errEl, onDone) {
+  const b = ctx.el.querySelector("#guestBtn"); if (!b) return;
+  b.addEventListener("click", async () => {
+    errEl.textContent = ""; b.disabled = true; b.classList.add("busy");
+    try { await signInGuest(); onDone && onDone(); navigate(nextOf(ctx) || "/"); }
+    catch (ex) { errEl.textContent = authMessage(ex); b.disabled = false; b.classList.remove("busy"); }
+  });
+}
 export function setupSecurity(ctx, errEl, { onGoogleDone }) {
   let human = false, failed = false;
   const gbtn = ctx.el.querySelector("#gbtn");

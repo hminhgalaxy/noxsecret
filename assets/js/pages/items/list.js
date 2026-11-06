@@ -12,7 +12,7 @@ export async function mount(ctx) {
   let q = "", first = true;
   const head = () => { const a = S.items(cat.id), n = (a || []).length;
     ctx.setPage({ title: cat.label, sub: cat.sub, crumbs: crumbsFor(cat), count: a ? n + " mục" : null, desc: cat.label + " — " + (cat.sub || "Danh mục trên SKIBIDI SCRIPT WEB") + (a ? " (" + n + " mục)" : ""),
-      actions: session.isDev ? `<a class="btn primary" href="${S.catHref(cat)}/create">${ICO.plus}Thêm mới</a>` : "" }); };
+      actions: (session.isDev || session.isEditor) ? `<a class="btn primary" href="${S.catHref(cat)}/create">${ICO.plus}Thêm mới</a>` : "" }); };
   ctx.el.innerHTML = `<div class="toolbar"><div class="field"><label class="sr" for="catFilter">Lọc nội dung</label><input id="catFilter" type="search" placeholder="Lọc trong ${esc(cat.label)}…" autocomplete="off"></div></div><div class="grid" id="grid"></div>`;
   const grid = ctx.el.querySelector("#grid");
   const draw = () => {

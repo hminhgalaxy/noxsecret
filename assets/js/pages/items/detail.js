@@ -16,7 +16,7 @@ export async function mount(ctx) {
     if (!it && !settled(cat)) { ctx.setPage({ title: cat.label, crumbs: crumbsFor(cat) }); ctx.el.innerHTML = `<div class="grid one">${skeletonHTML(1)}</div>`; return; }
     if (!it) { ctx.setPage({ title: "Không tìm thấy mục", noindex: true, crumbs: crumbsFor(cat).concat([{ label: cat.label, href: base }]) }); ctx.el.innerHTML = missingHTML(base, cat.label); return; }
     ctx.setPage({ title: it.name, desc: it.desc || (cat.label + " — " + it.name), noindex: false, crumbs: crumbsFor(cat).concat([{ label: cat.label, href: base }]),
-      actions: session.isDev ? `<a class="btn ghost" href="${base}/${encodeURIComponent(key)}/edit">${ICO.pencil}Sửa</a>` : "" });
+      actions: (session.isDev || session.isEditor) ? `<a class="btn ghost" href="${base}/${encodeURIComponent(key)}/edit">${ICO.pencil}Sửa</a>` : "" });
     const hasUrl = validUrl(it.url), times = [];
     if (it.created) times.push("Đăng " + fmtTime(it.created)); if (it.ts && it.ts !== it.created) times.push("Cập nhật " + fmtTime(it.ts));
     ctx.el.innerHTML = `<article class="detail">
@@ -30,10 +30,10 @@ export async function mount(ctx) {
         ${it.code ? `<button class="btn primary" type="button" data-act="copycode" data-cat="${esc(cat.id)}" data-key="${esc(it.key)}">${ICO.copy}Sao chép code</button>` : ""}
         ${hasUrl ? `<a class="btn primary" href="${esc(it.url.trim())}" target="_blank" rel="noopener noreferrer">${ICO.ext}Mở link</a><button class="btn ghost" type="button" data-act="copyurl" data-url="${esc(it.url.trim())}">${ICO.copy}Sao chép link</button>` : ""}
         <a class="btn ghost" href="${base}">${ICO.back}Quay lại</a>
-        ${session.isDev ? `<button class="btn danger" type="button" id="delBtn">${ICO.trash}Xóa</button>` : ""}
+        ${(session.isDev || session.isEditor) ? `<button class="btn danger" type="button" id="delBtn">${ICO.trash}Xóa</button>` : ""}
       </div></article>`;
     const del = ctx.el.querySelector("#delBtn");
-    if (del) del.addEventListener("click", () => armDelete(del, () => S.deleteItem(cat.id, key).then(() => { toast("Đã xóa."); ctx.navigate(base); }).catch(e => toast(friendly(e), "err"))));
+    if (del) del.addEventListener("click", () => armDelete(del, () => S.deleteItem(cat.id, key).then(() => { toast("Đã xóa."); ctx.navigate(base); }).catch(e => toast(friendly(e), "err")), { title: "Xóa mục này?", message: "Mục sẽ bị xóa khỏi website. Hành động này không thể hoàn tác." }));
   };
   draw();
   const u1 = S.subscribe((t, id) => { if ((t === "data" && id === cat.id) || t === "cats") draw(); }), u2 = onAuth(draw);

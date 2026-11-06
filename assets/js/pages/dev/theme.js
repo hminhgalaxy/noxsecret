@@ -5,6 +5,7 @@ import { MAX_DATA_LEN } from "../../lib/config.js";
 import * as S from "../../lib/store.js";
 import { friendly } from "../../lib/messages.js";
 import { locked, devCrumb } from "./shared.js";
+import { confirmDialog } from "../../lib/confirm.js";
 
 export function mount(ctx) {
   if (locked(ctx)) return;
@@ -26,11 +27,11 @@ export function mount(ctx) {
       else if (f.type.startsWith("video/")) { if (f.size > 6.5 * 1048576) return ($("#thE").textContent = "Video quá lớn (tối đa khoảng 6,5 MB)."); const d = await readAsDataURL(f); if (d.length > MAX_DATA_LEN) return ($("#thE").textContent = "Video quá lớn."); bg = { type: "video", data: d, name: f.name }; $("#thP").innerHTML = `<video src="${esc(d)}" muted loop autoplay playsinline></video>`; }
       else return ($("#thE").textContent = "Chỉ hỗ trợ ảnh hoặc video."); $("#thA").disabled = false; } catch (x) { $("#thE").textContent = friendly(x); } });
   $("#thA").onclick = () => { if (!bg) return; const b = $("#thA"); b.disabled = true; S.setTheme({ bgType: bg.type, bgData: bg.data }).then(() => { toast("Đã áp dụng hình nền."); bg = null; $("#thP").innerHTML = ""; }).catch(x => { $("#thE").textContent = friendly(x); b.disabled = false; }); };
-  $("#thC").onclick = () => S.setTheme({ bgType: "none", bgData: "" }).then(() => { bg = null; $("#thP").innerHTML = ""; $("#thA").disabled = true; toast("Đã xóa hình nền."); }).catch(x => toast(friendly(x), "err"));
+  $("#thC").onclick = async () => { if (!(await confirmDialog({ title: "Xóa hình nền?", message: "Hình nền sẽ bị gỡ khỏi website của mọi người.", ok: "Xóa nền", danger: true }))) return; S.setTheme({ bgType: "none", bgData: "" }).then(() => { bg = null; $("#thP").innerHTML = ""; $("#thA").disabled = true; toast("Đã xóa hình nền."); }).catch(x => toast(friendly(x), "err")); };
   $("#auF").addEventListener("change", async e => { const f = e.target.files[0]; e.target.value = ""; $("#auE").textContent = ""; if (!f) return;
     if (!f.type.startsWith("audio/")) return ($("#auE").textContent = "Tệp này không phải âm thanh."); if (f.size > 6.5 * 1048576) return ($("#auE").textContent = "Tệp quá lớn (tối đa khoảng 6,5 MB).");
     try { const d = await readAsDataURL(f); if (d.length > MAX_DATA_LEN) return ($("#auE").textContent = "Tệp quá lớn."); au = { data: d, name: f.name }; $("#auA").disabled = false; $("#auS").textContent = "Sẵn sàng áp dụng: " + f.name; } catch (x) { $("#auE").textContent = friendly(x); } });
   $("#auA").onclick = () => { if (!au) return; const b = $("#auA"); b.disabled = true; S.setTheme({ audioData: au.data, audioName: au.name }).then(() => { toast("Đã áp dụng nhạc nền."); au = null; }).catch(x => { $("#auE").textContent = friendly(x); b.disabled = false; }); };
-  $("#auC").onclick = () => S.setTheme({ audioData: "", audioName: "" }).then(() => { au = null; $("#auA").disabled = true; toast("Đã xóa nhạc nền."); }).catch(x => toast(friendly(x), "err"));
+  $("#auC").onclick = async () => { if (!(await confirmDialog({ title: "Xóa nhạc nền?", message: "Nhạc nền sẽ bị gỡ khỏi website của mọi người.", ok: "Xóa nhạc", danger: true }))) return; S.setTheme({ audioData: "", audioName: "" }).then(() => { au = null; $("#auA").disabled = true; toast("Đã xóa nhạc nền."); }).catch(x => toast(friendly(x), "err")); };
   return u;
 }

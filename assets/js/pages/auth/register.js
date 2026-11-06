@@ -3,7 +3,7 @@ import { toast } from "../../lib/util.js";
 import { signUpEmail } from "../../lib/auth.js";
 import { dlog } from "../../lib/log.js";
 import { authMessage } from "../../lib/messages.js";
-import { emailError, EMAIL_EXAMPLE, withNext, shell, field, pwField, wireEyes, setErr, busy, captchaHTML, googleHTML, setupSecurity } from "./shared.js";
+import { emailError, EMAIL_EXAMPLE, withNext, shell, field, pwField, wireEyes, setErr, busy, captchaHTML, googleHTML, setupSecurity, guestHTML, wireGuest } from "./shared.js";
 
 const rules = p => ({ len: p.length >= 8, letter: /[A-Za-zÀ-ỹ]/.test(p), digit: /\d/.test(p) });
 const score = p => { const r = rules(p); if (!p) return 0; let s = 0; if (r.len) s++; if (r.letter && r.digit) s++; if (p.length >= 12) s++; if (/[^A-Za-z0-9]/.test(p) || (/[a-z]/.test(p) && /[A-Z]/.test(p))) s++; return Math.max(1, s); };
@@ -22,7 +22,7 @@ export function mount(ctx) {
       ${captchaHTML}
       <p class="form-error" id="err" role="alert" aria-live="polite"></p>
       <button class="btn primary lg block" type="submit">Tạo tài khoản</button>
-    </form>${googleHTML}
+    </form>${googleHTML}${guestHTML}
     <p class="auth-foot">Đã có tài khoản? <a href="${withNext("/login", ctx)}">Đăng nhập</a></p>`, true);
   const f = ctx.el.querySelector("#f"), err = ctx.el.querySelector("#err"), btn = f.querySelector("button[type=submit]");
   wireEyes(ctx.el);
@@ -33,6 +33,7 @@ export function mount(ctx) {
     ctx.el.querySelectorAll("#rules li").forEach(li => li.classList.toggle("ok", !!r[li.dataset.r]));
   });
   const sec = setupSecurity(ctx, err, { onGoogleDone: () => toast("Đăng nhập thành công.") });
+  wireGuest(ctx, err, () => toast("Đã vào với tư cách khách."));
   f.addEventListener("submit", async e => {
     e.preventDefault(); err.textContent = ""; const errs = {};
     const name = f.name.value.trim().replace(/\s+/g, " "), email = f.email.value.trim(), p = f.password.value, c = f.confirm.value, r = rules(p);

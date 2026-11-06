@@ -1,5 +1,5 @@
 /* Router History API: URL thật, deep link, Back/Forward, guard đăng nhập/DEV, lazy load, 404. */
-import { session, ready as authReady, onAuth } from "./auth.js";
+import { session, ready as authReady, onAuth, adminReady } from "./auth.js";
 import { toast, RM } from "./util.js";
 
 const routes = [];
@@ -26,8 +26,9 @@ export function match(pathname) {
 /* Quyết định guard — hàm thuần để kiểm thử */
 export function decide(guard, s, here) {
   if (!guard || guard === "public") return null;
-  if (guard === "guest") return s.user ? { to: "__next__", replace: true } : null;
+  if (guard === "guest") return (s.user && !s.isGuest) ? { to: "__next__", replace: true } : null;
   if (!s.user) return { to: "/login?next=" + encodeURIComponent(here), replace: true };
+  if (guard === "staff" && !(s.isDev || s.isEditor)) return { to: "/", replace: true, toast: "Bạn không có quyền thực hiện thao tác này." };
   if (guard === "dev" && !s.isDev) return { to: "/", replace: true, toast: s.devBlocked || "Bạn không có quyền truy cập khu vực DEV." };
   return null;
 }
@@ -77,7 +78,7 @@ export async function render({ pop = false } = {}) {
   barStart();
   let m = match(url.pathname) || { def: hooks.notFound, params: {}, path: "*" };
   let def = m.def;
-  await authReady;
+  await authReady; if (def.guard === "staff") await adminReady();
   if (id !== navId) return;
   const d = decide(def.guard, session, here);
   if (d) {
@@ -131,6 +132,7 @@ export async function render({ pop = false } = {}) {
 onAuth(() => {
   if (!cur) return;
   const here = location.pathname + location.search;
-  const d = decide(cur.def.guard, session, here);
+  const m = match(location.pathname), guard = (m ? m.def : cur.def).guard; /* guard của địa chỉ hiện tại (cur có thể còn là trang trước khi đang chờ hồ sơ quyền) */
+  const d = decide(guard, session, here);
   if (d) { if (d.toast) toast(d.toast, "err"); const to = d.to === "__next__" ? (hooks.safeNext(new URL(location.href).searchParams.get("next")) || "/") : d.to; navigate(to, { replace: true }); }
 });

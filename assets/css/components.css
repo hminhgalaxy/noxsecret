@@ -180,3 +180,25 @@ a.row:hover{transform:translateX(4px);border-color:var(--line-strong);background
 .m-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
 @media(min-width:640px){.modal{bottom:auto;top:50%;border-radius:var(--r-xl);border-bottom:1px solid var(--line-strong);transform:translate(-50%,-46%) scale(.96);opacity:0;pointer-events:none;transition:transform .5s var(--ez),opacity .3s;padding-bottom:24px}
   .modal.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}.m-grab{display:none}}
+
+/* ── Hộp thoại xác nhận (Có / Không) ── */
+.cf-root{position:fixed;inset:0;z-index:400;display:grid;place-items:center;padding:20px;pointer-events:none}
+.cf-ov{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .2s;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.cf{position:relative;width:min(400px,100%);padding:26px 24px 22px;border-radius:var(--r-xl);background:var(--surface);border:1px solid var(--line-strong);box-shadow:var(--shadow-2);
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;opacity:0;transform:translateY(10px) scale(.97);transition:transform .25s var(--ez),opacity .2s}
+.cf-root.on{pointer-events:auto}.cf-root.on .cf-ov{opacity:1}.cf-root.on .cf{opacity:1;transform:none}
+.cf-ico{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--surface-3);color:var(--text);margin-bottom:6px}
+.cf-ico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cf h4{font-size:19px;line-height:1.3;overflow-wrap:break-word}
+.cf p{color:var(--text-2);font-size:14.5px;line-height:1.55;overflow-wrap:break-word;max-width:100%}
+.cf p:empty{display:none}
+.cf-acts{display:flex;gap:10px;width:100%;margin-top:16px}.cf-acts .btn{flex:1;justify-content:center;white-space:nowrap}
+@media(max-width:420px){.cf-acts{flex-direction:column-reverse}}
+@media(prefers-reduced-motion:reduce){.cf,.cf-ov{transition:none}}
+.cf-fields{display:grid;gap:10px;width:100%;margin-top:10px;text-align:left}
+.cf-f{display:grid;gap:5px;font-size:13px;color:var(--text-2)}
+.cf-f input,.cf-f select{width:100%;min-height:42px;padding:0 12px;border-radius:var(--r-sm);background:var(--field);border:1px solid var(--line);color:var(--text);font:inherit}
+.cf-f input:focus,.cf-f select:focus{outline:2px solid var(--strong);outline-offset:1px}
+/* Hộp xác nhận luôn dùng nền ĐẶC (kể cả khi bật kính mờ) để chữ và nút luôn đọc rõ */
+.cf{--surface:#141414;--surface-2:#1b1b1b;--surface-3:#262626;--field:#0b0b0b;--text-2:#b4b4b4;--text-3:#9a9a9a;--line:rgba(255,255,255,.14);--line-strong:rgba(255,255,255,.24);background:#141414!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html[data-theme="light"] .cf{--surface:#ffffff;--surface-2:#f1f1f1;--surface-3:#e5e5e5;--field:#f6f6f6;--text-2:#525252;--text-3:#636363;--line:rgba(0,0,0,.12);--line-strong:rgba(0,0,0,.24);background:#fff!important}

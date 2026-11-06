@@ -24,7 +24,7 @@
 :root[data-glass="on"] #hdr,:root[data-glass="on"] #tabbar{background:transparent}
 :root[data-glass="on"] #hdr{border-bottom-color:var(--line)}
 :root[data-glass="on"] :is(#hdr,#tabbar,#side,.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.modal,.nav-btn,.me,.statebox,.table-wrap,.stat,.dsec,.urlbox,.bell,#btnMenu,.slide,.upd,.faq,.feat,.step,.eyebrow,.chip,.count,.hero-search input,.field input,.field textarea,.field select,.gbtn,.seg){
-  -webkit-backdrop-filter:blur(14px) saturate(1.35);backdrop-filter:blur(14px) saturate(1.35)}
+  -webkit-backdrop-filter:blur(var(--gl-blur,14px)) saturate(1.35);backdrop-filter:blur(var(--gl-blur,14px)) saturate(1.35)}
 :root[data-glass="on"] #side{background:var(--glass)}
 :root[data-glass="on"] .btn.soft{background:var(--surface-2)}
 :root[data-glass="on"] .toast{backdrop-filter:none}

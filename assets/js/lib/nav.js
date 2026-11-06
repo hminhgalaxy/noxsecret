@@ -2,7 +2,7 @@
 import { $, $$, esc } from "./util.js";
 import { ICO } from "./icons.js";
 import { store } from "./store.js";
-import { session } from "./auth.js";
+import { session, isEditor } from "./auth.js";
 import { current } from "./router.js";
 import { icoOf, avatarHTML } from "./ui.js";
 import { unreadCount } from "./updates.js";
@@ -107,7 +107,7 @@ function markTabs(path) {
 
 /* Tài khoản: góc trên bên phải + cuối menu + thẻ "Hồ sơ" ở thanh dưới */
 export function renderAccount() {
-  const u = session.user, name = u ? (u.displayName || (u.email || "").split("@")[0] || "Bạn") : "";
+  const u = session.user, name = u ? (session.isGuest ? "Khách" : (u.displayName || (u.email || "").split("@")[0] || "Bạn")) : "", role = session.isGuest ? "Khách (hạn chế)" : session.isDev ? "Quản trị viên" : isEditor() ? "Biên tập viên" : "Thành viên";
   const h = $("#hdrAcc");
   if (h) {
     h.dataset.state = u ? "in" : "out";
@@ -116,7 +116,7 @@ export function renderAccount() {
   }
   const z = $("#authZone");
   if (z) z.innerHTML = u
-    ? `<a class="me" href="/profile"><span class="avatar">${avatarHTML(u)}</span><span class="who"><b>${esc(name)}</b><small>${session.isDev ? "Quản trị viên" : "Thành viên"}</small></span></a>
+    ? `<a class="me" href="/profile"><span class="avatar">${avatarHTML(u)}</span><span class="who"><b>${esc(name)}</b><small>${role}</small></span></a>
        <button class="btn ghost sm block" data-act="signout" type="button">${ICO.out}Đăng xuất</button>`
     : `<a class="btn primary block" href="/login">Đăng nhập</a><a class="btn ghost block" href="/register">Tạo tài khoản</a>`;
   const tm = $("#tabMe"), tl = $("#tabMeL"); if (tm) { tm.setAttribute("href", u ? "/profile" : "/login"); if (tl) tl.textContent = u ? "Hồ sơ" : "Đăng nhập"; }

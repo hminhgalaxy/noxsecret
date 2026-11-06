@@ -3,7 +3,7 @@ import { $, RM } from "./util.js";
 
 export function initSplash(firstPage) {
   const el = $("#splash");
-  let seen = false; try { seen = sessionStorage.getItem("ssw_splash") === "1"; } catch (_) {}
+  let seen = false; try { seen = sessionStorage.getItem("ssw_splash") === "1" || localStorage.getItem("ssw_nosplash") === "1"; } catch (_) {}
   if (!el || seen) { if (el) el.style.display = "none"; return Promise.resolve(); }
   return new Promise(done => {
     const t0 = performance.now(); let fin = false;

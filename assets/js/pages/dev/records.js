@@ -24,6 +24,6 @@ export async function mount(ctx) {
   };
   ctx.el.querySelector("#flt").addEventListener("input", e => { q = e.target.value; draw(); });
   list.addEventListener("click", e => { const b = e.target.closest("[data-del]"); if (!b) return;
-    armDelete(b, () => S.deleteItem(c.id, b.dataset.del).then(() => toast("Đã xóa.")).catch(x => toast(friendly(x), "err"))); });
+    armDelete(b, () => S.deleteItem(c.id, b.dataset.del).then(() => toast("Đã xóa.")).catch(x => toast(friendly(x), "err")), { title: "Xóa mục này?", message: "Mục sẽ bị xóa khỏi website. Hành động này không thể hoàn tác." }); });
   draw(); return S.subscribe((t, id) => { if ((t === "data" && id === c.id) || t === "cats") draw(); });
 }

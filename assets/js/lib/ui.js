@@ -1,3 +1,4 @@
+import { confirmDialog } from "./confirm.js";
 /* Mảnh giao diện dùng chung giữa các trang: thẻ, ô danh mục, dòng, ảnh đại diện, trạng thái... */
 import { ICO, SW } from "./icons.js";
 import { esc, fmtTime, validUrl } from "./util.js";
@@ -12,6 +13,9 @@ export const lockedHTML = (msg, href = "/", label = "Về trang chủ") => `<div
 
 /* Ảnh đại diện: ảnh thật hoặc chữ cái đầu */
 export function avatarHTML(u) {
+  const mine = u && session.user && u.uid === session.user.uid && session.profile && session.profile.avatar;
+  if (mine) return `<img src="${esc(session.profile.avatar)}" alt="" onerror="this.replaceWith(document.createTextNode(this.dataset.i||'?'))" data-i="${esc(initial(u))}">`;
+  if (u && u.isAnonymous) return ICO.user;
   if (u && u.photoURL) return `<img src="${esc(u.photoURL)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode(this.dataset.i||'?'))" data-i="${esc(initial(u))}">`;
   return esc(initial(u));
 }
@@ -23,7 +27,7 @@ export function cardHTML(it, catId, i, showChip) {
   if (it.code) acts.push(`<button class="btn primary sm" type="button" data-act="copycode" data-cat="${esc(catId)}" data-key="${esc(it.key)}" data-stop>${ICO.copy}Sao chép code</button>`);
   if (validUrl(it.url)) acts.push(`<a class="btn ghost sm" href="${esc(it.url.trim())}" target="_blank" rel="noopener noreferrer" data-stop>${ICO.ext}Mở link</a>`);
   acts.push(`<a class="btn soft sm" href="${href}" data-stop>Chi tiết</a>`);
-  if (session.isDev) acts.push(`<a class="btn soft sm icon" href="${href}/edit" data-stop aria-label="Sửa ${esc(it.name)}">${ICO.pencil}</a>`);
+  if (session.isDev || session.isEditor) acts.push(`<a class="btn soft sm icon" href="${href}/edit" data-stop aria-label="Sửa ${esc(it.name)}">${ICO.pencil}</a>`);
   return `<article class="card" style="--d:${Math.min(i, 10) * 45}ms" data-href="${href}" tabindex="0">
     <div class="card-top"><span class="ico">${icoOf(c)}</span>${showChip ? `<span class="badge">${esc(c.label)}</span>` : ""}${it.vault ? `<span class="badge strong">Vault</span>` : ""}<time>${it.ts ? esc(fmtTime(it.ts)) : ""}</time></div>
     ${it.img ? `<img class="card-thumb" src="${esc(it.img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
@@ -45,10 +49,10 @@ export function countUp(el, to) {
   (function step(t) { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(from + (to - from) * e); if (p < 1) requestAnimationFrame(step); })(t0);
 }
 export const countOf = id => { const a = store.data[id]; return a ? a.length : 0; };
-/* Nút xóa 2 bước (không dùng popup) */
-export function armDelete(btn, run) {
-  if (!btn.classList.contains("arm")) { const old = btn.innerHTML; btn.classList.add("arm"); btn.textContent = "Chắc chắn?"; setTimeout(() => { btn.classList.remove("arm"); btn.innerHTML = old; }, 2600); return false; }
-  run(); return true;
+/* Xóa: hỏi bằng hộp thoại Có / Không của web rồi mới chạy */
+export async function armDelete(btn, run, o = {}) {
+  const ok = await confirmDialog({ title: o.title || "Xóa mục này?", message: o.message || "Hành động này không thể hoàn tác.", ok: o.ok || "Xóa", danger: true });
+  if (ok) run(); return ok;
 }
 export function fieldErrors(form, errs) {
   form.querySelectorAll(".field-error").forEach(e => { e.textContent = ""; });
