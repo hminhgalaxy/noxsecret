@@ -1,0 +1,41 @@
+/* ═══ KÍNH MỜ (tùy chọn trong Cài đặt) ═══
+   Tắt: các khung dùng màu đặc theo giao diện (đen hoặc trắng).
+   Bật: khung trong suốt, chỉ còn viền, nền phía sau được làm mờ. */
+:root[data-glass="on"]{
+  --bg-soft:rgba(255,255,255,.025);
+  --surface:rgba(255,255,255,.04);
+  --surface-2:rgba(255,255,255,.085);
+  --surface-3:rgba(255,255,255,.14);
+  --line:rgba(255,255,255,.17);
+  --line-strong:rgba(255,255,255,.32);
+  --field:rgba(0,0,0,.22);
+  --glass:rgba(10,10,10,.25);
+}
+:root[data-theme="light"][data-glass="on"]{
+  --bg-soft:rgba(255,255,255,.2);
+  --surface:rgba(255,255,255,.28);
+  --surface-2:rgba(255,255,255,.5);
+  --surface-3:rgba(0,0,0,.08);
+  --line:rgba(0,0,0,.16);
+  --line-strong:rgba(0,0,0,.32);
+  --field:rgba(255,255,255,.5);
+  --glass:rgba(250,250,250,.3);
+}
+:root[data-glass="on"] #hdr,:root[data-glass="on"] #tabbar{background:transparent}
+:root[data-glass="on"] #hdr{border-bottom-color:var(--line)}
+:root[data-glass="on"] :is(#hdr,#tabbar,#side,.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.modal,.nav-btn,.me,.statebox,.table-wrap,.stat,.dsec,.urlbox,.bell,#btnMenu,.slide,.upd,.faq,.feat,.step,.eyebrow,.chip,.count,.hero-search input,.field input,.field textarea,.field select,.gbtn,.seg){
+  -webkit-backdrop-filter:blur(14px) saturate(1.35);backdrop-filter:blur(14px) saturate(1.35)}
+:root[data-glass="on"] #side{background:var(--glass)}
+:root[data-glass="on"] .btn.soft{background:var(--surface-2)}
+:root[data-glass="on"] .toast{backdrop-filter:none}
+/* Nền có các vệt sáng mờ để thấy hiệu ứng kính */
+:root[data-glass="on"] #bg{background:
+  radial-gradient(520px 420px at 10% 6%,color-mix(in srgb,var(--text) 17%,transparent),transparent 70%),
+  radial-gradient(560px 460px at 90% 28%,color-mix(in srgb,var(--text) 12%,transparent),transparent 70%),
+  radial-gradient(680px 520px at 38% 104%,color-mix(in srgb,var(--text) 14%,transparent),transparent 70%)}
+:root[data-glass="on"] body.has-bg #bg{opacity:.5}
+/* Nếu thiết bị không hỗ trợ làm mờ nền thì quay về màu đặc để vẫn đọc được */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root[data-glass="on"]{--surface:#141414;--surface-2:#1b1b1b;--surface-3:#262626;--line:rgba(255,255,255,.1);--field:var(--bg)}
+  :root[data-theme="light"][data-glass="on"]{--surface:#fff;--surface-2:#f1f1f1;--surface-3:#e5e5e5;--line:rgba(0,0,0,.1)}
+}
