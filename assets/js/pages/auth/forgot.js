@@ -1,5 +1,5 @@
 /* Quên mật khẩu: gửi liên kết đặt lại qua email. Không tiết lộ email có tồn tại hay không. */
-import { resetPassword } from "../../lib/auth.js";
+import { resetPassword, recoverByRecoveryEmail } from "../../lib/auth.js";
 import { authMessage } from "../../lib/messages.js";
 import { emailError, EMAIL_EXAMPLE, withNext, shell, field, setErr, busy } from "./shared.js";
 
@@ -9,9 +9,17 @@ export function mount(ctx) {
       ${field("email", "Email", { type: "email", ac: "username", ph: EMAIL_EXAMPLE })}
       <p class="form-error" id="err" role="alert" aria-live="polite"></p><p class="form-ok" id="ok" role="status"></p>
       <button class="btn primary lg block" type="submit">Gửi liên kết đặt lại</button></form>
+    <p class="sub-note rec-note">Không vào được hộp thư này nữa? Nhập email đăng nhập ở trên rồi <button class="linkbtn" id="recover" type="button">dùng email khôi phục</button> (nếu bạn đã thêm).</p>
     <p class="auth-foot"><a href="${withNext("/login", ctx)}">← Quay lại đăng nhập</a></p>`);
   const f = ctx.el.querySelector("#f"), err = ctx.el.querySelector("#err"), ok = ctx.el.querySelector("#ok"), btn = f.querySelector("button[type=submit]");
   let timer = null; ctx.cleanup(() => clearInterval(timer));
+  const rec = ctx.el.querySelector("#recover");
+  rec.addEventListener("click", async () => {
+    err.textContent = ""; ok.textContent = ""; const email = f.email.value.trim(), em = emailError(email); if (em) { setErr(f, { email: em }); return; } setErr(f, {});
+    rec.disabled = true;
+    try { await recoverByRecoveryEmail(email); ok.textContent = "Nếu tài khoản này có email khôi phục, chúng tôi đã gửi liên kết đặt lại mật khẩu tới đó. Hãy kiểm tra cả mục thư rác."; }
+    catch (ex) { err.textContent = authMessage(ex); } setTimeout(() => { rec.disabled = false; }, 15000);
+  });
   f.addEventListener("submit", async e => {
     e.preventDefault(); err.textContent = ""; ok.textContent = ""; const email = f.email.value.trim(), errs = {};
     const em = emailError(email); if (em) errs.email = em; setErr(f, errs); if (Object.keys(errs).length) return;

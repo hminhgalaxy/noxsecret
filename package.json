@@ -1,0 +1,8 @@
+{
+  "name": "skibidiscript",
+  "private": true,
+  "version": "2.0.0",
+  "description": "SkibidiScript — static site + Vercel serverless functions (api/).",
+  "engines": { "node": ">=18" },
+  "dependencies": { "firebase-admin": "^12.7.0" }
+}

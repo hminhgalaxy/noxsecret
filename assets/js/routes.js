@@ -19,6 +19,8 @@ export function registerRoutes() {
   define("/login", { load: L("auth/login"), guard: "guest", title: "Đăng nhập", desc: "Đăng nhập để dùng đầy đủ tính năng của SKIBIDI SCRIPT WEB." });
   define("/register", { load: L("auth/register"), guard: "guest", title: "Đăng ký", desc: "Tạo tài khoản miễn phí trên SKIBIDI SCRIPT WEB." });
   define("/forgot-password", { load: L("auth/forgot"), guard: "guest", title: "Quên mật khẩu", desc: "Đặt lại mật khẩu tài khoản của bạn." });
+  define("/two-step", { load: L("auth/twofa"), guard: "twofa", title: "Xác minh 2 bước", noindex: true });
+  define("/auth/action", { load: L("auth/action"), guard: "open", title: "Xác nhận từ email", noindex: true });
   define("/profile", { load: L("profile"), guard: "auth", title: "Hồ sơ", needs: [] });
   define("/search", { load: L("search"), guard: "public", title: "Tìm kiếm", noindex: true, needs: ALL });
   define("/categories", { load: L("categories"), guard: "public", title: "Danh mục", desc: "Tất cả danh mục Script, APK, iOS và liên kết hữu ích trên SKIBIDI SCRIPT WEB.", needs: ALL });
@@ -42,6 +44,7 @@ export function registerRoutes() {
   define("/dev/data/c/:node", { load: L("dev/records"), guard: "dev", custom: true, needs: catNeeds({ custom: true }) });
   define("/dev/categories", { load: L("dev/categories"), guard: "dev", title: "Danh mục", needs: ["cats"] });
   define("/dev/users", { load: L("dev/users"), guard: "dev", title: "Người dùng", needs: ["users"] });
+  define("/dev/mail", { load: L("dev/mail"), guard: "dev", title: "Gửi thư", needs: ["users"] });
   define("/dev/theme", { load: L("dev/theme"), guard: "dev", title: "Giao diện", needs: ["theme"] });
   define("/dev/updates", { load: L("dev/updates"), guard: "dev", title: "Cập nhật", needs: ["updates"] });
   define("/dev/test", { load: L("dev/test"), guard: "dev", title: "Kiểm tra hệ thống", needs: [] });

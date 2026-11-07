@@ -70,3 +70,5 @@
 .users-t td small.faint{color:var(--text-3)}
 .badge.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
 .cell-user .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.mail-frame{width:100%;height:560px;border:1px solid var(--line);border-radius:var(--r-lg);background:#f2f2f3;display:block}
+@media(max-width:560px){.mail-frame{height:480px}}

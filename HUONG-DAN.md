@@ -7,6 +7,7 @@
 - `assets/js/pages/` — mỗi trang một file: home, categories, search, profile, settings, notifications, auth/*, items/*, dev/*
 - `api/verify-captcha.js` — xác minh captcha ở máy chủ Vercel
 - `api/sitemap.js` — tạo sitemap.xml tự động (cả từng mục nội dung)
+- `api/account.js` + `api/_lib/` — máy chủ thư/2 bước/khôi phục/ban (cần `package.json` → `firebase-admin`)
 - `robots.txt`, `manifest.webmanifest`, `vercel.json`, `database.rules.json`
 
 ## Việc bạn cần làm trên Vercel
@@ -40,9 +41,27 @@
 - **Hồ sơ:** đổi ảnh đại diện (tự cắt vuông, thu nhỏ, lưu trong Realtime Database) và mô tả bản thân (tối đa 300 ký tự).
 - **Khách:** vào bằng một nút, chỉ xem/sao chép; không có hồ sơ, không ghi được dữ liệu, không được tính là người dùng.
 - **Dev Panel → Người dùng:** cấp/gỡ **biên tập viên** (thêm, sửa, xoá nội dung; không đụng được danh mục, giao diện, người dùng), **mute** (không đổi được tên/mô tả/ảnh), **ban** (bị đăng xuất ngay, không dùng được trong thời hạn đặt). Có thời hạn 1 giờ → vĩnh viễn và lý do.
-  Lưu ý: ban được áp dụng bằng Rules + đăng xuất phía trình duyệt; để khoá hẳn tài khoản ở Firebase Authentication cần backend (Giai đoạn 2).
+  Lưu ý: ban được áp dụng bằng Rules + đăng xuất phía trình duyệt; giai đoạn 2 đã thêm khoá thật trên Firebase Authentication (xem bên dưới).
 - **Biểu tượng danh mục:** 54 biểu tượng, bảng chọn cuộn được.
 - Captcha **không đổi**.
 
-## Giai đoạn 2 (chưa làm — cần tài khoản/khoá của bạn)
-Thư HTML tiếng Anh có logo (xác minh, đặt lại mật khẩu, đổi email, thông báo…), mã 2 bước gửi qua email, email khôi phục, trang `/auth/action`. Cần: tài khoản Brevo hoặc Resend (đã xác minh tên miền gửi), và khoá dịch vụ (service account) của Firebase để đặt vào biến môi trường Vercel.
+## Giai đoạn 2 (đã làm — cần bạn bật bằng khoá của bạn)
+**Có gì:** thư HTML 100% tiếng Anh có logo + "SkibidiScript • skibidiscript.vercel.app" (xác minh email, đặt lại mật khẩu, đổi email, chào mừng, mã 2 bước, email khôi phục, đổi mật khẩu, cấp/gỡ biên tập viên, mute, ban…); **xác minh 2 bước** bằng mã 6 số gửi qua email (hiệu lực 10 phút, tối đa 5 lần sai, gửi lại sau 30 giây); **email khôi phục** (thêm/đổi/xoá, dùng để nhận mã đăng nhập hoặc nhận liên kết đặt lại mật khẩu); **đổi email đăng nhập** (cần mật khẩu, gửi liên kết tới email mới và báo email cũ); trang **/auth/action** (đặt mật khẩu mới, xác minh email…); **ban thật** trên Firebase Authentication (ban vĩnh viễn = vô hiệu hoá tài khoản; ban có thời hạn = thu hồi phiên và chặn bằng Rules); **Dev Panel → Gửi thư**: văn mẫu trả lời người dùng (cảm ơn, nâng cấp, bảo trì…), xem trước mọi thư tự động và gửi thử cho chính bạn.
+
+**Chưa cấu hình thì sao:** web vẫn chạy bình thường như giai đoạn 1 (quên mật khẩu/xác minh dùng thư mặc định của Firebase, mục 2 bước bị ẩn, trang Gửi thư báo "chưa được bật"). Captcha **không đổi**.
+
+**Các bước bạn cần làm:**
+1. **Brevo** (brevo.com, gói miễn phí): Senders & IP → thêm và **xác minh** email gửi đi (Brevo gửi thư xác nhận vào hộp thư đó). SMTP & API → tạo **API key**.
+2. **Firebase service account:** Firebase Console → Project settings → Service accounts → *Generate new private key* → tải file JSON. (Giữ bí mật, đừng đưa vào mã.)
+3. **Vercel → Settings → Environment Variables** (rồi Redeploy):
+   - `BREVO_API_KEY` = khoá ở bước 1
+   - `MAIL_FROM_EMAIL` = email đã xác minh ở bước 1
+   - `MAIL_FROM_NAME` = `skibidiscript` (tuỳ chọn)
+   - `MAIL_REPLY_TO` = email nhận trả lời (tuỳ chọn)
+   - `FIREBASE_SERVICE_ACCOUNT` = dán nguyên nội dung file JSON (hoặc mã base64 của nó)
+   - `FIREBASE_DATABASE_URL` (tuỳ chọn, nếu khác mặc định), `SITE_URL` (tuỳ chọn, mặc định `https://skibidiscript.vercel.app`), `CODE_SALT` (chuỗi ngẫu nhiên dài, nên đặt), `DEV_EMAIL` (tuỳ chọn)
+4. Dán lại **`database.rules.json`** vào Firebase Console → Realtime Database → Rules → Publish (thêm nhánh `nox_security` và điều kiện 2 bước cho các quyền ghi). Bật **Anonymous** (xem 4b) nếu chưa.
+5. Firebase Console → Authentication → Templates: bạn tự chỉnh tên người gửi (`skibidiscript`) và mẫu thư mặc định nếu muốn (mẫu mặc định chỉ còn dùng khi máy chủ thư chưa bật).
+6. Vào **/profile** bằng một tài khoản đã xác minh email: có mục "Two-step verification and recovery". Vào **/dev/mail** để xem trước và gửi thử.
+
+**Lưu ý trung thực:** thư gửi từ địa chỉ Gmail qua Brevo có thể vào thư rác, hoặc Brevo/Gmail đổi người gửi hiển thị; muốn thư vào hộp chính nên dùng tên miền riêng đã xác thực (SPF/DKIM). Logo trong thư chỉ hiện khi website đã được đưa lên `skibidiscript.vercel.app`. Chưa có logo bên cạnh người gửi (BIMI cần tên miền riêng và chứng chỉ).

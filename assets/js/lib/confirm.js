@@ -16,7 +16,7 @@ export function confirmDialog(o = {}) {
         <p id="${id}d">${esc(o.message || "")}</p>
         ${o.fields && o.fields.length ? `<div class="cf-fields">${o.fields.map((f, i) => `<label class="cf-f"><span>${esc(f.label)}</span>${f.options
           ? `<select data-f="${esc(f.id)}">${f.options.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(f.value) ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`
-          : `<input data-f="${esc(f.id)}" type="text" maxlength="${f.max || 200}" value="${esc(f.value || "")}" placeholder="${esc(f.placeholder || "")}">`}</label>`).join("")}</div>` : ""}
+          : `<input data-f="${esc(f.id)}" type="${f.type === "password" ? "password" : "text"}" autocomplete="${f.type === "password" ? "current-password" : f.otp ? "one-time-code" : "off"}"${f.otp ? ' inputmode="numeric"' : ""} maxlength="${f.max || 200}" value="${esc(f.value || "")}" placeholder="${esc(f.placeholder || "")}">`}</label>`).join("")}</div>` : ""}
         <div class="cf-acts">
           ${o.cancel === false ? "" : `<button type="button" class="btn ghost" data-cf="no">${esc(o.cancel || "Hủy")}</button>`}
           <button type="button" class="btn ${o.danger ? "danger" : "primary"}" data-cf="yes">${esc(o.ok || "Đồng ý")}</button>

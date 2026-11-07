@@ -16,6 +16,7 @@ export const NOTICE_NODE = "nox_notice";
 export const THEME_NODE = "nox_theme";
 export const UPDATES_NODE = "nox_updates";
 export const ADMIN_NODE = "nox_admin"; // MỚI (additive): bài đăng "Cập nhật này có gì?" — ai cũng đọc được, chỉ DEV ghi
+export const SEC_NODE = "nox_security"; // MỚI: cờ xác minh 2 bước + email khôi phục (chỉ máy chủ ghi, chủ tài khoản đọc)
 export const USERS_NODE = "nox_users"; // MỚI (additive): hồ sơ đăng nhập, phục vụ /dev/users
 export const MAX_DATA_LEN = 9 * 1024 * 1024;
 export const THEME_PUBLIC_KEYS = ["bgType", "bgData", "audioData", "audioName"];

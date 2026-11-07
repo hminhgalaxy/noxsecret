@@ -32,20 +32,27 @@ const accounts=LS.get('fb_accounts')||{
   'user@example.com':{uid:'uUSER',email:'user@example.com',pw:'userpass',verified:true,name:'Người Dùng'}};
 const UNV='devunverified@x.io';
 let cur=LS.get('fb_user'); const authSubs=new Set(); window.__fbLog={listeners:0,reads:[],denied:[]};
-const mk=u=>u&&{uid:u.uid,isAnonymous:!!u.anon,email:u.email,emailVerified:!!u.verified,displayName:u.name||'',photoURL:'',providerData:[{providerId:u.provider||'password'}],metadata:{creationTime:'Mon, 01 Jan 2024 00:00:00 GMT',lastSignInTime:'Tue, 03 Nov 2026 10:00:00 GMT'},sendEmailVerification(){window.__verifySent=(window.__verifySent||0)+1;return Promise.resolve()},updateProfile(p){return later().then(()=>{if(p&&p.displayName!=null){cur.name=p.displayName;Object.keys(accounts).forEach(k=>{if(accounts[k].uid===cur.uid)accounts[k].name=p.displayName});LS.set('fb_accounts',accounts);LS.set('fb_user',cur);window.__nameSet=p.displayName}})},reload(){return Promise.resolve()}};
-const A=()=>cur?{uid:cur.uid,token:cur.anon?{firebase:{sign_in_provider:'anonymous'}}:{email:cur.email,email_verified:!!cur.verified,firebase:{sign_in_provider:cur.provider==='google.com'?'google.com':'password'}}}:null;
+const mk=u=>u&&{uid:u.uid,isAnonymous:!!u.anon,email:u.email,emailVerified:!!u.verified,displayName:u.name||'',photoURL:'',providerData:[{providerId:u.provider||'password'}],metadata:{creationTime:'Mon, 01 Jan 2024 00:00:00 GMT',lastSignInTime:'Tue, 03 Nov 2026 10:00:00 GMT'},sendEmailVerification(){window.__verifySent=(window.__verifySent||0)+1;return Promise.resolve()},updateProfile(p){return later().then(()=>{if(p&&p.displayName!=null){cur.name=p.displayName;Object.keys(accounts).forEach(k=>{if(accounts[k].uid===cur.uid)accounts[k].name=p.displayName});LS.set('fb_accounts',accounts);LS.set('fb_user',cur);window.__nameSet=p.displayName}})},reload(){return later().then(()=>{const a=Object.values(accounts).find(x=>x.uid===cur.uid);if(a){cur.verified=!!a.verified;cur.email=a.email;LS.set('fb_user',cur)}})},getIdToken(f){return later().then(()=>{if(f)refreshTok();return 'fk.'+cur.uid+'.'+cur.authTime})},getIdTokenResult(f){return later().then(()=>{if(f)refreshTok();return{claims:Object.assign({auth_time:cur.authTime},cur.tok||{})}})}};
+const A=()=>cur?{uid:cur.uid,token:cur.anon?{firebase:{sign_in_provider:'anonymous'}}:Object.assign({email:cur.email,email_verified:!!cur.verified,auth_time:cur.authTime,firebase:{sign_in_provider:cur.provider==='google.com'?'google.com':'password'}},cur.tok||{})}:null;
 const err=(code,message)=>Object.assign(new Error(message||code),{code});
 const later=(v,ms=15)=>new Promise(r=>setTimeout(()=>r(v),ms));
+const sess=a=>Object.assign({},a,{authTime:Math.floor(Date.now()/1000),tok:Object.assign({},a.claims||{})});
+function refreshTok(){const a=Object.values(accounts).find(x=>x.uid===cur.uid);cur.tok=Object.assign({},(a&&a.claims)||{});LS.set('fb_user',cur);relisten()}
 function setUser(u){cur=u;LS.set('fb_user',u);authSubs.forEach(f=>f(mk(cur)));relisten();}
 const authObj={get currentUser(){return mk(cur)},setPersistence(){return Promise.resolve()},
  onAuthStateChanged(cb){authSubs.add(cb);setTimeout(()=>cb(mk(cur)),30);return()=>authSubs.delete(cb)},
  async signInWithEmailAndPassword(e,p){await later();const key=Object.keys(accounts).find(k=>accounts[k].email===e&&accounts[k].pw===p)||(accounts[e]&&accounts[e].pw===p?e:null);
-   if(!key)throw err('auth/invalid-credential');setUser(accounts[key]);return{user:mk(cur)}},
+   if(!key)throw err('auth/invalid-credential');if(accounts[key].disabled)throw err('auth/user-disabled');setUser(sess(accounts[key]));return{user:mk(cur)}},
  async createUserWithEmailAndPassword(e,p){await later();if(accounts[e])throw err('auth/email-already-in-use');if(p.length<6)throw err('auth/weak-password');
-   accounts[e]={uid:'u'+Math.random().toString(36).slice(2,8),email:e,pw:p,verified:false};LS.set('fb_accounts',accounts);setUser(accounts[e]);return{user:mk(cur)}},
+   accounts[e]={uid:'u'+Math.random().toString(36).slice(2,8),email:e,pw:p,verified:false};LS.set('fb_accounts',accounts);setUser(sess(accounts[e]));return{user:mk(cur)}},
  async signInWithCredential(c){await later();const m={'google:dev':accounts[DEV],'google:user':accounts['user@example.com']}[c.t];if(!m)throw err('auth/invalid-credential');
-   setUser(Object.assign({},m,{provider:'google.com'}));return{user:mk(cur)}},
- async signInAnonymously(){await later();if(window.__anonOff)throw err('auth/operation-not-allowed');setUser({uid:'g'+Math.random().toString(36).slice(2,8),anon:true,email:null,name:''});return{user:mk(cur)}},
+   if(m.disabled)throw err('auth/user-disabled');setUser(sess(Object.assign({},m,{provider:'google.com'})));return{user:mk(cur)}},
+ async signInAnonymously(){await later();if(window.__anonOff)throw err('auth/operation-not-allowed');setUser(sess({uid:'g'+Math.random().toString(36).slice(2,8),anon:true,email:null,name:''}));return{user:mk(cur)}},
+ async verifyPasswordResetCode(c){await later();const o=(LS.get('fb_oob')||{})[c];if(!o||o.mode!=='resetPassword')throw err('auth/invalid-action-code');if(o.expired)throw err('auth/expired-action-code');return o.email},
+ async confirmPasswordReset(c,pw){await later();const all=LS.get('fb_oob')||{},o=all[c];if(!o||o.mode!=='resetPassword')throw err('auth/invalid-action-code');if(o.expired)throw err('auth/expired-action-code');if(pw.length<6)throw err('auth/weak-password');const k=Object.keys(accounts).find(x=>accounts[x].email===o.email);accounts[k].pw=pw;LS.set('fb_accounts',accounts);delete all[c];LS.set('fb_oob',all);window.__pwReset=o.email},
+ async applyActionCode(c){await later();const all=LS.get('fb_oob')||{},o=all[c];if(!o)throw err('auth/invalid-action-code');if(o.expired)throw err('auth/expired-action-code');const k=Object.keys(accounts).find(x=>accounts[x].email===o.email);if(!k)throw err('auth/invalid-action-code');
+   if(o.mode==='verifyEmail'){accounts[k].verified=true}else if(o.mode==='verifyAndChangeEmail'){const a=accounts[k];delete accounts[k];a.email=o.newEmail;a.verified=true;accounts[o.newEmail]=a;window.__emailChanged=o.newEmail}else throw err('auth/invalid-action-code');
+   LS.set('fb_accounts',accounts);delete all[c];LS.set('fb_oob',all)},
  async signOut(){await later(5);setUser(null)},
  async sendPasswordResetEmail(e){await later();if(!/^[^@\\s]+@[^@\\s]+$/.test(e))throw err('auth/invalid-email');window.__resetSent=e}};
 const authFn=()=>authObj; authFn.Auth={Persistence:{LOCAL:'local'}}; authFn.GoogleAuthProvider={credential:t=>({t})};
@@ -70,7 +77,20 @@ const ref=path=>{const segs=split(path);const R={key:segs[segs.length-1]||null,
 const dbObj={ref:p=>{if(p===undefined)p='';if(p==='.info/connected'){return{on(e,cb){setTimeout(()=>cb({val:()=>true}),10);return cb},off(){}}}return ref(p)}};
 const dbFn=()=>dbObj; dbFn.ServerValue={TIMESTAMP:{'.sv':'timestamp'}};
 const apps=[]; window.firebase={apps,initializeApp(c){apps.push({options:c});return apps[0]},app:()=>apps[0],auth:authFn,database:dbFn};
-window.__fb={getDb:()=>clone(root),setDb(v){root=clone(v);LS.set('fb_db',root);relisten()},reset(){localStorage.removeItem('fb_db');localStorage.removeItem('fb_user');location.reload()}};
+const findU=uid=>Object.values(accounts).find(a=>a.uid===uid);
+const rec=a=>a?{uid:a.uid,email:a.email,displayName:a.name||'',disabled:!!a.disabled,customClaims:a.claims||{},providerData:[{providerId:a.provider||'password'}]}:null;
+const mkOob=(mode,email,newEmail)=>{const o=LS.get('fb_oob')||{};const c='OOB'+Math.random().toString(36).slice(2,10);o[c]={mode,email,newEmail};LS.set('fb_oob',o);return 'https://x.firebaseapp.com/__/auth/action?mode='+mode+'&oobCode='+c};
+const dbw=(p,v)=>{root=RulesEngine.setAt(root,split(p),v);LS.set('fb_db',root);relisten()};
+const admin={getUser:uid=>rec(findU(uid)),getUserByEmail:e=>rec(accounts[e]||Object.values(accounts).find(a=>a.email===e)),
+ setClaims(uid,c){const a=findU(uid);a.claims=c;LS.set('fb_accounts',accounts);if(cur&&cur.uid===uid){cur.claims=c;LS.set('fb_user',cur)}},
+ updateUser(uid,p){const a=findU(uid);Object.assign(a,p);LS.set('fb_accounts',accounts)},
+ revoke(uid){if(cur&&cur.uid===uid)setUser(null)},
+ passwordOk(e,pw){const a=accounts[e];return !!a&&a.pw===pw},
+ link(mode,email,newEmail){return mkOob(mode,email,newEmail)},
+ expireAll(){const o=LS.get('fb_oob')||{};Object.keys(o).forEach(k=>o[k].expired=true);LS.set('fb_oob',o)},
+ verify(tok){const m=/^fk\\.([^.]+)\\.(\\d+)$/.exec(tok||'');if(!m||!cur||cur.uid!==m[1])return null;return Object.assign({uid:cur.uid,email:cur.email,email_verified:!!cur.verified,auth_time:Number(m[2]),firebase:{sign_in_provider:cur.anon?'anonymous':(cur.provider==='google.com'?'google.com':'password')}},cur.tok||{})},
+ db:{get:p=>{const v=getAt(root,split(p));return v===undefined?null:clone(v)},set:(p,v)=>dbw(p,v),update:(p,o)=>{Object.keys(o).forEach(k=>dbw(p+'/'+k,o[k]))},remove:p=>dbw(p,null)}};
+window.__fb={admin,getDb:()=>clone(root),setDb(v){root=clone(v);LS.set('fb_db',root);relisten()},reset(){localStorage.removeItem('fb_db');localStorage.removeItem('fb_user');location.reload()}};
 })();`;
 }
 export const GIS_STUB = `window.google={accounts:{id:{initialize(o){window.__gis=o},renderButton(el){el.innerHTML='<button type="button" id="gstub">Continue with Google</button>';el.querySelector('#gstub').onclick=()=>window.__gis.callback({credential:window.__gisCred||'google:dev'})}}}};`;

@@ -16,7 +16,7 @@ const LINKS = {
   allCats: { href: "/categories", label: "Tất cả danh mục", icon: "grid", exact: true },
   dev: [{ href: "/dev", label: "Tổng quan", icon: "dash", exact: true }, { href: "/dev/data", label: "Dữ liệu", icon: "box" },
         { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
-        { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" },
+        { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" }, { href: "/dev/mail", label: "Gửi thư", icon: "mail" },
         { href: "/dev/system", label: "Bảo trì & thông báo", icon: "wrench" }, { href: "/dev/test", label: "Kiểm tra hệ thống", icon: "check" }]
 };
 const link = (l, cls = "", i = null) => `<a class="nav-link ${cls}" href="${l.href}" data-exact="${l.exact ? 1 : 0}"${i != null ? ` style="--i:${i}"` : ""}>${ICO[l.icon] || ICO.box}<span class="nl">${esc(l.label)}</span>${l.dot ? `<span class="dot" data-dot="${l.dot}" hidden></span>` : ""}${l.cnt != null ? `<span class="cnt" data-cnt="${esc(l.cid)}"${l.cnt ? "" : " hidden"}>${l.cnt || ""}</span>` : ""}</a>`;

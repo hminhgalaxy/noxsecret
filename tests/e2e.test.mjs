@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 import { startServer } from "./server.mjs";
 import { fakeFirebaseSource, GIS_STUB, DEV_EMAIL } from "./fake-firebase.mjs";
 const { chromium, devices } = createRequire(import.meta.url)("playwright");
+const { createApi } = createRequire(import.meta.url)("../api/_lib/core.js");
 const SHOTS = process.env.SHOTS || "/tmp/claude-0/-home-claude/99618507-ff35-52bc-84ef-f65de1e6fb66/scratchpad/shots";
 const { srv, port, hits } = await startServer(); const BASE = "http://127.0.0.1:" + port;
 const browser = await chromium.launch();
@@ -31,6 +32,38 @@ async function fresh(o = {}) {
   page.on("console", m => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) page.errs.push("console: " + m.text()); });
   return { ctx, page };
 }
+
+/* Máy chủ /api/account THẬT (api/_lib/core.js) chạy trong Node, nối với Firebase giả trong trang + Brevo giả (st.sent). */
+async function installApi(page, st = {}) {
+  st.sent = []; st.off = !!st.off;
+  const ev = (fn, arg) => page.evaluate(fn, arg), A = n => (a, b) => ev(([n, a, b]) => window.__fb.admin[n](a, b), [n, a, b]);
+  const NF = () => Object.assign(new Error("nf"), { code: "auth/user-not-found" });
+  const deps = {
+    auth: { verifyIdToken: async t => { const d = await ev(t => window.__fb.admin.verify(t), t); if (!d) throw new Error("bad token"); return d; },
+      getUser: async u => (await A("getUser")(u)) || Promise.reject(NF()), getUserByEmail: async e => (await A("getUserByEmail")(e)) || Promise.reject(NF()),
+      setCustomUserClaims: (u, c) => A("setClaims")(u, c), updateUser: (u, p) => A("updateUser")(u, p), revokeRefreshTokens: u => A("revoke")(u),
+      generateEmailVerificationLink: e => ev(e => window.__fb.admin.link("verifyEmail", e), e), generatePasswordResetLink: e => ev(e => window.__fb.admin.link("resetPassword", e), e),
+      generateVerifyAndChangeEmailLink: (e, n) => ev(([e, n]) => window.__fb.admin.link("verifyAndChangeEmail", e, n), [e, n]) },
+    db: { get: p => ev(p => window.__fb.admin.db.get(p), p), set: (p, v) => ev(([p, v]) => window.__fb.admin.db.set(p, v), [p, v]), update: (p, o) => ev(([p, o]) => window.__fb.admin.db.update(p, o), [p, o]), remove: p => ev(p => window.__fb.admin.db.remove(p), p) },
+    sendMail: async m => { st.sent.push(m); }, verifyPassword: (e, p) => ev(([e, p]) => window.__fb.admin.passwordOk(e, p), [e, p]),
+    env: { DEV_EMAIL }, randomInt: () => 123456
+  };
+  const handle = createApi(deps);
+  await page.route(BASE + "/api/account", async route => {
+    if (st.off) return route.fulfill({ status: 501, contentType: "application/json", body: JSON.stringify({ ok: false, code: "not_configured" }) });
+    let body = {}; try { body = JSON.parse(route.request().postData() || "{}"); } catch (_) {}
+    const h = route.request().headers(), token = /^Bearer /i.test(h.authorization || "") ? h.authorization.slice(7) : "";
+    let out; try { out = await handle({ action: body.action, body, token, ip: "9.9.9.9" }); } catch (e) { out = { status: 500, body: { ok: false, code: "server_error" } }; }
+    st.last = out; return route.fulfill({ status: out.status, contentType: "application/json", body: JSON.stringify(out.body) });
+  });
+  return st;
+}
+const until = async (fn, ms = 6000) => { const t = Date.now(), at = (new Error().stack.split("\n")[2] || "").replace(/^.*e2e\.test\.mjs:/, "dòng ").replace(/\)$/, ""); for (;;) { const v = await fn(); if (v) return v; if (Date.now() - t > ms) throw new Error("hết giờ chờ điều kiện (" + at + ")"); await new Promise(r => setTimeout(r, 40)); } };
+const linkOf = m => (m.html.match(/href="([^"]*\/auth\/action[^"]*)"/) || [])[1].replace(/&amp;/g, "&").replace("https://skibidiscript.vercel.app", BASE);
+const mailTo = (st, to, re) => st.sent.find(m => m.to === to && re.test(m.subject));
+const acct = (page, e) => page.evaluate(e => JSON.parse(localStorage.getItem("fb_accounts"))[e], e);
+const oneCf = page => page.waitForFunction(() => document.querySelectorAll(".cf").length === 1);
+const codeDlg = async (page, code) => { const f = '.cf-root.on [data-f="code"]'; await page.waitForSelector(f); await page.fill(f, code); await page.waitForFunction(c => document.querySelector('.cf-root.on [data-f="code"]')?.value === c, code); await page.click('.cf-root.on [data-cf="yes"]'); await page.waitForFunction(() => !document.querySelector(".cf-root.on")); };
 const go = async (page, p) => { await page.goto(BASE + p); await page.waitForSelector("#view .page", { timeout: 8000 }); };
 const authState = page => page.locator("#hdrAcc").getAttribute("data-state");
 const authed = page => page.waitForFunction(() => document.querySelector("#hdrAcc") && document.querySelector("#hdrAcc").dataset.state === "in");
@@ -167,7 +200,7 @@ test("đăng ký: kiểm tra từng ô, độ mạnh mật khẩu, tạo tài kh
   await page.fill("#password", "Matkhau123"); eq(await page.getAttribute("#meter", "data-s") > "1", true, "thanh độ mạnh"); await page.fill("#confirm", "Khac12345"); await page.click("button[type=submit]");
   ok((await page.textContent('[data-err="confirm"]')).length > 3, "nhập lại không khớp");
   await page.fill("#confirm", "Matkhau123"); await page.click("button[type=submit]"); await page.waitForURL(BASE + "/"); await authed(page);
-  await page.waitForFunction(() => window.__nameSet === "Test User", null, { timeout: 4000 }).catch(() => { throw new Error("tên hiển thị không được lưu"); }); ok((await page.evaluate(() => window.__verifySent)) >= 1, "gửi email xác minh");
+  await page.waitForFunction(() => window.__nameSet === "Test User", null, { timeout: 4000 }).catch(() => { throw new Error("tên hiển thị không được lưu"); }); await page.waitForFunction(() => window.__verifySent >= 1, null, { timeout: 4000 }).catch(() => {}); ok((await page.evaluate(() => window.__verifySent)) >= 1, "gửi email xác minh");
   await page.waitForFunction(() => Object.values(window.__fb.getDb().nox_users || {}).some(u => u.email === "new@example.com"), null, { timeout: 4000 }).catch(() => { throw new Error("hồ sơ người dùng không được tạo"); });
 });
 test("đăng ký: email đã tồn tại báo lỗi dễ hiểu", async ({ page }) => {
@@ -223,7 +256,7 @@ test("menu: nút Danh mục mở ra từ từ, có hiệu ứng, ghi nhớ và �
 test("menu: Dev Panel có nút riêng, chỉ DEV mới thấy", async ({ page }) => {
   await go(page, "/"); eq(await page.locator('.disc[data-g="dev"]').count(), 0, "khách không thấy");
   await loginDev(page); await page.waitForSelector('.disc[data-g="dev"]'); await page.locator('.disc[data-g="dev"] .nav-btn').click(); await page.waitForTimeout(700);
-  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 8, "8 mục quản trị");
+  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 9, "9 mục quản trị (có Gửi thư)");
   await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/system"]').click(); await page.waitForURL(BASE + "/dev/system"); await page.waitForSelector("#mBtn");
 });
 test("menu: tài khoản thường không thấy Dev Panel và bị chặn khi vào /dev", async ({ page }) => {
@@ -560,9 +593,148 @@ test("English: trang cài đặt mới, hộp xác nhận, hồ sơ khách, Ngư
   await go(page, "/dev/categories"); await chk("/dev/categories");
   ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
 }, { lang: "en" });
+test("English: giai đoạn 2 (hồ sơ bảo mật, hộp mã, /two-step, /auth/action, quên mật khẩu) — không còn chữ tiếng Việt", async ({ page }) => {
+  const st = await installApi(page); const bad = []; const chk = async n => { await page.waitForTimeout(350); const v = await viContent(page); if (v.length) bad.push(n + " → " + v.slice(0, 8).join(" | ")); };
+  await go(page, "/forgot-password"); await page.waitForSelector("#recover"); await chk("/forgot-password");
+  await go(page, "/auth/action?mode=resetPassword&oobCode=SAI"); await page.waitForSelector(".auth-card h1"); await chk("/auth/action lỗi");
+  await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.waitForSelector("#tfBtn"); await chk("/profile bảo mật");
+  await page.click("#rcBtn"); await oneCf(page); await chk("hộp thêm email khôi phục"); await page.fill('.cf [data-f="email"]', USERPW[0]); await page.click('.cf [data-cf="yes"]'); await page.waitForFunction(() => document.querySelector("#toasts").textContent.length > 5); await chk("toast email trùng");
+  await page.click("#emBtn"); await oneCf(page); await chk("hộp đổi email"); await no(page);
+  await page.click("#tfBtn"); await until(() => mailTo(st, USERPW[0], /verification code/)); await page.waitForSelector('.cf-root.on [data-f="code"]'); await chk("hộp mã bật 2 bước");
+  await codeDlg(page, "000000"); await page.waitForFunction(() => /isn't right/.test(document.querySelector("#toasts").textContent)); await chk("toast sai mã"); await page.waitForSelector('.cf-root.on [data-f="code"]'); await codeDlg(page, "123456"); await until(async () => (await db(page)).nox_security?.uUSER?.twofa === true); await chk("sau khi bật");
+  await page.click('[data-act="signout"]'); await yes(page); await login(page, USERPW); await page.waitForURL(/\/two-step/); await page.waitForSelector("#code"); await chk("/two-step");
+  await page.fill("#code", "12"); await page.click("button[type=submit]"); await chk("/two-step thiếu số"); await page.fill("#code", "999999"); await page.click("button[type=submit]"); await page.waitForFunction(() => document.querySelector("#err").textContent.length > 3); await chk("/two-step sai mã");
+  ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
+}, { lang: "en" });
+test("English: Dev — trang Gửi thư và hộp xem trước", async ({ page }) => {
+  await installApi(page); await loginDev(page); await seedUsers(page); const bad = []; const chk = async n => { await page.waitForTimeout(400); const v = await viContent(page); if (v.length) bad.push(n + " → " + v.slice(0, 8).join(" | ")); };
+  await go(page, "/dev/mail"); await page.waitForSelector("#mT"); await chk("/dev/mail"); await page.selectOption("#mT", { index: 1 }); await chk("/dev/mail văn mẫu");
+  await page.click('[data-prev]'); await chk("xem trước"); await page.fill("#mTo", ""); await page.click("#mSend"); await chk("thiếu người nhận");
+  ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
+}, { lang: "en" });
 test("tương phản chữ — trang Người dùng và Cài đặt mới (sáng + kính)", async ({ page }) => {
   await loginDev(page); await seedUsers(page); await page.evaluate(() => { localStorage.setItem("ssw_theme", "light"); localStorage.setItem("ssw_glass", "1"); });
   await contrastRun(page, ["/settings", "/profile", "/dev/users"], "người dùng+cài đặt");
+});
+
+/* ───────── Giai đoạn 2: thư HTML, 2 bước, email khôi phục, đổi email, /auth/action ───────── */
+test("chưa cấu hình máy chủ thư: vẫn quên mật khẩu bằng Firebase, ẩn mục 2 bước, trang Gửi thư báo chưa bật", async ({ page }) => {
+  await installApi(page, { off: true });
+  await go(page, "/forgot-password"); await page.fill("#email", "ai-do@example.com"); await page.click("button[type=submit]"); await page.waitForFunction(() => document.querySelector("#ok").textContent.length > 3);
+  eq(await page.evaluate(() => window.__resetSent), "ai-do@example.com", "quay về thư mặc định của Firebase");
+  await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.waitForTimeout(500); eq(await page.locator("#secPanel").count(), 0, "không hiện mục 2 bước khi chưa cấu hình");
+  await page.click('[data-act="signout"]'); await yes(page);
+  await loginDev(page); await go(page, "/dev/mail"); await page.waitForSelector(".statebox"); ok(/chưa được bật/.test(await page.textContent("#view")), "báo chưa bật");
+});
+test("đăng ký (máy chủ thư bật): thư xác minh + chào mừng gửi qua API, bấm liên kết thì xác minh xong", async ({ page }) => {
+  const st = await installApi(page); await go(page, "/register"); await page.waitForFunction(() => window.__tsOpts); await page.waitForTimeout(80);
+  await page.fill("#name", "Test User"); await page.fill("#email", "new@example.com"); await page.fill("#password", "Matkhau123"); await page.fill("#confirm", "Matkhau123"); await page.click("button[type=submit]"); await page.waitForURL(BASE + "/"); await authed(page);
+  await until(() => mailTo(st, "new@example.com", /Verify your email/) && mailTo(st, "new@example.com", /Welcome to/));
+  eq(await page.evaluate(() => window.__verifySent || 0), 0, "không dùng thư mặc định của Firebase");
+  const m = mailTo(st, "new@example.com", /Verify your email/); ok(/SkibidiScript &bull; skibidiscript\.vercel\.app/.test(m.html) && /icon-192\.png/.test(m.html), "có logo + tên web");
+  eq((await acct(page, "new@example.com")).verified, false);
+  await page.goto(linkOf(m)); await page.waitForSelector(".auth-card h1"); await page.waitForFunction(() => /Email đã được xác minh/.test(((document.querySelector(".auth-card h1") || {}).textContent || "")), null, { timeout: 5000 }); eq((await acct(page, "new@example.com")).verified, true, "đã xác minh");
+  await page.reload(); await page.waitForFunction(() => /không dùng được/.test(((document.querySelector(".auth-card h1") || {}).textContent || "")), null, { timeout: 5000 }); ok(true, "dùng lại liên kết → báo hết hạn/đã dùng");
+});
+test("quên mật khẩu (máy chủ thư bật): thư tiếng Anh → trang /auth/action đặt mật khẩu mới → đăng nhập bằng mật khẩu mới", async ({ page }) => {
+  const st = await installApi(page); await go(page, "/forgot-password"); await page.fill("#email", USERPW[0]); await page.click("button[type=submit]"); await page.waitForFunction(() => document.querySelector("#ok").textContent.length > 3);
+  const m = await until(() => mailTo(st, USERPW[0], /Reset your SkibidiScript password/)); eq(await page.evaluate(() => window.__resetSent || null), null, "không dùng thư Firebase");
+  await page.goto(linkOf(m)); await page.waitForSelector("#f #password"); await page.fill("#password", "abc"); await page.fill("#confirm", "abc"); await page.click("button[type=submit]"); ok((await page.textContent('[data-err="password"]')).length > 3, "mật khẩu yếu bị từ chối");
+  await page.fill("#password", "Moimatkhau99"); await page.fill("#confirm", "Moimatkhau99"); await page.click("button[type=submit]"); await page.waitForFunction(() => /Đã đổi mật khẩu/.test(((document.querySelector(".auth-card h1") || {}).textContent || "")));
+  await login(page, [USERPW[0], "Moimatkhau99"]); await page.waitForURL(BASE + "/"); await authed(page);
+  const st2 = await installApi(page); await page.evaluate(() => window.__fb.admin.expireAll()); ok(true);
+});
+test("liên kết hết hạn / sai: trang báo lỗi dễ hiểu và có nút yêu cầu liên kết mới", async ({ page }) => {
+  await installApi(page);
+  for (const q of ["mode=resetPassword&oobCode=SAI", "mode=verifyEmail", "mode=khac&oobCode=x", ""]) { await go(page, "/auth/action" + (q ? "?" + q : "")); await page.waitForFunction(() => /không dùng được/.test(((document.querySelector(".auth-card h1") || {}).textContent || ""))); ok(await page.locator('a[href="/forgot-password"]').count() === 1, "nút yêu cầu liên kết mới: " + q); ok(!TECH.test(await visibleText(page)), "không lộ thuật ngữ"); }
+  eq(await page.evaluate(() => document.querySelector('meta[name=robots]') && document.querySelector('meta[name=robots]').content), "noindex,nofollow");
+});
+test("2 bước: bật trong hồ sơ → đăng nhập lại bị hỏi mã → sai mã bị từ chối → đúng mã vào được → tắt", async ({ page }) => {
+  const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.waitForSelector("#tfBtn");
+  await page.click("#tfBtn"); await until(() => mailTo(st, USERPW[0], /verification code/)); ok(/^123456 is your/.test(mailTo(st, USERPW[0], /verification code/).subject), "mã trong tiêu đề thư");
+  await codeDlg(page, "000000"); await page.waitForFunction(() => document.querySelector("#toasts") && /chưa đúng/.test(document.querySelector("#toasts").textContent)); await page.waitForFunction(() => document.querySelectorAll(".cf").length === 1 && document.querySelector('.cf [data-f="code"]')); await page.fill('.cf [data-f="code"]', "123 456"); await page.click('.cf [data-cf="yes"]'); await page.waitForSelector(".cf", { state: "detached" });
+  await until(async () => (await db(page)).nox_security?.uUSER?.twofa === true); await page.waitForTimeout(400); eq(path(page), "/profile", "phiên hiện tại không bị đá ra");
+  await page.fill("#bio", "vẫn ghi được"); await page.click("#saveBio"); await page.waitForFunction(() => window.__fb.getDb().nox_users.uUSER.bio === "vẫn ghi được", null, { timeout: 6000 }); ok(/Disable|Tắt/.test(await page.textContent("#tfBtn")), "nút đổi thành Tắt");
+  /* phiên mới */
+  await page.click('[data-act="signout"]'); await yes(page); await page.waitForURL(/\/login/); st.sent.length = 0;
+  await login(page, USERPW); await page.waitForURL(/\/two-step/); await until(() => mailTo(st, USERPW[0], /sign-in code/));
+  const w = await page.evaluate(async () => { try { await firebase.database().ref("nox_users/uUSER/bio").set("hack"); return "ok"; } catch (e) { return e.code; } }); eq(w, "PERMISSION_DENIED", "chưa nhập mã thì Rules chặn ghi");
+  await go(page, "/profile"); eq(path(page).split("?")[0], "/two-step", "mọi trang cần đăng nhập đều bị đưa về bước nhập mã"); await go(page, "/settings"); eq(path(page).split("?")[0], "/two-step", "kể cả trang công khai");
+  await page.fill("#code", "12"); await page.click("button[type=submit]"); ok((await page.textContent("#codeErr")).length > 3, "mã thiếu số"); await page.fill("#code", "999999"); await page.click("button[type=submit]"); await page.waitForFunction(() => document.querySelector("#err").textContent.length > 3); ok(!TECH.test(await page.textContent("#err")), "lỗi dễ hiểu"); eq(path(page).split("?")[0], "/two-step");
+  await page.fill("#code", "123456"); await page.click("button[type=submit]"); await page.waitForURL(BASE + "/settings"); await authed(page); /* quay về đúng trang đang định vào */
+  const w2 = await page.evaluate(async () => { try { await firebase.database().ref("nox_users/uUSER/bio").set("ok-sau-khi-nhap-ma"); return "ok"; } catch (e) { return e.code; } }); eq(w2, "ok", "nhập mã xong thì ghi được");
+  await page.reload(); await authed(page); await page.waitForTimeout(500); ok(!/two-step/.test(path(page)), "tải lại trang không phải nhập lại");
+  await go(page, "/profile"); await page.click("#tfBtn"); await until(() => mailTo(st, USERPW[0], /turn off|Turn off|verification code/i)); await codeDlg(page, "123456"); await until(async () => (await db(page)).nox_security.uUSER.twofa === false); await page.waitForFunction(() => /Bật|Turn on/.test(document.querySelector("#tfBtn").textContent));
+});
+test("2 bước: mã chỉ dùng 1 lần, hết 10 phút hoặc sai 5 lần thì phải xin mã mới; gửi lại có đếm ngược", async ({ page }) => {
+  const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.click("#tfBtn"); await codeDlg(page, "123456"); await until(async () => (await db(page)).nox_security?.uUSER?.twofa === true);
+  await page.click('[data-act="signout"]'); await yes(page); await login(page, USERPW); await page.waitForURL(/\/two-step/); await until(() => st.sent.some(m => /sign-in code/.test(m.subject)));
+  await page.waitForFunction(() => document.querySelector("#resend").disabled, null, { timeout: 4000 }); ok(await page.locator("#resend").isDisabled(), "gửi lại bị khoá trong lúc đếm ngược"); ok(/\d+s/.test(await page.textContent("#resend")), "có đếm ngược");
+  for (let i = 0; i < 5; i++) { await page.fill("#code", "000000"); await page.click("button[type=submit]"); await page.waitForFunction(n => document.querySelector("#err").textContent.length > 3 && !document.querySelector("button[type=submit]").disabled, i); }
+  await page.fill("#code", "123456"); await page.click("button[type=submit]"); await page.waitForFunction(() => /quá nhiều lần|yêu cầu mã mới|hết hạn/.test(document.querySelector("#err").textContent)); eq(path(page).split("?")[0], "/two-step", "sai 5 lần thì mã đúng cũng không còn dùng được");
+  await page.click("#out"); await page.waitForURL(/\/login/); eq(await authState(page), "out");
+});
+test("email khôi phục: thêm (xác nhận bằng mã) → dùng để nhận mã đăng nhập 2 bước → quên email: nhận liên kết đặt lại ở email khôi phục → xoá", async ({ page }) => {
+  const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.waitForSelector("#rcBtn");
+  await page.click("#rcBtn"); await oneCf(page); await page.fill('.cf [data-f="email"]', USERPW[0]); await page.click('.cf [data-cf="yes"]'); await page.waitForFunction(() => /khác|different/i.test(document.querySelector("#toasts").textContent));
+  await page.click("#rcBtn"); await oneCf(page); await page.fill('.cf [data-f="email"]', "backup@example.com"); await page.click('.cf [data-cf="yes"]');
+  await until(() => mailTo(st, "backup@example.com", /recovery code/)); await codeDlg(page, "123456"); await until(async () => (await db(page)).nox_security?.uUSER?.recovery?.email === "backup@example.com");
+  await until(() => mailTo(st, USERPW[0], /recovery email was added/i)); await page.waitForFunction(() => /backup@example.com/.test(document.querySelector("#secPanel").textContent));
+  await page.click("#tfBtn"); await codeDlg(page, "123456"); await until(async () => (await db(page)).nox_security.uUSER.twofa === true);
+  await page.click('[data-act="signout"]'); await yes(page); st.sent.length = 0; await login(page, USERPW); await page.waitForURL(/\/two-step/); await page.waitForSelector("#alt"); await until(() => mailTo(st, USERPW[0], /sign-in code/));
+  await page.waitForTimeout(100); st.sent.length = 0; await page.evaluate(() => 0); await page.click("#alt"); await until(() => mailTo(st, "backup@example.com", /sign-in code/)); ok(/recovery email/.test(mailTo(st, "backup@example.com", /sign-in code/).html), "thư nói rõ đây là email khôi phục");
+  await page.fill("#code", "123456"); await page.click("button[type=submit]"); await page.waitForURL(BASE + "/"); await authed(page);
+  await page.click('[data-act="signout"]'); await yes(page); await go(page, "/forgot-password"); await page.waitForSelector("#recover"); st.sent.length = 0; await page.fill("#email", USERPW[0]); await page.click("#recover"); await until(() => mailTo(st, "backup@example.com", /Account recovery/));
+  await login(page, USERPW); await page.waitForURL(/\/two-step/); await page.fill("#code", "123456"); await page.click("button[type=submit]"); await page.waitForURL(BASE + "/"); await go(page, "/profile"); await page.waitForSelector("#rcDel"); await page.click("#rcDel"); await no(page); await page.click("#rcDel"); await yes(page);
+  await until(async () => !((await db(page)).nox_security.uUSER.recovery)); await until(() => mailTo(st, USERPW[0], /recovery email was removed/i));
+});
+test("đổi email đăng nhập: cần mật khẩu, gửi liên kết tới email mới (+ báo email cũ), bấm xong đăng nhập bằng email mới", async ({ page }) => {
+  const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.waitForSelector("#emBtn");
+  await page.click("#emBtn"); await oneCf(page); eq(await page.getAttribute('.cf [data-f="pw"]', "type"), "password", "ô mật khẩu được che");
+  await page.fill('.cf [data-f="email"]', "moi@example.com"); await page.fill('.cf [data-f="pw"]', "saimatkhau"); await page.click('.cf [data-cf="yes"]'); await page.waitForFunction(() => /Mật khẩu hiện tại không đúng/.test(document.querySelector("#toasts").textContent)); eq(st.sent.filter(m => m.to === "moi@example.com").length, 0, "sai mật khẩu → không gửi");
+  await page.click("#emBtn"); await oneCf(page); await page.fill('.cf [data-f="email"]', "moi@example.com"); await page.fill('.cf [data-f="pw"]', USERPW[1]); await page.click('.cf [data-cf="yes"]');
+  const m = await until(() => mailTo(st, "moi@example.com", /Confirm your new email/)); await until(() => mailTo(st, USERPW[0], /email is being changed/i));
+  await page.goto(linkOf(m)); await page.waitForFunction(() => /Đã đổi email/.test(((document.querySelector(".auth-card h1") || {}).textContent || ""))); eq(await page.evaluate(() => window.__emailChanged), "moi@example.com");
+  await login(page, ["moi@example.com", USERPW[1]]); await page.waitForURL(BASE + "/"); await authed(page);
+});
+test("DEV: cấp quyền / mute / ban qua máy chủ — gửi thư thông báo, ban vĩnh viễn khoá thật tài khoản", async ({ page }) => {
+  const st = await installApi(page); await loginDev(page); await seedUsers(page); await go(page, "/dev/users"); await page.waitForSelector('[data-uid="uUSER"]'); const row = '[data-uid="uUSER"]';
+  await page.click(row + ' [data-a="role"]'); await yes(page); await until(() => mailTo(st, USERPW[0], /editor/)); eq((await db(page)).nox_admin.uUSER.role, "editor");
+  await page.click(row + ' [data-a="mute"]'); await page.selectOption('.cf [data-f="dur"]', "3600000"); await page.fill('.cf [data-f="why"]', "Spam"); await yes(page); await until(() => mailTo(st, USERPW[0], /muted/)); ok(/Spam/.test(mailTo(st, USERPW[0], /muted/).html), "thư có lý do");
+  await page.click(row + ' [data-a="ban"]'); await page.selectOption('.cf [data-f="dur"]', "perm"); await page.fill('.cf [data-f="why"]', "Vi phạm"); await yes(page); await until(() => mailTo(st, USERPW[0], /suspended/)); ok(/permanently/.test(mailTo(st, USERPW[0], /suspended/).text), "thư nói vĩnh viễn");
+  eq((await acct(page, USERPW[0])).disabled, true, "tài khoản bị khoá thật");
+  await page.click('[data-act="signout"]').catch(() => {}); await page.evaluate(() => 0);
+  await go(page, "/profile"); await page.click('[data-act="signout"]'); await yes(page); await login(page, USERPW); await page.waitForFunction(() => /bị khóa/.test(document.querySelector("#err").textContent)); eq(await authState(page), "out");
+  await loginDev(page); await go(page, "/dev/users"); await page.waitForSelector(row + ' [data-a="ban"]'); await page.click(row + ' [data-a="ban"]'); await yes(page); await until(() => mailTo(st, USERPW[0], /active again/)); eq((await acct(page, USERPW[0])).disabled, false, "mở khoá lại");
+});
+test("DEV → Gửi thư: văn mẫu điền sẵn, xem trước có logo, gửi thật + gửi thử về DEV, thư hệ thống xem/gửi thử được", async ({ page }) => {
+  const st = await installApi(page); await loginDev(page); await seedUsers(page); await go(page, "/dev/mail"); await page.waitForSelector("#mT");
+  const n = await page.locator("#mT option").count(); ok(n >= 8, "nhiều văn mẫu: " + n); ok((await page.inputValue("#mB")).length > 40 && /\{\{name\}\}/.test(await page.inputValue("#mB")), "điền sẵn nội dung");
+  await page.selectOption("#mT", "resolved"); ok(/resolved/i.test(await page.inputValue("#mS")), "đổi mẫu thì đổi tiêu đề");
+  await page.waitForFunction(() => (document.querySelector("#mFrame").srcdoc || "").includes("SkibidiScript"), null, { timeout: 5000 }); ok(/icon-192\.png/.test(await page.getAttribute("#mFrame", "srcdoc")), "xem trước có logo");
+  await page.click("#mSend"); ok((await page.textContent("#mE")).length > 3, "thiếu người nhận"); await page.fill("#mTo", USERPW[0]); await page.click("#mSend"); const m = await until(() => mailTo(st, USERPW[0], /resolved/i)); ok(/Hi Người/.test(m.text) || /Hi /.test(m.text), "chèn tên: " + m.text.slice(0, 40));
+  await page.fill("#mB", "Xin chào\n\n**Đậm** và <b>html</b>"); await page.click("#mTest"); const t = await until(() => st.sent.find(x => x.to === DEV_EMAIL && /resolved/i.test(x.subject))); ok(!/<b>html<\/b>/.test(t.html) && /<b>Đậm<\/b>/.test(t.html), "escape HTML, giữ **đậm**");
+  await page.click('[data-prev="banned"]'); await page.waitForFunction(() => /suspended/.test(document.querySelector("#mFrame").srcdoc)); await page.click('[data-test="loginCode"]'); await until(() => st.sent.some(x => x.to === DEV_EMAIL && /sign-in code/.test(x.subject)));
+});
+test("người dùng thường không gọi được API quản trị / gửi thư (kể cả gọi thẳng)", async ({ page }) => {
+  const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
+  const r = await page.evaluate(async () => { const tok = await firebase.auth().currentUser.getIdToken(); const o = {}; for (const [k, b] of [["mod", { action: "moderate", uid: "uDEV", op: "ban", until: 9e15 }], ["send", { action: "dev-send", to: "x@y.co", body: "hi" }], ["tpl", { action: "dev-templates" }]]) { const r = await fetch("/api/account", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + tok }, body: JSON.stringify(b) }); o[k] = r.status; } return o; });
+  eq(r, { mod: 403, send: 403, tpl: 403 }); eq(st.sent.length, 0);
+  await go(page, "/dev/mail"); ok(path(page) === "/" || (await page.locator("#mT").count()) === 0, "không vào được trang Gửi thư");
+});
+test("English: màn nhập mã 2 bước, trang /auth/action, hồ sơ (mục bảo mật) và Gửi thư — không còn tiếng Việt", async ({ page }) => {
+  const st = await installApi(page); const bad = []; const chk = async n => { await page.waitForTimeout(400); const v = await viContent(page); if (v.length) bad.push(n + " → " + v.slice(0, 8).join(" | ")); };
+  await go(page, "/auth/action?mode=resetPassword&oobCode=SAI"); await page.waitForSelector(".auth-card h1"); await chk("/auth/action lỗi");
+  await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.waitForSelector("#tfBtn"); await chk("/profile bảo mật");
+  await page.click("#tfBtn"); await page.waitForSelector(".cf"); await chk("hộp nhập mã"); await codeDlg(page, "123456"); await until(async () => (await db(page)).nox_security?.uUSER?.twofa === true);
+  await page.click("#rcBtn"); await page.waitForSelector(".cf"); await chk("hộp email khôi phục"); await no(page); await page.click("#emBtn"); await page.waitForSelector(".cf"); await chk("hộp đổi email"); await no(page);
+  await page.click('[data-act="signout"]'); await yes(page); await login(page, USERPW); await page.waitForURL(/two-step/); await page.waitForSelector("#code"); await chk("/two-step"); await page.click("button[type=submit]"); await chk("/two-step lỗi");
+  await page.click("#out"); await page.waitForURL(/login/); await loginDev(page); await go(page, "/dev/mail"); await page.waitForSelector("#mT"); await chk("/dev/mail");
+  ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
+}, { lang: "en" });
+test("tương phản chữ — /two-step, hồ sơ có mục bảo mật, /dev/mail (sáng + kính)", async ({ page }) => {
+  const st = await installApi(page); await loginDev(page); await seedUsers(page); await page.evaluate(() => { localStorage.setItem("ssw_theme", "light"); localStorage.setItem("ssw_glass", "1"); });
+  await contrastRun(page, ["/profile", "/dev/mail", "/auth/action?mode=resetPassword&oobCode=SAI"], "giai đoạn 2");
 });
 test("không có chữ kỹ thuật trên các trang công khai (cả khi chưa có dữ liệu)", async ({ page }) => {
   for (const r of ["/", "/categories", "/scripts", "/apk", "/ios", "/links", "/notifications", "/settings", "/login", "/register", "/forgot-password", "/search?q=zzz", "/scripts/khong-co"]) {

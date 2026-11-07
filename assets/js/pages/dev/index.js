@@ -11,6 +11,7 @@ const SHORTCUTS = [
   { href: "/dev/users", t: "Người dùng", d: "Những tài khoản đã đăng nhập vào website.", i: "users" },
   { href: "/dev/theme", t: "Giao diện", d: "Hình nền, video nền và nhạc nền.", i: "paint" },
   { href: "/dev/updates", t: "Cập nhật", d: "Đăng tin \"Cập nhật này có gì?\" và làm sáng chuông thông báo.", i: "bell" },
+  { href: "/dev/mail", t: "Gửi thư", d: "Trả lời người dùng bằng văn mẫu tiếng Anh và xem trước các thư tự động.", i: "mail" },
   { href: "/dev/system", t: "Bảo trì & thông báo", d: "Bật chế độ bảo trì, đăng thông báo cho mọi người.", i: "wrench" },
   { href: "/dev/test", t: "Kiểm tra hệ thống", d: "Chạy thử mọi thành phần và xem lỗi cùng cách khắc phục ngay.", i: "check" }
 ];

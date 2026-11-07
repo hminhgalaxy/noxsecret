@@ -1,5 +1,5 @@
 /* Router History API: URL thật, deep link, Back/Forward, guard đăng nhập/DEV, lazy load, 404. */
-import { session, ready as authReady, onAuth, adminReady } from "./auth.js";
+import { session, ready as authReady, onAuth, adminReady, secReady } from "./auth.js";
 import { toast, RM } from "./util.js";
 
 const routes = [];
@@ -25,8 +25,16 @@ export function match(pathname) {
 }
 /* Quyết định guard — hàm thuần để kiểm thử */
 export function decide(guard, s, here) {
+  if (guard === "open") return null; /* công khai và không bị chặn bởi bước nhập mã 2 bước (vd. /auth/action) */
+  const real = s.user && !s.isGuest;
+  /* Đã nhập mật khẩu nhưng chưa nhập mã 2 bước → mọi trang (trừ trang nhập mã) chuyển về /two-step */
+  if (real && s.twofaPending && guard !== "twofa") {
+    let nx = here; try { const u = new URL(here, "http://x"); if (/^\/(login|register|forgot-password|two-step)$/.test(u.pathname)) nx = u.searchParams.get("next") || "/"; } catch (_) {}
+    return { to: "/two-step" + (nx && nx !== "/" ? "?next=" + encodeURIComponent(nx) : ""), replace: true };
+  }
   if (!guard || guard === "public") return null;
-  if (guard === "guest") return (s.user && !s.isGuest) ? { to: "__next__", replace: true } : null;
+  if (guard === "twofa") return !real ? { to: "/login", replace: true } : (!s.twofaPending ? { to: "__next__", replace: true } : null);
+  if (guard === "guest") return real ? { to: "__next__", replace: true } : null;
   if (!s.user) return { to: "/login?next=" + encodeURIComponent(here), replace: true };
   if (guard === "staff" && !(s.isDev || s.isEditor)) return { to: "/", replace: true, toast: "Bạn không có quyền thực hiện thao tác này." };
   if (guard === "dev" && !s.isDev) return { to: "/", replace: true, toast: s.devBlocked || "Bạn không có quyền truy cập khu vực DEV." };
@@ -78,7 +86,7 @@ export async function render({ pop = false } = {}) {
   barStart();
   let m = match(url.pathname) || { def: hooks.notFound, params: {}, path: "*" };
   let def = m.def;
-  await authReady; if (def.guard === "staff") await adminReady();
+  await authReady; if (def.guard !== "open") await secReady(); if (def.guard === "staff") await adminReady();
   if (id !== navId) return;
   const d = decide(def.guard, session, here);
   if (d) {

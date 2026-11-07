@@ -28,6 +28,8 @@ const AUTH = {
   "auth/unauthorized-domain": "Cách đăng nhập này đang tạm thời không khả dụng.",
   "auth/configuration-not-found": "Đăng nhập đang tạm thời không khả dụng. Vui lòng thử lại sau.",
   "auth/api-key-not-valid": "Đăng nhập đang tạm thời không khả dụng. Vui lòng thử lại sau.",
+  "auth/expired-action-code": "Liên kết này đã hết hạn hoặc đã được dùng. Hãy yêu cầu một liên kết mới.", "auth/invalid-action-code": "Liên kết này không hợp lệ hoặc đã được dùng. Hãy yêu cầu một liên kết mới.",
+  "auth/wrong-password-reauth": "Mật khẩu hiện tại không đúng.",
   "app/no-sdk": "Không kết nối được tới hệ thống đăng nhập. Vui lòng tải lại trang.",
   "app/captcha": "Xác minh không thành công. Vui lòng thử lại.", "app/captcha-missing": "Vui lòng xác minh bạn không phải người máy."
 };
