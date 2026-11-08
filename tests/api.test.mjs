@@ -64,7 +64,7 @@ console.log("XÁC MINH EMAIL / ĐẶT LẠI MẬT KHẨU");
   t("đã xác minh rồi → không gửi nữa", (await w.call("verify-email", {}, "a")).body.already, true);
   for (let i = 0; i < 4; i++) await w.call("verify-email", {}, "aUnv"); t("giới hạn 5 thư/giờ", (await w.call("verify-email", {}, "aUnv")).status, 429);
   const w2 = world();
-  await w2.call("reset", { email: "A@Example.com " }); t("reset: gửi tới email tồn tại (không phân biệt hoa thường)", [w2.sent.length, w2.sent[0].subject], [1, "Reset your SkibidiScript password"]);
+  await w2.call("reset", { email: "A@Example.com " }); t("reset: gửi tới email tồn tại (không phân biệt hoa thường)", [w2.sent.length, w2.sent[0].subject], [1, "123456 is your SkibidiScript password reset code"]);
   const r2 = await w2.call("reset", { email: "nobody@example.com" }); t("reset: email không tồn tại → vẫn ok, KHÔNG gửi", [r2.status, r2.body.ok, w2.sent.length], [200, true, 1]);
   await w2.call("reset", { email: "g@example.com" }); t("reset: tài khoản Google → thư hướng dẫn dùng Google", w2.sent.at(-1).subject, "Sign in to SkibidiScript with Google");
   t("reset: email sai định dạng → 400", (await w2.call("reset", { email: "abc" })).status, 400);
@@ -72,9 +72,70 @@ console.log("XÁC MINH EMAIL / ĐẶT LẠI MẬT KHẨU");
   clock += 61 * 60 * 1000; t("reset: hết cửa sổ giờ thì gửi lại được", (await w3.call("reset", { email: "a@example.com" })).status, 200); clock = NOW0;
   const w4 = world(); w4.users.uA.disabled = true; await w4.call("reset", { email: "a@example.com" }); t("reset: tài khoản bị khoá → không gửi", w4.sent.length, 0);
   const w5 = world(); w5.data = { nox_security: { uA: { recovery: { email: "backup@example.com", verified: true } } } };
-  await w5.call("recover", { email: "a@example.com" }); t("recover: gửi liên kết tới EMAIL KHÔI PHỤC", [w5.sent.length, w5.sent[0].to, /backup/.test(w5.sent[0].to)], [1, "backup@example.com", true]);
+  await w5.call("recover", { email: "a@example.com" }); t("recover: gửi MÃ tới EMAIL KHÔI PHỤC", [w5.sent.length, w5.sent[0].to, /backup/.test(w5.sent[0].to)], [1, "backup@example.com", true]);
   const w6 = world(); const r6 = await w6.call("recover", { email: "a@example.com" }); t("recover: chưa có email khôi phục → ok nhưng không gửi (không lộ thông tin)", [r6.status, w6.sent.length], [200, 0]);
   const w7 = world(); w7.data = { nox_security: { uA: { recovery: { email: "backup@example.com", verified: false } } } }; await w7.call("recover", { email: "a@example.com" }); t("recover: email khôi phục chưa xác minh → không gửi", w7.sent.length, 0); }
+
+console.log("ĐẶT LẠI MẬT KHẨU BẰNG MÃ");
+{ const w = world(); await w.call("reset", { email: "a@example.com" });
+  t("thư chứa mã 6 số, KHÔNG có liên kết đặt lại", [lastCode(w), /oobCode|mode=resetPassword/.test(w.sent[0].html)], ["123456", false]);
+  t("mã không lưu dạng rõ", JSON.stringify(w.data).includes("123456"), false);
+  t("sai mã bị từ chối", (await w.call("reset-confirm", { email: "a@example.com", code: "000000", password: "Matkhau123" })).body.code, "wrong_code");
+  t("mật khẩu yếu bị từ chối (không tiêu mã)", (await w.call("reset-confirm", { email: "a@example.com", code: "123456", password: "abc" })).body.code, "weak_password");
+  t("mật khẩu chỉ chữ bị từ chối", (await w.call("reset-confirm", { email: "a@example.com", code: "123456", password: "abcdefghij" })).body.code, "weak_password");
+  const ok1 = await w.call("reset-confirm", { email: "A@example.com", code: "123 456", password: "Matkhau123" });
+  t("đúng mã + mật khẩu mạnh → đổi được, đăng xuất mọi thiết bị, báo bằng thư", [ok1.status, w.calls.some(c => c[0] === "update" && c[1] === "uA" && c[2].password === "Matkhau123"), w.calls.some(c => c[0] === "revoke" && c[1] === "uA"), w.sent.at(-1).subject], [200, true, true, "Your SkibidiScript password was changed"]);
+  t("mã dùng được đúng 1 lần", (await w.call("reset-confirm", { email: "a@example.com", code: "123456", password: "Matkhau456" })).body.code, "code_expired");
+  t("mã tới đúng email tài khoản → coi là đã xác minh email", w.users.uA.emailVerified, true);
+  t("email không tồn tại → báo mã hết hạn (không lộ)", (await w.call("reset-confirm", { email: "nobody@example.com", code: "123456", password: "Matkhau123" })).body.code, "code_expired");
+  t("tài khoản Google không đổi mật khẩu bằng mã", (await w.call("reset-confirm", { email: "g@example.com", code: "123456", password: "Matkhau123" })).body.code, "code_expired");
+  const w2 = world(); await w2.call("reset", { email: "a@example.com" });
+  for (let i = 0; i < 5; i++) await w2.call("reset-confirm", { email: "a@example.com", code: "000000", password: "Matkhau123" });
+  t("sai 5 lần thì mã đúng cũng hết dùng", (await w2.call("reset-confirm", { email: "a@example.com", code: "123456", password: "Matkhau123" })).body.code, "too_many_tries");
+  const w3 = world(); w3.data = { nox_security: { uA: { recovery: { email: "backup@example.com", verified: true } } } };
+  await w3.call("recover", { email: "a@example.com" }); t("mã gửi tới email khôi phục", [w3.sent.at(-1).to, /recovery code/.test(w3.sent.at(-1).subject)], ["backup@example.com", true]);
+  await w3.call("reset-confirm", { email: "a@example.com", code: "123456", password: "Matkhau123" }); t("đổi qua email khôi phục: không tự coi email chính là đã xác minh", [w3.users.uA.emailVerified, w3.calls.some(c => c[0] === "update" && c[2].password)], [undefined, true]);
+  const w4 = world(); for (let i = 0; i < 12; i++) await w4.call("reset-confirm", { email: "a@example.com", code: "000000", password: "Matkhau123" }); t("giới hạn số lần thử theo email", (await w4.call("reset-confirm", { email: "a@example.com", code: "000000", password: "Matkhau123" })).status, 429); }
+
+console.log("ĐỔI MẬT KHẨU TRONG HỒ SƠ (MÃ + MẬT KHẨU HIỆN TẠI)");
+{ const w = world();
+  t("chưa đăng nhập → 401", (await w.call("password-code-send")).status, 401);
+  const r = await w.call("password-code-send", {}, "a"); t("gửi mã tới email đăng nhập", [r.status, w.sent.at(-1).to, /password change code/.test(w.sent.at(-1).subject)], [200, "a@example.com", true]);
+  t("sai mật khẩu hiện tại → 403, không dùng mã", (await w.call("password-change", { code: "123456", currentPassword: "nope", password: "Moimatkhau9" }, "a")).body.code, "wrong_password");
+  t("thiếu mã / sai mã → từ chối", (await w.call("password-change", { code: "000000", currentPassword: "pw-ok", password: "Moimatkhau9" }, "a")).body.code, "wrong_code");
+  t("mật khẩu mới yếu → từ chối", (await w.call("password-change", { code: "123456", currentPassword: "pw-ok", password: "short1" }, "a")).body.code, "weak_password");
+  t("trùng mật khẩu cũ → từ chối", (await w.call("password-change", { code: "123456", currentPassword: "pw-ok", password: "pw-ok" }, "a")).body.code, "weak_password");
+  const ok2 = await w.call("password-change", { code: "123456", currentPassword: "pw-ok", password: "Moimatkhau9" }, "a");
+  t("đủ mã + mật khẩu hiện tại → đổi, thu hồi phiên, yêu cầu đăng nhập lại", [ok2.status, ok2.body.relogin, w.calls.some(c => c[0] === "update" && c[2].password === "Moimatkhau9"), w.calls.some(c => c[0] === "revoke")], [200, true, true, true]);
+  t("thư báo đã đổi mật khẩu", w.sent.at(-1).subject, "Your SkibidiScript password was changed");
+  t("tài khoản Google → không có mật khẩu để đổi", (await w.call("password-code-send", {}, "guest")).status, 403);
+  const w2 = world(); w2.data = { nox_security: { uA: { twofa: true, gate: true } } };
+  t("bật 2 bước mà chưa nhập mã phiên → 403", (await w2.call("password-code-send", {}, "a")).body.code, "twofa_required"); }
+
+console.log("KIỂM TRA IP KHI ĐĂNG NHẬP (login-check)");
+{ const w = world();
+  const a1 = await w.call("login-check", {}, "a", "10.0.0.5");
+  t("lần đầu: tin IP hiện tại, cấp thẻ phiên tự động, đặt cổng (gate)", [a1.body.need, a1.body.refresh, w.data.nox_security.uA.gate, Object.keys(w.data.nox_security.uA.known).length, w.users.uA.customClaims.tf1], [null, true, true, 1, NOW0 / 1000 - 60]);
+  t("không lưu IP thật trong DB", JSON.stringify(w.data).includes("10.0.0"), false);
+  t("gọi lại khi đã có thẻ phiên → không làm gì", (await w.call("login-check", {}, "a", "10.0.0.5")).body.need, null);
+  w.tokens.a2 = { ...w.tokens.a, auth_time: NOW0 / 1000 + 100 };
+  t("phiên mới, CÙNG dải IP → cấp tự động", [(await w.call("login-check", {}, "a2", "10.0.0.77")).body.need, w.users.uA.customClaims.tf1], [null, NOW0 / 1000 + 100]);
+  w.tokens.a3 = { ...w.tokens.a, auth_time: NOW0 / 1000 + 200 };
+  const n = await w.call("login-check", {}, "a3", "203.0.113.9"); t("phiên mới, IP LẠ → yêu cầu mã", [n.body.need], ["new_ip"]);
+  t("IP lạ: chưa cấp thẻ cho phiên này, nên bị Rules chặn", w.users.uA.customClaims.tf1 !== NOW0 / 1000 + 200 && w.users.uA.customClaims.tf2 !== NOW0 / 1000 + 200, true);
+  const sd = await w.call("twofa-send", { purpose: "login" }, "a3", "203.0.113.9"); t("gửi mã (thư 'vị trí mới')", [sd.status, /new location/.test(w.sent.at(-1).subject), lastCode(w)], [200, true, "123456"]);
+  t("sai mã bị từ chối", (await w.call("twofa-verify", { purpose: "login", code: "000000" }, "a3", "203.0.113.9")).body.code, "wrong_code");
+  const vv = await w.call("twofa-verify", { purpose: "login", code: "123456" }, "a3", "203.0.113.9"); t("đúng mã → vào được, và tin IP mới", [vv.status, w.users.uA.customClaims.tf1, Object.keys(w.data.nox_security.uA.known).length], [200, NOW0 / 1000 + 200, 2]);
+  w.tokens.a4 = { ...w.tokens.a, auth_time: NOW0 / 1000 + 300 }; t("lần sau từ IP mới đó → không hỏi nữa", (await w.call("login-check", {}, "a4", "203.0.113.50")).body.need, null);
+  const w2 = world(); w2.data = { nox_security: { uA: { twofa: true, gate: true, known: { abc: { ts: 1 } } } } };
+  t("đã bật 2 bước → luôn cần mã dù IP quen", (await w2.call("login-check", {}, "a", "10.0.0.5")).body.need, "twofa");
+  const w3 = world(); t("email chưa xác minh → bỏ qua (chưa cần cổng)", (await w3.call("login-check", {}, "aUnv", "10.0.0.5")).body.skipped, "unverified");
+  const w4 = world(); await w4.call("login-check", {}, "a", ""); t("không biết IP → không chặn nhầm người dùng", [w4.users.uA.customClaims && w4.users.uA.customClaims.tf1], [NOW0 / 1000 - 60]); }
+
+console.log("GIỚI HẠN THEO IP (tường lửa lớp ứng dụng)");
+{ const w = world(); let last; for (let i = 0; i < 241; i++) last = await w.call("login-check", {}, "nope", "5.5.5.5");
+  t("quá 240 yêu cầu/10 phút từ một IP → 429", last.status, 429);
+  t("IP khác không bị ảnh hưởng", (await w.call("login-check", {}, "nope", "6.6.6.6")).status !== 429, true); }
 
 console.log("ĐỔI EMAIL");
 { const w = world();

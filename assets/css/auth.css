@@ -92,3 +92,14 @@ textarea#bio{width:100%;resize:vertical;min-height:96px}
 .sec-row p{margin:0;color:var(--text-2);font-size:13.5px;line-height:1.5;overflow-wrap:anywhere}
 .sec-row .btn{flex:none}
 @media(max-width:520px){.sec-row{flex-direction:column;align-items:flex-start}}
+
+/* Hồ sơ chia mục */
+.ptabs{display:flex;gap:6px;padding:5px;border-radius:999px;background:var(--surface);border:1px solid var(--line);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.ptabs::-webkit-scrollbar{display:none}
+.ptab-btn{flex:1 0 auto;min-height:44px;padding:0 18px;border-radius:999px;color:var(--text-2);font:inherit;font-weight:600;font-size:14.5px;white-space:nowrap;transition:background .25s,color .25s}
+.ptab-btn:hover{color:var(--text)}
+.ptab-btn.on{background:var(--text);color:var(--bg)}
+.ptab{display:flex;flex-direction:column;gap:16px}.ptab[hidden]{display:none!important}
+@media(max-width:560px){.ptab-btn{min-height:46px;padding:0 14px;font-size:14px}}
+.head-acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+@media(max-width:640px){.head-acts{width:100%}.head-acts .btn{flex:1}}

@@ -1,8 +1,9 @@
 /* Hồ sơ cá nhân: ảnh đại diện, mô tả bản thân, tên hiển thị, bảo mật, đăng xuất. Khách (ẩn danh) chỉ thấy bản hạn chế. */
 import { esc, toast, fmtTime } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
-import { session, onAuth, updateDisplayName, resendVerification, resetPassword, providerLabel, canChangePassword, saveProfileFields, muteInfo, isEditor, twofaSend, twofaVerify, recoveryStart, recoveryConfirm, recoveryRemove, changeEmail } from "../lib/auth.js";
+import { session, onAuth, updateDisplayName, resendVerification, resetPassword, providerLabel, canChangePassword, saveProfileFields, muteInfo, isEditor, twofaSend, twofaVerify, recoveryStart, recoveryConfirm, recoveryRemove, changeEmail, passwordCodeSend, changePasswordWithCode } from "../lib/auth.js";
 import { serverReady } from "../lib/account.js";
+import { navigate } from "../lib/router.js";
 import { avatarHTML } from "../lib/ui.js";
 import { friendly } from "../lib/messages.js";
 import { fileToAvatar } from "../lib/avatar.js";
@@ -11,7 +12,7 @@ import { confirmDialog, formDialog } from "../lib/confirm.js";
 const when = s => { const t = s ? new Date(s).getTime() : 0; return t ? fmtTime(t) : "—"; };
 const BIO_MAX = 300;
 
-let ctx0 = null;
+let ctx0 = null, curTab = "overview";
 const mailOk = { v: null };
 /* Hỏi mã 6 số (hộp thoại), cho nhập lại khi sai; trả true nếu thành công */
 async function askCode(o, verify) {
@@ -30,12 +31,13 @@ function secHTML(u) {
         <button class="btn ${sec.twofa ? "ghost" : "primary"}" id="tfBtn" type="button" ${off}>${sec.twofa ? "Tắt" : "Bật"}</button></div>
       <div class="sec-row"><div><h4>Email khôi phục</h4><p translate="no">${rec ? esc(rec) : ""}</p>${rec ? "" : `<p>Chưa có. Dùng để lấy lại tài khoản nếu bạn mất quyền vào hộp thư chính.</p>`}</div>
         <div class="acts"><button class="btn ghost" id="rcBtn" type="button" ${off}>${rec ? "Đổi" : "Thêm"}</button>${rec ? `<button class="btn ghost" id="rcDel" type="button" ${off}>Xóa</button>` : ""}</div></div>
+      ${canChangePassword(u) ? `<div class="sec-row"><div><h4>Mật khẩu</h4><p>Để đổi mật khẩu, bạn cần mật khẩu hiện tại và một mã gửi tới email của bạn.</p></div><button class="btn ghost" id="pwBtn" type="button" ${off}>Đổi mật khẩu</button></div>` : ""}
       ${canChangePassword(u) ? `<div class="sec-row"><div><h4>Email đăng nhập</h4><p translate="no">${esc(u.email || "")}</p></div><button class="btn ghost" id="emBtn" type="button" ${off}>Đổi email</button></div>` : ""}
     </div></section>`;
 }
 function fillSec(u) {
   const host = ctx0.el.querySelector("#secHost"); if (!host) return;
-  const paint = () => { if (!ctx0.isCurrent() || !ctx0.el.contains(host)) return; host.innerHTML = secHTML(u); wireSec(host, u); };
+  const paint = () => { if (!ctx0.isCurrent() || !ctx0.el.contains(host)) return; host.innerHTML = secHTML(u); wireSec(host, u); ctx0.el.querySelectorAll("[data-legacy]").forEach(x => x.remove()); const ls = ctx0.el.querySelector("#legacySec"); if (ls && !ls.querySelector(".acts button")) ls.remove(); };
   if (mailOk.v === true) paint(); else if (mailOk.v === null) serverReady().then(ok => { mailOk.v = ok; if (ok) paint(); });
 }
 function wireSec(host, u) {
@@ -58,6 +60,24 @@ function wireSec(host, u) {
     if (!(await confirmDialog({ title: "Xóa email khôi phục?", message: "Bạn sẽ không còn dùng được email này để lấy lại tài khoản.", ok: "Xóa", danger: true }))) return;
     try { await recoveryRemove(); toast("Đã xóa email khôi phục."); } catch (x) { toast(friendly(x), "err"); }
   });
+  const pwb = $("#pwBtn"); if (pwb) pwb.addEventListener("click", async () => {
+    pwb.classList.add("busy");
+    try {
+      const r = await passwordCodeSend(); pwb.classList.remove("busy");
+      let msg = "Chúng tôi đã gửi mã tới " + (r.sentTo || u.email) + ". Nhập mật khẩu hiện tại, mã và mật khẩu mới.";
+      for (;;) {
+        const v = await formDialog({ title: "Đổi mật khẩu", message: msg, ok: "Đổi mật khẩu", fields: [{ id: "cur", label: "Mật khẩu hiện tại", type: "password", max: 200 }, { id: "code", label: "Mã gồm 6 chữ số", max: 7, otp: true, placeholder: "000000" }, { id: "pw", label: "Mật khẩu mới", type: "password", max: 200 }, { id: "pw2", label: "Nhập lại mật khẩu mới", type: "password", max: 200 }] });
+        if (!v) return;
+        const code = (v.code || "").replace(/\s+/g, ""), p = v.pw || "";
+        if (!v.cur) { msg = "Hãy nhập mật khẩu hiện tại."; continue; }
+        if (!/^\d{6}$/.test(code)) { msg = "Nhập mã gồm 6 chữ số."; continue; }
+        if (p.length < 8 || !/[A-Za-z]/.test(p) || !/\d/.test(p)) { msg = "Mật khẩu mới cần ít nhất 8 ký tự, gồm cả chữ và số."; continue; }
+        if (p !== v.pw2) { msg = "Mật khẩu nhập lại chưa khớp."; continue; }
+        try { await changePasswordWithCode(v.cur, code, p); toast("Đã đổi mật khẩu. Hãy đăng nhập lại bằng mật khẩu mới."); navigate("/login", { replace: true }); return; }
+        catch (x) { toast(friendly(x), "err"); if (/code_expired|too_many_tries/.test(x.code || "")) return; msg = "Kiểm tra lại thông tin rồi thử lại."; }
+      }
+    } catch (x) { pwb.classList.remove("busy"); toast(friendly(x), "err"); }
+  });
   const em = $("#emBtn"); if (em) em.addEventListener("click", async () => {
     const v = await formDialog({ title: "Đổi email đăng nhập", message: "Chúng tôi sẽ gửi liên kết xác nhận tới email mới. Nhập mật khẩu hiện tại để tiếp tục.", ok: "Gửi liên kết", fields: [{ id: "email", label: "Email mới", max: 120, placeholder: "example@gmail.com" }, { id: "pw", label: "Mật khẩu hiện tại", type: "password", max: 200 }] });
     if (!v) return;
@@ -66,7 +86,7 @@ function wireSec(host, u) {
 }
 
 export function mount(ctx) {
-  ctx0 = ctx;
+  ctx0 = ctx; { const q = ctx.query.get("tab"); if (/^(overview|edit|security)$/.test(q || "")) curTab = q; }
   ctx.setPage({ title: "Hồ sơ", sub: "Thông tin và bảo mật tài khoản của bạn.", noindex: true });
   let timer = null, sig = ""; ctx.cleanup(() => clearInterval(timer));
   const sigOf = () => { const u = session.user, p = session.profile || {}, m = muteInfo(); return [u && u.uid, u && u.displayName, u && u.emailVerified, session.isGuest, session.isDev, isEditor(), p.bio, (p.avatar || "").length, m && m.until, JSON.stringify(session.sec || null)].join("|"); };
@@ -90,8 +110,15 @@ export function mount(ctx) {
           ${prof.bio ? `<p class="bio" translate="no">${esc(prof.bio)}</p>` : ""}
           <div class="tags"><span class="badge${session.isDev ? " strong" : ""}">${ICO.shield}${role}</span>
           <span class="badge">${u.emailVerified ? ICO.check + "Email đã xác minh" : "Email chưa xác minh"}</span>${mute ? `<span class="badge warn">Đang bị mute</span>` : ""}</div></div>
-        ${session.isDev ? `<a class="btn primary" href="/dev">${ICO.shield}Dev Panel</a>` : ""}</section>
+        <div class="head-acts">${session.isDev ? `<a class="btn primary" href="/dev">${ICO.shield}Dev Panel</a>` : ""}<button class="btn ghost" data-act="signout" type="button">${ICO.out}Đăng xuất</button></div></section>
       ${mute ? `<section class="panel notice-mute" role="status"><h3>Bạn đang bị mute</h3><p class="muted">Bạn chưa thể đổi ảnh, mô tả hoặc tên cho tới ${esc(fmtTime(mute.until))}.${mute.reason ? " Lý do: " + esc(mute.reason) : ""}</p></section>` : ""}
+      <nav class="ptabs" role="tablist" aria-label="Các mục hồ sơ">${[["overview", "Tổng quan"], ["edit", "Chỉnh sửa hồ sơ"], ["security", "Bảo mật"]].map(([k, l]) => `<button class="ptab-btn${curTab === k ? " on" : ""}" type="button" role="tab" aria-selected="${curTab === k}" data-tab="${k}">${l}</button>`).join("")}</nav>
+      <div class="ptab" data-pane="overview" role="tabpanel" ${curTab === "overview" ? "" : "hidden"}>
+      <section class="panel"><h3>Tài khoản</h3><dl class="info">
+        <div><dt>Email</dt><dd>${esc(u.email || "—")}</dd></div><div><dt>Đăng nhập bằng</dt><dd>${esc(providerLabel(u))}</dd></div>
+        <div><dt>Tham gia</dt><dd>${esc(when(meta.creationTime))}</dd></div><div><dt>Đăng nhập gần nhất</dt><dd>${esc(when(meta.lastSignInTime))}</dd></div></dl></section>
+      </div>
+      <div class="ptab" data-pane="edit" role="tabpanel" ${curTab === "edit" ? "" : "hidden"}>
       <section class="panel"><h3>Ảnh đại diện</h3>
         <div class="av-row"><span class="avatar xl">${avatarHTML(u)}</span>
           <div class="acts"><button class="btn ghost" id="avPick" type="button" ${dis}>${ICO.paint}Đổi ảnh</button>${prof.avatar ? `<button class="btn ghost" id="avDel" type="button" ${dis}>${ICO.trash}Xóa ảnh</button>` : ""}</div>
@@ -104,15 +131,15 @@ export function mount(ctx) {
       <section class="panel"><h3>Thông tin cá nhân</h3>
         <form id="nameForm" class="form" novalidate><div class="field"><label for="dn">Tên hiển thị</label><input id="dn" name="name" value="${esc(name)}" maxlength="60" autocomplete="name" placeholder="Tên của bạn" ${dis}><p class="field-error" data-err="name" role="alert"></p></div>
           <div class="form-acts"><button class="btn primary" type="submit" id="saveName" ${dis}>Lưu thay đổi</button></div></form></section>
-      <section class="panel"><h3>Tài khoản</h3><dl class="info">
-        <div><dt>Email</dt><dd>${esc(u.email || "—")}</dd></div><div><dt>Đăng nhập bằng</dt><dd>${esc(providerLabel(u))}</dd></div>
-        <div><dt>Tham gia</dt><dd>${esc(when(meta.creationTime))}</dd></div><div><dt>Đăng nhập gần nhất</dt><dd>${esc(when(meta.lastSignInTime))}</dd></div></dl></section>
-      <section class="panel"><h3>Bảo mật</h3>
-        <p class="muted">${canChangePassword(u) ? "Bạn có thể đổi mật khẩu bằng liên kết gửi qua email." : "Tài khoản của bạn đăng nhập bằng Google nên không cần mật khẩu riêng."}</p>
-        <div class="acts">${canChangePassword(u) ? `<button class="btn ghost" id="pwMail" type="button">${ICO.mail}Gửi email đổi mật khẩu</button>` : ""}
+      </div>
+      <div class="ptab" data-pane="security" role="tabpanel" ${curTab === "security" ? "" : "hidden"}>
+      <section class="panel" id="legacySec"><h3>Bảo mật</h3>
+        <p class="muted"${canChangePassword(u) ? " data-legacy" : ""}>${canChangePassword(u) ? "Bạn có thể đổi mật khẩu bằng liên kết gửi qua email." : "Tài khoản của bạn đăng nhập bằng Google nên không cần mật khẩu riêng."}</p>
+        <div class="acts">${canChangePassword(u) ? `<button class="btn ghost" id="pwMail" type="button" data-legacy>${ICO.mail}Gửi email đổi mật khẩu</button>` : ""}
           ${!u.emailVerified ? `<button class="btn ghost" id="vMail" type="button">${ICO.check}Gửi lại email xác minh</button>` : ""}
-          <button class="btn ghost" data-act="signout" type="button">${ICO.out}Đăng xuất</button></div></section><div id="secHost"></div></div>`;
+</div></section><div id="secHost"></div></div></div>`;
     const $q = x => ctx.el.querySelector(x);
+    ctx.el.querySelectorAll(".ptab-btn").forEach(b => b.addEventListener("click", () => { curTab = b.dataset.tab; ctx.el.querySelectorAll(".ptab-btn").forEach(x => { const on = x.dataset.tab === curTab; x.classList.toggle("on", on); x.setAttribute("aria-selected", on); }); ctx.el.querySelectorAll(".ptab").forEach(p => { p.hidden = p.dataset.pane !== curTab; }); }));
     fillSec(u);
     /* Tên hiển thị */
     const f = $q("#nameForm"), b = f.querySelector("#saveName");
@@ -131,7 +158,7 @@ export function mount(ctx) {
       if (v.length > BIO_MAX) { er.textContent = "Mô tả tối đa " + BIO_MAX + " ký tự."; return; }
       if (v === (prof.bio || "")) { toast("Mô tả chưa thay đổi."); return; }
       sb.classList.add("busy");
-      try { await saveProfileFields({ bio: v }); toast("Đã cập nhật hồ sơ."); } catch (x) { er.textContent = friendly(x); } sb.classList.remove("busy");
+      try { await saveProfileFields({ bio: v }); toast("Đã cập nhật hồ sơ."); } catch (x) { er.textContent = /PERMISSION_DENIED|permission/i.test((x && (x.code || x.message)) || "") ? "Không lưu được. Hãy tải lại trang và đăng nhập lại; nếu vẫn lỗi, quản trị viên cần cập nhật Rules cho website." : friendly(x); } sb.classList.remove("busy");
     });
     /* Ảnh đại diện */
     const file = $q("#avFile"), ae = $q("#avErr");

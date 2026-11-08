@@ -11,6 +11,7 @@ export function applyMaint() {
   const m = store.maint; let on = !!(m && m.enabled), end = 0;
   if (on) { end = until(m); if (Date.now() >= end) { autoCloseMaintenance(); on = false; } }
   const onAuthPage = /^\/(login|register|forgot-password)(\/|$)/.test(location.pathname);
+  session.maintOn = on; /* Tài khoản dev không đăng xuất được khi đang bảo trì (xem signOut) */
   const show = on && !session.isDev && !onAuthPage;
   $("#maint").classList.toggle("on", show);
   if (timer) { clearInterval(timer); timer = null; }

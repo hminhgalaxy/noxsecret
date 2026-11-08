@@ -16,8 +16,10 @@ module.exports = async (req, res) => {
   if (!body || typeof body !== "object" || Array.isArray(body)) return res.status(400).json({ ok: false, code: "bad_request" });
   const h = String(req.headers.authorization || ""), token = /^Bearer /i.test(h) ? h.slice(7).trim() : "";
   const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  const dec = v => { try { return decodeURIComponent(String(v || "")).slice(0, 60); } catch (_) { return ""; } };
+  const geo = { country: dec(req.headers["x-vercel-ip-country"]).slice(0, 2).toUpperCase(), city: dec(req.headers["x-vercel-ip-city"]) };
   let out;
-  try { out = await getApi()({ action: body.action, body, token, ip }); }
+  try { out = await getApi()({ action: body.action, body, token, ip, geo }); }
   catch (e) { console.error("account init", e && e.message); out = { status: 501, body: { ok: false, code: "not_configured", message: "The email service isn't set up yet." } }; }
   return res.status(out.status).json(out.body);
 };

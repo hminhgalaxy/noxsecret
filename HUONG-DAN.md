@@ -65,3 +65,11 @@
 6. Vào **/profile** bằng một tài khoản đã xác minh email: có mục "Two-step verification and recovery". Vào **/dev/mail** để xem trước và gửi thử.
 
 **Lưu ý trung thực:** thư gửi từ địa chỉ Gmail qua Brevo có thể vào thư rác, hoặc Brevo/Gmail đổi người gửi hiển thị; muốn thư vào hộp chính nên dùng tên miền riêng đã xác thực (SPF/DKIM). Logo trong thư chỉ hiện khi website đã được đưa lên `skibidiscript.vercel.app`. Chưa có logo bên cạnh người gửi (BIMI cần tên miền riêng và chứng chỉ).
+
+## Đợt A (tài khoản + bảo mật) — thay đổi so với giai đoạn 2
+- **Quên mật khẩu bằng MÃ** (không còn liên kết): nhập email → nhận mã 6 số → nhập mã + mật khẩu mới. Có nút "dùng email khôi phục" (mã gửi tới email khôi phục). Chưa cấu hình máy chủ thư thì web quay về thư liên kết mặc định của Firebase.
+- **Đổi mật khẩu trong hồ sơ** (mục Bảo mật): cần mật khẩu hiện tại + mã gửi về email; đổi xong mọi thiết bị bị đăng xuất, có thư cảnh báo.
+- **Hồ sơ chia 3 mục:** Tổng quan / Chỉnh sửa hồ sơ / Bảo mật. Nút Đăng xuất nằm ở đầu trang hồ sơ.
+- **Kiểm tra IP ngầm:** lần đăng nhập đầu tiên web ghi nhớ dấu vân tay (băm HMAC) của dải IP, KHÔNG lưu IP thật. Đăng nhập từ dải IP khác phải nhập mã gửi về email (thư "new location", có tên thành phố/quốc gia lấy từ header của Vercel). Nhập đúng thì IP đó được tin (tối đa 10 IP). Bật 2 bước thì lần nào cũng cần mã. Cơ chế "cổng" (`gate`) trong `nox_security` được máy chủ đặt, client không tự bỏ được; **phải Publish lại `database.rules.json`** (bản mới dùng `gate`).
+- **Bảo trì:** màn bảo trì không còn nút đăng nhập admin (dev vào thẳng `/login`); khi đang bảo trì tài khoản dev không đăng xuất được.
+- **Tường lửa nhẹ:** header bảo mật (nosniff, HSTS, COOP, X-Frame-Options, CSP chống nhúng/`object`/`base`), giới hạn 240 yêu cầu / 10 phút mỗi IP cho API, giới hạn riêng cho từng hành động (gửi mã, đổi mật khẩu…). **Chống DDoS thật nằm ở Vercel**: bật *Vercel Firewall / Attack Challenge Mode* trong Project → Firewall; cần mạnh hơn thì đặt Cloudflare (miễn phí) trước web. CSP chặt cho script chưa bật vì chưa thể thử với Google/Cloudflare/Firebase thật mà không làm hỏng captcha.

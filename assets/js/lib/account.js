@@ -10,7 +10,7 @@ const MSG = {
   invalid_email: "Email không hợp lệ.", twofa_required: "Hãy nhập mã xác minh 2 bước trước.", no_recovery: "Bạn chưa thêm email khôi phục.", unverified: "Hãy xác minh email của bạn trước.",
   not_configured: "Tính năng này chưa được bật trên website.", not_password: "Tài khoản này đăng nhập bằng Google nên không dùng được tính năng này.",
   already_on: "Xác minh 2 bước đã được bật.", not_on: "Xác minh 2 bước chưa được bật.", forbidden: "Bạn không có quyền thực hiện thao tác này.", guest: "Tài khoản khách không dùng được tính năng này.",
-  wrong_password: "Mật khẩu hiện tại không đúng.", unauthenticated: "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.", network: "Lỗi kết nối mạng. Vui lòng thử lại.", not_found: "Không tìm thấy mục này.", bad_request: "Yêu cầu không hợp lệ."
+  wrong_password: "Mật khẩu hiện tại không đúng.", weak_password: "Mật khẩu cần ít nhất 8 ký tự, gồm cả chữ và số.", same_password: "Hãy chọn mật khẩu khác với mật khẩu hiện tại.", unauthenticated: "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.", network: "Lỗi kết nối mạng. Vui lòng thử lại.", not_found: "Không tìm thấy mục này.", bad_request: "Yêu cầu không hợp lệ."
 };
 export const apiMessage = r => MSG[r && r.code] || "Có lỗi xảy ra. Vui lòng thử lại.";
 

@@ -178,6 +178,7 @@ a.row:hover{transform:translateX(4px);border-color:var(--line-strong);background
 .m-body h4{font-size:20px;margin:12px 0 8px}
 .m-body p{color:var(--text-2);white-space:pre-wrap;overflow-wrap:break-word;max-height:40vh;overflow:auto}
 .m-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+@media(max-width:639px){.m-acts{flex-direction:column}.m-acts .btn{width:100%;min-height:50px;font-size:16px;justify-content:center;border-radius:14px}}
 @media(min-width:640px){.modal{bottom:auto;top:50%;border-radius:var(--r-xl);border-bottom:1px solid var(--line-strong);transform:translate(-50%,-46%) scale(.96);opacity:0;pointer-events:none;transition:transform .5s var(--ez),opacity .3s;padding-bottom:24px}
   .modal.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}.m-grab{display:none}}
 
@@ -193,7 +194,8 @@ a.row:hover{transform:translateX(4px);border-color:var(--line-strong);background
 .cf p{color:var(--text-2);font-size:14.5px;line-height:1.55;overflow-wrap:break-word;max-width:100%}
 .cf p:empty{display:none}
 .cf-acts{display:flex;gap:10px;width:100%;margin-top:16px}.cf-acts .btn{flex:1;justify-content:center;white-space:nowrap}
-@media(max-width:420px){.cf-acts{flex-direction:column-reverse}}
+@media(max-width:560px){.cf{padding:24px 20px 20px}.cf-acts{flex-direction:column-reverse;gap:10px}.cf-acts .btn{min-height:50px;font-size:16px;padding:0 20px;border-radius:14px}.cf-f input,.cf-f select{min-height:50px;font-size:16px}}
+@media(pointer:coarse){.cf-acts .btn{min-height:50px}}
 @media(prefers-reduced-motion:reduce){.cf,.cf-ov{transition:none}}
 .cf-fields{display:grid;gap:10px;width:100%;margin-top:10px;text-align:left}
 .cf-f{display:grid;gap:5px;font-size:13px;color:var(--text-2)}

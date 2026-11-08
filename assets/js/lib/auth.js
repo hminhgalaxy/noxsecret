@@ -3,7 +3,7 @@ import { auth, db, TS, GoogleProvider } from "./firebase.js";
 import { DEV_EMAIL, GOOGLE_CLIENT_ID, USERS_NODE, ADMIN_NODE, SEC_NODE } from "./config.js";
 import { dlog } from "./log.js";
 import { authMessage, GENERIC } from "./messages.js";
-import { api, apiMessage } from "./account.js";
+import { api, apiMessage, serverReady } from "./account.js";
 
 const subs = new Set();
 export const session = { user: null, ready: false, isDev: false, devBlocked: "", isGuest: false, isEditor: false, adminLoaded: false, profile: null, admin: null, banned: null, sec: null, secLoaded: false, twofaPending: false };
@@ -28,8 +28,8 @@ function apply(u) {
   subs.forEach(f => { try { f(session); } catch (e) { console.error(e); } });
 }
 /* Chờ hồ sơ quyền (vai trò) của người dùng tải xong — tối đa 3 giây — trước khi quyết định trang chỉ dành cho nhân sự */
-export const adminReady = () => (!session.user || session.isGuest || session.adminLoaded) ? Promise.resolve() : new Promise(res => { const off = onAuth(() => { if (session.adminLoaded) { off(); res(); } }); setTimeout(() => { off(); res(); }, 3000); });
-/* Chờ biết tài khoản có đang chờ nhập mã 2 bước hay không (tối đa 3 giây) */
+export const adminReady = () => (!session.user || session.isGuest || session.adminLoaded) ? Promise.resolve() : new Promise(res => { const off = onAuth(() => { if (session.adminLoaded) { off(); res(); } }); setTimeout(() => { off(); res(); }, 6000); });
+/* Chờ biết tài khoản có đang chờ nhập mã 2 bước hay không (tối đa 6 giây) */
 export const secReady = () => (!session.user || session.isGuest || session.secLoaded) ? Promise.resolve() : new Promise(res => { const off = onAuth(() => { if (session.secLoaded) { off(); res(); } }); setTimeout(() => { off(); res(); }, 3000); });
 export const onAuth = fn => { subs.add(fn); return () => subs.delete(fn); };
 
@@ -59,11 +59,30 @@ function watchSelf(u) {
   }, () => { session.adminLoaded = true; notify(); }); offSelf.push(() => ra.off("value", ha));
 }
 
-/* Đã bật 2 bước mà phiên đăng nhập này chưa nhập mã? (claim tf1/tf2/tf3 phải khớp auth_time của phiên) */
-async function computeTwofa(u) {
-  if (!session.sec || !session.sec.twofa) { session.twofaPending = false; return; }
-  try { const r = await u.getIdTokenResult(true), c = r.claims || {}; session.twofaPending = ![c.tf1, c.tf2, c.tf3].includes(c.auth_time); }
-  catch (_) { session.twofaPending = true; }
+/* Phiên đăng nhập này đã được "thẻ phiên" (claim tf1/tf2/tf3 khớp auth_time) chưa?
+   - Tài khoản chưa có cổng (gate) hoặc chưa có thẻ: hỏi máy chủ (login-check). IP quen + không bật 2 bước → máy chủ cấp thẻ tự động.
+   - Bật 2 bước hoặc IP/vị trí lạ → twofaPending = true → router đưa tới /two-step để nhập mã gửi qua email. */
+let twofaRun = null;
+function computeTwofa(u) {
+  if (twofaRun) return twofaRun;
+  twofaRun = (async () => {
+    if (!u || u.isAnonymous) { session.twofaPending = false; session.twofaReason = null; return; }
+    const flagged = !!(session.sec && session.sec.twofa);
+    if (!u.emailVerified) { try { await u.reload(); } catch (_) {} }
+    try {
+      let c = ((await u.getIdTokenResult(true)).claims) || {}; const has = () => [c.tf1, c.tf2, c.tf3].includes(c.auth_time);
+      if (has() && session.sec && (session.sec.gate || session.sec.twofa)) { session.twofaPending = false; session.twofaReason = null; return; }
+      if (u.emailVerified && await serverReady()) {
+        const r = await api("login-check");
+        if (r.ok) {
+          if (!r.need && !has()) { c = ((await u.getIdTokenResult(true)).claims) || {}; }
+          session.twofaPending = !!r.need; session.twofaReason = r.need || null; session.twofaPlace = r.place || ""; return;
+        }
+      }
+      session.twofaPending = flagged && !has(); session.twofaReason = session.twofaPending ? "twofa" : null;
+    } catch (_) { session.twofaPending = flagged; session.twofaReason = flagged ? "twofa" : null; }
+  })().finally(() => { twofaRun = null; });
+  return twofaRun;
 }
 /* Sau khi máy chủ cấp claim (nhập đúng mã / bật 2FA) → lấy token mới và đánh giá lại */
 export async function refreshSession() {
@@ -103,6 +122,11 @@ export async function sendVerification() {
   const r = await api("verify-email"); if (r.ok) return; if (fallback(r)) return u.sendEmailVerification(); throw apiErr(r);
 }
 /* Quên cả email đăng nhập? Gửi liên kết đặt lại mật khẩu tới EMAIL KHÔI PHỤC (nếu có). Luôn báo thành công để không lộ thông tin. */
+/* Nhập mã nhận qua email + mật khẩu mới → đổi mật khẩu (chưa cần đăng nhập). */
+export async function resetConfirm(email, code, password) { const r = await api("reset-confirm", { email, code, password }, { token: false }); if (!r.ok) throw apiErr(r); return r; }
+export const passwordCodeSend = () => act("password-code-send", {});
+/* Đổi mật khẩu khi đang đăng nhập: mật khẩu hiện tại + mã gửi về email. Máy chủ thu hồi mọi phiên → đăng nhập lại. */
+export async function changePasswordWithCode(currentPassword, code, password) { const r = await act("password-change", { currentPassword, code, password }); try { await need().signOut(); } catch (_) {} return r; }
 export async function recoverByRecoveryEmail(e) { const r = await api("recover", { email: e }, { token: false }); if (r.ok) return; throw apiErr(r); }
 /* Xác minh 2 bước + email khôi phục + đổi email (cần máy chủ đã cấu hình) */
 async function act(action, body, refresh) { const r = await api(action, body); if (!r.ok) throw apiErr(r); if (refresh && r.refresh) await refreshSession(); return r; }
@@ -113,7 +137,8 @@ export const recoveryConfirm = code => act("recovery-confirm", { code });
 export const recoveryRemove = () => act("recovery-remove", {});
 export const changeEmail = (newEmail, password) => act("change-email", { newEmail, password });
 export const notifyPasswordChanged = () => api("password-changed");
-export const signOut = () => need().signOut();
+export const signOutBlocked = () => !!(session.maintOn && session.isDev && !session.twofaPending);
+export const signOut = () => signOutBlocked() ? Promise.reject(Object.assign(new Error("Website đang bảo trì: tài khoản quản trị không thể đăng xuất lúc này."), { code: "app/maint-lock" })) : need().signOut();
 /* Đăng nhập khách (ẩn danh): không phải người dùng thật, bị hạn chế một số thứ */
 export const signInGuest = () => need().signInAnonymously();
 /* Mô tả + avatar của chính mình */

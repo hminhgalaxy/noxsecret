@@ -1,6 +1,7 @@
 /* Trang xử lý liên kết trong email: đặt lại mật khẩu, xác minh email, xác nhận đổi email.
    Liên kết có dạng /auth/action?mode=...&oobCode=... (do máy chủ tạo từ mã của Firebase). */
 import { auth } from "../../lib/firebase.js";
+import { refreshSession } from "../../lib/auth.js";
 import { authMessage } from "../../lib/messages.js";
 import { esc } from "../../lib/util.js";
 import { shell, pwField, wireEyes, setErr, busy } from "./shared.js";
@@ -33,7 +34,7 @@ export async function mount(ctx) {
       });
     } else if (mode === "verifyEmail") {
       await auth.applyActionCode(code);
-      try { if (auth.currentUser) { await auth.currentUser.reload(); await auth.currentUser.getIdToken(true); } } catch (_) {}
+      try { if (auth.currentUser) { await auth.currentUser.reload(); await auth.currentUser.getIdToken(true); await refreshSession(); } } catch (_) {}
       done(ctx, "Email đã được xác minh", "Cảm ơn bạn! Tài khoản của bạn đã sẵn sàng.", `<a class="btn primary lg block" href="/">Về trang chủ</a>`);
     } else if (mode === "verifyAndChangeEmail") {
       await auth.applyActionCode(code);

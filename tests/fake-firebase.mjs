@@ -83,7 +83,7 @@ const mkOob=(mode,email,newEmail)=>{const o=LS.get('fb_oob')||{};const c='OOB'+M
 const dbw=(p,v)=>{root=RulesEngine.setAt(root,split(p),v);LS.set('fb_db',root);relisten()};
 const admin={getUser:uid=>rec(findU(uid)),getUserByEmail:e=>rec(accounts[e]||Object.values(accounts).find(a=>a.email===e)),
  setClaims(uid,c){const a=findU(uid);a.claims=c;LS.set('fb_accounts',accounts);if(cur&&cur.uid===uid){cur.claims=c;LS.set('fb_user',cur)}},
- updateUser(uid,p){const a=findU(uid);Object.assign(a,p);LS.set('fb_accounts',accounts)},
+ updateUser(uid,p){const a=findU(uid);const q=Object.assign({},p);if('password' in q){q.pw=q.password;delete q.password}if('emailVerified' in q){q.verified=q.emailVerified;delete q.emailVerified}Object.assign(a,q);LS.set('fb_accounts',accounts)},
  revoke(uid){if(cur&&cur.uid===uid)setUser(null)},
  passwordOk(e,pw){const a=accounts[e];return !!a&&a.pw===pw},
  link(mode,email,newEmail){return mkOob(mode,email,newEmail)},

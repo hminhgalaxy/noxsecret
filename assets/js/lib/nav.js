@@ -108,6 +108,7 @@ function markTabs(path) {
 /* Tài khoản: góc trên bên phải + cuối menu + thẻ "Hồ sơ" ở thanh dưới */
 export function renderAccount() {
   const u = session.user, name = u ? (session.isGuest ? "Khách" : (u.displayName || (u.email || "").split("@")[0] || "Bạn")) : "", role = session.isGuest ? "Khách (hạn chế)" : session.isDev ? "Quản trị viên" : isEditor() ? "Biên tập viên" : "Thành viên";
+  document.querySelectorAll("[data-guest-only]").forEach(a => { a.hidden = !!(u && !session.isGuest); });
   const h = $("#hdrAcc");
   if (h) {
     h.dataset.state = u ? "in" : "out";

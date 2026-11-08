@@ -8,17 +8,18 @@ import { shell, busy, nextOf } from "./shared.js";
 const mask = e => { const [l = "", d = ""] = String(e).split("@"); return (l.length <= 2 ? l.slice(0, 1) + "*" : l[0] + "*".repeat(Math.min(l.length - 2, 6)) + l.slice(-1)) + "@" + d; };
 
 export function mount(ctx) {
-  ctx.setPage({ hero: true, title: "Xác minh 2 bước", desc: "Nhập mã xác minh để hoàn tất đăng nhập." });
+  const newIp = session.twofaReason === "new_ip", ttl = newIp ? "Xác nhận đăng nhập" : "Xác minh 2 bước";
+  ctx.setPage({ hero: true, title: ttl, desc: "Nhập mã xác minh để hoàn tất đăng nhập." });
   const u = session.user, hasRec = !!(session.sec && session.sec.recovery && session.sec.recovery.verified);
   let purpose = "login", sentTo = mask((u && u.email) || ""), timer = null; ctx.cleanup(() => clearInterval(timer));
   const sub = () => "Nhập mã gồm 6 chữ số chúng tôi vừa gửi tới " + sentTo + ".";
-  ctx.el.innerHTML = shell("Xác minh 2 bước", sub(), `<form id="f" novalidate class="form">
+  ctx.el.innerHTML = shell(ttl, sub(), `<form id="f" novalidate class="form">
       <div class="field"><label for="code">Mã xác minh</label><input id="code" name="code" class="code-in" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000000" aria-describedby="codeErr"><p class="field-error" id="codeErr" data-err="code" role="alert"></p></div>
       <p class="form-error" id="err" role="alert" aria-live="polite"></p><p class="form-ok" id="ok" role="status"></p>
       <button class="btn primary lg block" type="submit">Xác minh</button>
     </form>
     <div class="tf-links"><button class="linkbtn" type="button" id="resend">Gửi lại mã</button>${hasRec ? `<button class="linkbtn" type="button" id="alt">Dùng email khôi phục</button>` : ""}</div>
-    <p class="sub-note">Mã có hiệu lực trong 10 phút. Kiểm tra cả mục thư rác.</p>
+    ${newIp ? `<p class="sub-note">Bạn đang đăng nhập từ một vị trí hoặc địa chỉ IP mới nên cần thêm mã xác nhận.</p>` : ""}<p class="sub-note">Mã có hiệu lực trong 10 phút. Kiểm tra cả mục thư rác.</p>
     <p class="auth-foot"><button class="linkbtn" type="button" id="out">Đăng xuất</button></p>`);
   const $ = s => ctx.el.querySelector(s), f = $("#f"), err = $("#err"), ok = $("#ok"), codeErr = $("#codeErr"), btn = f.querySelector("button[type=submit]"), resend = $("#resend"), alt = $("#alt"), subEl = ctx.el.querySelector(".auth-sub");
   const cool = () => { let left = 30; resend.disabled = true; clearInterval(timer); resend.textContent = "Gửi lại sau " + left + "s"; timer = setInterval(() => { left--; if (left <= 0) { clearInterval(timer); resend.disabled = false; resend.textContent = "Gửi lại mã"; } else resend.textContent = "Gửi lại sau " + left + "s"; }, 1000); };

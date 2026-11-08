@@ -139,7 +139,7 @@ t("người bị mute ghi lại đúng mô tả cũ vẫn được (không đổ
 
 console.log("XÁC MINH 2 BƯỚC (claim tf phải khớp auth_time của phiên đăng nhập)");
 const AT = 1800000000, with2fa = (u, tf) => ({ ...u, token: { ...u.token, auth_time: AT, ...(tf === undefined ? {} : { tf1: tf }) } });
-const root2 = { ...root, nox_security: { d1: { twofa: true }, u1: { twofa: true } }, nox_admin: { e1: { role: "editor" } } };
+const root2 = { ...root, nox_security: { d1: { gate: true, twofa: true }, u1: { gate: true, twofa: true } }, nox_admin: { e1: { role: "editor" } } };
 const W2 = (p, v, a, r = root2) => eng.write([{ segs: split(p), value: v }], a, r).ok;
 t("không bật 2FA: ghi bình thường (không cần claim tf)", W2("nox_users/u2/bio", "hi", with2fa(OTHER)), true);
 t("bật 2FA, CHƯA nhập mã: user KHÔNG ghi hồ sơ", W2("nox_users/u1/bio", "hi", with2fa(USER)), false);
@@ -156,6 +156,7 @@ t("nox_security: user đọc được của chính mình", eng.canRead(split("no
 t("nox_security: user KHÔNG đọc của người khác", eng.canRead(split("nox_security/u1"), OTHER, root2), false);
 t("nox_security: DEV KHÔNG đọc của người khác", eng.canRead(split("nox_security/u1"), DEV, root2), false);
 t("nox_security: client KHÔNG tự ghi (kể cả tắt 2FA / sửa email khôi phục)", W2("nox_security/u1/twofa", false, with2fa(USER, AT)) || W2("nox_security/u1/recovery", { email: "a@b.c" }, with2fa(USER, AT)), false);
+t("nox_security: gate/known chỉ máy chủ ghi (client không tự bỏ cổng)", W2("nox_security/u1/gate", false, with2fa(USER, AT)) || W2("nox_security/u1/known", {}, with2fa(USER, AT)), false);
 t("nox_security: DEV cũng KHÔNG ghi được từ client", W2("nox_security/u1/twofa", false, with2fa(DEV, AT)), false);
 t("nox_codes / nox_rate: không ai đọc/ghi từ client", eng.canRead(split("nox_codes/u1"), DEV, root2) || W2("nox_codes/u1", { hash: "x" }, with2fa(DEV, AT)) || eng.canRead(split("nox_rate"), DEV, root2), false);
 
