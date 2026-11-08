@@ -20,6 +20,9 @@ module.exports = async (req, res) => {
   const geo = { country: dec(req.headers["x-vercel-ip-country"]).slice(0, 2).toUpperCase(), city: dec(req.headers["x-vercel-ip-city"]) };
   let out;
   try { out = await getApi()({ action: body.action, body, token, ip, geo }); }
-  catch (e) { console.error("account init", e && e.message); out = { status: 501, body: { ok: false, code: "not_configured", message: "The email service isn't set up yet." } }; }
+  catch (e) {
+    console.error("account init", e && e.message);
+    if (body.action === "status") { let problems = []; try { problems = require("./_lib/runtime").diagnose().map(x => x.msg); } catch (_) {} return res.status(200).json({ ok: true, mail: false, twofa: false, problems }); }
+    out = { status: 501, body: { ok: false, code: "not_configured", message: "The email service isn't set up yet." } }; }
   return res.status(out.status).json(out.body);
 };

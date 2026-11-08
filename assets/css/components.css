@@ -231,3 +231,7 @@ html[data-theme="light"] .cf{--surface:#ffffff;--surface-2:#f1f1f1;--surface-3:#
 @media (max-width:640px){.faq-q{min-height:56px;font-size:15px}}
 .imgf-prev{border:1px solid var(--line);border-radius:var(--r-md,15px);overflow:hidden;max-width:320px}
 .imgf-prev img{display:block;width:100%;height:auto}
+.diag-l{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:8px}
+.diag-l li{padding:10px 12px;border:1px solid var(--line);border-radius:12px;line-height:1.5;font-size:14px}
+.diag-l .good{border-color:color-mix(in srgb,#22c55e 55%,var(--line))}
+.diag-l .bad{border-color:color-mix(in srgb,#ef4444 60%,var(--line))}

@@ -38,8 +38,8 @@ function world() {
     generatePasswordResetLink: async e => "https://x.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=RST" + e.length,
     generateVerifyAndChangeEmailLink: async (e, n) => "https://x.firebaseapp.com/__/auth/action?mode=verifyAndChangeEmail&oobCode=CHG" + n.length
   };
-  const sendMail = async m => { if (m.to === "fail@example.com") throw new Error("boom"); sent.push(m); };
-  const api = createApi({ auth, db, sendMail, verifyPassword: async (e, p) => p === "pw-ok",  env: { DEV_EMAIL: DEVE }, now: () => clock, randomInt: () => 123456 });
+  const sendMail = async m => { if (m.to === "fail@example.com") throw new Error("boom"); if (m.to === "brevo@example.com") throw Object.assign(new Error("mail 400 sender not valid"), { code: "mail_failed" }); sent.push(m); };
+  const api = createApi({ auth, db, sendMail, verifyPassword: async (e, p) => p === "pw-ok",  env: { DEV_EMAIL: DEVE }, now: () => clock, randomInt: () => 123456, diagnose: () => [{ code: "missing:X", msg: "Thiếu biến X" }], liveCheck: async () => [{ ok: false, msg: "Người gửi chưa xác minh" }] });
   const call = (action, body = {}, token = "", ip = "1.2.3.4") => api({ action, body, token, ip });
   return { api, call, sent, calls, users, tokens, get data() { return data; }, set data(v) { data = v; } };
 }
@@ -52,6 +52,10 @@ console.log("CHUNG");
   t("action lạ → 400", (await w.call("hack")).status, 400);
   t("prototype key (constructor) → 400", (await w.call("constructor")).status, 400);
   t("status khi đủ cấu hình", (await w.call("status")).body.mail, true);
+  t("status kèm danh sách vấn đề cấu hình (chỉ lời nhắc, không lộ giá trị)", (await w.call("status")).body.problems, ["Thiếu biến X"]);
+  t("mail-check: chỉ DEV được gọi", [(await w.call("mail-check")).status, (await w.call("mail-check", {}, "a")).status], [401, 403]);
+  t("mail-check: DEV nhận kết quả kiểm tra Brevo", (await w.call("mail-check", {}, "dev")).body.checks, [{ ok: false, msg: "Người gửi chưa xác minh" }]);
+  { const r = await w.call("dev-send", { to: "brevo@example.com", template: "custom", subject: "x", body: "hello" }, "dev"); t("Brevo từ chối gửi → 502 mail_failed (không phải 500 chung chung)", [r.status, r.body.code], [502, "mail_failed"]); }
   t("không có token → 401", (await w.call("welcome")).status, 401);
   t("token sai → 401", (await w.call("welcome", {}, "zzz")).status, 401);
   t("khách (ẩn danh) → 403", (await w.call("welcome", {}, "guest")).status, 403); }

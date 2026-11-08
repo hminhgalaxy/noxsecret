@@ -46,10 +46,11 @@ async function installApi(page, st = {}) {
       generateVerifyAndChangeEmailLink: (e, n) => ev(([e, n]) => window.__fb.admin.link("verifyAndChangeEmail", e, n), [e, n]) },
     db: { get: p => ev(p => window.__fb.admin.db.get(p), p), set: (p, v) => ev(([p, v]) => window.__fb.admin.db.set(p, v), [p, v]), update: (p, o) => ev(([p, o]) => window.__fb.admin.db.update(p, o), [p, o]), remove: p => ev(p => window.__fb.admin.db.remove(p), p) },
     sendMail: async m => { st.sent.push(m); }, verifyPassword: (e, p) => ev(([e, p]) => window.__fb.admin.passwordOk(e, p), [e, p]),
-    env: { DEV_EMAIL }, randomInt: () => 123456
+    env: { DEV_EMAIL }, randomInt: () => 123456, diagnose: () => (st.problems || []).map(msg => ({ msg })), liveCheck: async () => st.live || [{ ok: true, msg: "Khoá API hợp lệ." }]
   };
   const handle = createApi(deps);
   await page.route(BASE + "/api/account", async route => {
+    if (st.off) { try { if (JSON.parse(route.request().postData() || "{}").action === "status" && st.problems) return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, mail: false, twofa: false, problems: st.problems }) }); } catch (_) {} }
     if (st.off) return route.fulfill({ status: 501, contentType: "application/json", body: JSON.stringify({ ok: false, code: "not_configured" }) });
     let body = {}; try { body = JSON.parse(route.request().postData() || "{}"); } catch (_) {}
     const h = route.request().headers(), token = /^Bearer /i.test(h.authorization || "") ? h.authorization.slice(7) : "";
@@ -645,6 +646,15 @@ test("chưa cấu hình máy chủ thư: vẫn quên mật khẩu bằng Firebas
   await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile"); await page.waitForTimeout(500); eq(await page.locator("#secPanel").count(), 0, "không hiện mục 2 bước khi chưa cấu hình");
   await page.click('[data-act="signout"]'); await yes(page);
   await loginDev(page); await go(page, "/dev/mail"); await page.waitForSelector(".statebox"); ok(/chưa được bật/.test(await page.textContent("#view")), "báo chưa bật");
+});
+test("/dev/mail: khi chưa bật hiện đúng lý do thiếu cấu hình; khi bật có nút Kiểm tra với Brevo báo từng mục", async ({ page }) => {
+  const st = await installApi(page, { off: true, problems: ["Thiếu biến môi trường BREVO_API_KEY trên Vercel (hoặc chưa Redeploy sau khi thêm)."] });
+  await loginDev(page); await go(page, "/dev/mail"); await page.waitForSelector("#diag");
+  ok(/BREVO_API_KEY/.test(await page.textContent("#diag")), "nêu đúng biến thiếu"); ok(/Redeploy/.test(await page.textContent("#diag")), "nhắc Redeploy");
+  st.off = false; st.live = [{ ok: true, msg: "Khoá API hợp lệ." }, { ok: false, msg: "Người gửi a@gmail.com CHƯA có trong Brevo." }];
+  await page.evaluate(() => import("/assets/js/lib/account.js").then(m => m.serverReady())); await page.reload(); await page.waitForSelector("#mT");
+  await page.click("#diagGo"); await page.waitForFunction(() => document.querySelectorAll("#diag li").length >= 2);
+  const t = await page.textContent("#diag"); ok(/✓ Khoá API hợp lệ/.test(t) && /✗ Người gửi a@gmail\.com CHƯA/.test(t), "hiện từng mục đạt/lỗi: " + t.slice(0, 200));
 });
 test("đăng ký (máy chủ thư bật): thư xác minh + chào mừng gửi qua API, bấm liên kết thì xác minh xong", async ({ page }) => {
   const st = await installApi(page); await go(page, "/register"); await page.waitForFunction(() => window.__tsOpts); await page.waitForTimeout(80);

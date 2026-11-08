@@ -80,3 +80,10 @@
 - **Đoạn dài thu gọn:** mô tả mục, bài cập nhật, phần giới thiệu trong hồ sơ tự thu gọn nếu dài, có nút "Hiển thị tất cả" / "Thu gọn" (chỉ hiện khi thật sự dài).
 - **Ảnh chỉ lấy từ máy:** ô "Link ảnh" của mục đã bỏ; thay bằng **Chọn ảnh từ máy** (tự thu nhỏ ≤ 640px, nén JPEG ≤ ~30 KB, lưu cùng dữ liệu). Ảnh cũ dạng link ngoài **không còn được tải** (xoá khi bạn lưu lại mục). Ảnh nền/nhạc của Dev và ảnh đại diện vốn đã chọn từ máy. Cần **dán lại `database.rules.json`** (nhánh `img` nay nhận `data:image/...`).
 - **Tiêu đề mới:** "SKIBIDI SCRIPT WEB — Nơi chia sẻ APK tiện ích, bảo mật cao" (và bản tiếng Anh), mô tả nói rõ: kiểm duyệt trước khi đăng, cảnh báo phần mềm bên thứ ba, không cổ xúy hack. Áp dụng cho thẻ title/description/Open Graph, manifest, trang chủ, sitemap (có thêm `/help`) và thư chào.
+
+## Không nhận được thư? Kiểm tra theo thứ tự
+1. **Redeploy:** thêm/sửa biến môi trường trên Vercel KHÔNG áp dụng cho bản đang chạy. Vào Deployments → bản mới nhất → ⋯ → **Redeploy**.
+2. Vào web bằng tài khoản dev → **Dev → Gửi thư**. Trang này tự hiện lý do nếu thiếu/sai biến (tên biến sai chính tả, `MAIL_FROM_EMAIL` có kèm tên, khoá Brevo là khoá SMTP `xsmtpsib-` thay vì khoá API `xkeysib-`, `FIREBASE_SERVICE_ACCOUNT` không phải JSON…). Khi đã bật, bấm **Kiểm tra với Brevo**: web gọi thật tới Brevo và báo (✓/✗) khoá API, SMTP đã bật chưa, địa chỉ người gửi đã xác minh chưa.
+3. Phía Brevo: (a) Senders → thêm đúng địa chỉ trong `MAIL_FROM_EMAIL` và bấm liên kết xác minh Brevo gửi về hộp thư đó; (b) tài khoản mới có thể phải được Brevo kích hoạt gửi thư giao dịch (SMTP) — Brevo → SMTP & API.
+4. Thư từ địa chỉ Gmail có thể vào **Spam/Quảng cáo**. Muốn vào hộp thư chính nên dùng tên miền riêng đã xác thực (SPF/DKIM) trong Brevo → Domains.
+5. Xem log: Vercel → Logs → lọc `account:` — mỗi lần Brevo từ chối sẽ có dòng `mail 4xx …` ghi rõ lý do.

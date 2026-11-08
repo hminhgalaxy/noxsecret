@@ -8,7 +8,7 @@ const MSG = {
   wrong_code: "Mã chưa đúng. Hãy kiểm tra lại rồi thử lại.", code_expired: "Mã đã hết hạn. Hãy yêu cầu mã mới.", too_many_tries: "Bạn nhập sai quá nhiều lần. Hãy yêu cầu mã mới.",
   recent_login: "Vì lý do an toàn, hãy đăng nhập lại rồi thử lại.", email_taken: "Email này đã được dùng bởi tài khoản khác.", same_email: "Hãy nhập một email khác.",
   invalid_email: "Email không hợp lệ.", twofa_required: "Hãy nhập mã xác minh 2 bước trước.", no_recovery: "Bạn chưa thêm email khôi phục.", unverified: "Hãy xác minh email của bạn trước.",
-  not_configured: "Tính năng này chưa được bật trên website.", not_password: "Tài khoản này đăng nhập bằng Google nên không dùng được tính năng này.",
+  not_configured: "Tính năng này chưa được bật trên website.", mail_failed: "Chưa gửi được thư lúc này. Quản trị viên cần kiểm tra cấu hình gửi thư (Dev → Gửi thư → Kiểm tra gửi thư).", not_password: "Tài khoản này đăng nhập bằng Google nên không dùng được tính năng này.",
   already_on: "Xác minh 2 bước đã được bật.", not_on: "Xác minh 2 bước chưa được bật.", forbidden: "Bạn không có quyền thực hiện thao tác này.", guest: "Tài khoản khách không dùng được tính năng này.",
   wrong_password: "Mật khẩu hiện tại không đúng.", weak_password: "Mật khẩu cần ít nhất 8 ký tự, gồm cả chữ và số.", same_password: "Hãy chọn mật khẩu khác với mật khẩu hiện tại.", unauthenticated: "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.", network: "Lỗi kết nối mạng. Vui lòng thử lại.", not_found: "Không tìm thấy mục này.", bad_request: "Yêu cầu không hợp lệ."
 };
@@ -31,4 +31,6 @@ export async function serverReady() {
   if (st !== null && Date.now() - stAt < 5 * 60 * 1000) return st;
   const r = await api("status", {}, { token: false }); st = !!(r.ok && r.mail); stAt = Date.now(); return st;
 }
+/* Các vấn đề cấu hình máy chủ (chỉ tên biến thiếu/sai, không lộ giá trị) */
+export async function serverProblems() { const r = await api("status", {}, { token: false }); return { ok: !!r.ok, ready: !!(r.ok && r.mail), problems: (r && r.problems) || [], code: r && r.code }; }
 export const apiDownRecently = () => Date.now() - down < 60 * 1000;

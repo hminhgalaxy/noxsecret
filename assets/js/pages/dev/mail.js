@@ -3,7 +3,7 @@ import { esc, toast } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";
 import { friendly } from "../../lib/messages.js";
-import { api, apiMessage, serverReady } from "../../lib/account.js";
+import { api, apiMessage, serverReady, serverProblems } from "../../lib/account.js";
 import { locked, devCrumb } from "./shared.js";
 
 const SYS = { resetCode: "Mã đặt lại mật khẩu", recoverCode: "Mã khôi phục tài khoản", passwordCode: "Mã đổi mật khẩu", newLocationCode: "Mã đăng nhập từ vị trí mới", passwordChangedAlert: "Đã đổi mật khẩu (cảnh báo)", verifyEmail: "Xác minh email", resetPassword: "Đặt lại mật khẩu", googleOnly: "Tài khoản dùng Google", recoverReset: "Khôi phục qua email khôi phục", changeEmail: "Xác nhận email mới", changeEmailNotice: "Báo có yêu cầu đổi email", welcome: "Chào mừng", loginCode: "Mã đăng nhập 2 bước", enableCode: "Mã bật 2 bước", disableCode: "Mã tắt 2 bước", recoveryCode: "Mã xác nhận email khôi phục", recoveryLoginCode: "Mã đăng nhập qua email khôi phục", twofaEnabled: "Đã bật 2 bước", twofaDisabled: "Đã tắt 2 bước", recoveryAdded: "Đã thêm email khôi phục", recoveryRemoved: "Đã xóa email khôi phục", passwordChanged: "Đã đổi mật khẩu", roleGranted: "Được cấp biên tập viên", roleRemoved: "Bị gỡ biên tập viên", muted: "Bị mute", unmuted: "Hết mute", banned: "Bị đình chỉ", unbanned: "Hết đình chỉ" };
@@ -12,7 +12,11 @@ export async function mount(ctx) {
   if (locked(ctx)) return;
   ctx.setPage({ title: "Gửi thư", crumbs: devCrumb, sub: "Trả lời người dùng bằng văn mẫu và xem trước các thư tự động.", noindex: true });
   ctx.el.innerHTML = `<div class="statebox"><p>Đang tải…</p></div>`;
-  if (!(await serverReady())) { ctx.el.innerHTML = `<div class="statebox"><p>Dịch vụ gửi thư chưa được bật. Hãy làm theo mục "Giai đoạn 2" trong HUONG-DAN.md (Brevo + khoá Firebase Admin), website sẽ tự bật tính năng này.</p></div>`; return; }
+  const renderDiag = (pr, live) => `<div class="formcard" id="diag"><span class="dsec">Kiểm tra gửi thư</span>${pr.length ? `<ul class="diag-l">${pr.map(m => `<li class="bad" translate="no">✗ ${esc(m)}</li>`).join("")}</ul>` : ""}${live ? `<ul class="diag-l">${live.map(c => `<li class="${c.ok ? "good" : "bad"}" translate="no">${c.ok ? "✓" : "✗"} ${esc(c.msg)}</li>`).join("")}</ul>` : ""}<p class="sub-note">Sau khi thêm hoặc sửa biến môi trường trên Vercel, bạn phải Redeploy lại (Deployments → ⋯ → Redeploy) thì thay đổi mới có hiệu lực.</p><div class="form-acts"><button class="btn ghost" id="diagGo" type="button">Kiểm tra với Brevo</button></div></div>`;
+  if (!(await serverReady())) {
+    const sp = await serverProblems(); if (!ctx.isCurrent()) return;
+    ctx.el.innerHTML = `<div class="statebox"><p>Dịch vụ gửi thư chưa được bật trên máy chủ. Dưới đây là lý do website phát hiện được.</p></div>` + (sp.problems.length ? renderDiag(sp.problems).replace(/<div class="form-acts">.*?<\/div>/, "") : `<div class="statebox"><p>Không thấy biến nào thiếu. Nếu bạn vừa thêm biến trên Vercel, hãy Redeploy rồi tải lại trang này. Cũng kiểm tra FIREBASE_SERVICE_ACCOUNT còn hợp lệ.</p></div>`); return;
+  }
   const tp = await api("dev-templates"); if (!ctx.isCurrent()) return;
   if (!tp.ok) { ctx.el.innerHTML = `<div class="statebox err"><p>${esc(apiMessage(tp))}</p></div>`; return; }
   const users = () => (S.store.users || []).filter(u => u.email);
@@ -25,6 +29,8 @@ export async function mount(ctx) {
       <div class="form-acts"><button class="btn ghost" id="mTest" type="button">Gửi thử cho tôi</button><button class="btn primary" id="mSend" type="submit">${ICO.mail}Gửi thư</button></div></form>
     <span class="dsec">Xem trước</span><iframe class="mail-frame" id="mFrame" sandbox title="Email preview"></iframe>
     <span class="dsec">Thư tự động của hệ thống</span><div class="dlist" id="sysl">${tp.system.map(k => `<div class="upd-row"><span class="nm"><b>${esc(SYS[k] || k)}</b><small translate="no">${esc(k)}</small></span><span class="row-acts"><button class="btn ghost sm" data-prev="${esc(k)}" type="button">Xem</button><button class="btn ghost sm" data-test="${esc(k)}" type="button">Gửi thử cho tôi</button></span></div>`).join("")}</div>`;
+  ctx.el.insertAdjacentHTML("afterbegin", renderDiag([]));
+  ctx.el.querySelector("#diagGo").addEventListener("click", async e => { const b = e.currentTarget; b.disabled = true; b.textContent = "Đang kiểm tra…"; const r = await api("mail-check"); b.disabled = false; b.textContent = "Kiểm tra với Brevo"; if (!ctx.isCurrent()) return; const box = ctx.el.querySelector("#diag"); box.outerHTML = renderDiag(r.ok ? r.problems : [apiMessage(r)], r.ok ? r.checks : null); ctx.el.querySelector("#diagGo").addEventListener("click", () => mount(ctx)); });
   const $ = s => ctx.el.querySelector(s), f = $("#mf"), frame = $("#mFrame"), err = $("#mE"), ok = $("#mOk");
   const fill = () => { const r = tp.replies.find(x => x.id === f.tpl.value); if (r) { f.subject.value = r.subject; f.body.value = r.body; } preview(); };
   const nameFor = () => { const u = users().find(x => (x.email || "").toLowerCase() === f.to.value.trim().toLowerCase()); return (u && u.name) || ""; };

@@ -85,7 +85,11 @@ function createApi(deps) {
   }
 
   const A = {
-    async status() { return ok({ mail: configured(), twofa: configured() }); },
+    async status() { return ok({ mail: configured(), twofa: configured(), problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] }); },
+    async "mail-check"({ token }) {
+      const { err } = await devOnly(token); if (err) return err;
+      return ok({ checks: deps.liveCheck ? await deps.liveCheck() : [], problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] });
+    },
 
     async "verify-email"({ token }) {
       const { u, err } = await who(token); if (err) return err;
@@ -305,7 +309,7 @@ function createApi(deps) {
     /* Tường lửa lớp ứng dụng: mỗi IP tối đa 240 yêu cầu / 10 phút (chặn dồn dập); chi tiết từng hành động còn có giới hạn riêng. */
     if (req.ip && action !== "status" && !(await limit("ipall:" + sha(req.ip), 240, 10 * 60 * 1000))) return fail(429, "rate_limited", "Too many requests. Slow down and try again in a few minutes.");
     try { return await A[action]({ token: req.token, body: req.body || {}, ip: req.ip, geo: req.geo || {} }); }
-    catch (e) { console.error("account:" + action, e && e.code, e && e.message); return fail(500, "server_error", "Something went wrong. Please try again."); }
+    catch (e) { console.error("account:" + action, e && e.code, e && e.message); if (e && e.code === "mail_failed") return fail(502, "mail_failed", "We couldn't send the email right now. The site owner has been notified in the server log."); return fail(500, "server_error", "Something went wrong. Please try again."); }
   };
 }
 module.exports = { createApi, EMAIL_RE };
