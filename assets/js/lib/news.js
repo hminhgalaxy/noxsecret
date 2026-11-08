@@ -1,4 +1,5 @@
 /* Khối "cập nhật" dùng chung (trang chủ + trang Thông báo): một bài = tiêu đề, ngày, nội dung hoặc danh sách ý. */
+import { clampText } from "./collapse.js";
 import { esc, fmtDate } from "./util.js";
 import { isNew } from "./updates.js";
 
@@ -9,3 +10,5 @@ export const updHTML = (e, i = 0, { fresh = isNew(e) } = {}) => {
     <div class="upd-top">${fresh ? `<span class="badge strong">Mới</span>` : ""}<time datetime="${new Date(e.ts).toISOString().slice(0, 10)}">${esc(fmtDate(e.ts))}</time></div>
     <div${nt}><h3>${esc(e.title)}</h3>${body}</div></article>`;
 };
+/* Bài cập nhật dài: thu gọn danh sách/đoạn, có nút "Hiển thị tất cả" */
+export const clampUpdates = root => { if (!root) return; root.querySelectorAll(".upd ul, .upd p").forEach(el => clampText(el, 5)); };

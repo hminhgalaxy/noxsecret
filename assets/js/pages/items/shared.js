@@ -22,7 +22,7 @@ export function fieldsFor(cat) {
   if (cat.id === "script") f.push({ k: "code", label: "Code", req: true, area: true, rows: 12, mono: true });
   else if (cat.base) f.push({ k: "url", label: "Link", req: true, type: "url", ph: "https://…" });
   else { f.push({ k: "url", label: "Link", type: "url", ph: "https://…" }); f.push({ k: "code", label: "Code", area: true, rows: 10, mono: true }); }
-  f.push({ k: "img", label: "Link ảnh (không bắt buộc)", type: "url", ph: "https://…/anh.jpg" });
+  f.push({ k: "img", label: "Ảnh minh họa (chọn từ máy, không bắt buộc)", image: true });
   if (cat.id === "apk" || cat.id === "ios") f.push({ k: "vault", label: "Đánh dấu Vault", check: true });
   return f;
 }

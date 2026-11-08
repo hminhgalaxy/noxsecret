@@ -1,6 +1,7 @@
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-export const RM = (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches) || (() => { try { return localStorage.getItem("ssw_rm") === "1"; } catch (_) { return false; } })();
+/* Giảm chuyển động: theo hệ thống, theo cài đặt, hoặc khi ở mức đồ họa Tối ưu (đọc lại mỗi lần để đổi mức có hiệu lực ngay) */
+export const RM = () => { if (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches) return true; try { return localStorage.getItem("ssw_rm") === "1" || !/^(mid|high)$/.test(localStorage.getItem("ssw_gfx") || ""); } catch (_) { return false; } };
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 export const pick = (o, ks) => { for (const k of ks) if (o && o[k] != null && o[k] !== "") return o[k]; return ""; };
 export const vi = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
@@ -35,7 +36,7 @@ export function copyText(v) {
     }));
 }
 export function copyFx(btn) {
-  if (!btn || RM) return;
+  if (!btn || RM()) return;
   btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop");
   const r = btn.getBoundingClientRect(), s = document.createElement("span");
   s.className = "flychk"; s.textContent = "✓"; s.style.left = (r.left + r.width / 2) + "px"; s.style.top = (r.top - 4) + "px";

@@ -3,6 +3,7 @@ import { db, TS } from "./firebase.js";
 import { DATA_ROOT, CATS_NODE, MAINT_NODE, NOTICE_NODE, THEME_NODE, USERS_NODE, UPDATES_NODE, ADMIN_NODE, THEME_PUBLIC_KEYS } from "./config.js";
 import { session } from "./auth.js";
 import { pick, vi, validUrl } from "./util.js";
+import { isLocalImg } from "./avatar.js";
 import { dlog } from "./log.js";
 
 export const BASE_CATS = [
@@ -32,7 +33,7 @@ export function normItem(key, o) {
   if (o == null || typeof o !== "object") o = { name: String(o ?? "") };
   return {
     key, name: pick(o, ["name", "title"]) || "(không tên)", desc: pick(o, ["desc", "description", "note"]),
-    url: pick(o, ["url", "link", "href"]), code: pick(o, ["code", "script"]), img: pick(o, ["img", "image", "avatar", "thumb"]),
+    url: pick(o, ["url", "link", "href"]), code: pick(o, ["code", "script"]), img: (v => isLocalImg(v) ? v : "")(pick(o, ["img", "image", "avatar", "thumb"])),
     copies: o.copies != null ? Number(o.copies) || 0 : null, vault: !!(o.vault || o.vaulted),
     ts: Number(o.updatedAt || o.editedAt || o.createdAt || 0) || null, created: Number(o.createdAt) || null
   };
@@ -170,12 +171,12 @@ const guardDev = () => { if (!db) throw new Error("Chưa kết nối được d�
 const guardStaff = () => { if (!db) throw new Error("Chưa kết nối được dữ liệu. Vui lòng tải lại trang."); if (!session.isDev && !session.isEditor) throw new Error("Bạn không có quyền thực hiện thao tác này."); };
 const wrap = p => p.catch(e => { dlog("er", "Ghi: " + (e.code || e.message)); throw denied(e); });
 
-export const FIELD_RULES = { name: 200, desc: 2000, url: 2048, img: 2048, code: 200000 };
+export const FIELD_RULES = { name: 200, desc: 2000, url: 2048, img: 36000, code: 200000 };
 export function validateItem(cat, f) {
   const e = {};
   if (!f.name.trim()) e.name = "Thiếu tên mục."; else if (f.name.length > FIELD_RULES.name) e.name = "Tên tối đa 200 ký tự.";
   if (f.desc.length > FIELD_RULES.desc) e.desc = "Mô tả tối đa 2000 ký tự.";
-  if (f.img && !validUrl(f.img)) e.img = "Link ảnh không hợp lệ (cần bắt đầu bằng http:// hoặc https://).";
+  if (f.img && !isLocalImg(f.img)) e.img = "Ảnh phải được chọn từ máy của bạn (JPG, PNG hoặc WebP).";
   if (f.url && (!validUrl(f.url) || f.url.length > FIELD_RULES.url)) e.url = "Link không hợp lệ (cần bắt đầu bằng http:// hoặc https://).";
   if (f.code && f.code.length > FIELD_RULES.code) e.code = "Code quá dài (tối đa 200.000 ký tự).";
   if (cat.id === "script") { if (!f.code.trim()) e.code = "Thiếu code cho Script."; }

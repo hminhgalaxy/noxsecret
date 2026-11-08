@@ -42,6 +42,7 @@ let updEmits = 0;
 onAuth(() => { S.syncDevListeners(); renderNav(); renderAccount(); applyMaint(); });
 
 /* Khởi động */
+import { initGfx } from "./lib/gfx.js"; initGfx();
 initLayout(); initNav(); initHeader(); initMedia(); initNotice(); initActions();
 renderNav(true); renderSound(); renderNotifDot();
 S.start();

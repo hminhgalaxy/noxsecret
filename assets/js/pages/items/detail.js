@@ -5,6 +5,7 @@ import * as S from "../../lib/store.js";
 import { session, onAuth } from "../../lib/auth.js";
 import { skeletonHTML, armDelete, icoOf } from "../../lib/ui.js";
 import { friendly } from "../../lib/messages.js";
+import { clampText } from "../../lib/collapse.js";
 import { resolveCat, notFound, crumbsFor, settled, missingHTML } from "./shared.js";
 
 export async function mount(ctx) {
@@ -33,6 +34,7 @@ export async function mount(ctx) {
         ${(session.isDev || session.isEditor) ? `<button class="btn danger" type="button" id="delBtn">${ICO.trash}Xóa</button>` : ""}
       </div></article>`;
     const del = ctx.el.querySelector("#delBtn");
+    clampText(ctx.el.querySelector(".detail-desc"), 8);
     if (del) del.addEventListener("click", () => armDelete(del, () => S.deleteItem(cat.id, key).then(() => { toast("Đã xóa."); ctx.navigate(base); }).catch(e => toast(friendly(e), "err")), { title: "Xóa mục này?", message: "Mục sẽ bị xóa khỏi website. Hành động này không thể hoàn tác." }));
   };
   draw();

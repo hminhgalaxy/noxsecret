@@ -1,0 +1,89 @@
+/* ═══ MỨC ĐỒ HỌA: Tối ưu (low, mặc định) · Trung bình (mid) · Cao (high) ═══
+   Tối ưu: bố cục gọn, không animation, nền ô vuông đứng yên, vẫn có âm thanh.
+   Trung bình: animation hiện tại + nền ô vuông chuyển động nhẹ, không hiện nền website, vẫn có âm thanh.
+   Cao: nền website + âm thanh + animation nâng cao (ánh sáng theo con trỏ, viền sáng, hiệu ứng bóng). */
+
+/* ── Nền ô vuông (Tối ưu + Trung bình, và Cao khi website chưa có nền) ── */
+#bg{overflow:hidden;--gs:56px;--gl:color-mix(in srgb,var(--text) 8%,transparent)}
+:root:is([data-gfx="low"],[data-gfx="mid"]) #bg::after{display:none}
+:root:is([data-gfx="low"],[data-gfx="mid"]) #bg::before,:root[data-gfx="high"] body:not(.has-bg) #bg::before{content:"";position:absolute;inset:calc(var(--gs) * -1);
+  background-image:linear-gradient(var(--gl) 1px,transparent 1px),linear-gradient(90deg,var(--gl) 1px,transparent 1px);background-size:var(--gs) var(--gs);
+  -webkit-mask-image:radial-gradient(ellipse 85% 75% at 50% 28%,#000 25%,transparent 100%);mask-image:radial-gradient(ellipse 85% 75% at 50% 28%,#000 25%,transparent 100%)}
+/* Tối ưu: đứng yên */
+:root[data-gfx="low"] #bg::before{animation:none}
+/* Trung bình: trôi nhẹ + vệt sáng quét chậm */
+:root[data-gfx="mid"] #bg::before{animation:gridDrift 18s linear infinite;will-change:transform}
+:root[data-gfx="mid"] #bg::after{content:"";display:block;position:absolute;inset:0;background:linear-gradient(115deg,transparent 42%,color-mix(in srgb,var(--text) 5%,transparent) 50%,transparent 58%) 0 0/260% 100%;
+  -webkit-mask-image:none;mask-image:none;animation:gridSweep 11s ease-in-out infinite;opacity:.9}
+/* Cao: lưới + hai quầng sáng trôi chậm (khi chưa có nền website) */
+:root[data-gfx="high"] body:not(.has-bg) #bg::before{animation:gridDrift 26s linear infinite;will-change:transform}
+:root[data-gfx="high"] #bg::after{background-image:radial-gradient(520px 340px at var(--ax,20%) var(--ay,15%),color-mix(in srgb,var(--text) 9%,transparent),transparent 70%),radial-gradient(460px 320px at calc(100% - var(--ax,20%)) calc(100% - var(--ay,15%)),color-mix(in srgb,var(--text) 6%,transparent),transparent 70%);
+  background-size:auto;-webkit-mask-image:none;mask-image:none;animation:aurora 22s ease-in-out infinite alternate}
+@keyframes gridDrift{to{transform:translate(var(--gs),var(--gs))}}
+@keyframes gridSweep{0%{background-position:130% 0}100%{background-position:-30% 0}}
+@property --ax{syntax:"<percentage>";inherits:true;initial-value:20%}
+@property --ay{syntax:"<percentage>";inherits:true;initial-value:15%}
+@keyframes aurora{to{--ax:68%;--ay:55%}}
+
+/* ═══ TỐI ƯU: phẳng, gọn, không hiệu ứng ═══ */
+:root[data-gfx="low"] *,:root[data-gfx="low"] *::before,:root[data-gfx="low"] *::after{animation-duration:.001ms !important;animation-delay:0s !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;transition-delay:0s !important;scroll-behavior:auto !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+:root[data-gfx="low"] .btn.busy::after,:root[data-gfx="low"] .spin,:root[data-gfx="low"] #pageload i,:root[data-gfx="low"] .act-wait{animation-duration:.8s !important;animation-iteration-count:infinite !important}
+:root[data-gfx="low"] :is(.card,.tile,.row,.panel,.set-card,.upd,.formcard,.notice-card,.auth-card){box-shadow:none !important;transform:none !important}
+:root[data-gfx="low"] .btn{border-radius:10px;box-shadow:none !important;transform:none !important}
+:root[data-gfx="low"] .btn.primary{background:var(--strong)}
+:root[data-gfx="low"] .btn.primary:hover{opacity:.9}
+:root[data-gfx="low"] .tile{padding:14px 16px 16px}
+:root[data-gfx="low"] .tile-ico{width:38px;height:38px;margin-bottom:12px}
+:root[data-gfx="low"] .card-thumb{aspect-ratio:2/1}
+:root[data-gfx="low"] #themeLayer{display:none !important}
+
+/* ═══ TRUNG BÌNH: giữ hiệu ứng hiện tại, thêm viền sáng tinh tế ═══ */
+:root[data-gfx="mid"] #themeLayer{display:none !important}
+:root[data-gfx="mid"] .btn.primary{box-shadow:inset 0 1px 0 color-mix(in srgb,var(--on-strong) 22%,transparent),0 6px 18px -12px var(--strong)}
+:root[data-gfx="mid"] :is(.card,.tile):hover{box-shadow:var(--shadow-1),0 0 0 1px color-mix(in srgb,var(--text) 6%,transparent)}
+
+/* ═══ CAO: sang trọng, nhiều hiệu ứng ═══ */
+/* Ánh sáng đi theo con trỏ trên thẻ và khung (JS đặt --mx/--my) */
+:root[data-gfx="high"] :is(.card,.tile,.set-card,.panel,.upd,.row,.auth-card){--mx:50%;--my:0%;isolation:isolate}
+:root[data-gfx="high"] :is(.card,.tile,.set-card,.panel,.upd,.row,.auth-card)::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s var(--ez);
+  background:radial-gradient(360px circle at var(--mx) var(--my),color-mix(in srgb,var(--text) 11%,transparent),transparent 62%)}
+:root[data-gfx="high"] :is(.card,.tile,.set-card,.panel,.upd,.row,.auth-card):hover::before{opacity:1}
+:root[data-gfx="high"] :is(.card,.tile):hover{transform:translateY(-6px) scale(1.012);box-shadow:0 22px 44px -26px color-mix(in srgb,var(--text) 40%,transparent),0 0 0 1px var(--line-strong)}
+/* Nút chính: chuyển màu + vệt sáng quét qua khi rê chuột */
+:root[data-gfx="high"] .btn{transition:transform .35s var(--spring),box-shadow .35s var(--ez),background .3s var(--ez),border-color .3s var(--ez);overflow:hidden}
+:root[data-gfx="high"] .btn.primary{background:linear-gradient(135deg,var(--strong),color-mix(in srgb,var(--strong) 78%,var(--text-3)));box-shadow:inset 0 1px 0 color-mix(in srgb,var(--on-strong) 30%,transparent),0 10px 28px -14px var(--strong)}
+:root[data-gfx="high"] .btn.primary::before{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,color-mix(in srgb,var(--on-strong) 35%,transparent) 50%,transparent 65%);transform:translateX(-120%);transition:transform .7s var(--ez)}
+:root[data-gfx="high"] .btn.primary:hover::before{transform:translateX(120%)}
+:root[data-gfx="high"] .btn.primary:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--on-strong) 36%,transparent),0 16px 34px -14px var(--strong)}
+:root[data-gfx="high"] .btn.ghost:hover{border-color:var(--text);box-shadow:0 0 0 3px color-mix(in srgb,var(--text) 9%,transparent)}
+:root[data-gfx="high"] .btn:active{transform:scale(.96)}
+/* Biểu tượng danh mục nổi lên, tiêu đề trang có dải sáng */
+:root[data-gfx="high"] .tile-ico{transition:transform .45s var(--spring),background .3s var(--ez)}
+:root[data-gfx="high"] .tile:hover .tile-ico{transform:translateY(-3px) rotate(-6deg) scale(1.08);background:var(--strong);color:var(--on-strong)}
+:root[data-gfx="high"] .page-head h1,:root[data-gfx="high"] .page .ptitle{background:linear-gradient(100deg,var(--text) 30%,var(--text-3) 50%,var(--text) 70%) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:titleSheen 7s ease-in-out infinite}
+@keyframes titleSheen{0%,100%{background-position:100% 0}50%{background-position:0 0}}
+/* Xuất hiện lần lượt, mượt hơn */
+:root[data-gfx="high"] .fresh :is(.card,.tile,.row){animation-duration:.85s;animation-timing-function:cubic-bezier(.2,.9,.2,1)}
+:root[data-gfx="high"] .page{animation:pageInHi .7s cubic-bezier(.2,.9,.2,1) both}
+@keyframes pageInHi{from{opacity:0;transform:translateY(22px) scale(.985);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+:root[data-gfx="high"] .ptab-btn.on,:root[data-gfx="high"] .seg button.on{box-shadow:0 8px 22px -10px var(--strong)}
+:root[data-gfx="high"] .cf{animation:cfInHi .5s var(--spring) both}
+@keyframes cfInHi{from{opacity:0;transform:translateY(24px) scale(.93)}to{opacity:1;transform:none}}
+:root[data-gfx="high"] .badge{transition:transform .3s var(--spring)}
+:root[data-gfx="high"] .badge:hover{transform:scale(1.06)}
+
+/* Tôn trọng "Giảm chuyển động" ở mọi mức (kể cả Cao) */
+:root[data-motion="reduced"] :is(#bg::before,#bg::after,.page,.cf,.btn::before){animation:none !important}
+
+/* ── Thanh chọn mức đồ họa (Cài đặt) ── */
+.gfx-card .gfx-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.gfx-card .gfx-name{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.gfx-scale{position:relative;padding:6px 6px 0}
+.gfx-ticks{display:flex;justify-content:space-between;margin-top:2px;font-size:13px;color:var(--text-3);font-weight:600}
+.gfx-ticks span{flex:1;text-align:center;min-height:44px;display:grid;place-items:center;cursor:pointer;border-radius:10px;user-select:none}
+.gfx-ticks span:first-child{text-align:left;justify-items:start}.gfx-ticks span:last-child{text-align:right;justify-items:end}
+.gfx-ticks span.on{color:var(--text)}
+.gfx-list{display:grid;gap:8px;margin:2px 0 0;padding:0;list-style:none}
+.gfx-list li{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--text-2)}
+.gfx-list li::before{content:"";flex:none;width:7px;height:7px;margin-top:8px;border-radius:50%;background:var(--text-3)}
+.gfx-warn{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r-sm);border:1px solid color-mix(in srgb,var(--warn,#d9a400) 45%,transparent);background:color-mix(in srgb,var(--warn,#d9a400) 9%,transparent);font-size:13.5px;color:var(--text)}

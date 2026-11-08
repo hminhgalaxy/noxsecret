@@ -23,8 +23,9 @@ export function registerRoutes() {
   define("/auth/action", { load: L("auth/action"), guard: "open", title: "Xác nhận từ email", noindex: true });
   define("/profile", { load: L("profile"), guard: "auth", title: "Hồ sơ", needs: [] });
   define("/search", { load: L("search"), guard: "public", title: "Tìm kiếm", noindex: true, needs: ALL });
-  define("/categories", { load: L("categories"), guard: "public", title: "Danh mục", desc: "Tất cả danh mục Script, APK, iOS và liên kết hữu ích trên SKIBIDI SCRIPT WEB.", needs: ALL });
+  define("/categories", { load: L("categories"), guard: "public", title: "Danh mục", desc: "Tất cả danh mục nội dung đã được kiểm duyệt trên SKIBIDI SCRIPT WEB.", needs: ALL });
   define("/notifications", { load: L("notifications"), guard: "public", title: "Thông báo", desc: "Thông báo mới nhất từ SKIBIDI SCRIPT WEB.", needs: ["notice", "updates"] });
+  define("/help", { load: L("help"), guard: "public", title: "Câu hỏi thường gặp", desc: "Câu hỏi thường gặp về tài khoản, bảo mật, nội dung và cài đặt của SKIBIDI SCRIPT WEB.", needs: [] });
   define("/settings", { load: L("settings"), guard: "public", title: "Cài đặt", noindex: true, needs: ["theme"] });
   define("/404", notFoundDef);
 

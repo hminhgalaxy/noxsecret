@@ -1,7 +1,7 @@
 /* Nền tùy chỉnh + nhạc nền (dữ liệu từ nox_theme, chỉ các khóa công khai) */
 import { $, esc, toast } from "./util.js";
 import { store } from "./store.js";
-import { isMuted, setMuted, isBgHidden, getVolume } from "./prefs.js";
+import { isMuted, setMuted, isBgHidden, getVolume, getGfx } from "./prefs.js";
 
 const bgm = () => $("#bgm");
 let armed = false;
@@ -31,7 +31,7 @@ export function toggleSound() {
 }
 export function applyMedia() {
   const t = store.theme || {}, layer = $("#themeLayer"), a = bgm();
-  const hasBg = !!(t.bgData && t.bgType && t.bgType !== "none") && !isBgHidden();
+  const hasBg = !!(t.bgData && t.bgType && t.bgType !== "none") && !isBgHidden() && getGfx() === "high";
   document.body.classList.toggle("has-bg", hasBg);
   if (hasBg) {
     const sig = t.bgType + "|" + String(t.bgData).length + "|" + String(t.bgData).slice(-40);

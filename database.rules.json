@@ -17,7 +17,7 @@
             ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)"
           },
           "img": {
-            ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)"
+            ".validate": "newData.isString() && ((newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)) || (newData.val().length <= 36000 && newData.val().matches(/^data:image\\/(jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+$/)))"
           },
           "code": {
             ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 200000"

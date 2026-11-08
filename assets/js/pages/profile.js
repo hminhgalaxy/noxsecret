@@ -8,6 +8,7 @@ import { avatarHTML } from "../lib/ui.js";
 import { friendly } from "../lib/messages.js";
 import { fileToAvatar } from "../lib/avatar.js";
 import { confirmDialog, formDialog } from "../lib/confirm.js";
+import { clampText } from "../lib/collapse.js";
 
 const when = s => { const t = s ? new Date(s).getTime() : 0; return t ? fmtTime(t) : "—"; };
 const BIO_MAX = 300;
@@ -139,6 +140,7 @@ export function mount(ctx) {
           ${!u.emailVerified ? `<button class="btn ghost" id="vMail" type="button">${ICO.check}Gửi lại email xác minh</button>` : ""}
 </div></section><div id="secHost"></div></div></div>`;
     const $q = x => ctx.el.querySelector(x);
+    clampText($q(".profile-id .bio"), 4);
     ctx.el.querySelectorAll(".ptab-btn").forEach(b => b.addEventListener("click", () => { curTab = b.dataset.tab; ctx.el.querySelectorAll(".ptab-btn").forEach(x => { const on = x.dataset.tab === curTab; x.classList.toggle("on", on); x.setAttribute("aria-selected", on); }); ctx.el.querySelectorAll(".ptab").forEach(p => { p.hidden = p.dataset.pane !== curTab; }); }));
     fillSec(u);
     /* Tên hiển thị */

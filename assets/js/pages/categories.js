@@ -3,7 +3,7 @@ import * as S from "../lib/store.js";
 import { tileHTML, countUp, countOf, fresh } from "../lib/ui.js";
 
 export function mount(ctx) {
-  ctx.setPage({ title: "Danh mục", sub: "Chọn một danh mục để xem nội dung bên trong.", desc: "Tất cả danh mục Script, APK, iOS và liên kết hữu ích trên SKIBIDI SCRIPT WEB." });
+  ctx.setPage({ title: "Danh mục", sub: "Chọn một danh mục để xem nội dung bên trong.", desc: "Tất cả danh mục nội dung đã được kiểm duyệt trên SKIBIDI SCRIPT WEB." });
   ctx.el.innerHTML = `<div class="tiles" id="tiles"></div>`;
   const box = ctx.el.querySelector("#tiles"); let key = "", first = true;
   const draw = () => {

@@ -127,7 +127,7 @@ const contrastAudit = page => page.evaluate(() => {
   }
   return bad;
 });
-const AUDIT_ROUTES = ["/", "/categories", "/scripts", "/scripts/-s1", "/apk", "/notifications", "/settings", "/login", "/register", "/forgot-password", "/search?q=farm", "/khong/co"];
+const AUDIT_ROUTES = ["/", "/categories", "/scripts", "/scripts/-s1", "/apk", "/notifications", "/help", "/settings", "/login", "/register", "/forgot-password", "/search?q=farm", "/khong/co"];
 const DEV_ROUTES = ["/profile", "/dev", "/dev/data", "/dev/data/scripts", "/dev/categories", "/dev/users", "/dev/theme", "/dev/system", "/dev/updates", "/dev/test", "/scripts/create"];
 async function audit(page, widths, routes) {
   const by = new Map();
@@ -241,12 +241,13 @@ test("hồ sơ: chưa đăng nhập thì chuyển về đăng nhập", async ({ 
 
 /* ───────── Menu & Danh mục ───────── */
 test("menu: nút Danh mục mở ra từ từ, có hiệu ứng, ghi nhớ và đóng lại được (desktop)", async ({ page }) => {
+  await page.addInitScript(() => { try { localStorage.setItem("ssw_gfx", "mid"); } catch (_) {} });
   await go(page, "/"); const g = page.locator('.disc[data-g="cats"]'), panel = g.locator(".disc-panel");
   const btn = g.locator(".nav-btn"); eq(await btn.getAttribute("aria-expanded"), "false", "mặc định đóng");
   eq(await panel.evaluate(e => Math.round(e.getBoundingClientRect().height)), 0, "panel đóng cao 0");
-  await btn.click(); await page.waitForTimeout(90); const mid = await panel.evaluate(e => e.getBoundingClientRect().height);
+  await btn.click(); await page.waitForFunction(s => document.querySelector(s).getBoundingClientRect().height > 0, '.disc[data-g="cats"] .disc-panel', { polling: "raf" }); const mid = await panel.evaluate(e => e.getBoundingClientRect().height);
   await page.waitForTimeout(700); const full = await panel.evaluate(e => e.getBoundingClientRect().height);
-  ok(mid > 0 && mid < full, `đang mở dần (giữa=${mid}, đủ=${full})`); eq(await btn.getAttribute("aria-expanded"), "true");
+  ok(mid > 0 && mid < full, `đang mở dần (giữa=${mid}, đủ=${full}, gfx=${await page.evaluate(() => document.documentElement.dataset.gfx + "/" + document.documentElement.dataset.motion)})`); eq(await btn.getAttribute("aria-expanded"), "true");
   ok((await panel.locator(".disc-item").count()) >= 4, "có đủ danh mục");
   await page.reload(); await page.waitForSelector(".disc"); eq(await page.locator('.disc[data-g="cats"] .nav-btn').getAttribute("aria-expanded"), "true", "nhớ trạng thái mở");
   await page.locator('.disc[data-g="cats"] .nav-btn').click(); await page.waitForTimeout(700); eq(await panel.evaluate(e => Math.round(e.getBoundingClientRect().height)), 0, "đóng lại");
@@ -473,7 +474,7 @@ test("cài đặt: ngôn ngữ English ⇄ Tiếng Việt, ghi nhớ sau khi t�
 }, { lang: "default" });
 test("English: duyệt mọi trang (khách) không còn chữ tiếng Việt", async ({ page }) => {
   const bad = [];
-  for (const r of ["/", "/categories", "/scripts", "/scripts/-s1", "/apk", "/ios", "/links", "/c/mod", "/notifications", "/settings", "/login", "/register", "/forgot-password", "/search", "/search?q=zzz", "/scripts/khong-co", "/khong/co"]) {
+  for (const r of ["/", "/categories", "/scripts", "/scripts/-s1", "/apk", "/ios", "/links", "/c/mod", "/notifications", "/help", "/settings", "/login", "/register", "/forgot-password", "/search", "/search?q=zzz", "/scripts/khong-co", "/khong/co"]) {
     await go(page, r); await page.waitForTimeout(350); const v = await viContent(page); if (v.length) bad.push(r + " → " + v.slice(0, 6).join(" | "));
   }
   await go(page, "/"); await page.click("#btnMenu").catch(() => {}); const v2 = await viContent(page); if (v2.length) bad.push("menu → " + v2.slice(0, 6).join(" | "));
@@ -508,6 +509,7 @@ test("cài đặt: kính mờ chỉnh độ mờ + độ trong, về mặc đị
   await page.click("#glReset"); eq(await page.inputValue("#glBlur"), "14"); eq(await page.inputValue("#glClear"), "85");
 });
 test("cài đặt: hình nền — ẩn được, chỉnh độ sáng, ghi nhớ", async ({ page }) => {
+  await page.addInitScript(() => { try { localStorage.setItem("ssw_gfx", "high"); } catch (_) {} });
   await go(page, "/settings"); await page.$eval("#bgBright", e => { e.value = 60; e.dispatchEvent(new Event("input", { bubbles: true })); });
   eq((await page.evaluate(() => document.documentElement.style.getPropertyValue("--bg-bright"))).trim().replace(/^0?\./, "0."), "0.6", "độ sáng 60%");
   await page.click("label.sw:has(#bgShow)"); await page.waitForFunction(() => document.documentElement.dataset.bg === "off"); ok(await page.locator("#bgBright").isDisabled(), "ẩn nền thì khoá thanh sáng");
@@ -782,6 +784,92 @@ test("không có chữ kỹ thuật trên các trang công khai (cả khi chưa 
     await go(page, r); await page.waitForTimeout(250); const t = await visibleText(page); ok(!TECH.test(t), r + ": " + (t.match(TECH) || [])[0]);
   }
 });
+/* ───────── Đợt B: mức đồ họa, Trợ giúp, ảnh từ máy, thu gọn ───────── */
+test("đồ họa: mặc định Tối Ưu; 3 bậc; lên Cao có cảnh báo (huỷ thì giữ); nền hình chỉ hiện ở Cao; ghi nhớ", async ({ page }) => {
+  await go(page, "/settings"); const g = () => page.evaluate(() => document.documentElement.dataset.gfx), tick = i => page.click(`.gfx-ticks span[data-g="${i}"]`);
+  eq(await g(), "low", "mặc định thấp nhất"); eq(await page.inputValue("#gfx"), "0"); ok((await page.textContent("#gfxName")).includes("Tối"), "tên mức"); 
+  await tick(1); await page.waitForFunction(() => document.documentElement.dataset.gfx === "mid"); eq(await page.evaluate(() => localStorage.getItem("ssw_gfx")), "mid");
+  ok(await page.evaluate(() => !document.body.classList.contains("has-bg")), "trung bình: không nền hình");
+  await tick(2); await page.waitForSelector(".cf"); ok(/Cao/.test(await page.textContent(".cf")), "có cảnh báo trước khi lên Cao");
+  await no(page); eq(await g(), "mid", "huỷ thì giữ mức cũ"); eq(await page.inputValue("#gfx"), "1", "thanh trượt quay về");
+  await tick(2); await yes(page); await page.waitForFunction(() => document.documentElement.dataset.gfx === "high"); 
+  await page.reload(); await page.waitForSelector(".set-card"); eq(await g(), "high", "nhớ mức đồ họa"); eq(await page.inputValue("#gfx"), "2");
+  await tick(0); await page.waitForFunction(() => document.documentElement.dataset.gfx === "low"); eq(await page.evaluate(() => localStorage.getItem("ssw_gfx")), null, "về mặc định thì xoá khoá");
+});
+test("đồ họa: nền lưới có ở mọi mức; mức thấp đứng yên, mức trung bình chuyển động nhẹ; thẻ/nút khác nhau theo mức", async ({ page }) => {
+  const anim = () => page.evaluate(() => getComputedStyle(document.querySelector("#bg"), "::before").animationName);
+  await go(page, "/"); eq(await anim(), "none", "thấp: lưới đứng yên");
+  const bgLow = await page.evaluate(() => getComputedStyle(document.querySelector("#bg"), "::before").backgroundImage); ok(/gradient/.test(bgLow), "thấp: có lưới ô vuông");
+  await page.evaluate(() => { localStorage.setItem("ssw_gfx", "mid"); }); await page.reload(); await page.waitForSelector("#view .page"); ok(/gridDrift/.test(await anim()), "trung bình: lưới chuyển động nhẹ");
+  const sh = () => page.evaluate(() => getComputedStyle(document.querySelector(".btn.primary") || document.body).boxShadow);
+  const mid = await sh();
+  await page.evaluate(() => { localStorage.setItem("ssw_gfx", "high"); }); await page.reload(); await page.waitForSelector("#view .page");
+  ok(await page.evaluate(() => document.documentElement.dataset.gfx) === "high");
+  ok(await page.evaluate(() => !!document.querySelector("#bg")), "có lớp nền");
+});
+test("đồ họa: mức Tối Ưu không hiện màn hình mở đầu, không video/hình nền; Cao mới có hình nền", async ({ page }) => {
+  await go(page, "/"); ok(await page.evaluate(() => document.documentElement.classList.contains("no-splash")), "thấp: bỏ màn mở đầu"); ok(await page.evaluate(() => !document.body.classList.contains("has-bg")));
+  await go(page, "/settings"); ok(await page.locator("#bgShow").isDisabled(), "thấp: tuỳ chọn hình nền bị khoá, có ghi chú");
+});
+test("Trợ giúp: nhóm menu, câu hỏi thường gặp, tìm kiếm, mở/đóng, Hiển thị tất cả", async ({ page }) => {
+  await go(page, "/"); ok(await page.locator('.disc[data-g="help"] .disc-item[href="/help"]').count() === 1, "nhóm Trợ giúp trong menu");
+  await go(page, "/help"); eq((await page.title()).includes("Câu hỏi thường gặp"), true); ok((await page.locator(".faq-i").count()) >= 20, "đủ câu hỏi");
+  eq(await page.locator('.disc[data-g="help"].open').count(), 1, "mở sẵn nhóm chứa trang đang xem");
+  ok((await page.locator(".more-btn").count()) >= 1, "nhóm dài có nút Hiển thị tất cả");
+  const vis0 = await page.locator(".faq-i:visible").count(); await page.locator(".more-btn").first().click(); ok((await page.locator(".faq-i:visible").count()) > vis0, "bấm Hiển thị tất cả thì hiện thêm"); ok(/Thu gọn/.test(await page.locator(".more-btn").first().textContent()), "đổi thành Thu gọn");
+  await page.locator(".more-btn").first().click(); eq(await page.locator(".faq-i:visible").count(), vis0, "Thu gọn lại");
+  const q1 = page.locator(".faq-q").first(), q2 = page.locator(".faq-q").nth(1);
+  await q1.click(); eq(await q1.getAttribute("aria-expanded"), "true"); await q2.click(); eq(await q1.getAttribute("aria-expanded"), "false", "chỉ một câu mở"); eq(await q2.getAttribute("aria-expanded"), "true");
+  await page.fill("#fs", "mat khau"); await page.waitForFunction(() => document.querySelectorAll(".faq-i").length < 12); ok((await page.locator(".faq-i").count()) >= 3, "tìm không dấu ra kết quả");
+  eq(await page.locator(".more-btn").count(), 0, "đang tìm thì không ẩn bớt");
+  await page.fill("#fs", "zzzzqq"); await page.waitForSelector(".statebox"); eq(await page.locator(".faq-i").count(), 0);
+  const t = await visibleText(page); ok(!TECH.test(t), "không có chữ kỹ thuật");
+});
+test("Trợ giúp (English): câu hỏi hiện bằng tiếng Anh, đổi ngôn ngữ thì đổi theo", async ({ page }) => {
+  await go(page, "/help"); ok(/Getting started/.test(await page.textContent(".faq-h")), "tiếng Anh");
+  const v = await viContent(page); eq(v, [], "không còn chữ Việt: " + v.join(" | "));
+  await page.evaluate(() => import("/assets/js/lib/i18n.js").then(m => m.setLang("vi"))); await page.waitForFunction(() => /Bắt đầu/.test(document.querySelector(".faq-h").textContent)); ok(true, "đổi sang tiếng Việt ngay, không tải lại");
+}, { lang: "en" });
+test("ảnh mục: chọn từ máy (nén, lưu, hiện); link ảnh cũ không còn hiển thị; đã bỏ ô dán link ảnh", async ({ page }) => {
+  const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+  await loginDev(page); await go(page, "/links/create"); eq(await page.locator('#itemForm input[type=url][name=img]').count(), 0, "không còn ô dán link ảnh"); await page.fill("#itemForm [name=name]", "Có ảnh"); await page.fill("#itemForm [name=url]", "https://example.com/a");
+  await page.setInputFiles("#imgPick", { name: "a.png", mimeType: "image/png", buffer: PNG }); await page.waitForSelector("#imgPrev img"); ok(await page.locator("#imgDel").isVisible(), "có nút Xóa ảnh");
+  await page.click("#saveBtn"); await page.waitForFunction(() => /^\/links$/.test(location.pathname)); const d = await db(page); const it = Object.entries(d.nox_data.links).find(([, v]) => v.name === "Có ảnh");
+  ok(it && /^data:image\/jpeg;base64,/.test(it[1].img) && it[1].img.length < 36000, "ảnh đã lưu dạng data: nhẹ");
+  await go(page, "/links/" + it[0]); ok(await page.locator(".detail-img").count() === 1, "chi tiết hiện ảnh");
+  await go(page, "/links/" + it[0] + "/edit"); await page.click("#imgDel"); await page.click("#saveBtn"); await page.waitForFunction(() => /^\/links$/.test(location.pathname)); ok(!(await db(page)).nox_data.links[it[0]].img, "xoá ảnh được");
+  await page.evaluate(() => firebase.database().ref("nox_data/links/leg").set({ name: "Cũ", url: "https://a.b", img: "https://evil.example/t.png", createdAt: 1 })); await go(page, "/links/leg"); eq(await page.locator(".detail-img").count(), 0, "ảnh từ link ngoài không được tải");
+  await go(page, "/links"); eq(await page.locator('img[src^="http"]:not(.avatar img)').evaluateAll(l => l.filter(i => /evil\.example/.test(i.src)).length), 0);
+});
+test("đoạn dài: mô tả dài được thu gọn, có nút Hiển thị tất cả / Thu gọn; đoạn ngắn thì không có nút", async ({ page }) => {
+  await loginDev(page); const long = Array.from({ length: 34 }, (_, i) => "Dòng mô tả số " + i + " khá dài để chiếm nhiều chỗ.").join(" ");
+  await page.evaluate(l => firebase.database().ref("nox_data/links").update({ longi: { name: "Dài", url: "https://a.b", desc: l, createdAt: 1 }, shorti: { name: "Ngắn", url: "https://a.b", desc: "Ngắn thôi.", createdAt: 2 } }), long);
+  await go(page, "/links/longi"); await page.waitForSelector(".more-btn"); const h1 = await page.locator(".detail-desc").evaluate(e => e.clientHeight);
+  ok(await page.locator(".detail-desc.clamp").count() === 1, "đang thu gọn"); eq(await page.textContent(".more-btn"), "Hiển thị tất cả");
+  await page.click(".more-btn"); const h2 = await page.locator(".detail-desc").evaluate(e => e.clientHeight); ok(h2 > h1, `mở rộng (${h1} → ${h2})`); eq(await page.textContent(".more-btn"), "Thu gọn"); eq(await page.getAttribute(".more-btn", "aria-expanded"), "true");
+  await page.click(".more-btn"); eq(await page.locator(".detail-desc").evaluate(e => e.clientHeight), h1, "thu gọn lại");
+  await go(page, "/links/shorti"); await page.waitForSelector(".detail-desc"); await page.waitForTimeout(300); eq(await page.locator(".more-btn").count(), 0, "đoạn ngắn không có nút");
+});
+test("tiêu đề mới của web: nói rõ đây là web chia sẻ APK bảo mật cao, không còn 'kho script apk ios link'", async ({ page }) => {
+  await go(page, "/"); const m = await page.evaluate(() => ({ t: document.title, d: document.querySelector("meta[name=description]").content, o: document.querySelector('meta[property="og:title"]').content }));
+  ok(/APK/.test(m.t) && !/iOS|Kho|useful links/i.test(m.t), "tiêu đề: " + m.t); ok(/bảo mật cao/i.test(m.d) && /hack/i.test(m.d), "mô tả nói rõ bảo mật + không cổ xúy hack: " + m.d); ok(!/useful links|Kho Script/.test(m.o));
+  const sm = await (await page.request.get(BASE + "/manifest.webmanifest")).text(); ok(!/Kho Script/.test(sm), "manifest");
+  await page.evaluate(() => import("/assets/js/lib/i18n.js").then(m => m.setLang("en"))); await page.waitForFunction(() => /Secure APK/i.test(document.title)); ok(true);
+});
+test("ảnh chụp: 3 mức đồ họa (máy tính)", async ({ page }) => {
+  for (const g of ["low", "mid", "high"]) {
+    await page.addInitScript(g => { try { localStorage.setItem("ssw_gfx", g === "low" ? "" : g); if (g === "low") localStorage.removeItem("ssw_gfx"); sessionStorage.setItem("ssw_splash", "1"); } catch (_) {} }, g);
+    for (const [r, n] of [["/", "home"], ["/settings", "settings"], ["/help", "help"], ["/scripts", "list"]]) { await go(page, r); await page.waitForTimeout(900); await page.screenshot({ path: SHOTS + `/gfx-${g}-${n}.png` }); }
+    await page.evaluate(() => localStorage.removeItem("ssw_gfx"));
+  }
+});
+test("ảnh chụp: 3 mức đồ họa (điện thoại)", async ({ page }) => {
+  for (const g of ["low", "mid", "high"]) {
+    await page.evaluate(g => { try { g === "low" ? localStorage.removeItem("ssw_gfx") : localStorage.setItem("ssw_gfx", g); } catch (_) {} }, g).catch(() => {});
+    await page.addInitScript(g => { try { g === "low" ? localStorage.removeItem("ssw_gfx") : localStorage.setItem("ssw_gfx", g); } catch (_) {} }, g);
+    for (const [r, n] of [["/", "home"], ["/settings", "settings"], ["/help", "help"]]) { await go(page, r); await page.waitForTimeout(900); await page.screenshot({ path: SHOTS + `/gfxm-${g}-${n}.png` }); }
+  }
+}, { device: devices["Pixel 5"] });
 test("ảnh chụp màn hình", async ({ page }) => {
   await go(page, "/"); await page.waitForSelector(".slide"); await page.waitForTimeout(700); await page.screenshot({ path: SHOTS + "/d-home.png" }); await page.screenshot({ path: SHOTS + "/d-home-full.png", fullPage: true });
   await page.locator('.disc[data-g="cats"] .nav-btn').click(); await page.waitForTimeout(800); await page.screenshot({ path: SHOTS + "/d-home-menu.png" });

@@ -13,6 +13,7 @@ const LINKS = {
   notice: { href: "/notifications", label: "Thông báo", icon: "bell", dot: "notice" },
   profile: { href: "/profile", label: "Hồ sơ", icon: "user" },
   settings: { href: "/settings", label: "Cài đặt", icon: "gear" },
+  help: [{ href: "/help", label: "Câu hỏi thường gặp", icon: "bulb", exact: true }],
   allCats: { href: "/categories", label: "Tất cả danh mục", icon: "grid", exact: true },
   dev: [{ href: "/dev", label: "Tổng quan", icon: "dash", exact: true }, { href: "/dev/data", label: "Dữ liệu", icon: "box" },
         { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
@@ -25,7 +26,7 @@ const link = (l, cls = "", i = null) => `<a class="nav-link ${cls}" href="${l.hr
 const GKEY = "ssw_navgroups";
 const saved = (() => { try { const v = JSON.parse(localStorage.getItem(GKEY)); if (v && typeof v === "object") return v; } catch (_) {} return {}; })();
 const openNow = new Set(Object.keys(saved).filter(k => saved[k]));
-const persist = () => { try { const o = {}; ["cats", "dev"].forEach(k => { o[k] = openNow.has(k); }); localStorage.setItem(GKEY, JSON.stringify(o)); } catch (_) {} };
+const persist = () => { try { const o = {}; ["cats", "dev", "help"].forEach(k => { o[k] = openNow.has(k); }); localStorage.setItem(GKEY, JSON.stringify(o)); } catch (_) {} };
 
 const group = (id, { title, icon, count, cls = "" }, items) => {
   const open = openNow.has(id);
@@ -59,6 +60,7 @@ export function renderNav(force) {
     ${link(LINKS.notice)}
     <span class="nav-sec">Của bạn</span>
     ${session.user ? link(LINKS.profile) : ""}${link(LINKS.settings)}
+    ${group("help", { title: "Trợ giúp", icon: "chat" }, LINKS.help.map((l, i) => link(l, "disc-item", i)).join(""))}
     ${session.isDev ? `<span class="nav-sec">Quản trị</span>${group("dev", { title: "Dev Panel", icon: "shield", cls: "dev" }, devItems)}` : ""}`;
   renderNotifDot(); markActive(false); renderAccount();
 }

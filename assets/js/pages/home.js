@@ -4,7 +4,7 @@ import { ICO } from "../lib/icons.js";
 import { store, subscribe, catHref } from "../lib/store.js";
 import { icoOf, countUp, countOf, fresh } from "../lib/ui.js";
 import { feed } from "../lib/updates.js";
-import { updHTML } from "../lib/news.js";
+import { updHTML, clampUpdates } from "../lib/news.js";
 
 const FEATS = [
   ["grid", "Sắp xếp rõ ràng", "Mọi nội dung được chia theo danh mục. Tìm kiếm gõ có dấu hay không dấu đều ra kết quả."],
@@ -13,22 +13,22 @@ const FEATS = [
   ["copy", "Sao chép một chạm", "Bấm một nút để sao chép code hoặc mở liên kết, không phải qua nhiều bước."]
 ];
 const STEPS = [
-  ["Chọn danh mục", "Vào Script, APK, iOS hoặc một danh mục bất kỳ ở thanh bên."],
+  ["Chọn danh mục", "Mở một danh mục bất kỳ ở thanh bên để xem các mục đã được kiểm duyệt."],
   ["Mở mục bạn cần", "Xem mô tả và chi tiết của từng mục trước khi dùng."],
   ["Sao chép hoặc mở link", "Bấm Sao chép code hoặc Mở link là xong."]
 ];
 const FAQ = [
   ["Tôi có cần tài khoản để dùng không?", "Không. Bạn có thể xem và sao chép mọi nội dung công khai mà không cần đăng nhập. Tài khoản dùng để có hồ sơ cá nhân của riêng bạn."],
-  ["Làm sao để sao chép script?", "Mở mục Script, chọn một mục rồi bấm Sao chép code. Code sẽ được chép vào bộ nhớ tạm của thiết bị."],
+  ["Làm sao để sao chép code?", "Mở một mục có code rồi bấm Sao chép code. Code sẽ được chép vào bộ nhớ tạm của thiết bị."],
   ["Bao lâu thì có nội dung mới?", "Nội dung được cập nhật trực tiếp. Khi có tin mới, biểu tượng chuông ở đầu trang sẽ báo cho bạn."],
-  ["Tôi quên mật khẩu thì sao?", "Vào trang Đăng nhập, bấm Quên mật khẩu và nhập email. Chúng tôi sẽ gửi liên kết để bạn đặt lại mật khẩu."]
+  ["Tôi quên mật khẩu thì sao?", "Vào trang Đăng nhập, bấm Quên mật khẩu và nhập email. Chúng tôi sẽ gửi một mã 6 số tới email; nhập đúng mã cùng mật khẩu mới là xong."]
 ];
 
 export function mount(ctx) {
-  ctx.setPage({ hero: true, title: null, desc: "SKIBIDI SCRIPT WEB là nơi tập hợp Script, APK, iOS và các liên kết hữu ích. Gọn gàng, dễ tìm và được cập nhật liên tục." });
+  ctx.setPage({ hero: true, title: null, desc: "Website tiện ích chia sẻ gói APK bảo mật cao: nội dung kiểm duyệt trước khi đăng, cảnh báo rõ phần mềm bên thứ ba. Không cổ xúy hack." });
   ctx.el.innerHTML = `<section class="hero" aria-labelledby="h1">
       <span class="eyebrow"><i></i>Luôn được cập nhật</span>
-      <h1 id="h1">Script, APK, iOS &amp; liên kết hữu ích. <span>Gọn gàng, dễ tìm.</span></h1>
+      <h1 id="h1">APK tiện ích, bảo mật cao. <span>Kiểm duyệt trước khi đăng.</span></h1>
       <p>Mọi thứ bạn cần được sắp xếp theo từng danh mục rõ ràng. Tìm nhanh, mở ngay, không rườm rà.</p>
       <form class="hero-search" id="heroSearch" role="search" action="/search">${ICO.search}
         <input type="search" name="q" placeholder="Bạn đang tìm gì?" aria-label="Tìm kiếm" autocomplete="off" enterkeyhint="search">
@@ -54,7 +54,7 @@ export function mount(ctx) {
       <div class="feats">${FEATS.map(([ic, t, d]) => `<div class="feat"><span class="feat-ico">${ICO[ic] || ICO.box}</span><h3>${esc(t)}</h3><p>${esc(d)}</p></div>`).join("")}</div></section>
     <section aria-labelledby="hs"><div class="sec-head"><h2 id="hs">Bắt đầu thế nào?</h2></div>
       <ol class="steps">${STEPS.map(([t, d], i) => `<li class="step"><span class="step-n">${i + 1}</span><div><h3>${esc(t)}</h3><p>${esc(d)}</p></div></li>`).join("")}</ol></section>
-    <section aria-labelledby="hf"><div class="sec-head"><h2 id="hf">Câu hỏi thường gặp</h2></div>
+    <section aria-labelledby="hf"><div class="sec-head"><h2 id="hf">Câu hỏi thường gặp</h2><a href="/help">Xem tất cả</a></div>
       <div class="faqs">${FAQ.map(([q, a]) => `<details class="faq"><summary>${esc(q)}${ICO.chevD}</summary><p>${esc(a)}</p></details>`).join("")}</div></section>`;
 
   const $ = s => ctx.el.querySelector(s);
@@ -90,7 +90,7 @@ export function mount(ctx) {
   const onResize = () => { track.scrollLeft = idx * track.clientWidth; sync(); }; addEventListener("resize", onResize);
 
   /* ── Cập nhật này có gì? ── */
-  const drawNews = () => { news.innerHTML = feed().slice(0, 3).map((e, i) => updHTML(e, i)).join(""); };
+  const drawNews = () => { news.innerHTML = feed().slice(0, 3).map((e, i) => updHTML(e, i)).join(""); clampUpdates(news); };
 
   drawCats(); drawNews();
   const u1 = subscribe(t => { if (t === "data" || t === "cats") drawCats(); else if (t === "updates" || t === "notice") drawNews(); });

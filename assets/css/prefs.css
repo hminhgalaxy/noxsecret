@@ -25,7 +25,7 @@ input[type=range].rng:disabled{opacity:.4;cursor:not-allowed}
 :root[data-contrast="high"]{--text-2:var(--text);--text-3:color-mix(in srgb,var(--text) 86%,var(--bg));--line:color-mix(in srgb,var(--text) 38%,transparent);--line-strong:color-mix(in srgb,var(--text) 70%,transparent)}
 :root[data-contrast="high"] .muted,:root[data-contrast="high"] small{color:var(--text)}
 /* Bố cục gọn */
-:root[data-density="compact"]{--r-lg:14px}
-:root[data-density="compact"] :is(.card,.panel,.set-card,.upd,.formcard,.notice-card,.auth-card,.slide,.row){padding:12px 14px}
-:root[data-density="compact"] .page{gap:12px}
-:root[data-density="compact"] :is(.set-grid,.profile,.grid,.list){gap:8px}
+:root:is([data-density="compact"],[data-gfx="low"]){--r-lg:14px}
+:root:is([data-density="compact"],[data-gfx="low"]) :is(.card,.panel,.set-card,.upd,.formcard,.notice-card,.auth-card,.slide,.row){padding:12px 14px}
+:root:is([data-density="compact"],[data-gfx="low"]) .page{gap:12px}
+:root:is([data-density="compact"],[data-gfx="low"]) :is(.set-grid,.profile,.grid,.list){gap:8px}

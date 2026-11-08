@@ -3,12 +3,17 @@ import { esc, toast } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
 import { session, onAuth, resendVerification } from "../lib/auth.js";
-import { getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, setFlag, resetPrefs } from "../lib/prefs.js";
+import { getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
 import { confirmDialog } from "../lib/confirm.js";
 import { getLang, setLang } from "../lib/i18n.js";
 import { hasMusic, toggleSound } from "../lib/media.js";
 import { friendly } from "../lib/messages.js";
 
+const GFX_INFO = {
+  low: { n: "Tối ưu", l: ["Nền ô vuông đứng yên", "Bố cục gọn, không có hiệu ứng chuyển động", "Vẫn có âm thanh", "Nhẹ nhất, mượt cả trên máy yếu"] },
+  mid: { n: "Trung bình", l: ["Nền ô vuông chuyển động nhẹ", "Hiệu ứng chuyển động cân bằng", "Vẫn có âm thanh", "Không hiện hình nền website"] },
+  high: { n: "Cao", l: ["Hiện hình nền website", "Có âm thanh", "Hiệu ứng nâng cao: ánh sáng theo con trỏ, viền sáng, chuyển cảnh mượt", "Có thể làm máy yếu bị giật, nóng, hao pin"] }
+};
 const sw = (id, label, on, extra = "") => `<div class="switch-row"><span>${label}</span><label class="sw"><input type="checkbox" id="${id}" ${on ? "checked" : ""} ${extra} aria-label="${label}"><i></i></label></div>`;
 const rng = (id, label, min, max, val, unit, dis) => `<div class="rng-row"><div class="rng-top"><label for="${id}">${label}</label><output id="${id}V" translate="no">${val}${unit}</output></div>
   <input class="rng" type="range" id="${id}" min="${min}" max="${max}" value="${val}" step="1" data-unit="${unit}" style="--p:${(val - min) / (max - min) * 100}%" ${dis ? "disabled" : ""}></div>`;
@@ -17,16 +22,22 @@ export function mount(ctx) {
   ctx.setPage({ title: "Cài đặt", sub: "Tùy chỉnh giao diện, ngôn ngữ, âm thanh và tài khoản.", noindex: true });
   const draw = () => {
     const pref = getThemePref(), u = session.user;
+    const gfx = getGfx(), gi = GFX.indexOf(gfx), onHigh = gfx === "high";
     ctx.el.innerHTML = `<div class="set-grid">
+      <section class="set-card wide gfx-card"><h3>${ICO.grid}Mức đồ họa</h3><p class="muted">Mặc định là Tối ưu để web luôn mượt. Kéo thanh để đổi mức; bạn có thể đổi lại bất cứ lúc nào.</p>
+        <div class="gfx-top"><span class="gfx-name" id="gfxName">${GFX_INFO[gfx].n}</span><span class="sub-note" id="gfxStep" translate="no">${gi + 1} / 3</span></div>
+        <div class="gfx-scale"><input class="rng" type="range" id="gfx" min="0" max="2" step="1" value="${gi}" style="--p:${gi * 50}%" aria-label="Mức đồ họa" aria-valuetext="${GFX_INFO[gfx].n}"></div>
+        <div class="gfx-ticks" role="presentation">${GFX.map((g, i) => `<span data-g="${i}" class="${i === gi ? "on" : ""}">${GFX_INFO[g].n}</span>`).join("")}</div>
+        <ul class="gfx-list" id="gfxList">${GFX_INFO[gfx].l.map(x => `<li>${x}</li>`).join("")}</ul></section>
       <section class="set-card"><h3>${ICO.paint}Giao diện</h3><p class="muted">Chọn chế độ hiển thị. Lựa chọn được lưu trên thiết bị này.</p>
         <div class="seg" role="radiogroup" aria-label="Giao diện">${[["dark", "Tối"], ["light", "Sáng"], ["system", "Theo thiết bị"]].map(([v, l]) => `<button type="button" role="radio" aria-checked="${pref === v}" data-theme="${v}" class="${pref === v ? "on" : ""}">${l}</button>`).join("")}</div></section>
       <section class="set-card"><h3>${ICO.grid}Kính mờ</h3><p class="muted">Khi bật, các khung trở nên trong suốt, chỉ còn viền và làm mờ phần phía sau. Khi tắt, khung dùng màu đặc theo giao diện (đen hoặc trắng).</p>
         ${sw("glass", "Bật kính mờ", isGlass())}
         <div class="set-fields" id="glassFields" aria-disabled="${!isGlass()}">${rng("glBlur", "Độ mờ", 0, 40, getGlassBlur(), "px", !isGlass())}${rng("glClear", "Độ trong", 0, 100, getGlassClear(), "%", !isGlass())}
           <div class="acts"><button class="btn ghost sm" id="glReset" type="button" ${!isGlass() ? "disabled" : ""}>Về mặc định</button></div></div></section>
-      <section class="set-card"><h3>${ICO.paint}Hình nền</h3><p class="muted">${S.store.theme && S.store.theme.bgData && S.store.theme.bgType !== "none" ? "Website có hình nền. Bạn có thể ẩn hoặc chỉnh độ sáng." : "Hiện website chưa có hình nền, nhưng cài đặt này sẽ áp dụng khi có."}</p>
-        ${sw("bgShow", "Hiện hình nền", !isBgHidden())}
-        <div class="set-fields" id="bgFields" aria-disabled="${isBgHidden()}">${rng("bgBright", "Độ sáng hình nền", 30, 150, getBgBright(), "%", isBgHidden())}</div></section>
+      <section class="set-card"><h3>${ICO.paint}Hình nền</h3><p class="muted">${!onHigh ? "Hình nền website chỉ hiện ở mức đồ họa Cao. Hãy chọn mức Cao ở trên để dùng." : S.store.theme && S.store.theme.bgData && S.store.theme.bgType !== "none" ? "Website có hình nền. Bạn có thể ẩn hoặc chỉnh độ sáng." : "Hiện website chưa có hình nền, nhưng cài đặt này sẽ áp dụng khi có."}</p>
+        ${sw("bgShow", "Hiện hình nền", !isBgHidden(), onHigh ? "" : "disabled")}
+        <div class="set-fields" id="bgFields" aria-disabled="${isBgHidden()}">${rng("bgBright", "Độ sáng hình nền", 30, 150, getBgBright(), "%", isBgHidden() || !onHigh)}</div></section>
       <section class="set-card"><h3>${ICO.link}Ngôn ngữ</h3><p class="muted">Chọn ngôn ngữ hiển thị của website.</p>
         <div class="seg" role="radiogroup" aria-label="Ngôn ngữ" translate="no">${[["en", "English"], ["vi", "Tiếng Việt"]].map(([v, l]) => `<button type="button" role="radio" aria-checked="${getLang() === v}" data-lang="${v}" class="${getLang() === v ? "on" : ""}">${l}</button>`).join("")}</div></section>
       <section class="set-card"><h3>${ICO.music}Âm thanh</h3><p class="muted">${hasMusic() ? "Website có nhạc nền. Bạn có thể bật hoặc tắt tại đây." : "Hiện website chưa có nhạc nền."}</p>
@@ -44,6 +55,14 @@ export function mount(ctx) {
     ctx.el.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", async () => { await setLang(b.dataset.lang); ctx.el.querySelectorAll("[data-lang]").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-checked", on); }); }));
     const $q = x => ctx.el.querySelector(x), redraw = id => { draw(); const e = $q("#" + id); if (e) e.focus(); };
     const bindRng = (id, fn) => { const r = $q("#" + id); if (!r) return; r.addEventListener("input", () => { const v = +r.value; r.style.setProperty("--p", (v - +r.min) / (+r.max - +r.min) * 100 + "%"); $q("#" + id + "V").textContent = v + r.dataset.unit; fn(v); }); };
+    const gr = $q("#gfx"), applyG = async i => {
+      const g = GFX[i]; if (g === getGfx()) return;
+      if (g === "high" && !(await confirmDialog({ title: "Chuyển sang đồ họa Cao?", message: "Mức Cao hiện hình nền website, âm thanh và nhiều hiệu ứng nâng cao. Trên máy yếu hoặc pin thấp, web có thể giật, nóng máy và tốn pin hơn. Bạn vẫn có thể quay lại mức thấp hơn bất cứ lúc nào.", ok: "Dùng mức Cao", cancel: "Giữ mức hiện tại" }))) { draw(); return; }
+      setGfx(g); draw(); const e = $q("#gfx"); if (e) e.focus();
+    };
+    const prevG = i => { const g = GFX[i]; gr.style.setProperty("--p", i * 50 + "%"); $q("#gfxName").textContent = GFX_INFO[g].n; $q("#gfxStep").textContent = (+i + 1) + " / 3"; $q("#gfxList").innerHTML = GFX_INFO[g].l.map(x => `<li>${x}</li>`).join(""); ctx.el.querySelectorAll(".gfx-ticks span").forEach(x => x.classList.toggle("on", +x.dataset.g === +i)); };
+    gr.addEventListener("input", () => prevG(+gr.value)); gr.addEventListener("change", () => applyG(+gr.value));
+    ctx.el.querySelectorAll(".gfx-ticks span").forEach(x => x.addEventListener("click", () => { gr.value = x.dataset.g; prevG(+x.dataset.g); applyG(+x.dataset.g); }));
     const gl = $q("#glass"); if (gl) gl.addEventListener("change", () => { setGlass(gl.checked); redraw("glass"); });
     bindRng("glBlur", setGlassBlur); bindRng("glClear", setGlassClear);
     $q("#glReset").addEventListener("click", () => { setGlassBlur(GLASS_DEF.blur); setGlassClear(GLASS_DEF.clear); draw(); });

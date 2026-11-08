@@ -160,4 +160,10 @@ t("nox_security: gate/known chỉ máy chủ ghi (client không tự bỏ cổng
 t("nox_security: DEV cũng KHÔNG ghi được từ client", W2("nox_security/u1/twofa", false, with2fa(DEV, AT)), false);
 t("nox_codes / nox_rate: không ai đọc/ghi từ client", eng.canRead(split("nox_codes/u1"), DEV, root2) || W2("nox_codes/u1", { hash: "x" }, with2fa(DEV, AT)) || eng.canRead(split("nox_rate"), DEV, root2), false);
 
+const IMGD = "data:image/jpeg;base64," + "A".repeat(2000);
+t("ảnh mục: DEV lưu ảnh chọn từ máy (data:image/jpeg) được", U("nox_data/scripts/s1", { img: IMGD, updatedAt: 2 }, DEV), true);
+t("ảnh mục: ảnh quá nặng (>36.000 ký tự) bị chặn", U("nox_data/scripts/s1", { img: "data:image/png;base64," + "A".repeat(37000), updatedAt: 2 }, DEV), false);
+t("ảnh mục: data: không phải ảnh (html/svg/js) bị chặn", U("nox_data/scripts/s1", { img: "data:text/html;base64,PHNjcmlwdD4=", updatedAt: 2 }, DEV) || U("nox_data/scripts/s1", { img: "data:image/svg+xml;base64,PHN2Zz4=", updatedAt: 2 }, DEV) || U("nox_data/scripts/s1", { img: "javascript:alert(1)", updatedAt: 2 }, DEV), false);
+t("ảnh mục: dữ liệu cũ dạng link vẫn còn hợp lệ (không làm hỏng bản ghi cũ)", U("nox_data/scripts/s1", { img: "https://a.b/x.jpg", updatedAt: 2 }, DEV), true);
+
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

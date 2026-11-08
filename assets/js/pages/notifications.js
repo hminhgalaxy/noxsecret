@@ -4,7 +4,7 @@ import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
 import { session, onAuth } from "../lib/auth.js";
 import { feed, seenTs, markSeen } from "../lib/updates.js";
-import { updHTML } from "../lib/news.js";
+import { updHTML, clampUpdates } from "../lib/news.js";
 import { renderNotifDot } from "../lib/nav.js";
 
 export function mount(ctx) {
@@ -19,6 +19,7 @@ export function mount(ctx) {
       <div class="sec-head"><h2>Cập nhật này có gì?</h2></div>
       <div class="news wide">${list.length ? list.map((e, i) => updHTML(e, i, { fresh: e.ts > before })).join("") : `<div class="statebox">${ICO.bell}<p>Hiện chưa có thông báo nào.</p></div>`}</div>
       ${session.isDev ? `<div class="acts"><a class="btn ghost" href="/dev/updates">${ICO.plus}Đăng cập nhật mới</a><a class="btn ghost" href="/dev/system#notice">${ICO.pencil}Chỉnh sửa thông báo</a></div>` : ""}`;
+    clampUpdates(ctx.el);
   };
   draw(); const u1 = S.subscribe(t => { if (t === "notice" || t === "updates") { markSeen(); renderNotifDot(); draw(); } }), u2 = onAuth(draw); return () => { u1(); u2(); };
 }

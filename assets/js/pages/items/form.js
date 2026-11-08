@@ -5,6 +5,7 @@ import * as S from "../../lib/store.js";
 import { session } from "../../lib/auth.js";
 import { skeletonHTML, lockedHTML, fieldErrors } from "../../lib/ui.js";
 import { friendly } from "../../lib/messages.js";
+import { fileToItemImage } from "../../lib/avatar.js";
 import { resolveCat, notFound, crumbsFor, settled, missingHTML, fieldsFor } from "./shared.js";
 
 export async function mount(ctx) {
@@ -19,7 +20,12 @@ export async function mount(ctx) {
     if (edit) ctx.setPage({ title: "Chỉnh sửa: " + it.name, crumbs, noindex: true });
     const val = k => it ? (k === "name" && it.name === "(không tên)" ? "" : (it[k] ?? "")) : "";
     ctx.el.innerHTML = `<form class="formcard" id="itemForm" novalidate>
-      ${fields.map(f => f.check
+      ${fields.map(f => f.image
+        ? `<div class="field imgf"><label for="imgPick">${esc(f.label)}</label><input type="hidden" name="${f.k}" value="${esc(val(f.k))}">
+          <div class="imgf-prev" id="imgPrev" ${val(f.k) ? "" : "hidden"}>${val(f.k) ? `<img src="${esc(val(f.k))}" alt="">` : ""}</div>
+          <div class="acts"><label class="btn ghost upbtn">${ICO.eye}Chọn ảnh từ máy<input type="file" id="imgPick" accept="image/jpeg,image/png,image/webp" hidden></label><button class="btn ghost" type="button" id="imgDel" ${val(f.k) ? "" : "hidden"}>${ICO.trash}Xóa ảnh</button></div>
+          <p class="field-error" data-err="${f.k}" role="alert"></p></div>`
+        : f.check
         ? `<div class="switch-row"><span>${esc(f.label)}</span><label class="sw"><input type="checkbox" name="${f.k}" aria-label="${esc(f.label)}" ${it && it[f.k] ? "checked" : ""}><i></i></label></div>`
         : `<div class="field"><label for="f_${f.k}">${esc(f.label)}${f.req ? ' <b class="req" aria-hidden="true">*</b>' : ""}</label>
           ${f.area ? `<textarea id="f_${f.k}" name="${f.k}" rows="${f.rows || 4}" spellcheck="false" class="${f.mono ? "mono" : ""}">${esc(val(f.k))}</textarea>`
@@ -28,6 +34,16 @@ export async function mount(ctx) {
       <p class="form-error" id="formErr" role="alert" aria-live="polite"></p>
       <div class="form-acts"><button class="btn primary" type="submit" id="saveBtn">${edit ? "Lưu chỉnh sửa" : "Lưu"}</button><a class="btn ghost" href="${base}${edit ? "/" + encodeURIComponent(key) : ""}">Hủy</a></div></form>`;
     const fm = ctx.el.querySelector("#itemForm"), btn = fm.querySelector("#saveBtn"), err = fm.querySelector("#formErr");
+    const hid = fm.elements.img;
+    if (hid) {
+      const prev = fm.querySelector("#imgPrev"), del = fm.querySelector("#imgDel"), pick = fm.querySelector("#imgPick"), ie = fm.querySelector('[data-err="img"]');
+      const show = d => { hid.value = d || ""; prev.hidden = del.hidden = !d; prev.innerHTML = d ? `<img src="${d}" alt="">` : ""; };
+      pick.addEventListener("change", async () => {
+        const f = pick.files && pick.files[0]; pick.value = ""; if (!f) return; ie.textContent = "";
+        try { show(await fileToItemImage(f)); } catch (ex) { ie.textContent = (ex && ex.message) || "Không đọc được ảnh này."; }
+      });
+      del.addEventListener("click", () => { ie.textContent = ""; show(""); });
+    }
     fm.addEventListener("submit", async e => {
       e.preventDefault(); err.textContent = "";
       const v = {}; fields.forEach(f => { const el = fm.elements[f.k]; v[f.k] = f.check ? el.checked : (f.k === "code" ? el.value : el.value.trim()); });

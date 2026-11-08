@@ -104,7 +104,7 @@ export async function render({ pop = false } = {}) {
   clearTimeout(spin);
   if (id !== navId) return;
   setBusy(false);
-  if (!loadErr && prev && !RM) { view.classList.add("leaving"); await sleep(110); if (id !== navId) return; }
+  if (!loadErr && prev && !RM()) { view.classList.add("leaving"); await sleep(110); if (id !== navId) return; }
   if (loadErr) {
     const e = loadErr;
     console.error(e); runCleanups(); view.classList.remove("leaving"); barEnd();
