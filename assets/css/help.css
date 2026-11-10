@@ -1,0 +1,65 @@
+/* Trợ giúp: hội thoại, hộp thư dev, bài chờ duyệt, điều kiện đăng bài, cảnh báo rủi ro */
+.quick{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent,#3b82f6);vertical-align:middle}
+.thread{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;text-decoration:none}
+.thread.unread .nm b{font-weight:800}
+.thread.on{outline:2px solid var(--text);outline-offset:-2px}
+.badge.review{display:inline-flex;align-items:center;gap:5px}
+.badge.review svg{width:13px;height:13px}
+.check{display:flex;gap:10px;align-items:flex-start;line-height:1.5;margin:6px 0 10px}
+.check input{margin-top:4px;width:18px;height:18px;flex:none}
+.reported{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:14px}
+.reported small{display:block;color:var(--text-2)}
+/* Hội thoại */
+.chat{display:grid;grid-template-rows:auto minmax(260px,1fr) auto;gap:12px;height:min(72vh,680px);min-height:420px}
+.chat-head{display:grid;gap:8px}
+.chat-title{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.chat-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chat-tools small{flex:1 1 100%;color:var(--text-2)}
+.chat-log{overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--text) 3%,transparent)}
+.msg{display:flex;flex-direction:column;max-width:82%;gap:3px}
+.msg.me{align-self:flex-end;align-items:flex-end}.msg.them{align-self:flex-start}
+.bub{padding:10px 14px;border-radius:16px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--line);background:var(--surface,transparent)}
+.msg.me .bub{background:var(--text);color:var(--bg);border-color:transparent}
+.msg time{font-size:12px;color:var(--text-2)}
+.chat-form{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.chat-form[hidden]{display:none}
+.chat-form textarea{resize:none;min-height:46px;max-height:140px}
+.chat-form .btn{min-height:46px}
+.chat-form.busy{opacity:.7;pointer-events:none}
+@media (max-width:640px){.chat{height:calc(100dvh - 250px);min-height:360px}.msg{max-width:92%}.chat-form .btn span{display:none}}
+/* Hộp thư dev */
+.inbox{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:16px;align-items:start}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chips button{min-height:36px;padding:6px 12px;border:1px solid var(--line-strong);border-radius:999px;background:none;color:var(--text);cursor:pointer;font-weight:600;font-size:13px}
+.chips button.on{background:var(--text);color:var(--bg)}
+.only-m{display:none}
+@media (max-width:860px){.inbox{grid-template-columns:1fr}.inbox.has-sel .ib-list{display:none}.inbox:not(.has-sel) .ib-view{display:none}.only-m{display:inline-flex}}
+/* Duyệt bài */
+.rv{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface,transparent)}
+.rv.rej{opacity:.75}
+.rv header{display:flex;gap:12px;align-items:center}
+.rv header .nm{flex:1;min-width:0}
+.rv-url{display:flex;gap:8px;align-items:center;font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere}
+.rv-url svg{width:16px;height:16px;flex:none}
+/* Điều kiện đăng bài */
+.conds{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:8px}
+.conds li{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.conds .tx{flex:1}.conds .mk{width:22px;height:22px;display:grid;place-items:center}.conds .mk svg{width:18px;height:18px}
+.conds .good{border-color:color-mix(in srgb,#22c55e 55%,var(--line))}.conds .bad{border-color:color-mix(in srgb,#ef4444 55%,var(--line))}
+.seg{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;margin:6px 0 12px}
+.seg button{min-height:38px;padding:6px 16px;border:0;border-radius:999px;background:none;color:var(--text);font-weight:600;cursor:pointer}
+.seg button.on{background:var(--text);color:var(--bg)}
+/* Cảnh báo rủi ro (đếm ngược 20 giây) */
+.rk-root{position:fixed;inset:0;z-index:9500;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.62);backdrop-filter:blur(6px)}
+.rk{max-width:520px;width:100%;max-height:92dvh;overflow:auto;padding:22px;border-radius:22px;border:1px solid var(--line-strong);background:var(--bg);display:grid;gap:14px}
+.rk h4{margin:0;font-size:20px}.rk p{margin:0;line-height:1.6;color:var(--text-2)}
+.rk ul{margin:0;padding-left:20px;display:grid;gap:6px;line-height:1.55}
+.rk .bar{height:6px;border-radius:99px;background:color-mix(in srgb,var(--text) 14%,transparent);overflow:hidden}
+.rk .bar i{display:block;height:100%;width:100%;background:var(--text);transform-origin:left;transition:transform 1s linear}
+.rk .acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.rk .acts .btn{min-height:46px}
+.rk .acts .btn[disabled]{opacity:.55;cursor:not-allowed}
+.rk-risk{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.tile-risk{display:inline-flex;align-items:center;gap:5px;position:absolute;left:14px;top:12px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;border:1px solid color-mix(in srgb,#f59e0b 60%,var(--line));color:var(--text)}
+.tile-risk svg{width:13px;height:13px}

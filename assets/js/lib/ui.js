@@ -2,7 +2,7 @@ import { confirmDialog } from "./confirm.js";
 /* Mảnh giao diện dùng chung giữa các trang: thẻ, ô danh mục, dòng, ảnh đại diện, trạng thái... */
 import { ICO, SW } from "./icons.js";
 import { esc, fmtTime, validUrl } from "./util.js";
-import { catById, catHref, itemHref, store } from "./store.js";
+import { catById, catHref, itemHref, store, riskOf, RISKS } from "./store.js";
 import { session } from "./auth.js";
 
 export const icoOf = c => ICO[c.icon] || ICO[c.id] || ICO.box;
@@ -36,7 +36,7 @@ export function cardHTML(it, catId, i, showChip) {
     ${it.code ? `<pre class="card-code">${esc(String(it.code).slice(0, 160))}</pre>` : ""}
     <div class="card-actions">${acts.join("")}</div></article>`;
 }
-export const tileHTML = (c, i = 0, href = catHref(c), n = countOf(c.id)) => `<a class="tile" href="${href}" style="--d:${i * 50}ms"><span class="tile-count" data-tilenum="${esc(c.id)}">${n}</span><span class="tile-ico">${icoOf(c)}</span><b>${esc(c.label)}</b><small>${esc(c.sub || "")}</small><span class="tile-go">${ICO.arrow}</span></a>`;
+export const tileHTML = (c, i = 0, href = catHref(c), n = countOf(c.id)) => `<a class="tile" href="${href}" style="--d:${i * 50}ms"><span class="tile-count" data-tilenum="${esc(c.id)}">${n}</span>${riskOf(c) ? `<span class="tile-risk" title="${esc(RISKS[c.risk])}">${ICO.warn}${esc(RISKS[c.risk])}</span>` : ""}<span class="tile-ico">${icoOf(c)}</span><b>${esc(c.label)}</b><small>${esc(c.sub || "")}</small><span class="tile-go">${ICO.arrow}</span></a>`;
 export const rowHTML = (it, i = 0) => { const c = catById(it.cat);
   return `<a class="row" href="${itemHref(it.cat, it.key)}" style="--d:${i * 55}ms"><span class="row-ico">${icoOf(c)}</span><span class="row-main"><b>${esc(it.name)}</b><small>${esc(fmtTime(it.ts))}</small></span><span class="badge">${esc(c.label)}</span></a>`; };
 

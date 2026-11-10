@@ -2,7 +2,9 @@
 import { esc } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import { store, subscribe, catHref } from "../lib/store.js";
-import { icoOf, countUp, countOf, fresh } from "../lib/ui.js";
+import { icoOf, countUp, countOf, fresh, cardHTML } from "../lib/ui.js";
+import { recent, onFavs } from "../lib/favs.js";
+import { items } from "../lib/store.js";
 import { feed } from "../lib/updates.js";
 import { updHTML, clampUpdates } from "../lib/news.js";
 
@@ -25,9 +27,9 @@ const FAQ = [
 ];
 
 export function mount(ctx) {
-  ctx.setPage({ hero: true, title: null, desc: "Website tiện ích chia sẻ gói APK bảo mật cao: nội dung kiểm duyệt trước khi đăng, cảnh báo rõ phần mềm bên thứ ba. Không cổ xúy hack." });
+  ctx.setPage({ hero: true, title: null, desc: "skibidiscript — website tiện ích chia sẻ gói APK bảo mật cao: nội dung kiểm duyệt trước khi đăng, cảnh báo rõ phần mềm bên thứ ba. Không cổ xúy hack." });
   ctx.el.innerHTML = `<section class="hero" aria-labelledby="h1">
-      <span class="eyebrow"><i></i>Luôn được cập nhật</span>
+      <span class="eyebrow"><i></i>skibidiscript · Luôn được cập nhật</span>
       <h1 id="h1">APK tiện ích, bảo mật cao. <span>Kiểm duyệt trước khi đăng.</span></h1>
       <p>Mọi thứ bạn cần được sắp xếp theo từng danh mục rõ ràng. Tìm nhanh, mở ngay, không rườm rà.</p>
       <form class="hero-search" id="heroSearch" role="search" action="/search">${ICO.search}
@@ -50,6 +52,7 @@ export function mount(ctx) {
         <div class="news" id="news"></div>
       </section>
     </div>
+    <section aria-labelledby="hr" id="hrec" hidden><div class="sec-head"><h2 id="hr">Xem gần đây</h2><a href="/favorites">Yêu thích</a></div><div class="grid" id="hrGrid"></div></section>
     <section aria-labelledby="hw"><div class="sec-head"><h2 id="hw">Vì sao chọn SKIBIDI SCRIPT WEB?</h2></div>
       <div class="feats">${FEATS.map(([ic, t, d]) => `<div class="feat"><span class="feat-ico">${ICO[ic] || ICO.box}</span><h3>${esc(t)}</h3><p>${esc(d)}</p></div>`).join("")}</div></section>
     <section aria-labelledby="hs"><div class="sec-head"><h2 id="hs">Bắt đầu thế nào?</h2></div>
@@ -94,5 +97,10 @@ export function mount(ctx) {
 
   drawCats(); drawNews();
   const u1 = subscribe(t => { if (t === "data" || t === "cats") drawCats(); else if (t === "updates" || t === "notice") drawNews(); });
-  return () => { u1(); removeEventListener("resize", onResize); cancelAnimationFrame(raf); };
+  const drawRecent = () => {
+    const l = recent().map(x => { const it = (items(x.c) || []).find(i => i.key === x.k); return it ? { ...it, cat: x.c } : null; }).filter(Boolean).slice(0, 3);
+    const sec = $("#hrec"); sec.hidden = !l.length; $("#hrGrid").innerHTML = l.map((it, i) => cardHTML(it, it.cat, i, true)).join("");
+  };
+  drawRecent(); const u3 = subscribe(t => { if (t === "data" || t === "cats") drawRecent(); }), u4 = onFavs(drawRecent);
+  return () => { u1(); u3(); u4(); removeEventListener("resize", onResize); cancelAnimationFrame(raf); };
 }

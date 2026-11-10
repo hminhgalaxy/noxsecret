@@ -72,3 +72,15 @@
 .cell-user .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .mail-frame{width:100%;height:560px;border:1px solid var(--line);border-radius:var(--r-lg);background:#f2f2f3;display:block}
 @media(max-width:560px){.mail-frame{height:480px}}
+
+.tracks{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px}
+.tracks:empty{display:none}
+.tracks li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-md);background:var(--field);border:1px solid var(--line)}
+.tracks .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:color-mix(in srgb,var(--text) 10%,transparent)}
+.tracks .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.badge[class*="tag-"]{font-weight:700}
+.badge.tag-new{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--text)}
+.badge.tag-fix{background:color-mix(in srgb,var(--warn,#d9a400) 22%,transparent);color:var(--text)}
+.badge.tag-security{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--text)}
+.badge.tag-improve{background:color-mix(in srgb,var(--text) 12%,transparent);color:var(--text)}

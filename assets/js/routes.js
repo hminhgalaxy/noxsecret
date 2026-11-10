@@ -25,7 +25,15 @@ export function registerRoutes() {
   define("/search", { load: L("search"), guard: "public", title: "Tìm kiếm", noindex: true, needs: ALL });
   define("/categories", { load: L("categories"), guard: "public", title: "Danh mục", desc: "Tất cả danh mục nội dung đã được kiểm duyệt trên SKIBIDI SCRIPT WEB.", needs: ALL });
   define("/notifications", { load: L("notifications"), guard: "public", title: "Thông báo", desc: "Thông báo mới nhất từ SKIBIDI SCRIPT WEB.", needs: ["notice", "updates"] });
+  [["skibidiscript", "/skibidiscript"], ["about", "/about"], ["guide", "/guide"], ["apk-safety", "/apk-safety"], ["security", "/security"], ["terms", "/terms"], ["privacy", "/privacy"]].forEach(([k, p]) => define(p, { load: L("info"), guard: "public", info: k, needs: [] }));
+  define("/favorites", { load: L("favorites"), guard: "public", title: "Yêu thích", noindex: true, needs: ALL });
   define("/help", { load: L("help"), guard: "public", title: "Câu hỏi thường gặp", desc: "Câu hỏi thường gặp về tài khoản, bảo mật, nội dung và cài đặt của SKIBIDI SCRIPT WEB.", needs: [] });
+  define("/help/support", { load: L("help/support"), guard: "real", title: "Hỗ trợ", needs: [] });
+  define("/help/report", { load: L("help/report"), guard: "real", title: "Báo cáo", needs: ["cats", "data:*"] });
+  define("/help/chat", { load: L("help/messages"), guard: "real", title: "Nhắn tin với dev", chat: true, needs: [] });
+  define("/help/messages", { load: L("help/messages"), guard: "real", title: "Tin nhắn của tôi", needs: [] });
+  define("/help/messages/:tid", { load: L("help/messages"), guard: "real", title: "Cuộc trò chuyện", needs: [] });
+  define("/help/submit", { load: L("help/submit"), guard: "real", title: "Đăng nội dung", needs: ["cats"] });
   define("/settings", { load: L("settings"), guard: "public", title: "Cài đặt", noindex: true, needs: ["theme"] });
   define("/404", notFoundDef);
 
@@ -44,6 +52,8 @@ export function registerRoutes() {
   BASE_PATHS.forEach(([seg, catId]) => define("/dev/data/" + seg, { load: L("dev/records"), guard: "dev", catId, needs: catNeeds({ catId }) }));
   define("/dev/data/c/:node", { load: L("dev/records"), guard: "dev", custom: true, needs: catNeeds({ custom: true }) });
   define("/dev/categories", { load: L("dev/categories"), guard: "dev", title: "Danh mục", needs: ["cats"] });
+  define("/dev/inbox", { load: L("dev/inbox"), guard: "dev", title: "Hộp thư", needs: ["users"] });
+  define("/dev/review", { load: L("dev/review"), guard: "dev", title: "Duyệt bài", needs: ["cats", "users"] });
   define("/dev/users", { load: L("dev/users"), guard: "dev", title: "Người dùng", needs: ["users"] });
   define("/dev/mail", { load: L("dev/mail"), guard: "dev", title: "Gửi thư", needs: ["users"] });
   define("/dev/theme", { load: L("dev/theme"), guard: "dev", title: "Giao diện", needs: ["theme"] });

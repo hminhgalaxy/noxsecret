@@ -7,7 +7,7 @@ const get = () => { try { return Number(localStorage.getItem(K)) || 0; } catch (
 const put = v => { try { localStorage.setItem(K, String(v)); } catch (_) {} };
 
 export function feed() {
-  return store.updates.map(u => ({ key: u.key, title: u.title, body: u.body, ts: u.ts, src: "dev" }))
+  return store.updates.map(u => ({ key: u.key, title: u.title, body: u.body, ts: u.ts, tag: u.tag, src: "dev" }))
     .concat(RELEASES.map(r => ({ key: r.id, title: r.title, items: r.items, ts: r.ts, src: "release" })))
     .sort((a, b) => b.ts - a.ts);
 }

@@ -36,6 +36,7 @@ export function decide(guard, s, here) {
   if (guard === "twofa") return !real ? { to: "/login", replace: true } : (!s.twofaPending ? { to: "__next__", replace: true } : null);
   if (guard === "guest") return real ? { to: "__next__", replace: true } : null;
   if (!s.user) return { to: "/login?next=" + encodeURIComponent(here), replace: true };
+  if (guard === "real" && s.isGuest) return { to: "/login?next=" + encodeURIComponent(here), replace: true, toast: "Hãy đăng nhập bằng tài khoản thật để dùng mục này." };
   if (guard === "staff" && !(s.isDev || s.isEditor)) return { to: "/", replace: true, toast: "Bạn không có quyền thực hiện thao tác này." };
   if (guard === "dev" && !s.isDev) return { to: "/", replace: true, toast: s.devBlocked || "Bạn không có quyền truy cập khu vực DEV." };
   return null;

@@ -1,0 +1,23 @@
+/* Nền động của website: lưới, quầng sáng (theo mức đồ họa). */
+/* ── Nền ô vuông (Tối ưu + Trung bình, và Cao khi website chưa có nền) ── */
+#bg{overflow:hidden;--gs:56px;--gl:color-mix(in srgb,var(--text) 8%,transparent)}
+:root:is([data-gfx="low"],[data-gfx="mid"]) #bg::after{display:none}
+:root:is([data-gfx="low"],[data-gfx="mid"]) #bg::before,:root[data-gfx="high"] body:not(.has-bg) #bg::before{content:"";position:absolute;inset:calc(var(--gs) * -1);
+  background-image:linear-gradient(var(--gl) 1px,transparent 1px),linear-gradient(90deg,var(--gl) 1px,transparent 1px);background-size:var(--gs) var(--gs);
+  -webkit-mask-image:radial-gradient(ellipse 85% 75% at 50% 28%,#000 25%,transparent 100%);mask-image:radial-gradient(ellipse 85% 75% at 50% 28%,#000 25%,transparent 100%)}
+/* Tối ưu: đứng yên */
+:root[data-gfx="low"] #bg::before{animation:none}
+/* Trung bình: trôi nhẹ + vệt sáng quét chậm */
+:root[data-gfx="mid"] #bg::before{animation:gridDrift 18s linear infinite;will-change:transform}
+:root[data-gfx="mid"] #bg::after{content:"";display:block;position:absolute;inset:0;background:linear-gradient(115deg,transparent 42%,color-mix(in srgb,var(--text) 5%,transparent) 50%,transparent 58%) 0 0/260% 100%;
+  -webkit-mask-image:none;mask-image:none;animation:gridSweep 11s ease-in-out infinite;opacity:.9}
+/* Cao: lưới + hai quầng sáng trôi chậm (khi chưa có nền website) */
+:root[data-gfx="high"] body:not(.has-bg) #bg::before{animation:gridDrift 26s linear infinite;will-change:transform}
+:root[data-gfx="high"] #bg::after{background-image:radial-gradient(520px 340px at var(--ax,20%) var(--ay,15%),color-mix(in srgb,var(--text) 9%,transparent),transparent 70%),radial-gradient(460px 320px at calc(100% - var(--ax,20%)) calc(100% - var(--ay,15%)),color-mix(in srgb,var(--text) 6%,transparent),transparent 70%);
+  background-size:auto;-webkit-mask-image:none;mask-image:none;animation:aurora 22s ease-in-out infinite alternate}
+@keyframes gridDrift{to{transform:translate(var(--gs),var(--gs))}}
+@keyframes gridSweep{0%{background-position:130% 0}100%{background-position:-30% 0}}
+@property --ax{syntax:"<percentage>";inherits:true;initial-value:20%}
+@property --ay{syntax:"<percentage>";inherits:true;initial-value:15%}
+@keyframes aurora{to{--ax:68%;--ay:55%}}
+

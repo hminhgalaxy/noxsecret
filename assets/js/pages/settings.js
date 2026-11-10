@@ -1,4 +1,5 @@
 /* Cài đặt: giao diện, kính mờ, ngôn ngữ, nhạc nền và tài khoản. */
+import { ACCENTS, getAccent, setAccent } from "../lib/accent.js";
 import { esc, toast } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
@@ -6,7 +7,7 @@ import { session, onAuth, resendVerification } from "../lib/auth.js";
 import { getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
 import { confirmDialog } from "../lib/confirm.js";
 import { getLang, setLang } from "../lib/i18n.js";
-import { hasMusic, toggleSound } from "../lib/media.js";
+import { hasMusic, toggleSound, playlist, currentTrack, nextTrack } from "../lib/media.js";
 import { friendly } from "../lib/messages.js";
 
 const GFX_INFO = {
@@ -40,8 +41,11 @@ export function mount(ctx) {
         <div class="set-fields" id="bgFields" aria-disabled="${isBgHidden()}">${rng("bgBright", "Độ sáng hình nền", 30, 150, getBgBright(), "%", isBgHidden() || !onHigh)}</div></section>
       <section class="set-card"><h3>${ICO.link}Ngôn ngữ</h3><p class="muted">Chọn ngôn ngữ hiển thị của website.</p>
         <div class="seg" role="radiogroup" aria-label="Ngôn ngữ" translate="no">${[["en", "English"], ["vi", "Tiếng Việt"]].map(([v, l]) => `<button type="button" role="radio" aria-checked="${getLang() === v}" data-lang="${v}" class="${getLang() === v ? "on" : ""}">${l}</button>`).join("")}</div></section>
+      <section class="set-card"><h3>${ICO.sparkles || ICO.star}Màu nhấn</h3><p class="muted">Đổi màu nút chính, viền chọn và công tắc.</p>
+        <div class="swatches" role="radiogroup" aria-label="Màu nhấn">${ACCENTS.map(a => `<button type="button" role="radio" class="swatch${a.id === getAccent() ? " on" : ""}" aria-checked="${a.id === getAccent()}" aria-label="${a.label}" title="${a.label}" data-accent="${a.id}"><i style="${a.hex ? "background:" + a.hex : ""}" class="${a.hex ? "" : "def"}"></i></button>`).join("")}</div></section>
       <section class="set-card"><h3>${ICO.music}Âm thanh</h3><p class="muted">${hasMusic() ? "Website có nhạc nền. Bạn có thể bật hoặc tắt tại đây." : "Hiện website chưa có nhạc nền."}</p>
         ${sw("snd", "Phát nhạc nền", !isMuted())}
+        ${hasMusic() ? `<div class="nowp"><span id="nowp" translate="no">${esc((currentTrack() || playlist()[0]).name)}</span>${playlist().length > 1 ? `<button type="button" class="btn ghost sm" id="nextBtn">Bài tiếp theo</button>` : ""}</div>` : ""}
         <div class="set-fields" aria-disabled="${isMuted()}">${rng("vol", "Âm lượng", 0, 100, getVolume(), "%", isMuted())}</div></section>
       <section class="set-card"><h3>${ICO.eye}Thoải mái khi dùng</h3><p class="muted">Giúp web dễ đọc và dễ chịu hơn.</p>
         ${sw("rm", "Giảm chuyển động", isReduceMotion())}${sw("hc", "Tương phản cao", isHighContrast())}${sw("dens", "Bố cục gọn", isCompact())}${sw("intro", "Hiện màn hình mở đầu", !isIntroOff())}</section>
@@ -68,9 +72,13 @@ export function mount(ctx) {
     $q("#glReset").addEventListener("click", () => { setGlassBlur(GLASS_DEF.blur); setGlassClear(GLASS_DEF.clear); draw(); });
     $q("#bgShow").addEventListener("change", e => { setBgHidden(!e.target.checked); redraw("bgShow"); }); bindRng("bgBright", setBgBright); bindRng("vol", setVolume);
     [["rm", "motion", true], ["hc", "contrast", true], ["dens", "compact", true], ["intro", "intro", true]].forEach(([id, name]) => $q("#" + id).addEventListener("change", e => setFlag(name, e.target.checked)));
-    $q("#resetAll").addEventListener("click", async () => { if (await confirmDialog({ title: "Đặt lại cài đặt hiển thị?", message: "Giao diện, kính mờ, hình nền, âm thanh và trợ năng sẽ về mặc định. Ngôn ngữ giữ nguyên.", ok: "Đặt lại", danger: true })) { resetPrefs(); draw(); toast("Đã đặt lại cài đặt."); } });
+    $q("#resetAll").addEventListener("click", async () => { if (await confirmDialog({ title: "Đặt lại cài đặt hiển thị?", message: "Giao diện, kính mờ, hình nền, âm thanh và trợ năng sẽ về mặc định. Ngôn ngữ giữ nguyên.", ok: "Đặt lại", danger: true })) { resetPrefs(); setAccent(""); draw(); toast("Đã đặt lại cài đặt."); } });
+    ctx.el.querySelectorAll("[data-accent]").forEach(b => b.addEventListener("click", () => { setAccent(b.dataset.accent); draw(); const e = ctx.el.querySelector(`[data-accent="${b.dataset.accent}"]`); if (e) e.focus(); }));
+    const nb = $q("#nextBtn"); if (nb) nb.addEventListener("click", () => nextTrack());
     const s = $q("#snd"); if (s) s.addEventListener("change", () => { toggleSound(); redraw("snd"); });
     const v = ctx.el.querySelector("#verify"); if (v) v.addEventListener("click", () => resendVerification().then(() => toast("Đã gửi email xác minh. Hãy kiểm tra hộp thư.")).catch(e => toast(friendly(e), "err")));
   };
-  draw(); const u1 = onAuth(draw), u2 = S.subscribe(t => { if (t === "theme") draw(); }); return () => { u1(); u2(); };
+  draw(); const u1 = onAuth(draw), u2 = S.subscribe(t => { if (t === "theme" || t === "tracks") draw(); });
+  const onTrack = () => { const n = ctx.el.querySelector("#nowp"), c = currentTrack(); if (n && c) n.textContent = c.name; };
+  document.addEventListener("track-change", onTrack); return () => { u1(); u2(); document.removeEventListener("track-change", onTrack); };
 }

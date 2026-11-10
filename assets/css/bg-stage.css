@@ -1,0 +1,12 @@
+/* Hình nền website nổi bật hơn: lớp phủ nhẹ hơn, tối dần về mép (vignette) để nội dung vẫn dễ đọc, màu sống động hơn, trôi chậm. */
+#themeLayer img,#themeLayer video{filter:brightness(var(--bg-bright,1)) saturate(1.14) contrast(1.05)}
+#themeLayer::after{background:linear-gradient(var(--bg),var(--bg));opacity:calc(.46 - (var(--bg-bright,1) - 1) * .5)}
+#themeLayer::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 120% 95% at 50% 38%,transparent 38%,color-mix(in srgb,var(--bg) 62%,transparent) 100%)}
+#themeLayer::after{z-index:1}
+/* Ánh sáng viền khi có nền: thẻ nổi lên rõ hơn trên ảnh */
+body.has-bg :is(.card,.tile,.row,.set-card,.panel,.upd,.formcard,.auth-card){box-shadow:0 10px 30px -18px rgba(0,0,0,.55)}
+/* Mức Cao: ảnh nền trôi chậm như đang quay phim (không áp dụng cho video) */
+:root[data-gfx="high"] #themeLayer.on img{animation:bgKen 46s ease-in-out infinite alternate;will-change:transform}
+@keyframes bgKen{from{transform:translate3d(var(--px),var(--py),0) scale(1.06)}to{transform:translate3d(calc(var(--px) + 1.2%),calc(var(--py) - .8%),0) scale(1.14)}}
+:root[data-motion="reduced"] #themeLayer img{animation:none !important}

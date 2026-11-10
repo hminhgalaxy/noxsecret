@@ -1,0 +1,31 @@
+/* Mức Cao (high): ánh sáng theo con trỏ, nút, tiêu đề, chuyển trang. */
+/* ═══ CAO: sang trọng, nhiều hiệu ứng ═══ */
+/* Ánh sáng đi theo con trỏ trên thẻ và khung (JS đặt --mx/--my) */
+:root[data-gfx="high"] :is(.card,.tile,.set-card,.panel,.upd,.row,.auth-card){--mx:50%;--my:0%;isolation:isolate}
+:root[data-gfx="high"] :is(.card,.tile,.set-card,.panel,.upd,.row,.auth-card)::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s var(--ez);
+  background:radial-gradient(360px circle at var(--mx) var(--my),color-mix(in srgb,var(--text) 11%,transparent),transparent 62%)}
+:root[data-gfx="high"] :is(.card,.tile,.set-card,.panel,.upd,.row,.auth-card):hover::before{opacity:1}
+:root[data-gfx="high"] :is(.card,.tile):hover{transform:translateY(-6px) scale(1.012);box-shadow:0 22px 44px -26px color-mix(in srgb,var(--text) 40%,transparent),0 0 0 1px var(--line-strong)}
+/* Nút chính: chuyển màu + vệt sáng quét qua khi rê chuột */
+:root[data-gfx="high"] .btn{transition:transform .35s var(--spring),box-shadow .35s var(--ez),background .3s var(--ez),border-color .3s var(--ez);overflow:hidden}
+:root[data-gfx="high"] .btn.primary{background:linear-gradient(135deg,var(--strong),color-mix(in srgb,var(--strong) 78%,var(--text-3)));box-shadow:inset 0 1px 0 color-mix(in srgb,var(--on-strong) 30%,transparent),0 10px 28px -14px var(--strong)}
+:root[data-gfx="high"] .btn.primary::before{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,color-mix(in srgb,var(--on-strong) 35%,transparent) 50%,transparent 65%);transform:translateX(-120%);transition:transform .7s var(--ez)}
+:root[data-gfx="high"] .btn.primary:hover::before{transform:translateX(120%)}
+:root[data-gfx="high"] .btn.primary:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--on-strong) 36%,transparent),0 16px 34px -14px var(--strong)}
+:root[data-gfx="high"] .btn.ghost:hover{border-color:var(--text);box-shadow:0 0 0 3px color-mix(in srgb,var(--text) 9%,transparent)}
+:root[data-gfx="high"] .btn:active{transform:scale(.96)}
+/* Biểu tượng danh mục nổi lên, tiêu đề trang có dải sáng */
+:root[data-gfx="high"] .tile-ico{transition:transform .45s var(--spring),background .3s var(--ez)}
+:root[data-gfx="high"] .tile:hover .tile-ico{transform:translateY(-3px) rotate(-6deg) scale(1.08);background:var(--strong);color:var(--on-strong)}
+:root[data-gfx="high"] .page-head h1,:root[data-gfx="high"] .page .ptitle{background:linear-gradient(100deg,var(--text) 30%,var(--text-3) 50%,var(--text) 70%) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:titleSheen 7s ease-in-out infinite}
+@keyframes titleSheen{0%,100%{background-position:100% 0}50%{background-position:0 0}}
+/* Xuất hiện lần lượt, mượt hơn */
+:root[data-gfx="high"] .fresh :is(.card,.tile,.row){animation-duration:.85s;animation-timing-function:cubic-bezier(.2,.9,.2,1)}
+:root[data-gfx="high"] .page{animation:pageInHi .7s cubic-bezier(.2,.9,.2,1) both}
+@keyframes pageInHi{from{opacity:0;transform:translateY(22px) scale(.985);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+:root[data-gfx="high"] .ptab-btn.on,:root[data-gfx="high"] .seg button.on{box-shadow:0 8px 22px -10px var(--strong)}
+:root[data-gfx="high"] .cf{animation:cfInHi .5s var(--spring) both}
+@keyframes cfInHi{from{opacity:0;transform:translateY(24px) scale(.93)}to{opacity:1;transform:none}}
+:root[data-gfx="high"] .badge{transition:transform .3s var(--spring)}
+:root[data-gfx="high"] .badge:hover{transform:scale(1.06)}
+

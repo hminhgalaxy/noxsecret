@@ -1,0 +1,13 @@
+/* Giao diện thanh chọn mức đồ họa trong Cài đặt. */
+/* ── Thanh chọn mức đồ họa (Cài đặt) ── */
+.gfx-card .gfx-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.gfx-card .gfx-name{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.gfx-scale{position:relative;padding:6px 6px 0}
+.gfx-ticks{display:flex;justify-content:space-between;margin-top:2px;font-size:13px;color:var(--text-3);font-weight:600}
+.gfx-ticks span{flex:1;text-align:center;min-height:44px;display:grid;place-items:center;cursor:pointer;border-radius:10px;user-select:none}
+.gfx-ticks span:first-child{text-align:left;justify-items:start}.gfx-ticks span:last-child{text-align:right;justify-items:end}
+.gfx-ticks span.on{color:var(--text)}
+.gfx-list{display:grid;gap:8px;margin:2px 0 0;padding:0;list-style:none}
+.gfx-list li{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--text-2)}
+.gfx-list li::before{content:"";flex:none;width:7px;height:7px;margin-top:8px;border-radius:50%;background:var(--text-3)}
+.gfx-warn{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r-sm);border:1px solid color-mix(in srgb,var(--warn,#d9a400) 45%,transparent);background:color-mix(in srgb,var(--warn,#d9a400) 9%,transparent);font-size:13.5px;color:var(--text)}

@@ -1,0 +1,13 @@
+/* Mức Tối ưu (low): phẳng, gọn, không hiệu ứng. */
+/* ═══ TỐI ƯU: phẳng, gọn, không hiệu ứng ═══ */
+:root[data-gfx="low"] *,:root[data-gfx="low"] *::before,:root[data-gfx="low"] *::after{animation-duration:.001ms !important;animation-delay:0s !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;transition-delay:0s !important;scroll-behavior:auto !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+:root[data-gfx="low"] .btn.busy::after,:root[data-gfx="low"] .spin,:root[data-gfx="low"] #pageload i,:root[data-gfx="low"] .act-wait{animation-duration:.8s !important;animation-iteration-count:infinite !important}
+:root[data-gfx="low"] :is(.card,.tile,.row,.panel,.set-card,.upd,.formcard,.notice-card,.auth-card){box-shadow:none !important;transform:none !important}
+:root[data-gfx="low"] .btn{border-radius:10px;box-shadow:none !important;transform:none !important}
+:root[data-gfx="low"] .btn.primary{background:var(--strong)}
+:root[data-gfx="low"] .btn.primary:hover{opacity:.9}
+:root[data-gfx="low"] .tile{padding:14px 16px 16px}
+:root[data-gfx="low"] .tile-ico{width:38px;height:38px;margin-bottom:12px}
+:root[data-gfx="low"] .card-thumb{aspect-ratio:2/1}
+:root[data-gfx="low"] #themeLayer{display:none !important}
+

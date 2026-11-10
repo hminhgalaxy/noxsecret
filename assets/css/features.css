@@ -1,0 +1,48 @@
+/* Tính năng bổ sung: tìm nhanh (Ctrl+K), huy hiệu, báo mất mạng, lên đầu trang, yêu thích, màu nhấn, sắp xếp. */
+/* Tìm nhanh */
+.cmdk{position:fixed;inset:0;z-index:1200;display:grid;justify-items:center;align-items:start;padding:min(14vh,120px) 16px 16px}
+.cmdk-ov{position:absolute;inset:0;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.cmdk-box{position:relative;width:min(640px,100%);max-height:min(560px,76vh);display:flex;flex-direction:column;border-radius:var(--r-lg,16px);background:var(--surface-2,var(--surface));border:1px solid var(--line-strong);box-shadow:0 30px 80px -20px rgba(0,0,0,.7);overflow:hidden;animation:cmdkIn .18s var(--ez,ease)}
+@keyframes cmdkIn{from{opacity:0;transform:translateY(-8px) scale(.985)}}
+.cmdk-in{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.cmdk-in svg{width:20px;height:20px;flex:none;opacity:.7}
+.cmdk-in input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:16px;padding:0;box-shadow:none}
+kbd{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;padding:4px 6px;border-radius:6px;border:1px solid var(--line-strong);background:var(--field);color:var(--text-2)}
+.cmdk-l{list-style:none;margin:0;padding:8px;overflow:auto;overscroll-behavior:contain}
+.cmdk-g{padding:10px 10px 4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3,var(--text-2))}
+.cmdk-o{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-md,10px);cursor:pointer}
+.cmdk-o svg{width:18px;height:18px;flex:none;opacity:.75}
+.cmdk-o .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmdk-o small{color:var(--text-3,var(--text-2));flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmdk-o.on{background:color-mix(in srgb,var(--strong) 14%,transparent);outline:1px solid color-mix(in srgb,var(--strong) 30%,transparent)}
+.cmdk-e{padding:22px;text-align:center;color:var(--text-2)}
+.cmdk-f{display:flex;gap:16px;padding:10px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--text-2)}
+.cmdk-f kbd{margin-right:4px}
+@media (max-width:640px){.cmdk{padding-top:10vh}.cmdk-f{display:none}}
+.cmdk-open body{overflow:hidden}
+/* Huy hiệu */
+.nav-badge{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;display:inline-grid;place-items:center;font-size:11px;font-weight:700;background:var(--strong);color:var(--on-strong)}
+.nav-btn .nav-badge.grp{margin-left:8px}
+.has-badge{position:relative}
+.has-badge::after{content:"";position:absolute;top:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:var(--strong);border:2px solid var(--bg)}
+/* Mất kết nối */
+#netBar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:1100;padding:10px 18px;border-radius:99px;background:var(--surface-2,var(--surface));border:1px solid var(--line-strong);box-shadow:0 12px 30px -12px rgba(0,0,0,.6);font-size:14px;max-width:calc(100vw - 32px);text-align:center}
+#netBar:not([hidden]){animation:cmdkIn .25s var(--ez,ease)}
+/* Lên đầu trang */
+#backTop{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:900;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2,var(--surface));border:1px solid var(--line-strong);color:var(--text);cursor:pointer;box-shadow:0 10px 24px -10px rgba(0,0,0,.6)}
+#backTop[hidden]{display:none}
+#backTop svg{width:20px;height:20px}
+@media (min-width:1024px){#backTop{bottom:24px;right:24px}#netBar{bottom:24px}}
+/* Yêu thích */
+.fav-s{margin-bottom:34px}.fav-h{display:flex;align-items:center;gap:10px;font-size:20px;margin:0 0 14px}.fav-h svg{width:22px;height:22px}
+.fav-h2{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.fav-h2 .fav-h{margin:0}
+#favBtn[aria-pressed="true"] svg{fill:currentColor}
+#favBtn[aria-pressed="true"]{color:var(--accent,var(--text))}
+/* Sắp xếp + màu nhấn */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap}.toolbar .field:first-child{flex:1;min-width:200px}.toolbar .sortf{flex:none}
+.swatches{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.swatch{width:40px;height:40px;border-radius:50%;padding:4px;border:2px solid transparent;background:none;cursor:pointer;transition:transform .25s var(--spring,ease),border-color .2s}
+.swatch:hover{transform:scale(1.08)}.swatch.on{border-color:var(--text)}
+.swatch i{display:block;width:100%;height:100%;border-radius:50%}
+.swatch i.def{background:conic-gradient(var(--text) 0 50%,var(--bg) 0);border:1px solid var(--line-strong)}
+::selection{background:color-mix(in srgb,var(--strong) 35%,transparent)}

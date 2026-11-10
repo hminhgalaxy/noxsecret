@@ -7,6 +7,12 @@ Disallow: /forgot-password
 Disallow: /profile
 Disallow: /settings
 Disallow: /search
+Disallow: /help/
+Disallow: /two-step
+Disallow: /auth/
 Disallow: /api/
+
+Allow: /feed.xml
+Allow: /opensearch.xml
 
 Sitemap: https://skibidiscript.vercel.app/sitemap.xml

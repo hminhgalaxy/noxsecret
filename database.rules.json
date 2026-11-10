@@ -56,6 +56,15 @@
         },
         "color": {
           ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 32"
+        },
+        "risk": {
+          ".validate": "newData.isString() && (newData.val() === '' || newData.val() === 'third' || newData.val() === 'hack' || newData.val() === 'mod' || newData.val() === 'game')"
+        },
+        "need": {
+          ".validate": "newData.isString() && (newData.val() === 'code' || newData.val() === 'url' || newData.val() === 'any')"
+        },
+        "removed": {
+          ".validate": "newData.isBoolean()"
         }
       }
     },
@@ -92,6 +101,9 @@
         },
         "$other": {
           ".validate": false
+        },
+        "tag": {
+          ".validate": "newData.isString() && (newData.val() === 'new' || newData.val() === 'improve' || newData.val() === 'fix' || newData.val() === 'security')"
         }
       }
     },
@@ -194,6 +206,199 @@
       ".read": false,
       "$uid": {
         ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "nox_perms": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))",
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+        "post": {
+          ".validate": "newData.isBoolean()"
+        },
+        "by": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "ts": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "nox_pending": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+        "$pid": {
+          ".write": "((auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)) || ((auth.uid === $uid && (auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (!root.child('nox_admin').child(auth.uid).child('banUntil').exists() || root.child('nox_admin').child(auth.uid).child('banUntil').val() <= now)) && auth.token.email_verified === true && root.child('nox_perms').child(auth.uid).child('post').val() === true && root.child('nox_security').child(auth.uid).child('twofa').val() === true && (!newData.exists() || newData.child('status').val() === 'pending')) && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time))",
+          ".validate": "newData.hasChildren(['kind', 'name', 'status', 'createdAt'])",
+          "kind": {
+            ".validate": "newData.isString() && (newData.val() === 'item' || newData.val() === 'category')"
+          },
+          "catId": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200"
+          },
+          "desc": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 2000"
+          },
+          "sub": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 120"
+          },
+          "icon": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 24"
+          },
+          "need": {
+            ".validate": "newData.isString() && (newData.val() === 'code' || newData.val() === 'url' || newData.val() === 'any')"
+          },
+          "url": {
+            ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https:\\/\\/.+/)"
+          },
+          "code": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 50000"
+          },
+          "img": {
+            ".validate": "newData.isString() && newData.val().length <= 36000 && newData.val().matches(/^data:image\\/(jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+$/)"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'rejected')"
+          },
+          "note": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 300"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "nox_threads": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+        "$tid": {
+          ".write": "((auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)) || ((auth.uid === $uid && (auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (!root.child('nox_admin').child(auth.uid).child('banUntil').exists() || root.child('nox_admin').child(auth.uid).child('banUntil').val() <= now))) && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time))",
+          ".validate": "newData.hasChildren(['type', 'status', 'createdAt', 'updatedAt'])",
+          "type": {
+            ".validate": "newData.isString() && (newData.val() === 'support' || newData.val() === 'report' || newData.val() === 'chat') && (!data.exists() || data.val() === newData.val())"
+          },
+          "subject": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 120"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'open' || newData.val() === 'closed')"
+          },
+          "last": {
+            ".validate": "newData.isString() && (newData.val() === 'user' || newData.val() === 'dev')"
+          },
+          "unreadDev": {
+            ".validate": "newData.isBoolean()"
+          },
+          "unreadUser": {
+            ".validate": "newData.isBoolean()"
+          },
+          "wantPost": {
+            ".validate": "newData.isBoolean()"
+          },
+          "ref": {
+            "kind": {
+              ".validate": "newData.isString() && (newData.val() === 'item' || newData.val() === 'category' || newData.val() === 'user' || newData.val() === 'other')"
+            },
+            "catId": {
+              ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 40"
+            },
+            "key": {
+              ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 60"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 120"
+            },
+            "reason": {
+              ".validate": "newData.isString() && (newData.val() === 'malware' || newData.val() === 'scam' || newData.val() === 'copyright' || newData.val() === 'inappropriate' || newData.val() === 'broken' || newData.val() === 'other')"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "nox_msgs": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))",
+        ".validate": true,
+        "$tid": {
+          "$mid": {
+            ".write": "((auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !data.exists()) || ((auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !newData.exists()) || ((auth.uid === $uid && (auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (!root.child('nox_admin').child(auth.uid).child('banUntil').exists() || root.child('nox_admin').child(auth.uid).child('banUntil').val() <= now)) && (!root.child('nox_admin').child(auth.uid).child('muteUntil').exists() || root.child('nox_admin').child(auth.uid).child('muteUntil').val() <= now) && !data.exists() && newData.exists() && root.child('nox_threads').child($uid).child($tid).child('status').val() !== 'closed') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time))",
+            ".validate": "newData.hasChildren(['from', 'text', 'ts'])",
+            "from": {
+              ".validate": "newData.isString() && ((newData.val() === 'user' && auth.uid === $uid) || (newData.val() === 'dev' && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 2000"
+            },
+            "ts": {
+              ".validate": "newData.isNumber() && newData.val() <= now + 5000 && newData.val() >= now - 300000"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    },
+    "nox_tracks": {
+      ".read": true,
+      ".write": false,
+      "$id": {
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+        ".validate": "newData.hasChildren(['name', 'ts'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+        },
+        "ts": {
+          ".validate": "newData.isNumber()"
+        },
+        "size": {
+          ".validate": "newData.isNumber()"
+        },
+        "$o": {
+          ".validate": false
+        }
+      }
+    },
+    "nox_trackdata": {
+      ".read": true,
+      ".write": false,
+      "$id": {
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+        ".validate": "newData.isString() && newData.val().length <= 9437184 && newData.val().matches(/^data:audio\\/[a-zA-Z0-9.+-]+;base64,.+/)"
       }
     }
   }

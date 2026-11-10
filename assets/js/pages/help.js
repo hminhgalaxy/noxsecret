@@ -111,7 +111,7 @@ const hay = f => vi(f.q.vi + " " + f.q.en + " " + f.a.vi + " " + f.a.en);
 export function mount(ctx) {
   let q = "", openIdx = -1;
   const lang = () => (getLang() === "vi" ? "vi" : "en");
-  const head = () => ctx.setPage({ title: "Câu hỏi thường gặp", sub: "Trả lời nhanh về tài khoản, bảo mật, nội dung và cài đặt.", desc: "Câu hỏi thường gặp về tài khoản, bảo mật, nội dung và cài đặt của SKIBIDI SCRIPT WEB.", crumbs: [] });
+  const head = () => ctx.setPage({ title: "Câu hỏi thường gặp", sub: "Trả lời nhanh về tài khoản, bảo mật, nội dung và cài đặt.", desc: "Câu hỏi thường gặp về tài khoản, bảo mật, nội dung và cài đặt của SKIBIDI SCRIPT WEB.", crumbs: [], faq: FAQ.map(f => ({ q: f.q[lang()], a: f.a[lang()] })) });
   ctx.el.innerHTML = `<div class="faqp"><form class="hero-search" id="fq" role="search">${ICO.search}<input id="fs" type="search" placeholder="Tìm câu hỏi…" aria-label="Tìm câu hỏi" autocomplete="off" enterkeyhint="search"></form>
     <div id="faqBody"></div></div>`;
   const body = ctx.el.querySelector("#faqBody"), inp = ctx.el.querySelector("#fs");

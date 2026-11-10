@@ -1,0 +1,10 @@
+/* Hiệu ứng JS: hiện dần khi cuộn (mid + high), gợn sóng nút (high), nền nghiêng theo con trỏ (high). */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s var(--ez),transform .7s cubic-bezier(.2,.9,.2,1)}
+.rv.rv-in{opacity:1;transform:none}
+:root[data-gfx="low"] .rv,:root[data-motion="reduced"] .rv{opacity:1;transform:none;transition:none}
+.btn .rip{position:absolute;border-radius:50%;pointer-events:none;background:color-mix(in srgb,currentColor 30%,transparent);transform:scale(0);opacity:.7;animation:ripple .65s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+:root[data-gfx="high"] .btn{position:relative;overflow:hidden}
+#themeLayer{--px:0px;--py:0px}
+:root[data-gfx="high"] #themeLayer img,:root[data-gfx="high"] #themeLayer video{transform:translate3d(var(--px),var(--py),0) scale(1.06);transition:transform .5s var(--ez)}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.btn .rip{display:none}}

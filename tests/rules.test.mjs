@@ -24,7 +24,7 @@ const U = (p, o, a) => eng.write(Object.keys(o).map(k => ({ segs: split(p + "/" 
 console.log("ĐỌC");
 t("khách đọc nox_data", R("nox_data/scripts", null), true);
 t("khách đọc danh mục/bảo trì/thông báo", R("nox_categories", null) && R("nox_maintenance", null) && R("nox_notice", null), true);
-t("khách đọc các khóa theme công khai", ["bgType", "bgData", "audioData", "audioName"].every(k => R("nox_theme/" + k, null)), true);
+t("khách đọc các khóa theme công khai", ["bgType", "bgData", "audioName"].every(k => R("nox_theme/" + k, null)), true);
 t("khách KHÔNG đọc nox_theme (cha) — tránh lộ API key", R("nox_theme", null), false);
 t("khách KHÔNG đọc nox_theme/api", R("nox_theme/api", null), false);
 t("user thường KHÔNG đọc nox_theme/api", R("nox_theme/api", USER), false);
@@ -166,4 +166,96 @@ t("ảnh mục: ảnh quá nặng (>36.000 ký tự) bị chặn", U("nox_data/s
 t("ảnh mục: data: không phải ảnh (html/svg/js) bị chặn", U("nox_data/scripts/s1", { img: "data:text/html;base64,PHNjcmlwdD4=", updatedAt: 2 }, DEV) || U("nox_data/scripts/s1", { img: "data:image/svg+xml;base64,PHN2Zz4=", updatedAt: 2 }, DEV) || U("nox_data/scripts/s1", { img: "javascript:alert(1)", updatedAt: 2 }, DEV), false);
 t("ảnh mục: dữ liệu cũ dạng link vẫn còn hợp lệ (không làm hỏng bản ghi cũ)", U("nox_data/scripts/s1", { img: "https://a.b/x.jpg", updatedAt: 2 }, DEV), true);
 
+console.log("ĐỢT C: danh mục do DEV quản lý, bài chờ duyệt, hỗ trợ/báo cáo/nhắn tin");
+{
+  const N = Date.now();
+  const U1 = with2fa(USER, AT), U2 = with2fa(OTHER), D = with2fa(DEV, AT), UNV = { ...U1, token: { ...U1.token, email_verified: false } };
+  const r3 = { ...root, nox_security: { u1: { twofa: true, gate: true }, u2: {} }, nox_perms: { u1: { post: true } },
+    nox_threads: { u1: { t1: { type: "support", status: "open", createdAt: 1, updatedAt: 1 }, tc: { type: "support", status: "closed", createdAt: 1, updatedAt: 1 } } },
+    nox_msgs: { u1: { t1: { m1: { from: "user", text: "hi", ts: N - 1000 } } } }, nox_admin: { } };
+  const P = (p, v, a, rr = r3) => eng.write([{ segs: split(p), value: v }], a, rr).ok, Rd = (p, a, rr = r3) => eng.canRead(split(p), a, rr);
+  const item = { kind: "item", catId: "mod", name: "Bản APK", url: "https://example.com/a.apk", status: "pending", createdAt: N };
+  const mod = { ...root, nox_categories: { c1: { name: "Mod", node: "mod" } } };
+  t("DEV sửa danh mục gốc (script): đổi tên, phân loại hack, kiểu nội dung", P("nox_categories/script", { name: "Tools", risk: "hack", need: "any", sub: "x" }, D, mod), true);
+  t("DEV đánh dấu xóa danh mục gốc (removed)", P("nox_categories/apk/removed", true, D, mod), true);
+  t("phân loại rủi ro sai giá trị bị từ chối", P("nox_categories/script/risk", "virus", D, mod), false);
+  t("user thường KHÔNG sửa/xóa danh mục", P("nox_categories/script/removed", true, U1, mod), false);
+  t("nox_perms: user KHÔNG tự cấp quyền đăng", P("nox_perms/u2/post", true, U2), false);
+  t("nox_perms: DEV cấp quyền", P("nox_perms/u2/post", true, D), true);
+  t("nox_perms: chủ đọc quyền của mình, người khác không đọc", [Rd("nox_perms/u1", U1), Rd("nox_perms/u1", U2)].join(), "true,false");
+  t("bài chờ duyệt: đủ 3 điều kiện (email xác minh + được cấp phép + bật 2FA) → gửi được", P("nox_pending/u1/p1", item, U1), true);
+  t("bài chờ duyệt: chưa được DEV cấp phép → bị chặn", P("nox_pending/u2/p1", item, U2, { ...r3, nox_security: { u1: r3.nox_security.u1, u2: { twofa: true } } }), false);
+  t("bài chờ duyệt: chưa bật 2FA → bị chặn", P("nox_pending/u2/p1", item, U2, { ...r3, nox_perms: { u2: { post: true } } }), false);
+  t("bài chờ duyệt: email chưa xác minh → bị chặn", P("nox_pending/u1/p1", item, UNV), false);
+  t("bài chờ duyệt: khách (ẩn danh) bị chặn", P("nox_pending/g1/p1", item, GUEST), false);
+  t("bài chờ duyệt: không ghi hộ người khác", P("nox_pending/u2/p1", item, U1), false);
+  t("bài chờ duyệt: user KHÔNG tự đặt status approved/rejected", [P("nox_pending/u1/p1", { ...item, status: "approved" }, U1), P("nox_pending/u1/p1", { ...item, status: "rejected" }, U1)].join(), "false,false");
+  t("bài chờ duyệt: chỉ nhận link https (chặn http/javascript/data)", ["http://a.b/x", "javascript:alert(1)", "data:text/html,x", "ftp://a.b"].map(u => P("nox_pending/u1/p1", { ...item, url: u }, U1)).join(), "false,false,false,false");
+  t("bài chờ duyệt: ảnh phải là data:image (từ máy), svg bị chặn", [P("nox_pending/u1/p1", { ...item, img: "data:image/jpeg;base64,AAAA" }, U1), P("nox_pending/u1/p1", { ...item, img: "data:image/svg+xml;base64,AAAA" }, U1), P("nox_pending/u1/p1", { ...item, img: "https://evil.example/x.png" }, U1)].join(), "true,false,false");
+  t("bài chờ duyệt: trường lạ bị chặn", P("nox_pending/u1/p1", { ...item, isAdmin: true }, U1), false);
+  { /* Firebase Rules KHÔNG có numChildren() (lỗi "Không có phương thức/thuộc tính" khi lưu). Chỉ cho phép các phương thức có thật. */
+    const OK = new Set(["child", "exists", "hasChild", "hasChildren", "isBoolean", "isNumber", "isString", "val", "matches", "toLowerCase", "toUpperCase", "contains", "beginsWith", "endsWith", "replace", "parent", "getPriority", "length"]);
+    const txt = JSON.stringify(JSON.parse(fs.readFileSync(new URL("../database.rules.json", import.meta.url), "utf8")));
+    const bad = [...new Set([...txt.matchAll(/\.([A-Za-z]+)\(/g)].map(m => m[1]).filter(n => !OK.has(n)))];
+    t("quy tắc chỉ dùng phương thức Firebase thật (không numChildren)", bad.join(","), "");
+  }
+  t("bài chờ duyệt: chủ đọc của mình, người khác không đọc, DEV đọc tất cả", [Rd("nox_pending/u1", U1), Rd("nox_pending/u1", U2), Rd("nox_pending", D), Rd("nox_pending", U1)].join(), "true,false,true,false");
+  const r4 = { ...r3, nox_pending: { u1: { p1: item } } };
+  t("duyệt: DEV đồng thời tạo mục công khai và xóa bài chờ (nguyên tử)", eng.write([{ segs: split("nox_data/mod/k1"), value: { name: "Bản APK", url: "https://example.com/a.apk", createdAt: N } }, { segs: split("nox_pending/u1/p1"), value: null }], D, r4).ok, true);
+  t("duyệt: user thường KHÔNG tự đưa bài lên công khai", P("nox_data/mod/k2", { name: "x", url: "https://a.b" }, U1, r4), false);
+  t("từ chối: DEV ghi status rejected + lý do", P("nox_pending/u1/p1", { ...item, status: "rejected", note: "Thiếu mô tả" }, D, r4), true);
+  t("chủ bài tự rút bài (xóa)", P("nox_pending/u1/p1", null, U1, r4), true);
+  t("hỗ trợ: user đăng nhập tạo yêu cầu của mình", P("nox_threads/u1/t2", { type: "support", subject: "Xin cấp phép đăng bài", status: "open", createdAt: N, updatedAt: N, wantPost: true, last: "user", unreadDev: true }, U1), true);
+  t("báo cáo: có ref hợp lệ", P("nox_threads/u1/t3", { type: "report", status: "open", createdAt: N, updatedAt: N, ref: { kind: "item", catId: "script", key: "s1", title: "A", reason: "malware" } }, U1), true);
+  t("báo cáo: lý do lạ bị chặn", P("nox_threads/u1/t3", { type: "report", status: "open", createdAt: N, updatedAt: N, ref: { kind: "item", reason: "hack" } }, U1), false);
+  t("hỗ trợ: khách KHÔNG tạo", P("nox_threads/g1/t1", { type: "support", status: "open", createdAt: N, updatedAt: N }, GUEST), false);
+  t("hỗ trợ: không tạo/đọc hộ người khác", [P("nox_threads/u1/t9", { type: "chat", status: "open", createdAt: N, updatedAt: N }, U2), Rd("nox_threads/u1", U2), Rd("nox_threads/u1", U1), Rd("nox_threads", D), Rd("nox_threads", U1)].join(), "false,false,true,true,false");
+  t("hỗ trợ: không đổi loại yêu cầu sau khi tạo", P("nox_threads/u1/t1/type", "chat", U1), false);
+  t("hỗ trợ: trường lạ bị chặn", P("nox_threads/u1/t5", { type: "chat", status: "open", createdAt: N, updatedAt: N, admin: 1 }, U1), false);
+  t("tin nhắn: user gửi tin 'user' của mình", P("nox_msgs/u1/t1/m2", { from: "user", text: "Cho mình hỏi", ts: N }, U1), true);
+  t("tin nhắn: user KHÔNG giả danh DEV (from: dev)", P("nox_msgs/u1/t1/m2", { from: "dev", text: "ok", ts: N }, U1), false);
+  t("tin nhắn: user KHÔNG sửa/xóa tin đã gửi", [P("nox_msgs/u1/t1/m1/text", "sửa", U1), P("nox_msgs/u1/t1/m1", null, U1)].join(), "false,false");
+  t("tin nhắn: DEV trả lời (from: dev) và xóa được", [P("nox_msgs/u1/t1/m3", { from: "dev", text: "Đã duyệt", ts: N }, D), P("nox_msgs/u1/t1/m1", null, D)].join(), "true,true");
+  t("tin nhắn: yêu cầu đã đóng thì user không gửi thêm", P("nox_msgs/u1/tc/m1", { from: "user", text: "alo", ts: N }, U1), false);
+  t("tin nhắn: người dùng bị mute không gửi được", P("nox_msgs/u1/t1/m2", { from: "user", text: "x", ts: N }, U1, { ...r3, nox_admin: { u1: { muteUntil: N + 3600000 } } }), false);
+  t("tin nhắn: người dùng bị ban không gửi được", P("nox_msgs/u1/t1/m2", { from: "user", text: "x", ts: N }, U1, { ...r3, nox_admin: { u1: { banUntil: N + 3600000 } } }), false);
+  t("tin nhắn: dài quá 2000 ký tự / rỗng bị chặn", [P("nox_msgs/u1/t1/m2", { from: "user", text: "a".repeat(2001), ts: N }, U1), P("nox_msgs/u1/t1/m2", { from: "user", text: "", ts: N }, U1)].join(), "false,false");
+  t("tin nhắn: thời gian giả (xa tương lai) bị chặn", P("nox_msgs/u1/t1/m2", { from: "user", text: "x", ts: N + 99999999 }, U1), false);
+  t("tin nhắn: chỉ chủ và DEV đọc", [Rd("nox_msgs/u1/t1", U1), Rd("nox_msgs/u1/t1", U2), Rd("nox_msgs/u1/t1", D), Rd("nox_msgs", U1)].join(), "true,false,true,false");
+  t("2FA: chủ bật gate nhưng chưa nhập mã thì không gửi tin / không tạo yêu cầu", [P("nox_msgs/u1/t1/m2", { from: "user", text: "x", ts: N }, with2fa(USER)), P("nox_threads/u1/t2", { type: "chat", status: "open", createdAt: N, updatedAt: N }, with2fa(USER))].join(), "false,false");
+}
+
+
+/* ===== Nhạc nền nối tiếp ===== */
+{
+  const A = "data:audio/mpeg;base64,AAAA", ok1 = { name: "Bài 1", ts: 1, size: 10 };
+  const rr = JSON.parse(JSON.stringify(root));
+  const T = (p, v, a, r = rr) => eng.write([{ segs: split(p), value: v }], a, r).ok;
+  t("khách đọc danh sách nhạc", eng.canRead(split("nox_tracks"), GUEST, rr), true);
+  t("khách đọc dữ liệu một bài", eng.canRead(split("nox_trackdata/a"), GUEST, rr), true);
+  t("DEV thêm bài (danh sách)", T("nox_tracks/a", ok1, DEV), true);
+  t("DEV thêm bài (dữ liệu)", T("nox_trackdata/a", A, DEV), true);
+  t("DEV thêm cả hai bằng một lệnh", eng.write([{ segs: split("nox_tracks/b"), value: ok1 }, { segs: split("nox_trackdata/b"), value: A }], DEV, rr).ok, true);
+  t("người dùng không thêm được bài", T("nox_tracks/c", ok1, USER), false);
+  t("người dùng không ghi được dữ liệu", T("nox_trackdata/c", A, USER), false);
+  t("khách không thêm được bài", T("nox_tracks/c", ok1, GUEST), false);
+  t("DEV chưa xác minh email không thêm được", T("nox_tracks/c", ok1, DEV_UNVERIFIED), false);
+  t("dữ liệu không phải âm thanh bị từ chối", T("nox_trackdata/c", "data:text/html;base64,AAAA", DEV), false);
+  t("dữ liệu không phải data URL bị từ chối", T("nox_trackdata/c", "https://x.io/a.mp3", DEV), false);
+  t("tên bài rỗng bị từ chối", T("nox_tracks/c", { name: "", ts: 1 }, DEV), false);
+  t("tên bài quá dài bị từ chối", T("nox_tracks/c", { name: "x".repeat(81), ts: 1 }, DEV), false);
+  t("khóa lạ trong bài bị từ chối", T("nox_tracks/c", { name: "ok", ts: 1, evil: "x" }, DEV), false);
+  t("dữ liệu quá 9 MB bị từ chối", T("nox_trackdata/c", "data:audio/mpeg;base64," + "A".repeat(9437184), DEV), false);
+  t("DEV xóa bài", eng.write([{ segs: split("nox_tracks/a"), value: null }, { segs: split("nox_trackdata/a"), value: null }], DEV, rr).ok, true);
+}
+
+/* ===== Phân loại bài cập nhật ===== */
+{
+  const rr = JSON.parse(JSON.stringify(root)); const T = (p, v, a) => eng.write([{ segs: split(p), value: v }], a, rr).ok;
+  for (const tag of ["new", "improve", "fix", "security"]) t("DEV đăng bài loại " + tag, T("nox_updates/u_" + tag, { title: "x", ts: 1, tag }, DEV), true);
+  t("loại lạ bị từ chối", T("nox_updates/u_bad", { title: "x", ts: 1, tag: "evil" }, DEV), false);
+  t("bài không có loại vẫn hợp lệ", T("nox_updates/u_none", { title: "x", ts: 1 }, DEV), true);
+  t("người dùng không đăng được bài", T("nox_updates/u_usr", { title: "x", ts: 1, tag: "new" }, USER), false);
+  t("DEV sửa tiêu đề và loại một lệnh", eng.write([{ segs: split("nox_updates/u_new/title"), value: "y" }, { segs: split("nox_updates/u_new/tag"), value: "fix" }], DEV, rr).ok, true);
+}
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

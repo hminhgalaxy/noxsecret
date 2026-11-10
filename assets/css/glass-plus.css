@@ -1,0 +1,12 @@
+/* Kính mờ nâng cấp: cạnh sáng như thủy tinh, độ bão hòa và sáng cao hơn, bóng đổ mềm. Chỉ áp dụng khi bật Kính mờ. */
+:root[data-glass="on"] :is(#side,.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.modal,.statebox,.table-wrap,.stat,.upd,.cf,.chat){
+  -webkit-backdrop-filter:blur(var(--gl-blur,14px)) saturate(1.6) brightness(1.06);backdrop-filter:blur(var(--gl-blur,14px)) saturate(1.6) brightness(1.06);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.18),0 18px 40px -26px rgba(0,0,0,.6)}
+:root[data-theme="light"][data-glass="on"] :is(#side,.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.modal,.statebox,.table-wrap,.stat,.upd,.cf,.chat){
+  -webkit-backdrop-filter:blur(var(--gl-blur,14px)) saturate(1.5) brightness(1.02);backdrop-filter:blur(var(--gl-blur,14px)) saturate(1.5) brightness(1.02);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(0,0,0,.06),0 18px 40px -28px rgba(0,0,0,.3)}
+:root[data-glass="on"] :is(input,textarea,select){background:var(--field);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 1px 2px rgba(0,0,0,.18)}
+:root[data-glass="on"] #hdr{-webkit-backdrop-filter:blur(calc(var(--gl-blur,14px) + 4px)) saturate(1.7);backdrop-filter:blur(calc(var(--gl-blur,14px) + 4px)) saturate(1.7);box-shadow:0 1px 0 var(--line),0 12px 30px -24px rgba(0,0,0,.6)}
+/* Mức Cao: vệt phản chiếu chạy qua mép khi rê chuột */
+:root[data-glass="on"][data-gfx="high"] :is(.card,.tile,.set-card):hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 0 0 1px var(--line-strong),0 24px 48px -26px rgba(0,0,0,.65)}
+@media (prefers-reduced-transparency:reduce){:root[data-glass="on"] *{-webkit-backdrop-filter:none !important;backdrop-filter:none !important}}

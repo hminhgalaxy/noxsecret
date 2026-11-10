@@ -1,0 +1,4 @@
+/* Giảm chuyển động áp dụng ở mọi mức. */
+/* Tôn trọng "Giảm chuyển động" ở mọi mức (kể cả Cao) */
+:root[data-motion="reduced"] :is(#bg::before,#bg::after,.page,.cf,.btn::before){animation:none !important}
+

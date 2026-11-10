@@ -75,11 +75,27 @@
 - **Tường lửa nhẹ:** header bảo mật (nosniff, HSTS, COOP, X-Frame-Options, CSP chống nhúng/`object`/`base`), giới hạn 240 yêu cầu / 10 phút mỗi IP cho API, giới hạn riêng cho từng hành động (gửi mã, đổi mật khẩu…). **Chống DDoS thật nằm ở Vercel**: bật *Vercel Firewall / Attack Challenge Mode* trong Project → Firewall; cần mạnh hơn thì đặt Cloudflare (miễn phí) trước web. CSP chặt cho script chưa bật vì chưa thể thử với Google/Cloudflare/Firebase thật mà không làm hỏng captcha.
 
 ## Đợt B (đồ họa + giao diện + nội dung) — thay đổi so với đợt A
-- **Mức đồ họa (Cài đặt → thanh kéo, 3 bậc):** mặc định **Tối ưu** (nền ô vuông đứng yên, bố cục gọn, không hiệu ứng chuyển động, bỏ màn mở đầu, không hình nền); **Trung bình** (lưới chuyển động nhẹ, hiệu ứng vừa phải, vẫn không hình nền); **Cao** (hình nền website + âm thanh + hiệu ứng nâng cao: ánh sáng theo con trỏ, viền sáng, nút sáng quét). Lên mức Cao có hộp cảnh báo, huỷ thì giữ mức cũ. Lựa chọn nhớ trên từng trình duyệt (`ssw_gfx`). Mỗi mức có kiểu nút/thẻ/danh mục riêng (`assets/css/gfx.css`). Âm thanh vẫn bật ở cả 3 mức.
+- **Mức đồ họa (Cài đặt → thanh kéo, 3 bậc):** mặc định **Tối ưu** (nền ô vuông đứng yên, bố cục gọn, không hiệu ứng chuyển động, bỏ màn mở đầu, không hình nền); **Trung bình** (lưới chuyển động nhẹ, hiệu ứng vừa phải, vẫn không hình nền); **Cao** (hình nền website + âm thanh + hiệu ứng nâng cao: ánh sáng theo con trỏ, viền sáng, nút sáng quét). Lên mức Cao có hộp cảnh báo, huỷ thì giữ mức cũ. Lựa chọn nhớ trên từng trình duyệt (`ssw_gfx`). Mỗi mức có kiểu nút/thẻ/danh mục riêng (`assets/css/gfx-*.css`). Âm thanh vẫn bật ở cả 3 mức.
 - **Trợ giúp → Câu hỏi thường gặp (`/help`):** ~30 câu chia 5 nhóm, có ô tìm (gõ không dấu cũng được), song ngữ Việt/Anh, nhóm dài chỉ hiện 4 câu kèm nút "Hiển thị tất cả". Nhóm "Trợ giúp" trong menu sẽ chứa thêm Hỗ trợ / Báo cáo / Nhắn tin với dev ở đợt C.
 - **Đoạn dài thu gọn:** mô tả mục, bài cập nhật, phần giới thiệu trong hồ sơ tự thu gọn nếu dài, có nút "Hiển thị tất cả" / "Thu gọn" (chỉ hiện khi thật sự dài).
 - **Ảnh chỉ lấy từ máy:** ô "Link ảnh" của mục đã bỏ; thay bằng **Chọn ảnh từ máy** (tự thu nhỏ ≤ 640px, nén JPEG ≤ ~30 KB, lưu cùng dữ liệu). Ảnh cũ dạng link ngoài **không còn được tải** (xoá khi bạn lưu lại mục). Ảnh nền/nhạc của Dev và ảnh đại diện vốn đã chọn từ máy. Cần **dán lại `database.rules.json`** (nhánh `img` nay nhận `data:image/...`).
 - **Tiêu đề mới:** "SKIBIDI SCRIPT WEB — Nơi chia sẻ APK tiện ích, bảo mật cao" (và bản tiếng Anh), mô tả nói rõ: kiểm duyệt trước khi đăng, cảnh báo phần mềm bên thứ ba, không cổ xúy hack. Áp dụng cho thẻ title/description/Open Graph, manifest, trang chủ, sitemap (có thêm `/help`) và thư chào.
+
+## Đợt C — thay đổi so với đợt B
+
+> **Bắt buộc:** dán lại toàn bộ `database.rules.json` vào Firebase → Realtime Database → Rules → **Publish** (có thêm `nox_perms`, `nox_pending`, `nox_threads`, `nox_msgs`, `nox_tracks`, `nox_trackdata`, loại bài cập nhật, ảnh mục). Chưa publish thì các tính năng mới báo lỗi quyền.
+
+- **Danh mục do dev quản lý (Dev → Danh mục):** Script / APK / iOS / Link không còn cố định — sửa tên, mô tả, màu, xóa và khôi phục như mọi danh mục khác. Xóa danh mục **không** xóa nội dung bên trong (khôi phục lại là thấy đủ). Mỗi danh mục có **loại cần có** (link / code / cả hai) và **phân loại rủi ro** (Bình thường / Bên thứ ba / Hack-mod…). Có phân loại rủi ro thì người xem phải đọc cảnh báo **20 giây** mới bấm "Tôi đã đọc" được; có ô "không hỏi lại với danh mục này".
+- **Hỗ trợ · Báo cáo · Nhắn tin với dev (Trợ giúp):** người dùng đăng nhập gửi yêu cầu hỗ trợ, báo cáo một mục (nút **Báo cáo** ở trang mục) hoặc chat; xem lại ở **Tin nhắn của tôi**. Dev xử lý ở **Dev → Hộp thư** (trả lời, đóng cuộc, cấp/thu hồi quyền đăng bài).
+- **Người dùng gửi danh mục/mục (Trợ giúp → Đăng nội dung):** cần đủ 3 điều kiện — email đã xác minh, đã bật xác minh 2 bước, và được dev cấp phép (xin phép ở mục Hỗ trợ). Bài hiện nhãn **Đang xem xét**, không bao giờ hiện công khai trước khi dev duyệt ở **Dev → Duyệt bài** (duyệt = đăng, từ chối = kèm lý do cho người gửi). Chỉ nhận link https://, ảnh chọn từ máy.
+- **Nhạc nền nối tiếp:** Dev → Giao diện → **Thêm nhạc** (chọn một hoặc nhiều tệp, tối đa ~6,5 MB/bài, 30 bài). Phát hết bài này sang bài kế rồi lặp lại; người dùng có nút **Bài tiếp theo** ở Cài đặt. Dữ liệu nhạc chỉ tải khi tới lượt phát nên trang không nặng hơn. Nhạc đơn cũ (nếu có) vẫn phát đầu tiên và xóa được trong cùng danh sách.
+- **Hình nền nổi bật hơn:** lớp phủ nhẹ hơn, tối dần ở mép, màu sống động hơn, mức Cao có chuyển động chậm và nghiêng nhẹ theo con trỏ (`assets/css/bg-stage.css`, `assets/js/lib/fx/parallax.js`).
+- **Kính mờ nâng cấp:** cạnh sáng, độ bão hòa cao hơn, ô nhập mờ (`assets/css/glass-plus.css`).
+- **Tách file đồ họa:** CSS chia thành `gfx-bg / gfx-low / gfx-mid / gfx-high / gfx-motion / gfx-fx / gfx-ui`; JS hiệu ứng chia thành `assets/js/lib/fx/` (`pointer-light`, `parallax`, `reveal`, `ripple`), `gfx.js` chỉ khởi động. Mức Tối ưu không chạy hiệu ứng nào.
+- **SEO:** 6 trang công khai `/about /guide /apk-safety /security /terms /privacy` (hai ngôn ngữ, nội dung ở `lib/info-content.js`), JSON-LD theo trang (breadcrumb, nhà xuất bản, ảnh), logo là `ImageObject` 512×512 trong JSON-LD tổ chức, `favicon.ico` + `mask-icon`, liên kết trang thông tin ở chân trang, sitemap có thêm các trang này và ảnh logo.
+- **"Cập nhật này có gì":** mỗi bài có thể gắn loại (Tính năng mới / Cải tiến / Sửa lỗi / Bảo mật), dòng bắt đầu bằng `-` thành danh sách, dev **sửa** được bài đã đăng (không làm chuông sáng lại), trang Thông báo có bộ lọc theo loại.
+- **Quên mật khẩu bằng mã:** khi máy chủ gửi thư đã cấu hình đúng, quên mật khẩu hiển thị ô nhập mã 6 số. Nếu `serverReady()` còn sai (thiếu biến môi trường), trang tạm dùng luồng liên kết cũ của Firebase cho tới khi bạn cấu hình xong.
+- **Chưa làm / hạn chế:** giới hạn tối đa 30 bài nhạc chỉ được kiểm tra ở phía trình duyệt của dev (Firebase Rules không đếm được số con của nút cha). Tường lửa chỉ ở mức ứng dụng (giới hạn tần suất, quy tắc dữ liệu); không phải tường lửa mạng.
 
 ## Không nhận được thư? Kiểm tra theo thứ tự
 1. **Redeploy:** thêm/sửa biến môi trường trên Vercel KHÔNG áp dụng cho bản đang chạy. Vào Deployments → bản mới nhất → ⋯ → **Redeploy**.
@@ -87,3 +103,28 @@
 3. Phía Brevo: (a) Senders → thêm đúng địa chỉ trong `MAIL_FROM_EMAIL` và bấm liên kết xác minh Brevo gửi về hộp thư đó; (b) tài khoản mới có thể phải được Brevo kích hoạt gửi thư giao dịch (SMTP) — Brevo → SMTP & API.
 4. Thư từ địa chỉ Gmail có thể vào **Spam/Quảng cáo**. Muốn vào hộp thư chính nên dùng tên miền riêng đã xác thực (SPF/DKIM) trong Brevo → Domains.
 5. Xem log: Vercel → Logs → lọc `account:` — mỗi lần Brevo từ chối sẽ có dòng `mail 4xx …` ghi rõ lý do.
+
+## Đợt D — SEO + tính năng mới
+
+### Rules (quan trọng)
+Firebase Rules **không có** `numChildren()`. File `database.rules.json` mới đã bỏ hoàn toàn; giới hạn (10 bài chờ, 30 cuộc trò chuyện, 300 tin, 30 bài nhạc) được kiểm ở phía trình duyệt. Dán lại toàn bộ file vào Realtime Database → Rules → Publish.
+
+### SEO để tìm "skibidiscript" ra website
+Code đã làm: thẻ title/description/canonical/Open Graph/Twitter cho từng trang, JSON-LD (WebSite + SearchAction, Organization, WebPage/AboutPage/CollectionPage, BreadcrumbList, FAQPage, CreativeWork cho từng mục), `sitemap.xml` tự sinh từ dữ liệu, `robots.txt`, `feed.xml` (RSS), `opensearch.xml`, `.well-known/security.txt`, `manifest.webmanifest`, `favicon.ico`, trang nội dung riêng: `/skibidiscript`, `/about`, `/guide`, `/apk-safety`, `/security`, `/terms`, `/privacy`, và nội dung `<noscript>` cho bot không chạy JS.
+
+**Code không thể đảm bảo thứ hạng Google.** Tên miền `.vercel.app` bị Google đánh giá thấp. Để thật sự ra web khi gõ "skibidiscript" bạn cần làm:
+1. Mua tên miền riêng (vd `skibidiscript.com`), gắn vào Vercel → Settings → Domains.
+2. Google Search Console (search.google.com/search-console) → Thêm thuộc tính → xác minh (thẻ meta HTML hoặc DNS) → Sitemaps → gửi `https://<tên-miền>/sitemap.xml` → "Kiểm tra URL" trang chủ rồi bấm **Yêu cầu lập chỉ mục**.
+3. Làm tương tự ở Bing Webmaster Tools (bing.com/webmasters) — có thể nhập thẳng từ Search Console.
+4. Đặt liên kết về website ở nơi bạn có (kênh YouTube/TikTok/Discord/Telegram, bio mạng xã hội) — backlink là yếu tố lớn nhất.
+5. Chờ vài ngày đến vài tuần để Google lập chỉ mục.
+Nếu đổi tên miền: đặt biến môi trường `SITE_URL` trên Vercel (dùng cho thư/sitemap/feed) và thay `https://skibidiscript.vercel.app` bằng tên miền mới trong `index.html`, `robots.txt`, `opensearch.xml`, `.well-known/security.txt` (tìm & thay toàn bộ).
+
+### Tính năng mới
+- **Tìm nhanh (Ctrl+K / ⌘K)**: nhảy tới trang, danh mục, nội dung.
+- **Yêu thích** (nút trái tim ở trang mục) + **Xem gần đây** → trang `/favorites`, mục "Xem gần đây" ở trang chủ. Chỉ lưu trên trình duyệt.
+- **Chia sẻ** (Web Share hoặc sao chép liên kết), **Sắp xếp** trong danh mục (mới/cũ/A–Z/Z–A/sao chép nhiều).
+- **Màu nhấn** trong Cài đặt (5 màu), **thanh báo mất kết nối**, **nút lên đầu trang**, **huy hiệu** số mục cần xem trên menu.
+- **Danh sách nhạc nối tiếp** (dev thêm nhiều bài bằng nút "+"; nút bài kế ở Cài đặt).
+- **Thẻ cập nhật** (Mới / Cải thiện / Sửa lỗi / Bảo mật) và bộ lọc ở Thông báo.
+- Đồ họa: ánh sáng theo con trỏ, parallax, hiện dần khi cuộn, hiệu ứng ripple; tách file CSS theo mức đồ họa.

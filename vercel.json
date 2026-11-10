@@ -8,7 +8,11 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/((?!assets/|api/|robots\\.txt|manifest\\.webmanifest|favicon|\\.well-known/).*)",
+      "source": "/feed.xml",
+      "destination": "/api/feed"
+    },
+    {
+      "source": "/((?!assets/|api/|robots\\.txt|opensearch\\.xml|manifest\\.webmanifest|favicon|\\.well-known/).*)",
       "destination": "/index.html"
     }
   ],

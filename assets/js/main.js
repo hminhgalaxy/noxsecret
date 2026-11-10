@@ -1,6 +1,7 @@
 /* Điểm khởi động: nối các mô-đun lại với nhau. Mỗi việc cụ thể nằm trong file riêng ở lib/. */
 import { applyThemePref, applyAllPrefs } from "./lib/prefs.js";
 applyThemePref(); applyAllPrefs();
+import { applyAccent } from "./lib/accent.js"; applyAccent();
 import { $, safeNext } from "./lib/util.js";
 import { dlog } from "./lib/log.js";
 import * as router from "./lib/router.js";
@@ -36,7 +37,7 @@ S.subscribe((type) => {
   else if (type === "maint") { resetMaintClock(); applyMaint(); }
   else if (type === "notice") { renderNotifDot(); maybeNotice(); }
   else if (type === "updates") { const grew = renderNotifDot(); if (grew && updEmits > 0 && location.pathname !== "/notifications") toast("Có cập nhật mới.", "ok"); updEmits++; if (location.pathname === "/notifications") markSeen(); }
-  else if (type === "theme") applyMedia();
+  else if (type === "theme" || type === "tracks") applyMedia();
 });
 let updEmits = 0;
 onAuth(() => { S.syncDevListeners(); renderNav(); renderAccount(); applyMaint(); });
@@ -44,6 +45,8 @@ onAuth(() => { S.syncDevListeners(); renderNav(); renderAccount(); applyMaint();
 /* Khởi động */
 import { initGfx } from "./lib/gfx.js"; initGfx();
 initLayout(); initNav(); initHeader(); initMedia(); initNotice(); initActions();
+import { initPalette } from "./lib/palette.js"; import { initNetStatus } from "./lib/netstatus.js"; import { initBackTop } from "./lib/backtop.js"; import { initBadges } from "./lib/badges.js";
+initPalette(); initNetStatus(); initBackTop(); initBadges();
 renderNav(true); renderSound(); renderNotifDot();
 S.start();
 const first = initI18n().then(() => router.render({ pop: false }));

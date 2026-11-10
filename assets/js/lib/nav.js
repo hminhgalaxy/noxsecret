@@ -1,4 +1,5 @@
 /* Menu: thanh bên (máy tính), ngăn kéo + thanh dưới (điện thoại). Có hai nút mở rộng riêng: Danh mục và Dev Panel. */
+import { applyBadges } from "./badges.js";
 import { $, $$, esc } from "./util.js";
 import { ICO } from "./icons.js";
 import { store } from "./store.js";
@@ -10,14 +11,15 @@ import { unreadCount } from "./updates.js";
 const LINKS = {
   home: { href: "/", label: "Trang chủ", icon: "home", exact: true },
   search: { href: "/search", label: "Tìm kiếm", icon: "search" },
+  favs: { href: "/favorites", label: "Yêu thích", icon: "heart" },
   notice: { href: "/notifications", label: "Thông báo", icon: "bell", dot: "notice" },
   profile: { href: "/profile", label: "Hồ sơ", icon: "user" },
   settings: { href: "/settings", label: "Cài đặt", icon: "gear" },
-  help: [{ href: "/help", label: "Câu hỏi thường gặp", icon: "bulb", exact: true }],
+  help: [{ href: "/help", label: "Câu hỏi thường gặp", icon: "bulb", exact: true }, { href: "/help/support", label: "Hỗ trợ", icon: "mail" }, { href: "/help/report", label: "Báo cáo", icon: "flag" }, { href: "/help/chat", label: "Nhắn tin với dev", icon: "chat" }, { href: "/help/messages", label: "Tin nhắn của tôi", icon: "layers" }, { href: "/help/submit", label: "Đăng nội dung", icon: "upload" }],
   allCats: { href: "/categories", label: "Tất cả danh mục", icon: "grid", exact: true },
   dev: [{ href: "/dev", label: "Tổng quan", icon: "dash", exact: true }, { href: "/dev/data", label: "Dữ liệu", icon: "box" },
         { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
-        { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" }, { href: "/dev/mail", label: "Gửi thư", icon: "mail" },
+        { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" }, { href: "/dev/inbox", label: "Hộp thư", icon: "chat" }, { href: "/dev/review", label: "Duyệt bài", icon: "check" }, { href: "/dev/mail", label: "Gửi thư", icon: "mail" },
         { href: "/dev/system", label: "Bảo trì & thông báo", icon: "wrench" }, { href: "/dev/test", label: "Kiểm tra hệ thống", icon: "check" }]
 };
 const link = (l, cls = "", i = null) => `<a class="nav-link ${cls}" href="${l.href}" data-exact="${l.exact ? 1 : 0}"${i != null ? ` style="--i:${i}"` : ""}>${ICO[l.icon] || ICO.box}<span class="nl">${esc(l.label)}</span>${l.dot ? `<span class="dot" data-dot="${l.dot}" hidden></span>` : ""}${l.cnt != null ? `<span class="cnt" data-cnt="${esc(l.cid)}"${l.cnt ? "" : " hidden"}>${l.cnt || ""}</span>` : ""}</a>`;
@@ -56,13 +58,14 @@ export function renderNav(force) {
   side.innerHTML = `<span class="nav-sec">Khám phá</span>
     ${link(LINKS.home)}
     ${link(LINKS.search)}
+    ${link(LINKS.favs)}
     ${group("cats", { title: "Danh mục", icon: "grid", count: cats.length }, catItems)}
     ${link(LINKS.notice)}
     <span class="nav-sec">Của bạn</span>
     ${session.user ? link(LINKS.profile) : ""}${link(LINKS.settings)}
     ${group("help", { title: "Trợ giúp", icon: "chat" }, LINKS.help.map((l, i) => link(l, "disc-item", i)).join(""))}
     ${session.isDev ? `<span class="nav-sec">Quản trị</span>${group("dev", { title: "Dev Panel", icon: "shield", cls: "dev" }, devItems)}` : ""}`;
-  renderNotifDot(); markActive(false); renderAccount();
+  renderNotifDot(); markActive(false); renderAccount(); applyBadges();
 }
 export function renderCounts() {
   store.cats.forEach(c => $$(`[data-cnt="${c.id}"]`).forEach(el => { const n = (store.data[c.id] || []).length; el.hidden = !n; el.textContent = n || ""; }));

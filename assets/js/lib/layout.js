@@ -16,6 +16,6 @@ export function setPage(p) {
       <div class="ph-row"><div><h1 class="ptitle">${esc(pg.title)}</h1>${pg.sub ? `<p class="psub">${esc(pg.sub)}</p>` : ""}</div>
       <div class="ph-tools">${pg.count != null ? `<span class="count">${esc(pg.count)}</span>` : ""}${pg.actions || ""}</div></div>`;
   }
-  applySeo({ title: pg.title || null, desc: pg.desc, path: location.pathname, noindex: !!pg.noindex });
+  applySeo({ title: pg.title || null, desc: pg.desc, path: location.pathname, noindex: !!pg.noindex, crumbs: pg.crumbs, ld: pg.ld, faq: pg.faq, extra: pg.extra });
 }
 export function initLayout() { const y = $("#yr"); if (y) y.textContent = "© " + new Date().getFullYear() + " " + NAME + ". Bảo lưu mọi quyền."; }

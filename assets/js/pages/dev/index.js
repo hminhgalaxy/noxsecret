@@ -6,8 +6,10 @@ import { countOf } from "../../lib/ui.js";
 import { locked } from "./shared.js";
 
 const SHORTCUTS = [
-  { href: "/dev/data", t: "Dữ liệu", d: "Thêm, sửa, xóa Script, APK, iOS, Link và các danh mục khác.", i: "box" },
-  { href: "/dev/categories", t: "Danh mục", d: "Tạo hoặc xóa danh mục tùy chỉnh.", i: "grid" },
+  { href: "/dev/data", t: "Dữ liệu", d: "Thêm, sửa, xóa nội dung trong từng danh mục.", i: "box" },
+  { href: "/dev/categories", t: "Danh mục", d: "Thêm, sửa, xóa mọi danh mục (kể cả Script, APK, iOS, Link) và gán cảnh báo.", i: "grid" },
+  { href: "/dev/inbox", t: "Hộp thư", d: "Tin nhắn, báo cáo và yêu cầu hỗ trợ từ người dùng; cấp quyền đăng bài.", i: "chat" },
+  { href: "/dev/review", t: "Duyệt bài", d: "Duyệt hoặc từ chối mục và danh mục do người dùng gửi.", i: "check" },
   { href: "/dev/users", t: "Người dùng", d: "Những tài khoản đã đăng nhập vào website.", i: "users" },
   { href: "/dev/theme", t: "Giao diện", d: "Hình nền, video nền và nhạc nền.", i: "paint" },
   { href: "/dev/updates", t: "Cập nhật", d: "Đăng tin \"Cập nhật này có gì?\" và làm sáng chuông thông báo.", i: "bell" },

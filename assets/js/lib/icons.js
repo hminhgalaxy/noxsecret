@@ -1,5 +1,7 @@
 export const SW = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
 export const ICO = {
+  share:`<svg viewBox="0 0 24 24" ${SW}><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>`,
+  clock:`<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
   script:`<svg viewBox="0 0 24 24" ${SW}><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg>`,
   apk:`<svg viewBox="0 0 24 24" ${SW}><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/><path d="M12 13v7"/></svg>`,
   link:`<svg viewBox="0 0 24 24" ${SW}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
