@@ -37,6 +37,7 @@ export function mount(ctx) {
         <button class="btn primary" type="submit">Tìm</button></form>
       <div class="stat-strip" id="stats"></div>
     </section>
+    <section class="post-band" aria-labelledby="hp"><span class="pb-ico">${ICO.upload}</span><div><h2 id="hp">Có script hay APK muốn chia sẻ?</h2><p>Đăng bài để mọi người cùng dùng. Bài của bạn sẽ được xem xét trước khi hiển thị.</p></div><a class="btn primary" href="/help/submit">${ICO.plus}Đăng bài</a></section>
     <div class="home-grid">
       <section aria-labelledby="hc" class="home-cats">
         <div class="sec-head"><h2 id="hc">Danh mục</h2><a href="/categories">Xem tất cả</a></div>

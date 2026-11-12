@@ -26,7 +26,7 @@ const cleanText = (t, max = 2000) => String(t || "").replace(/\r/g, "").trim().s
 export function createThread({ type, subject, text, ref, wantPost, id }) {
   const uid = need(), body = cleanText(text); if (!body) throw err("Hãy nhập nội dung.");
   const tid = id || db.ref(THREADS + "/" + uid).push().key, mid = db.ref(MSGS + "/" + uid + "/" + tid).push().key, t = {};
-  t[THREADS + "/" + uid + "/" + tid] = { type, subject: cleanText(subject, 120), status: "open", last: "user", unreadDev: true, createdAt: TS(), updatedAt: TS(), ...(wantPost ? { wantPost: true } : {}), ...(ref ? { ref } : {}) };
+  t[THREADS + "/" + uid + "/" + tid] = { type, subject: cleanText(subject, 120), status: "open", last: "user", unreadDev: true, preview: body.slice(0, 140), createdAt: TS(), updatedAt: TS(), ...(wantPost ? { wantPost: true } : {}), ...(ref ? { ref } : {}) };
   t[MSGS + "/" + uid + "/" + tid + "/" + mid] = { from: "user", text: body, ts: TS() };
   return wrap(db.ref().update(t)).then(() => tid);
 }
@@ -36,8 +36,8 @@ export function sendMsg(uid, tid, text, asDev = false) {
   const body = cleanText(text); if (!body) throw err("Hãy nhập nội dung.");
   const mid = db.ref(MSGS + "/" + uid + "/" + tid).push().key, t = {};
   t[MSGS + "/" + uid + "/" + tid + "/" + mid] = { from: asDev ? "dev" : "user", text: body, ts: TS() };
-  Object.assign(t, asDev ? { [THREADS + "/" + uid + "/" + tid + "/last"]: "dev", [THREADS + "/" + uid + "/" + tid + "/unreadUser"]: true, [THREADS + "/" + uid + "/" + tid + "/unreadDev"]: false, [THREADS + "/" + uid + "/" + tid + "/updatedAt"]: TS() }
-    : { [THREADS + "/" + uid + "/" + tid + "/last"]: "user", [THREADS + "/" + uid + "/" + tid + "/unreadDev"]: true, [THREADS + "/" + uid + "/" + tid + "/unreadUser"]: false, [THREADS + "/" + uid + "/" + tid + "/updatedAt"]: TS() });
+  Object.assign(t, asDev ? { [THREADS + "/" + uid + "/" + tid + "/last"]: "dev", [THREADS + "/" + uid + "/" + tid + "/unreadUser"]: true, [THREADS + "/" + uid + "/" + tid + "/unreadDev"]: false, [THREADS + "/" + uid + "/" + tid + "/updatedAt"]: TS(), [THREADS + "/" + uid + "/" + tid + "/preview"]: body.slice(0, 140) }
+    : { [THREADS + "/" + uid + "/" + tid + "/last"]: "user", [THREADS + "/" + uid + "/" + tid + "/unreadDev"]: true, [THREADS + "/" + uid + "/" + tid + "/unreadUser"]: false, [THREADS + "/" + uid + "/" + tid + "/updatedAt"]: TS(), [THREADS + "/" + uid + "/" + tid + "/preview"]: body.slice(0, 140) });
   return wrap(db.ref().update(t));
 }
 export const markRead = (uid, tid, asDev) => db && db.ref(THREADS + "/" + uid + "/" + tid + (asDev ? "/unreadDev" : "/unreadUser")).set(false).catch(() => {});

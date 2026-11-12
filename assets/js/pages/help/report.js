@@ -23,7 +23,7 @@ export function mount(ctx) {
     if (!f.text.value.trim()) { f.querySelector('[data-err="text"]').textContent = "Hãy mô tả vấn đề."; f.text.focus(); return; }
     const ref = { kind: it ? "item" : "other", title: t.slice(0, 120), reason: f.reason.value, ...(it ? { catId: cat ? cat.id : cid, key } : {}) };
     const b = f.querySelector("button[type=submit]"); b.classList.add("busy");
-    try { const tid = await H.createThread({ type: "report", subject: "Báo cáo: " + t, text: f.text.value, ref }); toast("Đã gửi báo cáo. Cảm ơn bạn!"); ctx.navigate("/help/messages/" + tid); }
+    try { const tid = await H.createThread({ type: "report", subject: "Báo cáo: " + t, text: f.text.value, ref }); toast("Đã gửi báo cáo. Cảm ơn bạn!"); ctx.navigate("/inbox/" + tid); }
     catch (x) { re.textContent = friendly(x); b.classList.remove("busy"); }
   });
 }

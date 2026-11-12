@@ -22,3 +22,4 @@ export const MAX_DATA_LEN = 9 * 1024 * 1024;
 export const THEME_PUBLIC_KEYS = ["bgType", "bgData", "audioName"];
 export const TRACKS_NODE = "nox_tracks", TRACKDATA_NODE = "nox_trackdata";
 export const MAX_TRACKS = 30;
+export const LIKES_NODE = "nox_likes", SAVED_NODE = "nox_saved", MAINTNOTES_NODE = "nox_maintnotes";

@@ -128,3 +128,25 @@ Nếu đổi tên miền: đặt biến môi trường `SITE_URL` trên Vercel (
 - **Danh sách nhạc nối tiếp** (dev thêm nhiều bài bằng nút "+"; nút bài kế ở Cài đặt).
 - **Thẻ cập nhật** (Mới / Cải thiện / Sửa lỗi / Bảo mật) và bộ lọc ở Thông báo.
 - Đồ họa: ánh sáng theo con trỏ, parallax, hiện dần khi cuộn, hiệu ứng ripple; tách file CSS theo mức đồ họa.
+
+## Đợt E — thiết kế lại, hộp thư, thông báo, bảo mật, SEO
+
+### Việc bạn cần làm (theo thứ tự)
+1. **Dán lại `database.rules.json`** vào Firebase → Realtime Database → Rules → **Publish** (có thêm `nox_likes`, `nox_saved`, `nox_maintnotes`, `nox_probe` và xem trước tin nhắn). Thiếu bước này thì Thích / Lưu / Thông báo bảo trì / Chẩn đoán DEV sẽ báo "không có quyền".
+2. **Redeploy** trên Vercel (có hàm mới `api/page.js` và `vercel.json` đã đổi: mỗi trang con có `<head>` riêng).
+3. Vào Google Search Console → **Kiểm tra URL** trang chủ và vài trang con (vd `/apk`, `/about`) → **Yêu cầu lập chỉ mục**; gửi lại `sitemap.xml`. Logo (favicon) ở kết quả tìm kiếm do Google cập nhật chậm (vài ngày–vài tuần). Đã thêm favicon PNG 48/96/192 px và logo 512 px trong JSON-LD.
+
+### Mới
+- **Giao diện v2**: font Plus Jakarta Sans, màu nhấn tím–xanh, thẻ/nút/thanh tab mới, trang chủ có mục **Đăng bài**. Giao diện đẹp hơn mặc định; **Cài đặt → Sắc nét** bật chữ rõ hơn + nút bóng như bong bóng.
+- **Chống nháy/giật**: giữ chiều cao khi đổi trang, chống tràn ngang, tự bật **chế độ nhẹ** khi máy giật (tắt hiệu ứng nặng), tạm dừng video nền khi chuyển tab.
+- **Hộp thư** (biểu tượng thư ở đầu trang, mọi tài khoản thật dùng được): kiểu ứng dụng nhắn tin, có huy hiệu riêng. **Dev → không còn mục Hộp thư riêng**, dev trả lời ngay trong hộp thư chung.
+- **Thông báo là popup** (chuông ở đầu trang), có 2 thẻ: Cập nhật · Bảo trì. Đã xóa khỏi menu.
+- **Thông báo bảo trì**: Dev → Bảo trì & thông báo → mục "Thông báo bảo trì" (lên lịch / đang bảo trì / đã xong). Mục đang hoạt động hiện thành dải ngay dưới thanh trên.
+- **Popup riêng cho từng việc** (xác nhận xóa, ban, mute, mật khẩu, mã xác nhận, duyệt bài…) thay cho hộp thoại cũ; trên điện thoại là tấm trượt từ đáy.
+- **Bài viết**: nút **Thích** (đếm công khai, cần tài khoản thật), menu **3 chấm** (Lưu, Chia sẻ, Sao chép liên kết, Mở tab mới, Báo cáo; nhân sự có thêm Sửa/Xóa), **Lưu bài viết** → trang `/favorites` (Đã lưu · Đã thích · Gần đây). **Tìm kiếm** chỉ còn ở trang chủ/Ctrl+K (đã bỏ khỏi menu); **Đăng bài** bỏ khỏi menu, có ở trang chủ.
+- **Bảo mật**: tài khoản Google **bắt buộc bật xác minh 2 bước** (web tự dẫn tới Hồ sơ). **Đổi mật khẩu** cần một trong: mật khẩu hiện tại · mã 2 bước · mã gửi tới email khôi phục.
+- **Chẩn đoán quyền DEV**: Dev Panel có thẻ tự kiểm tra (email đã xác minh? token có xác nhận? phiên có thẻ 2 bước? thử ghi thật vào `nox_probe`). Bấm **Kiểm tra & sửa** để tự khắc phục; nếu thiếu thẻ phiên sẽ đưa bạn tới trang nhập mã 2 bước. Nguyên nhân gốc đã sửa: trạng thái "email đã xác minh" bị cũ sau khi tải lại, và Rules yêu cầu thẻ phiên khi cổng 2 bước đang bật.
+
+### Còn hạn chế (nói thật)
+- Đã kiểm thử bằng Firebase giả + Rules mô phỏng; **chưa thử trên Firebase/Vercel thật của bạn**.
+- Không ai đảm bảo được thứ hạng/logo trên Google; phải chờ Google lập chỉ mục lại.

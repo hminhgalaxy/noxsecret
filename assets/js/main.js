@@ -37,16 +37,21 @@ S.subscribe((type) => {
   else if (type === "maint") { resetMaintClock(); applyMaint(); }
   else if (type === "notice") { renderNotifDot(); maybeNotice(); }
   else if (type === "updates") { const grew = renderNotifDot(); if (grew && updEmits > 0 && location.pathname !== "/notifications") toast("Có cập nhật mới.", "ok"); updEmits++; if (location.pathname === "/notifications") markSeen(); }
+  else if (type === "maintnotes") renderMnBanner();
   else if (type === "theme" || type === "tracks") applyMedia();
 });
 let updEmits = 0;
-onAuth(() => { S.syncDevListeners(); renderNav(); renderAccount(); applyMaint(); });
+onAuth(() => { S.syncDevListeners(); S.syncLikesOwner(); syncSaved(); renderNav(); renderAccount(); applyMaint(); });
 
 /* Khởi động */
+import { syncSaved } from "./lib/favs.js";
 import { initGfx } from "./lib/gfx.js"; initGfx();
+import { initPerf } from "./lib/perf.js"; initPerf();
 initLayout(); initNav(); initHeader(); initMedia(); initNotice(); initActions();
 import { initPalette } from "./lib/palette.js"; import { initNetStatus } from "./lib/netstatus.js"; import { initBackTop } from "./lib/backtop.js"; import { initBadges } from "./lib/badges.js";
-initPalette(); initNetStatus(); initBackTop(); initBadges();
+import { initNotifPanel } from "./lib/notifpanel.js";
+import { renderMnBanner } from "./lib/mnbanner.js";
+initPalette(); initNetStatus(); initBackTop(); initBadges(); initNotifPanel();
 renderNav(true); renderSound(); renderNotifDot();
 S.start();
 const first = initI18n().then(() => router.render({ pop: false }));

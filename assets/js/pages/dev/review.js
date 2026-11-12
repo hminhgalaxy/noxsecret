@@ -27,9 +27,9 @@ export function mount(ctx) {
   box.addEventListener("click", async e => {
     const b = e.target.closest("[data-a]"); if (!b) return; const [uid, pid] = b.closest("[data-k]").dataset.k.split("|"), p = all.find(x => x.uid === uid && x.pid === pid); if (!p) return;
     try {
-      if (b.dataset.a === "no") { const v = await formDialog({ title: "Từ chối bài này?", message: "Người gửi sẽ thấy lý do bên dưới.", ok: "Từ chối", danger: true, fields: [{ id: "note", label: "Lý do (không bắt buộc)", max: 300 }] }); if (v) { await H.rejectPending(p, v.note); toast("Đã từ chối."); } }
-      else if (p.kind === "category") { const v = await formDialog({ title: "Duyệt danh mục này?", message: "Danh mục sẽ hiện công khai. Hãy chọn phân loại phù hợp.", ok: "Duyệt & đăng", fields: [{ id: "risk", label: "Phân loại", value: "", options: Object.entries(S.RISKS) }] }); if (v) { await H.approvePending(p, { risk: v.risk }); toast("Đã duyệt và đăng danh mục."); } }
-      else { if (await confirmDialog({ title: "Duyệt và đăng mục này?", message: "Mục sẽ hiện công khai trong danh mục đã chọn.", ok: "Duyệt & đăng" })) { await H.approvePending(p); toast("Đã duyệt và đăng."); } }
+      if (b.dataset.a === "no") { const v = await formDialog({ kind: "reject", title: "Từ chối bài này?", message: "Người gửi sẽ thấy lý do bên dưới.", ok: "Từ chối", danger: true, fields: [{ id: "note", label: "Lý do (không bắt buộc)", max: 300 }] }); if (v) { await H.rejectPending(p, v.note); toast("Đã từ chối."); } }
+      else if (p.kind === "category") { const v = await formDialog({ kind: "approve", title: "Duyệt danh mục này?", message: "Danh mục sẽ hiện công khai. Hãy chọn phân loại phù hợp.", ok: "Duyệt & đăng", fields: [{ id: "risk", label: "Phân loại", value: "", options: Object.entries(S.RISKS) }] }); if (v) { await H.approvePending(p, { risk: v.risk }); toast("Đã duyệt và đăng danh mục."); } }
+      else { if (await confirmDialog({ kind: "approve", title: "Duyệt và đăng mục này?", message: "Mục sẽ hiện công khai trong danh mục đã chọn.", ok: "Duyệt & đăng" })) { await H.approvePending(p); toast("Đã duyệt và đăng."); } }
     } catch (x) { toast(friendly(x), "err"); }
   });
   const offs = [H.listenAllPending(v => { all = v; draw(); }), S.subscribe(t => { if (t === "users" || t === "cats") draw(); })];

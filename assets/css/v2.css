@@ -1,0 +1,102 @@
+/* ═══ v2.css — lớp thiết kế lại: chống tràn/giật, màu nhấn, thẻ & nút đẹp hơn, chế độ "Sắc nét" ═══ */
+
+/* ── 1. Chống tràn ngang, chống nhảy bố cục, chống chớp trắng ── */
+html{background:var(--bg);overflow-x:clip}
+body{background:var(--bg);overflow-x:clip}
+#view,.page{min-width:0}
+.tracks{grid-template-columns:minmax(0,1fr)}
+.tracks li{min-width:0}
+.grid>*,.tiles>*,.set-grid>*,.home-grid>*,.feats>*{min-width:0}
+img,video,canvas,svg{max-width:100%}
+pre,code{overflow-wrap:anywhere}
+.table-wrap{max-width:100%;overflow-x:auto}
+#view{transition:opacity .18s ease}
+#view.swap{opacity:.001}
+.feats,.steps,.faqs,#hrec{content-visibility:auto;contain-intrinsic-size:auto 360px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+::selection{background:color-mix(in srgb,var(--acc) 40%,transparent)}
+*{scrollbar-width:thin;scrollbar-color:var(--surface-3) transparent}
+
+/* ── 2. Đầu trang gọn trên điện thoại (không đè lên tên website) ── */
+@media(max-width:480px){.hd-brand .word span{display:none}.hd-brand .word b{font-size:14.5px;letter-spacing:.05em}}
+@media(max-width:400px){#btnMenu,.bell,.mailbtn{width:36px;height:36px;border-radius:12px}.avatar{width:34px;height:34px}.hd-r,#hdrAcc{gap:4px}.hero-search input{font-size:15px;padding-right:88px}.hero-search .btn{padding:0 14px}}
+@media(max-width:340px){.hd-brand .word{display:none}}
+.hero-search input{text-overflow:ellipsis}
+.hero-search input::placeholder{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── 3. Trang chủ ── */
+.hero{position:relative;isolation:isolate}
+.hero::before{content:"";position:absolute;z-index:-1;right:-8vw;top:-30px;width:min(640px,92vw);height:430px;pointer-events:none;opacity:.85;filter:blur(34px);
+  background:radial-gradient(closest-side at 30% 40%,color-mix(in srgb,var(--acc) 30%,transparent),transparent 72%),radial-gradient(closest-side at 72% 62%,color-mix(in srgb,var(--acc-2) 22%,transparent),transparent 70%)}
+.hero h1{letter-spacing:-.05em}
+.hero h1 span{background:var(--acc-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{background:color-mix(in srgb,var(--surface) 80%,transparent);border-color:color-mix(in srgb,var(--acc) 35%,var(--line))}
+.eyebrow i{background:var(--acc-grad);box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 55%,transparent)}
+.hero-search{filter:drop-shadow(0 18px 30px color-mix(in srgb,var(--acc) 12%,transparent))}
+.hero-search input{border-color:var(--line-strong);background:color-mix(in srgb,var(--surface) 92%,transparent)}
+.hero-search input:focus{border-color:var(--acc);box-shadow:0 0 0 5px color-mix(in srgb,var(--acc) 16%,transparent)}
+.stat-strip b{background:linear-gradient(180deg,var(--text),var(--text-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.post-band{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:26px 0 8px;padding:20px 22px;border-radius:26px;position:relative;overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));background:linear-gradient(120deg,color-mix(in srgb,var(--acc) 14%,var(--surface)),color-mix(in srgb,var(--acc-2) 9%,var(--surface)))}
+.post-band>div{flex:1;min-width:220px}
+.post-band h2{font-size:clamp(17px,4.4vw,21px);letter-spacing:-.02em;margin:0 0 3px}
+.post-band p{margin:0;color:var(--text-2);font-size:14px}
+.pb-ico{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;flex:none;background:var(--acc-grad);color:#0a0a0a;box-shadow:0 18px 34px -16px var(--acc)}
+.pb-ico svg{width:25px;height:25px}
+@media(max-width:560px){.post-band .btn{width:100%}}
+
+/* ── 4. Thẻ, ô, nút ── */
+.card,.tile,.feat,.set-card,.slide{background-color:var(--surface);background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 3.5%,transparent),transparent)}
+.card{transition:transform .35s var(--ez),border-color .25s,box-shadow .35s,background .25s}
+.card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--acc) 40%,var(--line-strong));box-shadow:0 26px 50px -30px var(--acc),var(--shadow-1)}
+.tile:hover{border-color:color-mix(in srgb,var(--acc) 40%,var(--line-strong));box-shadow:0 26px 50px -30px var(--acc)}
+.tile:hover .tile-ico{background:var(--acc-grad);color:#0a0a0a}
+.card-title{letter-spacing:-.015em}
+.btn{font-weight:700;letter-spacing:-.005em;transition:transform .3s var(--spring),background .2s,border-color .2s,box-shadow .3s,color .2s}
+.btn.primary{box-shadow:0 1px 0 rgba(255,255,255,.28) inset,0 12px 26px -16px var(--strong)}
+.btn.primary:hover{box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 16px 30px -14px var(--acc)}
+.badge{font-weight:700}
+.chip,.seg button,.tab{transition:transform .3s var(--spring),background .2s,color .2s,border-color .2s}
+.seg button.on{box-shadow:0 8px 18px -10px var(--strong)}
+
+/* Thanh tab dưới (điện thoại): dạng thanh nổi */
+@media(max-width:1023.98px){
+  #tabbar{left:10px;right:10px;bottom:calc(8px + var(--safe-b));height:var(--bar-h);padding:6px;border-radius:26px;border:1px solid var(--line-strong);
+    background:color-mix(in srgb,var(--bg) 84%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);box-shadow:0 20px 44px -18px rgba(0,0,0,.7)}
+  #main{padding-bottom:calc(var(--bar-h) + var(--safe-b) + 36px)}
+  .tab.on{background:linear-gradient(180deg,var(--surface-3),var(--surface-2));color:var(--text)}
+}
+
+/* ── 5. Chế độ "Sắc nét": chữ rõ hơn, viền chắc hơn, nút bóng như bong bóng ── */
+:root[data-crisp="on"]{--line:rgba(255,255,255,.15);--line-strong:rgba(255,255,255,.32);--text-2:#c4c4c4;--text-3:#a8a8a8}
+:root[data-crisp="on"][data-theme="light"]{--line:rgba(0,0,0,.16);--line-strong:rgba(0,0,0,.36);--text-2:#3d3d3d;--text-3:#555}
+:root[data-crisp="on"] body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;font-feature-settings:"kern","liga","calt"}
+:root[data-crisp="on"] :is(h1,h2,h3,h4){text-rendering:geometricPrecision;-webkit-text-stroke:.15px currentColor}
+:root[data-crisp="on"] :is(#hdr,#tabbar,#side,.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.statebox,.pop-root>.pop,.cf){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+:root[data-crisp="on"] #hdr{background:var(--bg)}
+:root[data-crisp="on"] .btn:not(.icon):not(.ghost):not(.soft):not(.danger),
+:root[data-crisp="on"] .btn.ghost,:root[data-crisp="on"] .btn.soft,:root[data-crisp="on"] .btn.danger{overflow:hidden;isolation:isolate}
+:root[data-crisp="on"] .btn::before{content:"";position:absolute;z-index:-1;left:6%;right:6%;top:2px;height:46%;border-radius:99px;background:var(--sheen);opacity:.5;pointer-events:none}
+:root[data-crisp="on"] .btn.primary{background:linear-gradient(180deg,color-mix(in srgb,var(--strong) 78%,#fff),var(--strong) 45%,color-mix(in srgb,var(--strong) 84%,#000));
+  box-shadow:inset 0 2px 1px rgba(255,255,255,.55),inset 0 -4px 8px rgba(0,0,0,.22),0 12px 22px -10px color-mix(in srgb,var(--strong) 60%,transparent),0 3px 0 color-mix(in srgb,var(--strong) 55%,#000);border:0;margin-bottom:3px}
+:root[data-crisp="on"] .btn.primary:hover{transform:translateY(-2px) scale(1.02)}
+:root[data-crisp="on"] .btn.primary:active{transform:translateY(2px) scale(.97);box-shadow:inset 0 2px 1px rgba(255,255,255,.4),inset 0 -2px 6px rgba(0,0,0,.25),0 4px 10px -6px var(--strong),0 1px 0 color-mix(in srgb,var(--strong) 55%,#000)}
+:root[data-crisp="on"] .btn.ghost,:root[data-crisp="on"] .btn.soft,:root[data-crisp="on"] .btn.danger{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14),inset 0 -3px 6px rgba(0,0,0,.18),0 8px 16px -10px rgba(0,0,0,.7),0 2px 0 rgba(0,0,0,.35)}
+:root[data-crisp="on"] .btn.ghost:hover,:root[data-crisp="on"] .btn.soft:hover,:root[data-crisp="on"] .btn.danger:hover{transform:translateY(-2px) scale(1.02)}
+:root[data-crisp="on"] .btn.ghost:active,:root[data-crisp="on"] .btn.soft:active,:root[data-crisp="on"] .btn.danger:active{transform:translateY(1px) scale(.97)}
+:root[data-crisp="on"] .like-btn,:root[data-crisp="on"] .chip,:root[data-crisp="on"] .seg button.on,:root[data-crisp="on"] .cf-chip,:root[data-crisp="on"] .badge,:root[data-crisp="on"] .dots-btn,:root[data-crisp="on"] .cv-send,:root[data-crisp="on"] .car-btn{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.16),inset 0 -2px 5px rgba(0,0,0,.16),0 5px 12px -8px rgba(0,0,0,.75)}
+:root[data-crisp="on"] .seg button.on{background:linear-gradient(180deg,color-mix(in srgb,var(--strong) 80%,#fff),var(--strong))}
+:root[data-crisp="on"] .cv .msg.me .bub{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.4),inset 0 -3px 6px rgba(0,0,0,.14),0 10px 20px -12px var(--acc)}
+:root[data-crisp="on"] .cv .bub{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.07),0 4px 10px -8px rgba(0,0,0,.6)}
+:root[data-crisp="on"] img{image-rendering:-webkit-optimize-contrast}
+:root[data-crisp="on"] .cf-ico,:root[data-crisp="on"] .pk-ico,:root[data-crisp="on"] .tile-ico,:root[data-crisp="on"] .pb-ico{box-shadow:inset 0 2px 1px rgba(255,255,255,.4),inset 0 -4px 8px rgba(0,0,0,.2),0 14px 26px -14px var(--acc)}
+
+/* ── 6. Chế độ nhẹ (tự bật khi máy giật): tắt hiệu ứng nặng ── */
+html.lite *,html.lite *::before,html.lite *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+html.lite :is(#hdr,#tabbar,#side,.card,.tile,.pop-root>.pop,.cf,.pop-bg,.cf-ov){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.lite :is(.hero::before,.hero-search){filter:none!important}
+html.lite .hero::before{display:none}
+@media(prefers-reduced-motion:reduce){.hero::before{filter:none}#view{transition:none}}
+
+/* Nội dung tĩnh cho công cụ tìm kiếm (bị thay bằng giao diện thật khi trang chạy) */
+.seo-static{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}

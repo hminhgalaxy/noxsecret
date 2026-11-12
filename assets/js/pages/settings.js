@@ -4,7 +4,7 @@ import { esc, toast } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
 import { session, onAuth, resendVerification } from "../lib/auth.js";
-import { getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
+import { getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, isCrisp, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
 import { confirmDialog } from "../lib/confirm.js";
 import { getLang, setLang } from "../lib/i18n.js";
 import { hasMusic, toggleSound, playlist, currentTrack, nextTrack } from "../lib/media.js";
@@ -32,6 +32,8 @@ export function mount(ctx) {
         <ul class="gfx-list" id="gfxList">${GFX_INFO[gfx].l.map(x => `<li>${x}</li>`).join("")}</ul></section>
       <section class="set-card"><h3>${ICO.paint}Giao diện</h3><p class="muted">Chọn chế độ hiển thị. Lựa chọn được lưu trên thiết bị này.</p>
         <div class="seg" role="radiogroup" aria-label="Giao diện">${[["dark", "Tối"], ["light", "Sáng"], ["system", "Theo thiết bị"]].map(([v, l]) => `<button type="button" role="radio" aria-checked="${pref === v}" data-theme="${v}" class="${pref === v ? "on" : ""}">${l}</button>`).join("")}</div></section>
+      <section class="set-card"><h3>${ICO.sparkles || ICO.star}Sắc nét</h3><p class="muted">Khi bật, chữ và viền rõ hơn, các nút trở nên bóng như bong bóng và đẹp hơn. Tắt hiệu ứng làm mờ để hình sắc nét.</p>
+        ${sw("crisp", "Bật chế độ Sắc nét", isCrisp())}</section>
       <section class="set-card"><h3>${ICO.grid}Kính mờ</h3><p class="muted">Khi bật, các khung trở nên trong suốt, chỉ còn viền và làm mờ phần phía sau. Khi tắt, khung dùng màu đặc theo giao diện (đen hoặc trắng).</p>
         ${sw("glass", "Bật kính mờ", isGlass())}
         <div class="set-fields" id="glassFields" aria-disabled="${!isGlass()}">${rng("glBlur", "Độ mờ", 0, 40, getGlassBlur(), "px", !isGlass())}${rng("glClear", "Độ trong", 0, 100, getGlassClear(), "%", !isGlass())}
@@ -61,18 +63,19 @@ export function mount(ctx) {
     const bindRng = (id, fn) => { const r = $q("#" + id); if (!r) return; r.addEventListener("input", () => { const v = +r.value; r.style.setProperty("--p", (v - +r.min) / (+r.max - +r.min) * 100 + "%"); $q("#" + id + "V").textContent = v + r.dataset.unit; fn(v); }); };
     const gr = $q("#gfx"), applyG = async i => {
       const g = GFX[i]; if (g === getGfx()) return;
-      if (g === "high" && !(await confirmDialog({ title: "Chuyển sang đồ họa Cao?", message: "Mức Cao hiện hình nền website, âm thanh và nhiều hiệu ứng nâng cao. Trên máy yếu hoặc pin thấp, web có thể giật, nóng máy và tốn pin hơn. Bạn vẫn có thể quay lại mức thấp hơn bất cứ lúc nào.", ok: "Dùng mức Cao", cancel: "Giữ mức hiện tại" }))) { draw(); return; }
+      if (g === "high" && !(await confirmDialog({ kind: "high", title: "Chuyển sang đồ họa Cao?", message: "Mức Cao hiện hình nền website, âm thanh và nhiều hiệu ứng nâng cao. Trên máy yếu hoặc pin thấp, web có thể giật, nóng máy và tốn pin hơn. Bạn vẫn có thể quay lại mức thấp hơn bất cứ lúc nào.", ok: "Dùng mức Cao", cancel: "Giữ mức hiện tại" }))) { draw(); return; }
       setGfx(g); draw(); const e = $q("#gfx"); if (e) e.focus();
     };
     const prevG = i => { const g = GFX[i]; gr.style.setProperty("--p", i * 50 + "%"); $q("#gfxName").textContent = GFX_INFO[g].n; $q("#gfxStep").textContent = (+i + 1) + " / 3"; $q("#gfxList").innerHTML = GFX_INFO[g].l.map(x => `<li>${x}</li>`).join(""); ctx.el.querySelectorAll(".gfx-ticks span").forEach(x => x.classList.toggle("on", +x.dataset.g === +i)); };
     gr.addEventListener("input", () => prevG(+gr.value)); gr.addEventListener("change", () => applyG(+gr.value));
     ctx.el.querySelectorAll(".gfx-ticks span").forEach(x => x.addEventListener("click", () => { gr.value = x.dataset.g; prevG(+x.dataset.g); applyG(+x.dataset.g); }));
+    const cr = $q("#crisp"); if (cr) cr.addEventListener("change", () => { setFlag("crisp", cr.checked); toast(cr.checked ? "Đã bật chế độ Sắc nét." : "Đã tắt chế độ Sắc nét.", "ok"); });
     const gl = $q("#glass"); if (gl) gl.addEventListener("change", () => { setGlass(gl.checked); redraw("glass"); });
     bindRng("glBlur", setGlassBlur); bindRng("glClear", setGlassClear);
     $q("#glReset").addEventListener("click", () => { setGlassBlur(GLASS_DEF.blur); setGlassClear(GLASS_DEF.clear); draw(); });
     $q("#bgShow").addEventListener("change", e => { setBgHidden(!e.target.checked); redraw("bgShow"); }); bindRng("bgBright", setBgBright); bindRng("vol", setVolume);
     [["rm", "motion", true], ["hc", "contrast", true], ["dens", "compact", true], ["intro", "intro", true]].forEach(([id, name]) => $q("#" + id).addEventListener("change", e => setFlag(name, e.target.checked)));
-    $q("#resetAll").addEventListener("click", async () => { if (await confirmDialog({ title: "Đặt lại cài đặt hiển thị?", message: "Giao diện, kính mờ, hình nền, âm thanh và trợ năng sẽ về mặc định. Ngôn ngữ giữ nguyên.", ok: "Đặt lại", danger: true })) { resetPrefs(); setAccent(""); draw(); toast("Đã đặt lại cài đặt."); } });
+    $q("#resetAll").addEventListener("click", async () => { if (await confirmDialog({ kind: "reset", title: "Đặt lại cài đặt hiển thị?", message: "Giao diện, kính mờ, hình nền, âm thanh và trợ năng sẽ về mặc định. Ngôn ngữ giữ nguyên.", ok: "Đặt lại", danger: true })) { resetPrefs(); setAccent(""); draw(); toast("Đã đặt lại cài đặt."); } });
     ctx.el.querySelectorAll("[data-accent]").forEach(b => b.addEventListener("click", () => { setAccent(b.dataset.accent); draw(); const e = ctx.el.querySelector(`[data-accent="${b.dataset.accent}"]`); if (e) e.focus(); }));
     const nb = $q("#nextBtn"); if (nb) nb.addEventListener("click", () => nextTrack());
     const s = $q("#snd"); if (s) s.addEventListener("change", () => { toggleSound(); redraw("snd"); });

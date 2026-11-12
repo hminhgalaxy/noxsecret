@@ -6,7 +6,7 @@ import { authMessage, GENERIC } from "./messages.js";
 import { api, apiMessage, serverReady } from "./account.js";
 
 const subs = new Set();
-export const session = { user: null, ready: false, isDev: false, devBlocked: "", isGuest: false, isEditor: false, adminLoaded: false, profile: null, admin: null, banned: null, sec: null, secLoaded: false, twofaPending: false };
+export const session = { user: null, ready: false, isDev: false, devBlocked: "", isGuest: false, isEditor: false, adminLoaded: false, profile: null, admin: null, banned: null, needTwofaSetup: false, sec: null, secLoaded: false, twofaPending: false };
 /* Quyền theo hồ sơ quản trị của chính người dùng (do DEV cấp): vai trò, ban, mute */
 const active = t => typeof t === "number" && t > Date.now();
 export const banInfo = () => (session.admin && active(session.admin.banUntil)) ? { until: session.admin.banUntil, reason: session.admin.banReason || "" } : null;
@@ -49,12 +49,12 @@ function watchSelf(u) {
   const notify = () => subs.forEach(f => { try { f(session); } catch (e) { console.error(e); } });
   if (!u.isAnonymous) { const r = db.ref(USERS_NODE + "/" + u.uid), h = r.on("value", sn => { session.profile = sn.val() || null; notify(); }, () => {}); offSelf.push(() => r.off("value", h)); }
   if (!u.isAnonymous) {
-    const rs = db.ref(SEC_NODE + "/" + u.uid), hs = rs.on("value", sn => { session.sec = sn.val() || null; computeTwofa(u).then(() => { if (auth.currentUser === u || (auth.currentUser && auth.currentUser.uid === u.uid)) { session.secLoaded = true; notify(); } }); }, () => { session.secLoaded = true; notify(); });
+    const rs = db.ref(SEC_NODE + "/" + u.uid), hs = rs.on("value", sn => { session.sec = sn.val() || null; computeTwofa(u).then(() => computeSetup(u)).then(() => { if (auth.currentUser === u || (auth.currentUser && auth.currentUser.uid === u.uid)) { session.secLoaded = true; notify(); } }); }, () => { session.secLoaded = true; notify(); });
     offSelf.push(() => rs.off("value", hs));
   } else session.secLoaded = true;
   const ra = db.ref(ADMIN_NODE + "/" + u.uid), ha = ra.on("value", sn => {
     session.admin = sn.val() || null; session.adminLoaded = true; session.isEditor = isEditor(); const b = banInfo();
-    if (b) { session.banned = b; if (Date.now() - banShown > 4000) { banShown = Date.now(); import("./confirm.js").then(m => m.alertDialog({ title: "Account suspended", message: b.reason ? "Reason: " + b.reason : "Your account has been suspended by an administrator.", ok: "OK", danger: true })).catch(() => {}); } need().signOut().catch(() => {}); }
+    if (b) { session.banned = b; if (Date.now() - banShown > 4000) { banShown = Date.now(); import("./confirm.js").then(m => m.alertDialog({ kind: "ban", title: "Account suspended", message: b.reason ? "Reason: " + b.reason : "Your account has been suspended by an administrator.", ok: "OK", danger: true })).catch(() => {}); } need().signOut().catch(() => {}); }
     notify();
   }, () => { session.adminLoaded = true; notify(); }); offSelf.push(() => ra.off("value", ha));
 }
@@ -68,7 +68,7 @@ function computeTwofa(u) {
   twofaRun = (async () => {
     if (!u || u.isAnonymous) { session.twofaPending = false; session.twofaReason = null; return; }
     const flagged = !!(session.sec && session.sec.twofa);
-    if (!u.emailVerified) { try { await u.reload(); } catch (_) {} }
+    if (!u.emailVerified) { try { await u.reload(); } catch (_) {} if (u.emailVerified) { const r = computeDev(u); session.isDev = r.dev; session.devBlocked = r.why; session.isEditor = isEditor(); } }
     try {
       let c = ((await u.getIdTokenResult(true)).claims) || {}; const has = () => [c.tf1, c.tf2, c.tf3].includes(c.auth_time);
       if (has() && session.sec && (session.sec.gate || session.sec.twofa)) { session.twofaPending = false; session.twofaReason = null; return; }
@@ -84,6 +84,15 @@ function computeTwofa(u) {
   })().finally(() => { twofaRun = null; });
   return twofaRun;
 }
+/* Tài khoản Google cũng PHẢI bật xác minh 2 bước (khi máy chủ gửi thư đã sẵn sàng): chưa bật → router đưa tới Hồ sơ › Bảo mật để bật */
+export const isGoogleUser = u => !!(u && (u.providerData || []).some(p => p.providerId === "google.com"));
+async function computeSetup(u) {
+  session.needTwofaSetup = false;
+  if (!u || u.isAnonymous || !isGoogleUser(u) || !u.emailVerified || (session.sec && session.sec.twofa) || session.twofaPending) return;
+  try { session.needTwofaSetup = await serverReady(); } catch (_) { session.needTwofaSetup = false; }
+}
+/* Ép đưa tới /two-step (dùng khi phiên thiếu "thẻ phiên" nên không ghi được dữ liệu quản trị) */
+export function forceTwofa() { session.twofaPending = true; session.twofaReason = "twofa"; subs.forEach(f => { try { f(session); } catch (e) { console.error(e); } }); }
 /* Sau khi máy chủ cấp claim (nhập đúng mã / bật 2FA) → lấy token mới và đánh giá lại */
 export async function refreshSession() {
   const u = need().currentUser; if (!u) return; await computeTwofa(u); subs.forEach(f => { try { f(session); } catch (e) { console.error(e); } });
@@ -124,9 +133,9 @@ export async function sendVerification() {
 /* Quên cả email đăng nhập? Gửi liên kết đặt lại mật khẩu tới EMAIL KHÔI PHỤC (nếu có). Luôn báo thành công để không lộ thông tin. */
 /* Nhập mã nhận qua email + mật khẩu mới → đổi mật khẩu (chưa cần đăng nhập). */
 export async function resetConfirm(email, code, password) { const r = await api("reset-confirm", { email, code, password }, { token: false }); if (!r.ok) throw apiErr(r); return r; }
-export const passwordCodeSend = () => act("password-code-send", {});
-/* Đổi mật khẩu khi đang đăng nhập: mật khẩu hiện tại + mã gửi về email. Máy chủ thu hồi mọi phiên → đăng nhập lại. */
-export async function changePasswordWithCode(currentPassword, code, password) { const r = await act("password-change", { currentPassword, code, password }); try { await need().signOut(); } catch (_) {} return r; }
+export const passwordCodeSend = via => act("password-code-send", { via });
+/* Đổi mật khẩu khi đang đăng nhập — một trong ba cách: via = "current" (mật khẩu hiện tại) | "recovery" (mã gửi email khôi phục) | "twofa" (mã xác minh 2 bước). Máy chủ thu hồi mọi phiên → đăng nhập lại. */
+export async function changePassword({ via, currentPassword, code, password }) { const r = await act("password-change", { via, currentPassword, code, password }); try { await need().signOut(); } catch (_) {} return r; }
 export async function recoverByRecoveryEmail(e) { const r = await api("recover", { email: e }, { token: false }); if (r.ok) return; throw apiErr(r); }
 /* Xác minh 2 bước + email khôi phục + đổi email (cần máy chủ đã cấu hình) */
 async function act(action, body, refresh) { const r = await api(action, body); if (!r.ok) throw apiErr(r); if (refresh && r.refresh) await refreshSession(); return r; }
@@ -190,3 +199,9 @@ export async function renderGoogleButton(container, { onDone, onError, guard } =
     dlog("er", "GIS: " + e.message); onError && onError("Không tải được đăng nhập Google. Hãy kiểm tra mạng rồi tải lại trang.");
   }
 }
+
+/* Quay lại tab sau khi bấm liên kết xác minh email ở tab khác → tự cập nhật (không phải tải lại trang) */
+document.addEventListener("visibilitychange", async () => {
+  const u = auth && auth.currentUser; if (document.visibilityState !== "visible" || !u || u.isAnonymous || u.emailVerified) return;
+  try { await u.reload(); if (u.emailVerified) { await u.getIdToken(true); apply(u); computeTwofa(u).then(() => subs.forEach(f => { try { f(session); } catch (e) { console.error(e); } })); } } catch (_) {}
+});

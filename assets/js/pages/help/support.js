@@ -18,7 +18,7 @@ export function mount(ctx) {
     if (!f.subject.value.trim()) { f.querySelector('[data-err="subject"]').textContent = "Hãy nhập chủ đề."; f.subject.focus(); return; }
     if (!f.text.value.trim()) { f.querySelector('[data-err="text"]').textContent = "Hãy nhập nội dung."; f.text.focus(); return; }
     const b = f.querySelector("button[type=submit]"); b.classList.add("busy");
-    try { const tid = await H.createThread({ type: "support", subject: f.subject.value, text: f.text.value, wantPost: f.wantPost.checked }); toast("Đã gửi yêu cầu. Quản trị viên sẽ trả lời trong mục Tin nhắn."); ctx.navigate("/help/messages/" + tid); }
+    try { const tid = await H.createThread({ type: "support", subject: f.subject.value, text: f.text.value, wantPost: f.wantPost.checked }); toast("Đã gửi yêu cầu. Quản trị viên sẽ trả lời trong Hộp thư."); ctx.navigate("/inbox/" + tid); }
     catch (x) { se.textContent = friendly(x); b.classList.remove("busy"); }
   });
 }

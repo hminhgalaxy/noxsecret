@@ -92,3 +92,21 @@ ICO.dash=`<svg viewBox="0 0 24 24" ${SW}><rect x="3.5" y="3.5" width="7" height=
 ICO.wrench=`<svg viewBox="0 0 24 24" ${SW}><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.5 17.3a2 2 0 1 0 3.2 3.2l5.8-5.8a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4Z"/></svg>`;
 /* Logo Google đúng màu thương hiệu (theo quy định của Google) */
 ICO.google=`<svg class="g-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.45a5.52 5.52 0 0 1-2.39 3.62v3h3.87c2.27-2.09 3.57-5.17 3.57-8.81Z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.91l-3.87-3c-1.07.72-2.45 1.15-4.08 1.15-3.13 0-5.78-2.11-6.72-4.95H1.28v3.1A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.28 14.29a7.2 7.2 0 0 1 0-4.58v-3.1H1.28a12 12 0 0 0 0 10.78l4-3.1Z"/><path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.59 1.8l3.44-3.44A11.5 11.5 0 0 0 12 0 12 12 0 0 0 1.28 6.61l4 3.1C6.22 6.87 8.87 4.76 12 4.76Z"/></svg>`;
+/* Biểu tượng bổ sung (Đợt D) */
+const _s = d => `<svg viewBox="0 0 24 24" ${SW}>${d}</svg>`;
+ICO.dots = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg>`;
+ICO.heartFill = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.6 3.6 4.5 6.9 4.5c2 0 3.8 1.1 5.1 3 1.3-1.9 3.1-3 5.1-3 3.3 0 5.2 3.1 4.1 6.6-1.7 4.8-9.2 9.4-9.2 9.4Z"/></svg>`;
+ICO.bookmark = _s('<path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/>');
+ICO.bookmarkFill = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1Z"/></svg>`;
+ICO.send = _s('<path d="M21 3 10.5 13.5"/><path d="m21 3-6.5 18-4-7.5L3 9.5Z"/>');
+ICO.inbox = _s('<path d="M3.5 13.5 6 5.5A1.5 1.5 0 0 1 7.4 4.5h9.2A1.5 1.5 0 0 1 18 5.5l2.5 8"/><path d="M3.5 13.5v5A1.5 1.5 0 0 0 5 20h14a1.5 1.5 0 0 0 1.5-1.5v-5h-5l-1.2 2h-4.6l-1.2-2Z"/>');
+ICO.envelope = _s('<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.8 7.2 8.2 6 8.2-6"/>');
+ICO.flagTop = ICO.flag;
+ICO.newtab = _s('<path d="M14 4h6v6"/><path d="M20 4 10.5 13.5"/><path d="M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>');
+ICO.hammer = ICO.wrench;
+ICO.calendar = _s('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>');
+ICO.info = _s('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.6" r=".6" fill="currentColor"/>');
+ICO.checkCircle = _s('<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16 9.5"/>');
+ICO.eyeOff = _s('<path d="M3 3l18 18"/><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c5 0 8.5 4.2 9.5 6a12.6 12.6 0 0 1-2.9 3.5M6.5 7.4A12.7 12.7 0 0 0 2.5 12c1 1.8 4.5 6 9.5 6 1.3 0 2.5-.3 3.6-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>');
+ICO.smile = _s('<circle cx="12" cy="12" r="9"/><path d="M8.5 14c.9 1.2 2 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><path d="M9 9.5h.01M15 9.5h.01"/>');
+ICO.brand = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="7" fill="currentColor"/><path d="M15.6 8.4c-.6-1-1.7-1.6-3.2-1.6-1.9 0-3.1 1-3.1 2.4 0 1.5 1.2 2 3.2 2.4 2.2.5 3.7 1.3 3.7 3.3 0 2-1.7 3.3-4 3.3-1.9 0-3.4-.8-4.1-2.3" fill="none" stroke="var(--on-strong,#fff)" stroke-width="2" stroke-linecap="round"/></svg>`;

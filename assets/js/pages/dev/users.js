@@ -45,15 +45,15 @@ export function mount(ctx) {
     };
     if (b.dataset.a === "role") {
       const on = a.role === "editor";
-      if (await confirmDialog({ title: on ? "Gỡ quyền biên tập viên?" : "Cấp quyền biên tập viên?", message: on ? name + " sẽ không còn thêm, sửa hay xóa nội dung được." : name + " sẽ được thêm, sửa và xóa nội dung (Script, APK, iOS, Link...). Không đụng được vào danh mục, giao diện hay người dùng.", ok: on ? "Gỡ quyền" : "Cấp quyền", danger: on })) run({ role: on ? "" : "editor" }, on ? "Đã gỡ quyền." : "Đã cấp quyền.", on ? "unrole" : "role");
+      if (await confirmDialog({ kind: "role", title: on ? "Gỡ quyền biên tập viên?" : "Cấp quyền biên tập viên?", message: on ? name + " sẽ không còn thêm, sửa hay xóa nội dung được." : name + " sẽ được thêm, sửa và xóa nội dung (Script, APK, iOS, Link...). Không đụng được vào danh mục, giao diện hay người dùng.", ok: on ? "Gỡ quyền" : "Cấp quyền", danger: on })) run({ role: on ? "" : "editor" }, on ? "Đã gỡ quyền." : "Đã cấp quyền.", on ? "unrole" : "role");
     } else if (b.dataset.a === "mute") {
-      if (act(a.muteUntil)) { if (await confirmDialog({ title: "Bỏ mute?", message: name + " sẽ đổi được ảnh, mô tả và tên trở lại.", ok: "Bỏ mute" })) run({ muteUntil: "", muteReason: "" }, "Đã bỏ mute.", "unmute"); return; }
-      const v = await formDialog({ title: "Mute " + name + "?", message: "Người bị mute không đổi được ảnh, mô tả và tên hiển thị.", ok: "Mute", danger: true,
+      if (act(a.muteUntil)) { if (await confirmDialog({ kind: "mute", title: "Bỏ mute?", message: name + " sẽ đổi được ảnh, mô tả và tên trở lại.", ok: "Bỏ mute" })) run({ muteUntil: "", muteReason: "" }, "Đã bỏ mute.", "unmute"); return; }
+      const v = await formDialog({ kind: "mute", title: "Mute " + name + "?", message: "Người bị mute không đổi được ảnh, mô tả và tên hiển thị.", ok: "Mute", danger: true,
         fields: [{ id: "dur", label: "Thời hạn", options: DUR, value: "86400000" }, { id: "why", label: "Lý do (không bắt buộc)", max: 200 }] });
       if (v) run({ muteUntil: untilOf(v.dur), muteReason: (v.why || "").trim() }, "Đã mute.", "mute", { until: untilOf(v.dur), reason: (v.why || "").trim() });
     } else if (b.dataset.a === "ban") {
-      if (act(a.banUntil)) { if (await confirmDialog({ title: "Bỏ ban?", message: name + " sẽ dùng được tài khoản trở lại.", ok: "Bỏ ban" })) run({ banUntil: "", banReason: "" }, "Đã bỏ ban.", "unban"); return; }
-      const v = await formDialog({ title: "Ban " + name + "?", message: "Người bị ban bị đăng xuất ngay và không thể dùng tài khoản trong thời hạn này.", ok: "Ban", danger: true,
+      if (act(a.banUntil)) { if (await confirmDialog({ kind: "ban", title: "Bỏ ban?", message: name + " sẽ dùng được tài khoản trở lại.", ok: "Bỏ ban" })) run({ banUntil: "", banReason: "" }, "Đã bỏ ban.", "unban"); return; }
+      const v = await formDialog({ kind: "ban", title: "Ban " + name + "?", message: "Người bị ban bị đăng xuất ngay và không thể dùng tài khoản trong thời hạn này.", ok: "Ban", danger: true,
         fields: [{ id: "dur", label: "Thời hạn", options: DUR, value: "604800000" }, { id: "why", label: "Lý do (người dùng sẽ thấy)", max: 200 }] });
       if (v) run({ banUntil: untilOf(v.dur), banReason: (v.why || "").trim() }, "Đã ban.", "ban", { until: untilOf(v.dur), reason: (v.why || "").trim() });
     }

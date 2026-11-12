@@ -30,7 +30,7 @@ export function mount(ctx) {
       else if (f.type.startsWith("video/")) { if (f.size > 6.5 * 1048576) return ($("#thE").textContent = "Video quá lớn (tối đa khoảng 6,5 MB)."); const d = await readAsDataURL(f); if (d.length > MAX_DATA_LEN) return ($("#thE").textContent = "Video quá lớn."); bg = { type: "video", data: d, name: f.name }; $("#thP").innerHTML = `<video src="${esc(d)}" muted loop autoplay playsinline></video>`; }
       else return ($("#thE").textContent = "Chỉ hỗ trợ ảnh hoặc video."); $("#thA").disabled = false; } catch (x) { $("#thE").textContent = friendly(x); } });
   $("#thA").onclick = () => { if (!bg) return; const b = $("#thA"); b.disabled = true; S.setTheme({ bgType: bg.type, bgData: bg.data }).then(() => { toast("Đã áp dụng hình nền."); bg = null; $("#thP").innerHTML = ""; }).catch(x => { $("#thE").textContent = friendly(x); b.disabled = false; }); };
-  $("#thC").onclick = async () => { if (!(await confirmDialog({ title: "Xóa hình nền?", message: "Hình nền sẽ bị gỡ khỏi website của mọi người.", ok: "Xóa nền", danger: true }))) return; S.setTheme({ bgType: "none", bgData: "" }).then(() => { bg = null; $("#thP").innerHTML = ""; $("#thA").disabled = true; toast("Đã xóa hình nền."); }).catch(x => toast(friendly(x), "err")); };
+  $("#thC").onclick = async () => { if (!(await confirmDialog({ kind: "media", title: "Xóa hình nền?", message: "Hình nền sẽ bị gỡ khỏi website của mọi người.", ok: "Xóa nền", danger: true }))) return; S.setTheme({ bgType: "none", bgData: "" }).then(() => { bg = null; $("#thP").innerHTML = ""; $("#thA").disabled = true; toast("Đã xóa hình nền."); }).catch(x => toast(friendly(x), "err")); };
   $("#auF").addEventListener("change", async e => { const fs = [...e.target.files]; e.target.value = ""; $("#auE").textContent = ""; let n = 0;
     for (const f of fs) {
       if (!f.type.startsWith("audio/")) { $("#auE").textContent = "Tệp \"" + f.name + "\" không phải âm thanh."; continue; }
@@ -39,7 +39,7 @@ export function mount(ctx) {
     }
     if (n) toast(n === 1 ? "Đã thêm 1 bài vào danh sách phát." : "Đã thêm " + n + " bài vào danh sách phát."); });
   $("#auL").addEventListener("click", async e => { const b = e.target.closest("[data-rm]"); if (!b) return;
-    if (!(await confirmDialog({ title: "Xóa bài này?", message: "Bài nhạc sẽ bị gỡ khỏi danh sách phát của mọi người.", ok: "Xóa bài", danger: true }))) return;
+    if (!(await confirmDialog({ kind: "music", title: "Xóa bài này?", message: "Bài nhạc sẽ bị gỡ khỏi danh sách phát của mọi người.", ok: "Xóa bài", danger: true }))) return;
     S.removeTrack(b.dataset.rm).then(() => toast("Đã xóa bài nhạc.")).catch(x => toast(friendly(x), "err")); });
   const u2 = S.subscribe(t => { if (t === "tracks") status(); });
   return () => { u(); u2(); };

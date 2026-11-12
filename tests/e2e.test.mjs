@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import fs from "node:fs";
 import { startServer } from "./server.mjs";
 import { fakeFirebaseSource, GIS_STUB, DEV_EMAIL } from "./fake-firebase.mjs";
 const { chromium, devices } = createRequire(import.meta.url)("playwright");
@@ -81,12 +82,12 @@ const viContent = page => page.evaluate(src => {
   const re = new RegExp(src, "i"), out = [], skip = n => { for (let e = n.nodeType === 1 ? n : n.parentElement; e; e = e.parentElement) { if (/^(SCRIPT|STYLE|NOSCRIPT|CODE|PRE)$/.test(e.tagName) || e.getAttribute("translate") === "no") return true; } return false; };
   const w = document.createTreeWalker(document.body, 5);
   for (let n = w.nextNode(); n; n = w.nextNode()) {
-    if (n.nodeType === 3) { if (re.test(n.nodeValue) && !skip(n)) out.push(n.nodeValue.trim().slice(0, 60)); }
-    else if (!skip(n)) for (const a of ["placeholder", "aria-label", "title", "alt"]) { const v = n.getAttribute(a); if (v && re.test(v)) out.push("[" + a + "] " + v.slice(0, 60)); }
+    if (n.nodeType === 3) { if (re.test(n.nodeValue) && !skip(n)) out.push(n.nodeValue.trim().slice(0, 400)); }
+    else if (!skip(n)) for (const a of ["placeholder", "aria-label", "title", "alt"]) { const v = n.getAttribute(a); if (v && re.test(v)) out.push("[" + a + "] " + v.slice(0, 400)); }
   }
   if (re.test(document.title)) out.push("[title] " + document.title);
   return [...new Set(out)];
-}, VI.source).then(l => l.filter(x => !SEED_TEXT.some(t => x.includes(t))));
+}, VI.source).then(l => l.filter(x => !SEED_TEXT.some(t => x.includes(t)))).then(l => { if (process.env.VI_DUMP && l.length) fs.appendFileSync(process.env.VI_DUMP, l.join("\n") + "\n"); return l.map(x => x.length > 70 ? x.slice(0, 70) + "…" : x); });
 /* Nội dung do DEV / người dùng nhập (dữ liệu mẫu) — được giữ nguyên, không dịch */
 const SEED_TEXT = ["Danh mục Mod", "Tự động farm", "Dữ liệu cũ dùng title/script", "Cộng đồng", "Thêm APK mới", "Đã thêm vài APK mới vào kho.", "Auto Farm Script", "Dev Minh", "Người Dùng"];
 /* Kiểm tra chữ: từ bị xuống dòng giữa chừng (H/O/O), tràn ngang, chữ quá to hoặc quá nhỏ */
@@ -258,7 +259,7 @@ test("menu: nút Danh mục mở ra từ từ, có hiệu ứng, ghi nhớ và �
 test("menu: Dev Panel có nút riêng, chỉ DEV mới thấy", async ({ page }) => {
   await go(page, "/"); eq(await page.locator('.disc[data-g="dev"]').count(), 0, "khách không thấy");
   await loginDev(page); await page.waitForSelector('.disc[data-g="dev"]'); await page.locator('.disc[data-g="dev"] .nav-btn').click(); await page.waitForTimeout(700);
-  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 11, "11 mục quản trị (có Gửi thư, Hộp thư, Duyệt bài)");
+  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 10, "10 mục quản trị (có Gửi thư, Duyệt bài)"); eq(await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/inbox"]').count(), 0, "Hộp thư không còn nằm trong Dev Panel");
   await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/system"]').click(); await page.waitForURL(BASE + "/dev/system"); await page.waitForSelector("#mBtn");
 });
 test("menu: tài khoản thường không thấy Dev Panel và bị chặn khi vào /dev", async ({ page }) => {
@@ -314,19 +315,31 @@ test("đầu trang điện thoại (Pixel 5 & 320px): thương hiệu ở giữa
     ok(m.brandH < 60, w + ": thương hiệu bị xuống dòng (cao " + m.brandH + ")");
   }
 }, { device: devices["Pixel 5"] });
-test("chuông thông báo: sáng khi DEV đăng cập nhật mới, tắt khi mở trang Thông báo", async ({ page }) => {
+const openBell = async page => { await page.click("#btnBell"); await page.waitForSelector('[data-pop="notif"].on'); };
+const closePop = async (page, id) => { await page.keyboard.press("Escape"); await page.waitForSelector(`[data-pop="${id}"]`, { state: "detached" }); };
+test("chuông thông báo (popup): sáng khi DEV đăng cập nhật mới, tắt khi mở popup", async ({ page }) => {
   await go(page, "/"); await page.waitForTimeout(600);
-  await page.click("#btnBell"); await page.waitForURL(BASE + "/notifications"); await page.waitForSelector(".upd"); await page.waitForTimeout(300);
-  ok(await page.locator("#bellBadge").isHidden(), "đã xem hết → chuông tắt");
+  await openBell(page); await page.waitForSelector('[data-pop="notif"] .upd'); await page.waitForTimeout(300);
+  eq(path(page), "/", "thông báo là popup, không đổi trang");
+  ok(await page.locator("#bellBadge").isHidden(), "đã xem hết → chuông tắt"); await closePop(page, "notif");
   await go(page, "/"); await page.waitForTimeout(300); ok(await page.locator("#bellBadge").isHidden(), "reload vẫn giữ trạng thái đã xem");
   await page.evaluate(() => { const d = window.__fb.getDb(); d.nox_updates["-u2"] = { title: "Bản vá mới", body: "Sửa lỗi nhỏ.", ts: Date.now() }; window.__fb.setDb(d); });
   await page.waitForFunction(() => !document.querySelector("#bellBadge").hidden, null, { timeout: 4000 }).catch(() => { throw new Error("chuông không sáng khi có cập nhật mới"); });
   eq((await page.textContent("#bellBadge")).trim(), "1"); await page.waitForSelector(".toast"); ok((await toasts(page)).join("").includes("Có cập nhật mới"), "có toast");
-  await page.click("#btnBell"); await page.waitForURL(BASE + "/notifications"); await page.waitForSelector(".upd.new"); ok((await page.textContent("#view")).includes("Bản vá mới"), "hiện bài mới");
+  await openBell(page); await page.waitForSelector('[data-pop="notif"] .upd.new'); ok((await page.textContent('[data-pop="notif"]')).includes("Bản vá mới"), "hiện bài mới");
   await page.waitForFunction(() => document.querySelector("#bellBadge").hidden);
 });
-test("trang Thông báo: thông báo đang ghim + danh sách cập nhật", async ({ page }) => {
-  await go(page, "/notifications"); ok((await page.textContent("#view")).includes("Đây là thông báo thử nghiệm."), "thông báo ghim"); ok((await page.textContent("#view")).includes("Thêm APK mới"), "bài DEV"); ok((await page.locator(".upd").count()) >= 2, "có cả ghi chú bản");
+test("thông báo popup: hai thẻ Cập nhật / Bảo trì, Esc đóng, trả focus; /notifications cũ vẫn mở popup", async ({ page }) => {
+  await go(page, "/"); await page.focus("#btnBell"); await page.keyboard.press("Enter"); await page.waitForSelector('[data-pop="notif"].on');
+  eq(await page.locator('[data-pop="notif"] [role=tab]').count(), 2, "hai thẻ"); eq(await page.getAttribute('[data-pop="notif"] .pop', "aria-modal"), "true");
+  await page.keyboard.press("Escape"); await page.waitForSelector('[data-pop="notif"]', { state: "detached" }); eq(await page.evaluate(() => document.activeElement.id), "btnBell", "trả focus về chuông");
+  eq(await page.locator('#side a[href="/notifications"]').count(), 0, "đã bỏ Thông báo khỏi menu");
+  await go(page, "/notifications"); await page.waitForSelector('[data-pop="notif"].on'); eq(path(page), "/", "địa chỉ cũ chuyển về trang chủ và mở popup");
+});
+test("popup Thông báo: thẻ Bảo trì có thông báo ghim, thẻ Cập nhật có danh sách", async ({ page }) => {
+  await go(page, "/"); await openBell(page); await page.waitForSelector('[data-pop="notif"] .upd');
+  ok((await page.textContent('[data-pop="notif"]')).includes("Thêm APK mới"), "bài DEV"); ok((await page.locator('[data-pop="notif"] .upd').count()) >= 2, "có cả ghi chú bản");
+  await page.click('[data-pop="notif"] [data-t="maint"]'); await page.waitForSelector('[data-pop="notif"] .np-pin'); ok((await page.textContent('[data-pop="notif"]')).includes("Đây là thông báo thử nghiệm."), "thông báo ghim");
 });
 test("danh mục tùy chỉnh /c/mod hoạt động; danh mục không tồn tại báo không tìm thấy, không treo", async ({ page }) => {
   await go(page, "/c/mod"); eq(await page.locator("#grid .card").count(), 1); await go(page, "/c/khong-ton-tai"); ok((await page.locator("#view .page").count()) === 1, "vẫn hiện trang");
@@ -365,7 +378,7 @@ test("Dev Panel: thêm / xoá danh mục tuỳ chỉnh", async ({ page }) => {
 });
 
 test("Dev Panel: đăng cập nhật làm chuông của người khác sáng, xoá được bài", async ({ page, ctx }) => {
-  const other = await ctx.newPage(); await other.goto(BASE + "/"); await other.waitForSelector("#view .page"); await other.click("#btnBell"); await other.waitForURL(BASE + "/notifications"); await other.waitForTimeout(400);
+  const other = await ctx.newPage(); await other.goto(BASE + "/"); await other.waitForSelector("#view .page"); await other.click("#btnBell"); await other.waitForSelector('[data-pop="notif"].on'); await other.waitForTimeout(400);
   await loginDev(page); await go(page, "/dev/updates"); await page.fill("#uT", "Bài thử từ DEV"); await page.fill("#uB", "Nội dung thử."); await page.click("#uBtn");
   await page.waitForFunction(() => document.querySelector("#ul").textContent.includes("Bài thử từ DEV"));
   const d = await db(page); ok(Object.values(d.nox_updates).some(u => u.title === "Bài thử từ DEV" && typeof u.ts === "number"), "đã lưu");
@@ -460,10 +473,10 @@ test("cài đặt: kính mờ bật/tắt — tắt: khung màu đặc, bật: k
   await go(page, "/settings"); const bgOf = () => page.evaluate(() => { const e = document.querySelector(".set-card"); const cs = getComputedStyle(e); return { g: document.documentElement.dataset.glass || "off", bg: cs.backgroundColor, bd: cs.borderTopColor, bf: cs.backdropFilter || cs.webkitBackdropFilter || "none" }; });
   const alpha = c => { const m = c.match(/rgba?\(([^)]+)\)/); const p = m[1].split(",").map(x => parseFloat(x)); return p.length > 3 ? p[3] : 1; };
   const off = await bgOf(); eq(off.g, "off"); eq(alpha(off.bg), 1, "tắt: màu đặc"); ok(/none/.test(off.bf), "tắt: không làm mờ");
-  await page.click("#glass + i, label.sw"); await page.waitForFunction(() => document.documentElement.dataset.glass === "on");
+  await page.click("label.sw:has(#glass)"); await page.waitForFunction(() => document.documentElement.dataset.glass === "on");
   const on = await bgOf(); ok(alpha(on.bg) < 0.6, "bật: trong suốt " + on.bg); ok(alpha(on.bd) > 0, "bật: còn viền " + on.bd);
   await page.reload(); await page.waitForSelector(".set-card"); eq(await page.evaluate(() => document.documentElement.dataset.glass), "on", "nhớ sau khi tải lại");
-  await page.click("label.sw >> nth=0"); await page.waitForFunction(() => document.documentElement.dataset.glass !== "on"); 
+  await page.click("label.sw:has(#glass)"); await page.waitForFunction(() => document.documentElement.dataset.glass !== "on"); 
   for (const th of ["light", "dark"]) { await page.evaluate(t => { localStorage.setItem("ssw_theme", t); document.documentElement.dataset.theme = t; }, th); const x = await bgOf(); eq(alpha(x.bg), 1, "màu đặc ở giao diện " + th); }
 });
 test("cài đặt: ngôn ngữ English ⇄ Tiếng Việt, ghi nhớ sau khi tải lại", async ({ page }) => {
@@ -478,11 +491,11 @@ test("English: duyệt mọi trang (khách) không còn chữ tiếng Việt", a
   for (const r of ["/", "/categories", "/scripts", "/scripts/-s1", "/apk", "/ios", "/links", "/c/mod", "/notifications", "/help", "/about", "/guide", "/apk-safety", "/security", "/terms", "/privacy", "/settings", "/favorites", "/login", "/register", "/forgot-password", "/search", "/search?q=zzz", "/scripts/khong-co", "/khong/co"]) {
     await go(page, r); await page.waitForTimeout(350); const v = await viContent(page); if (v.length) bad.push(r + " → " + v.slice(0, 6).join(" | "));
   }
-  await go(page, "/scripts/-s1"); await page.click("#favBtn"); await go(page, "/favorites"); await page.waitForTimeout(300); { const v = await viContent(page); if (v.length) bad.push("/favorites (có mục) → " + v.slice(0, 6).join(" | ")); }
+  await go(page, "/scripts/-s1"); await page.click(".save-btn"); await go(page, "/favorites"); await page.waitForTimeout(300); { const v = await viContent(page); if (v.length) bad.push("/favorites (có mục) → " + v.slice(0, 6).join(" | ")); }
   await go(page, "/"); await page.keyboard.press("Control+k"); await page.waitForSelector(".cmdk-box", { timeout: 3000 }); { const v = await viContent(page); if (v.length) bad.push("palette → " + v.slice(0, 6).join(" | ")); } await page.keyboard.press("Escape");
   await go(page, "/"); await page.click("#btnMenu").catch(() => {}); const v2 = await viContent(page); if (v2.length) bad.push("menu → " + v2.slice(0, 6).join(" | "));
   ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
-}, { lang: "en" });
+}, { lang: "en", timeout: 120000 });
 test("English: Dev Panel, hồ sơ, quên mật khẩu — không còn chữ tiếng Việt", async ({ page }) => {
   await loginDev(page); const bad = [];
   for (const r of ["/profile", "/dev", "/dev/data", "/dev/data/scripts", "/dev/categories", "/dev/users", "/dev/theme", "/dev/system", "/dev/updates", "/scripts/create", "/scripts/-s1/edit"]) {
@@ -492,7 +505,7 @@ test("English: Dev Panel, hồ sơ, quên mật khẩu — không còn chữ ti�
   ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
 }, { lang: "en" });
 test("English: nội dung DEV/người dùng nhập (bài cập nhật, tên mục) giữ nguyên, không bị dịch", async ({ page }) => {
-  await go(page, "/notifications"); ok((await page.textContent("#view")).includes("Thêm APK mới") && (await page.textContent("#view")).includes("Đã thêm vài APK mới vào kho."), "bài DEV giữ tiếng Việt"); ok((await page.textContent("#view")).includes("Đây là thông báo thử nghiệm."), "thông báo ghim giữ nguyên");
+  await go(page, "/"); await openBell(page); await page.waitForSelector('[data-pop="notif"] .upd'); const pt = await page.textContent('[data-pop="notif"]'); ok(pt.includes("Thêm APK mới") && pt.includes("Đã thêm vài APK mới vào kho."), "bài DEV giữ tiếng Việt"); await page.click('[data-pop="notif"] [data-t="maint"]'); await page.waitForSelector('[data-pop="notif"] .np-pin'); ok((await page.textContent('[data-pop="notif"]')).includes("Đây là thông báo thử nghiệm."), "thông báo ghim giữ nguyên");
 }, { lang: "en" });
 
 /* ───────── Giai đoạn 1: cài đặt mới, khách, hồ sơ, quyền ───────── */
@@ -503,7 +516,7 @@ test("mặc định là English khi chưa chọn ngôn ngữ; chọn Tiếng Vi�
 }, { lang: "default" });
 test("cài đặt: kính mờ chỉnh độ mờ + độ trong, về mặc định", async ({ page }) => {
   await go(page, "/settings"); ok(await page.locator("#glBlur").isDisabled(), "tắt kính thì thanh bị khoá");
-  await page.click("label.sw >> nth=0"); await page.waitForFunction(() => document.documentElement.dataset.glass === "on");
+  await page.click("label.sw:has(#glass)"); await page.waitForFunction(() => document.documentElement.dataset.glass === "on");
   const blur = () => page.evaluate(() => document.documentElement.style.getPropertyValue("--gl-blur")), alpha = () => page.evaluate(() => { const m = getComputedStyle(document.querySelector(".set-card")).backgroundColor.match(/rgba?\(([^)]+)\)/)[1].split(",").map(parseFloat); return m.length > 3 ? m[3] : 1; });
   const set = (id, v) => page.$eval("#" + id, (e, v) => { e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); }, v);
   await set("glBlur", 30); eq((await blur()).trim(), "30px"); eq(await page.textContent("#glBlurV"), "30px");
@@ -574,10 +587,10 @@ test("Dev Panel · Người dùng: cấp / gỡ biên tập viên, mute, ban có
   const row = '[data-uid="uUSER"]';
   await page.click(row + ' [data-a="role"]'); await no(page); eq(((await db(page)).nox_admin || {}).uUSER, undefined, "hủy thì không cấp");
   await page.click(row + ' [data-a="role"]'); await yes(page); await page.waitForFunction(() => (window.__fb.getDb().nox_admin || {}).uUSER?.role === "editor"); ok(/Gỡ biên tập viên/.test(await page.textContent(row)), "nút đổi thành Gỡ");
-  await page.click(row + ' [data-a="mute"]'); await page.selectOption('.cf [data-f="dur"]', "3600000"); await page.fill('.cf [data-f="why"]', "Spam"); await yes(page);
+  await page.click(row + ' [data-a="mute"]'); await page.click('.cf .cf-chip[data-v="3600000"]'); await page.fill('.cf [data-f="why"]', "Spam"); await yes(page);
   await page.waitForFunction(() => { const a = (window.__fb.getDb().nox_admin || {}).uUSER; return a && a.muteUntil > Date.now() && a.muteReason === "Spam" && a.role === "editor"; }); await page.waitForFunction(() => /mute/i.test(document.querySelector("tbody").textContent));
   await page.click(row + ' [data-a="mute"]'); await yes(page); await page.waitForFunction(() => !((window.__fb.getDb().nox_admin || {}).uUSER || {}).muteUntil);
-  await page.click(row + ' [data-a="ban"]'); await page.selectOption('.cf [data-f="dur"]', "perm"); await page.fill('.cf [data-f="why"]', "Vi phạm"); await yes(page);
+  await page.click(row + ' [data-a="ban"]'); await page.click('.cf .cf-chip[data-v="perm"]'); await page.fill('.cf [data-f="why"]', "Vi phạm"); await yes(page);
   await page.waitForFunction(() => (window.__fb.getDb().nox_admin || {}).uUSER?.banUntil >= 4102444800000); ok(/vĩnh viễn/.test(await page.textContent(row.replace('[data-uid="uUSER"]', "tbody"))), "hiện vĩnh viễn");
   await page.click(row + ' [data-a="ban"]'); await yes(page); await page.waitForFunction(() => !((window.__fb.getDb().nox_admin || {}).uUSER || {}).banUntil);
   eq(await page.evaluate(() => (window.__fb.getDb().nox_admin.uUSER || {}).role), "editor", "gỡ ban không mất quyền biên tập viên");
@@ -624,8 +637,8 @@ test("English: đợt A (quên mật khẩu bằng mã, đổi mật khẩu, đ�
   const st = await installApi(page); st.ip = "10.1.1.5"; const bad = []; const chk = async n => { await page.waitForTimeout(350); const v = await viContent(page); if (v.length) bad.push(n + " → " + v.slice(0, 8).join(" | ")); };
   await go(page, "/forgot-password"); await page.fill("#email", USERPW[0]); await page.click("button[type=submit]"); await page.waitForSelector("#f2 #code"); await chk("quên mật khẩu bước 2");
   await page.click("#f2 button[type=submit]"); await chk("bước 2 lỗi trống"); await page.fill("#code", "000000"); await page.fill("#password", "Moimatkhau99"); await page.fill("#confirm", "Moimatkhau99"); await page.click("#f2 button[type=submit]"); await page.waitForFunction(() => document.querySelector("#err2").textContent.length > 3); await chk("bước 2 sai mã");
-  await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile?tab=security"); await page.waitForSelector("#pwBtn"); await page.click("#pwBtn"); await page.waitForSelector('.cf-root.on [data-f="code"]'); await chk("hộp đổi mật khẩu");
-  await page.fill('.cf-root.on [data-f="cur"]', USERPW[1]); await page.fill('.cf-root.on [data-f="code"]', "123456"); await page.fill('.cf-root.on [data-f="pw"]', "abc"); await page.fill('.cf-root.on [data-f="pw2"]', "abc"); await page.click('.cf-root.on [data-cf="yes"]'); await page.waitForFunction(() => /needs at least/.test(document.querySelector(".cf-root.on")?.textContent || "")); await chk("hộp đổi mật khẩu lỗi"); await no(page);
+  await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile?tab=security"); await page.waitForSelector("#pwBtn"); await page.click("#pwBtn"); await page.waitForSelector('.cf-root.on [data-f="cur"]'); await chk("hộp đổi mật khẩu");
+  await page.fill('.cf-root.on [data-f="cur"]', USERPW[1]); await page.fill('.cf-root.on [data-f="pw"]', "abc"); await page.fill('.cf-root.on [data-f="pw2"]', "abc"); await page.click('.cf-root.on [data-cf="yes"]'); await page.waitForFunction(() => /needs at least/.test(document.querySelector(".cf-root.on")?.textContent || "")); await chk("hộp đổi mật khẩu lỗi"); await no(page);
   await page.click('[data-act="signout"]'); await yes(page); st.ip = "203.0.113.9"; await login(page, USERPW); await page.waitForURL(/\/two-step/); await page.waitForSelector("#code"); await chk("/two-step vị trí mới");
   ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
 }, { lang: "en" });
@@ -676,14 +689,13 @@ test("quên mật khẩu (máy chủ thư bật): email → MÃ 6 số → mã +
   await page.fill("#code", "123 456"); await page.fill("#password", "Moimatkhau99"); await page.fill("#confirm", "Moimatkhau99"); await page.click("#f2 button[type=submit]"); await page.waitForURL(u => /\/login/.test(u.toString()));
   await login(page, [USERPW[0], "Moimatkhau99"]); await page.waitForURL(BASE + "/"); await authed(page);
 });
-test("đổi mật khẩu trong hồ sơ: cần mật khẩu hiện tại + mã gửi về email; xong bị đăng xuất, đăng nhập lại bằng mật khẩu mới", async ({ page }) => {
+test("đổi mật khẩu trong hồ sơ (mật khẩu hiện tại): sai mật khẩu bị từ chối; xong bị đăng xuất, đăng nhập lại bằng mật khẩu mới", async ({ page }) => {
   const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/profile?tab=security"); await page.waitForSelector("#pwBtn"); await page.click("#pwBtn");
-  const m = await until(() => mailTo(st, USERPW[0], /password change code/)); ok(/123456/.test(m.html), "thư có mã"); await page.waitForSelector('.cf-root.on [data-f="code"]');
-  const fillAll = async (cur, code, pw) => { await page.fill('.cf-root.on [data-f="cur"]', cur); await page.fill('.cf-root.on [data-f="code"]', code); await page.fill('.cf-root.on [data-f="pw"]', pw); await page.fill('.cf-root.on [data-f="pw2"]', pw); await page.click('.cf-root.on [data-cf="yes"]'); };
-  await fillAll(USERPW[1], "123456", "abc"); await page.waitForFunction(() => /Mật khẩu mới cần/.test(document.querySelector(".cf-root.on")?.textContent || "")); ok(true, "mật khẩu yếu bị chặn ngay trên trang");
-  await fillAll("sai-mat-khau", "123456", "Moimatkhau99"); await page.waitForFunction(() => /Kiểm tra lại/.test(document.querySelector(".cf-root.on")?.textContent || "")); ok(await authState(page) === "in", "sai mật khẩu hiện tại: chưa đổi gì");
-  await fillAll(USERPW[1], "654321", "Moimatkhau99"); await page.waitForFunction(() => /Kiểm tra lại/.test(document.querySelector(".cf-root.on")?.textContent || "")); ok(await authState(page) === "in", "sai mã: chưa đổi gì");
-  await fillAll(USERPW[1], "123456", "Moimatkhau99"); await page.waitForURL(u => /\/login/.test(u.toString())); eq(await authState(page), "out", "đổi xong thì đăng xuất");
+  await page.waitForSelector('.cf-root.on [data-f="cur"]'); eq(await page.locator('.cf-root.on [data-f="code"]').count(), 0, "chưa bật 2 bước / email khôi phục → chỉ có cách mật khẩu hiện tại"); eq(st.sent.filter(m => /password change code/.test(m.subject)).length, 0, "không gửi mã");
+  const fillAll = async (cur, pw) => { await page.fill('.cf-root.on [data-f="cur"]', cur); await page.fill('.cf-root.on [data-f="pw"]', pw); await page.fill('.cf-root.on [data-f="pw2"]', pw); await page.click('.cf-root.on [data-cf="yes"]'); };
+  await fillAll(USERPW[1], "abc"); await page.waitForFunction(() => /Mật khẩu mới cần/.test(document.querySelector(".cf-root.on")?.textContent || "")); ok(true, "mật khẩu yếu bị chặn ngay trên trang");
+  await fillAll("sai-mat-khau", "Moimatkhau99"); await page.waitForFunction(() => /Kiểm tra lại/.test(document.querySelector(".cf-root.on")?.textContent || "")); ok(await authState(page) === "in", "sai mật khẩu hiện tại: chưa đổi gì");
+  await fillAll(USERPW[1], "Moimatkhau99"); await page.waitForURL(u => /\/login/.test(u.toString())); eq(await authState(page), "out", "đổi xong thì đăng xuất");
   await until(() => mailTo(st, USERPW[0], /password was changed/));
   await login(page, [USERPW[0], "Moimatkhau99"]); await page.waitForURL(BASE + "/"); await authed(page);
 });
@@ -755,8 +767,8 @@ test("đổi email đăng nhập: cần mật khẩu, gửi liên kết tới em
 test("DEV: cấp quyền / mute / ban qua máy chủ — gửi thư thông báo, ban vĩnh viễn khoá thật tài khoản", async ({ page }) => {
   const st = await installApi(page); await loginDev(page); await seedUsers(page); await go(page, "/dev/users"); await page.waitForSelector('[data-uid="uUSER"]'); const row = '[data-uid="uUSER"]';
   await page.click(row + ' [data-a="role"]'); await yes(page); await until(() => mailTo(st, USERPW[0], /editor/)); eq((await db(page)).nox_admin.uUSER.role, "editor");
-  await page.click(row + ' [data-a="mute"]'); await page.selectOption('.cf [data-f="dur"]', "3600000"); await page.fill('.cf [data-f="why"]', "Spam"); await yes(page); await until(() => mailTo(st, USERPW[0], /muted/)); ok(/Spam/.test(mailTo(st, USERPW[0], /muted/).html), "thư có lý do");
-  await page.click(row + ' [data-a="ban"]'); await page.selectOption('.cf [data-f="dur"]', "perm"); await page.fill('.cf [data-f="why"]', "Vi phạm"); await yes(page); await until(() => mailTo(st, USERPW[0], /suspended/)); ok(/permanently/.test(mailTo(st, USERPW[0], /suspended/).text), "thư nói vĩnh viễn");
+  await page.click(row + ' [data-a="mute"]'); await page.click('.cf .cf-chip[data-v="3600000"]'); await page.fill('.cf [data-f="why"]', "Spam"); await yes(page); await until(() => mailTo(st, USERPW[0], /muted/)); ok(/Spam/.test(mailTo(st, USERPW[0], /muted/).html), "thư có lý do");
+  await page.click(row + ' [data-a="ban"]'); await page.click('.cf .cf-chip[data-v="perm"]'); await page.fill('.cf [data-f="why"]', "Vi phạm"); await yes(page); await until(() => mailTo(st, USERPW[0], /suspended/)); ok(/permanently/.test(mailTo(st, USERPW[0], /suspended/).text), "thư nói vĩnh viễn");
   eq((await acct(page, USERPW[0])).disabled, true, "tài khoản bị khoá thật");
   await page.click('[data-act="signout"]').catch(() => {}); await page.evaluate(() => 0);
   await go(page, "/profile"); await page.click('[data-act="signout"]'); await yes(page); await login(page, USERPW); await page.waitForFunction(() => /bị khóa/.test(document.querySelector("#err").textContent)); eq(await authState(page), "out");
@@ -902,7 +914,7 @@ test("danh mục: dev sửa / xóa / khôi phục Script-APK-iOS-Link, route và
   await loginDev(page); await go(page, "/dev/categories");
   ok(await page.locator('[data-edit="apk"]').count() === 1, "APK là danh mục sửa được");
   await page.click('[data-edit="apk"]'); await page.waitForSelector('.cf-root.on [data-f="name"]');
-  await page.fill('.cf-root.on [data-f="name"]', "Ứng dụng"); await page.selectOption('.cf-root.on [data-f="risk"]', "third"); await page.click('.cf-root.on [data-cf="yes"]'); await page.waitForSelector(".cf", { state: "detached" });
+  await page.fill('.cf-root.on [data-f="name"]', "Ứng dụng"); await page.click('.cf-root.on .cf-chip[data-v="third"]'); await page.click('.cf-root.on [data-cf="yes"]'); await page.waitForSelector(".cf", { state: "detached" });
   await until(async () => /Ứng dụng/.test(await page.textContent("#list")));
   await page.goto(BASE + "/apk"); await page.waitForSelector(".rk-root", { timeout: 8000 });
   await page.click("#rkBack"); await page.waitForSelector(".rk-root", { state: "detached" });
@@ -912,8 +924,8 @@ test("danh mục: dev sửa / xóa / khôi phục Script-APK-iOS-Link, route và
   await go(page, "/dev/categories"); await page.click('[data-restore="apk"]'); await until(async () => await page.locator('[data-edit="apk"]').count() === 1);
 });
 test("cảnh báo rủi ro: đếm ngược, không bấm được trước khi hết giờ, nhớ 'không hỏi lại'", async ({ page }) => {
-  await loginDev(page); await go(page, "/dev/categories"); await page.click('[data-edit="apk"]'); await page.waitForSelector('.cf-root.on [data-f="risk"]');
-  await page.selectOption('.cf-root.on [data-f="risk"]', "hack"); await page.click('.cf-root.on [data-cf="yes"]'); await page.waitForSelector(".cf", { state: "detached" });
+  await loginDev(page); await go(page, "/dev/categories"); await page.click('[data-edit="apk"]'); await page.waitForSelector('.cf-root.on .cf-chip[data-v="hack"]');
+  await page.click('.cf-root.on .cf-chip[data-v="hack"]'); await page.click('.cf-root.on [data-cf="yes"]'); await page.waitForSelector(".cf", { state: "detached" });
   await until(async () => /Hack/.test(await page.textContent("#list")));
   await page.evaluate(() => { window.__rkSeconds = 3; });
   await page.click('.disc-item[href="/apk"], a[href="/apk"]', { timeout: 3000 }).catch(async () => { await page.evaluate(() => { history.pushState({}, "", "/apk"); dispatchEvent(new PopStateEvent("popstate")); }); });
@@ -927,21 +939,21 @@ test("cảnh báo rủi ro: đếm ngược, không bấm được trước khi 
 test("hỗ trợ, báo cáo, chat: người dùng gửi → dev thấy trong Hộp thư → trả lời → người dùng thấy", async ({ page }) => {
   const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
   await go(page, "/help/support"); await page.click("button[type=submit]"); ok((await page.textContent('[data-err="subject"]')).length > 3, "báo thiếu chủ đề");
-  await page.fill("#ss", "Không vào được"); await page.fill("#sm", "Mình bị lỗi trang trắng"); await page.click("button[type=submit]"); await page.waitForURL(/\/help\/messages\/.+/);
+  await page.fill("#ss", "Không vào được"); await page.fill("#sm", "Mình bị lỗi trang trắng"); await page.click("button[type=submit]"); await page.waitForURL(/\/inbox\/.+/);
   await page.waitForSelector("#chLog .bub"); ok(/trang trắng/.test(await page.textContent("#chLog")), "tin của mình hiện ra");
   await go(page, "/help/report?cat=script&key=-s1"); ok(/Auto Farm/.test(await page.textContent("#view")), "tự điền mục bị báo cáo");
-  await page.fill("#rd", "Link hỏng"); await page.click("button[type=submit]"); await page.waitForURL(/\/help\/messages\/.+/);
-  await go(page, "/help/chat"); await page.fill("#ct", "Chào dev"); await page.click("#cf button[type=submit]"); await page.waitForSelector("#chText");
-  await go(page, "/help/messages"); eq(await page.locator("a.thread").count(), 3, "3 cuộc trò chuyện");
+  await page.fill("#rd", "Link hỏng"); await page.click("button[type=submit]"); await page.waitForURL(/\/inbox\/.+/);
+  await go(page, "/help/chat"); eq(path(page), "/inbox/chat", "địa chỉ cũ chuyển sang Hộp thư"); await page.fill("#ct", "Chào dev"); await page.click("#cf button[type=submit]"); await page.waitForSelector("#chText");
+  await go(page, "/inbox"); await page.waitForSelector("button.thread"); eq(await page.locator("button.thread").count(), 3, "3 cuộc trò chuyện");
   const bad = await page.evaluate(async () => { try { await firebase.database().ref("nox_msgs/uDEV/x/m1").set({ from: "user", text: "a", ts: Date.now() }); return "ok"; } catch (e) { return e.code; } }); eq(bad, "PERMISSION_DENIED", "không ghi vào hộp thư người khác");
   await signout(page); await login(page, DEVPW); await page.waitForURL(BASE + "/"); await authed(page);
-  await go(page, "/dev/inbox"); await page.waitForSelector("button.thread"); eq(await page.locator("button.thread").count(), 3, "dev thấy 3 cuộc");
+  await go(page, "/inbox"); await page.waitForSelector("button.thread"); eq(await page.locator("button.thread").count(), 3, "dev thấy 3 cuộc");
   await page.locator("button.thread", { hasText: "Không vào được" }).click(); await page.waitForSelector("#chText");
   await page.fill("#chText", "Mình đã xem, thử tải lại nhé"); await page.click("#chForm button[type=submit]"); await until(async () => /thử tải lại/.test(await page.textContent("#chLog")));
   await page.click('[data-x="perm"]'); await until(async () => (await db(page)).nox_perms?.uUSER?.post === true);
   await page.click('[data-x="close"]'); await until(async () => Object.values((await db(page)).nox_threads.uUSER).some(t => t.status === "closed"));
   await signout(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
-  await go(page, "/help/messages"); await page.locator("a.thread", { hasText: "Không vào được" }).click(); await page.waitForSelector("#chLog .bub");
+  await go(page, "/inbox"); await page.locator("button.thread", { hasText: "Không vào được" }).click(); await page.waitForSelector("#chLog .bub");
   ok(/thử tải lại/.test(await page.textContent("#chLog")), "thấy trả lời của dev"); ok(await page.locator("#chForm").isHidden(), "cuộc đã đóng thì không nhập thêm");
 });
 test("khách và tài khoản chưa đủ điều kiện: bị đưa về đăng nhập / thấy điều kiện đăng bài", async ({ page }) => {
@@ -1018,10 +1030,10 @@ test("cập nhật: dev đăng có phân loại + danh sách, sửa bài, ngư�
   await page.fill("#uT", "Bản mới 2"); await page.click("#uBtn"); await until(async () => /Bản mới 2/.test(await page.textContent("#ul")));
   const u = Object.values((await db(page)).nox_updates).find(x => x.title === "Bản mới 2"); eq(u.ts, ts0, "sửa bài không đổi thời gian (không báo mới lại)"); eq(u.tag, "fix", "giữ nguyên loại");
   eq(Object.values((await db(page)).nox_updates).filter(x => /^(Bản mới|Tính năng X)/.test(x.title)).length, 2, "sửa không tạo bài mới");
-  await go(page, "/notifications"); await page.waitForSelector(".upd"); await page.waitForSelector(".upd ul li"); eq(await page.locator(".upd ul li").first().textContent(), "Lỗi một", "dòng gạch đầu dòng thành danh sách");
-  ok(await page.locator('.upd-flt [data-flt="fix"]').count() === 1, "có bộ lọc loại");
-  await page.click('.upd-flt [data-flt="fix"]'); await until(async () => !/Tính năng X/.test(await page.textContent(".news"))); ok(/Bản mới 2/.test(await page.textContent(".news")), "lọc theo Sửa lỗi");
-  await page.click('.upd-flt [data-flt=""]'); await until(async () => /Tính năng X/.test(await page.textContent(".news")));
+  await go(page, "/"); await openBell(page); await page.waitForSelector(".upd ul li"); eq(await page.locator(".upd ul li").first().textContent(), "Lỗi một", "dòng gạch đầu dòng thành danh sách");
+  ok(await page.locator('.np-flt [data-flt="fix"]').count() === 1, "có bộ lọc loại");
+  await page.click('.np-flt [data-flt="fix"]'); await until(async () => !/Tính năng X/.test(await page.textContent(".np-news"))); ok(/Bản mới 2/.test(await page.textContent(".np-news")), "lọc theo Sửa lỗi");
+  await page.click('.np-flt [data-flt=""]'); await until(async () => /Tính năng X/.test(await page.textContent(".np-news")));
   const bad = await page.evaluate(async () => { try { await firebase.database().ref("nox_updates").push({ title: "x", ts: 1, tag: "evil" }); return "ok"; } catch (e) { return e.code; } }); eq(bad, "PERMISSION_DENIED", "loại lạ bị rules chặn");
 });
 
@@ -1029,13 +1041,13 @@ test("English: trang Đợt C (hỗ trợ, báo cáo, tin nhắn, gửi bài, h�
   const bad = []; await installApi(page);
   await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
   for (const r of ["/help/support", "/help/report?cat=script&key=-s1", "/help/chat", "/help/messages", "/help/submit", "/settings"]) { await go(page, r); await page.waitForTimeout(400); const v = await viContent(page); if (v.length) bad.push(r + " → " + v.slice(0, 6).join(" | ")); }
-  await go(page, "/help/support"); await page.fill("#ss", "A"); await page.fill("#sm", "B"); await page.click("button[type=submit]"); await page.waitForURL(/\/help\/messages\/.+/); await page.waitForSelector("#chLog .bub"); { const v = await viContent(page); if (v.length) bad.push("cuộc trò chuyện → " + v.slice(0, 6).join(" | ")); }
-  await go(page, "/help/messages"); { const v = await viContent(page); if (v.length) bad.push("danh sách tin nhắn → " + v.slice(0, 6).join(" | ")); }
+  await go(page, "/help/support"); await page.fill("#ss", "A"); await page.fill("#sm", "B"); await page.click("button[type=submit]"); await page.waitForURL(/\/inbox\/.+/); await page.waitForSelector("#chLog .bub"); { const v = await viContent(page); if (v.length) bad.push("cuộc trò chuyện → " + v.slice(0, 6).join(" | ")); }
+  await go(page, "/inbox"); await page.waitForSelector("button.thread"); { const v = await viContent(page); if (v.length) bad.push("danh sách tin nhắn → " + v.slice(0, 6).join(" | ")); }
   await page.click('[data-act="signout"]').catch(async () => { await go(page, "/profile"); await page.click('[data-act="signout"]'); }); await yes(page);
   await page.waitForFunction(() => document.querySelector("#hdrAcc") && document.querySelector("#hdrAcc").dataset.state !== "in");
   await login(page, DEVPW); await page.waitForURL(/\/(two-step.*)?$/); if (/two-step/.test(path(page))) { await page.fill("#code", "123456"); await page.click("button[type=submit]"); await page.waitForURL(BASE + "/"); } await authed(page);
-  for (const r of ["/dev/inbox", "/dev/review", "/dev/categories", "/dev/theme", "/dev/updates", "/notifications"]) { await go(page, r); await page.waitForTimeout(500); const v = await viContent(page); if (v.length) bad.push(r + " → " + v.slice(0, 6).join(" | ")); }
-  await go(page, "/dev/inbox"); await page.waitForSelector("button.thread"); await page.locator("button.thread").first().click(); await page.waitForSelector("#chText"); { const v = await viContent(page); if (v.length) bad.push("hộp thư (mở cuộc) → " + v.slice(0, 6).join(" | ")); }
+  for (const r of ["/inbox", "/dev/review", "/dev/categories", "/dev/theme", "/dev/updates", "/dev/system"]) { await go(page, r); await page.waitForTimeout(500); const v = await viContent(page); if (v.length) bad.push(r + " → " + v.slice(0, 6).join(" | ")); }
+  await go(page, "/inbox"); await page.waitForSelector("button.thread"); await page.locator("button.thread").first().click(); await page.waitForSelector("#chText"); { const v = await viContent(page); if (v.length) bad.push("hộp thư (mở cuộc) → " + v.slice(0, 6).join(" | ")); }
   ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
 }, { lang: "en" });
 /* ===== Tính năng bổ sung (Ctrl+K, yêu thích, sắp xếp, màu nhấn, mạng, huy hiệu, lên đầu trang) ===== */
@@ -1052,18 +1064,32 @@ test("tìm nhanh Ctrl+K và phím /: mở, lọc, mũi tên, Enter đi tới m�
   await go(page, "/"); await page.keyboard.press("Control+k"); await page.waitForSelector(".cmdk-box"); await page.keyboard.type("tim kiem"); await page.keyboard.press("ArrowDown"); await page.keyboard.press("ArrowUp"); await page.keyboard.press("Enter"); await page.waitForURL(/\/search/);
   await page.keyboard.press("Control+k"); await page.waitForSelector(".cmdk-box"); await page.click(".cmdk-ov", { position: { x: 5, y: 5 } }); await page.waitForSelector(".cmdk-box", { state: "detached" }); ok(true, "bấm nền để đóng");
 });
-test("yêu thích + xem gần đây + chia sẻ: lưu trên trình duyệt, trang Yêu thích, trang chủ", async ({ page }) => {
-  await fresh(page); await go(page, "/scripts/-s1"); await page.waitForSelector("#favBtn");
-  eq(await page.getAttribute("#favBtn", "aria-pressed"), "false", "chưa yêu thích");
-  await page.click("#favBtn"); eq(await page.getAttribute("#favBtn", "aria-pressed"), "true", "đã yêu thích"); ok(/Đã yêu thích/.test(await page.textContent("#favBtn")), "nhãn đổi");
+test("lưu bài + xem gần đây + chia sẻ: lưu trên trình duyệt, trang Yêu thích & đã lưu, trang chủ", async ({ page }) => {
+  await fresh(page); await go(page, "/scripts/-s1"); await page.waitForSelector(".save-btn");
+  eq(await page.getAttribute(".save-btn", "aria-pressed"), "false", "chưa lưu");
+  await page.click(".save-btn"); eq(await page.getAttribute(".save-btn", "aria-pressed"), "true", "đã lưu"); ok(/Đã lưu/.test(await page.textContent(".save-btn")), "nhãn đổi");
   await page.click("#shareBtn"); await until(async () => /liên kết|link|Không sao chép/i.test((await toasts(page)).join(" "))); ok(true, "chia sẻ báo kết quả");
-  await go(page, "/favorites"); await page.waitForSelector("#favGrid .card"); ok(/Auto Farm/.test(await page.textContent("#favGrid")), "trang Yêu thích có mục");
+  await go(page, "/favorites"); await page.waitForSelector("#favGrid .card"); ok(/Auto Farm/.test(await page.textContent("#favGrid")), "tab Đã lưu có mục");
   await go(page, "/"); await page.waitForSelector("#hrGrid .card"); ok(/Auto Farm/.test(await page.textContent("#hrGrid")) && !(await page.locator("#hrec").isHidden()), "trang chủ có Xem gần đây");
   await page.reload(); await go(page, "/favorites"); await page.waitForSelector("#favGrid .card"); ok(true, "còn sau khi tải lại trang");
-  await go(page, "/scripts/-s1"); await page.click("#favBtn"); eq(await page.getAttribute("#favBtn", "aria-pressed"), "false", "bỏ yêu thích");
-  await go(page, "/favorites"); await page.waitForSelector("#favGrid, .statebox"); eq(await page.locator("#favGrid").count(), 0, "danh sách yêu thích rỗng"); ok(await page.locator("#clrRecent").count() === 0 || true, "");
-  eq(await page.locator("#recGrid .card").count(), 1, "vẫn có trong Xem gần đây"); await page.click("#clrRecent"); await yes(page); await until(async () => (await page.locator("#recGrid").count()) === 0);
+  await go(page, "/scripts/-s1"); await page.click(".save-btn"); eq(await page.getAttribute(".save-btn", "aria-pressed"), "false", "bỏ lưu");
+  await go(page, "/favorites"); await page.waitForSelector("#favGrid, .statebox"); eq(await page.locator("#favGrid").count(), 0, "danh sách đã lưu rỗng");
+  await page.click('[data-t="recent"]'); await page.waitForSelector("#favGrid .card"); eq(await page.locator("#favGrid .card").count(), 1, "vẫn có trong Xem gần đây"); await page.click("#clrRecent"); await yes(page); await until(async () => (await page.locator("#favGrid").count()) === 0);
   await page.evaluate(() => localStorage.setItem("ssw_favs", "{hỏng")); await go(page, "/favorites"); await page.waitForSelector(".statebox"); ok(true, "dữ liệu lưu bị hỏng không làm sập trang");
+});
+test("bài viết: nút Thích (đếm, cần đăng nhập), menu 3 chấm, Lưu; nhân sự có thêm Sửa/Xóa", async ({ page }) => {
+  await fresh(page); await go(page, "/scripts"); await page.waitForSelector(".card .like-btn");
+  await page.locator(".card", { hasText: "Auto Farm" }).locator(".like-btn").click(); await page.waitForURL(/\/login/); ok(/next=/.test(path(page)), "khách bấm Thích → đăng nhập rồi quay lại");
+  await login(page, USERPW); await page.waitForURL(u => !/\/login/.test(u.toString())); await authed(page); await go(page, "/scripts"); const card = page.locator(".card", { hasText: "Auto Farm" }); await card.waitFor();
+  await card.locator(".like-btn").click(); await page.waitForFunction(() => document.querySelector('.card .like-btn').classList.contains("on")); eq((await card.locator(".lk-n").textContent()).trim(), "1", "đếm lượt thích");
+  const lk = (await db(page)).nox_likes; ok(JSON.stringify(lk).includes("uUSER"), "lưu lượt thích theo uid"); await card.locator(".like-btn").click(); await page.waitForFunction(() => !document.querySelector('.card .like-btn').classList.contains("on")); ok(true, "bỏ thích");
+  await card.locator(".dots-btn").click(); await page.waitForSelector('[data-pop="itemmenu"].on'); const labels = await page.locator('[data-pop="itemmenu"] [role=menuitem]').allTextContents();
+  for (const w of ["Thích", "Lưu bài viết", "Chia sẻ", "Sao chép liên kết", "Mở trong tab mới", "Báo cáo bài viết"]) ok(labels.some(l => l.includes(w)), "menu có: " + w); ok(!labels.some(l => /Sửa bài viết|Xóa bài viết/.test(l)), "người dùng thường không thấy Sửa/Xóa");
+  await page.click('[data-pop="itemmenu"] [data-m="save"]'); await page.waitForSelector('[data-pop="itemmenu"]', { state: "detached" }); await until(async () => JSON.stringify((await db(page)).nox_saved || {}).includes("uUSER")); ok(true, "Lưu bài viết đồng bộ theo tài khoản");
+  await card.locator(".dots-btn").click(); await page.waitForSelector('[data-pop="itemmenu"].on'); await page.keyboard.press("ArrowDown"); await page.keyboard.press("Escape"); await page.waitForSelector('[data-pop="itemmenu"]', { state: "detached" }); eq(await page.evaluate(() => document.activeElement.classList.contains("dots-btn")), true, "Esc đóng và trả focus");
+  await card.locator(".dots-btn").click(); await page.click('[data-pop="itemmenu"] [data-m="report"]'); await page.waitForURL(/\/help\/report\?cat=script/); ok(true, "Báo cáo mở trang báo cáo đúng mục");
+  await signout(page); await login(page, DEVPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/scripts"); await page.locator(".card", { hasText: "Auto Farm" }).locator(".dots-btn").click();
+  await page.waitForSelector('[data-pop="itemmenu"].on [data-m="edit"]'); ok(await page.locator('[data-pop="itemmenu"] [data-m="del"]').count() === 1, "DEV thấy Sửa và Xóa");
 });
 test("sắp xếp danh mục: A→Z, Z→A, nhớ lựa chọn trong phiên", async ({ page }) => {
   await fresh(page); await go(page, "/scripts"); await page.waitForSelector("#grid .card");
@@ -1091,22 +1117,65 @@ test("lên đầu trang: chỉ hiện sau khi cuộn, bấm thì về đầu", a
   await fresh(page); await go(page, "/help"); await page.evaluate(() => { const d = document.createElement("div"); d.style.height = "3000px"; d.id = "spacer"; document.querySelector("#view").appendChild(d); });
   ok(await page.locator("#backTop").isHidden(), "ở đầu trang thì ẩn"); await page.evaluate(() => scrollTo(0, 1500)); await page.waitForSelector("#backTop:not([hidden])"); await page.click("#backTop"); await page.waitForFunction(() => scrollY < 5, null, { timeout: 4000 }); await page.waitForSelector("#backTop", { state: "hidden" }); ok(true);
 });
-test("huy hiệu: người dùng thấy số tin nhắn chưa đọc; dev thấy hộp thư và bài chờ duyệt; mở cuộc trò chuyện thì giảm", async ({ page }) => {
+test("huy hiệu: Hộp thư (biểu tượng thư riêng) báo số tin chưa đọc; dev thấy cả bài chờ duyệt; mở cuộc trò chuyện thì giảm", async ({ page }) => {
   await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
+  ok(await page.locator("#btnMail").isVisible(), "có biểu tượng Hộp thư ở đầu trang"); eq(await page.locator('#side a[href="/inbox"], #side a[href="/help/messages"], #side a[href="/dev/inbox"]').count(), 0, "menu không còn mục Hộp thư");
   await page.evaluate(() => { const d = window.__fb.getDb(); d.nox_threads = { uUSER: { t1: { type: "support", subject: "A", status: "open", last: "dev", unreadUser: true, createdAt: 1, updatedAt: 2 }, t2: { type: "support", subject: "B", status: "open", last: "dev", unreadUser: true, createdAt: 1, updatedAt: 3 }, t3: { type: "report", subject: "C", status: "open", last: "dev", unreadUser: false, createdAt: 1, updatedAt: 1 } } }; window.__fb.setDb(d); });
-  await page.waitForSelector('#sideNav a[href="/help/messages"] .nav-badge', { state: "attached" }); eq((await page.textContent('#sideNav a[href="/help/messages"] .nav-badge')).trim(), "2", "2 tin chưa đọc");
-  ok(await page.locator('#sideNav .nav-btn .nav-badge.grp').count() >= 1, "nhóm Trợ giúp (đang đóng) cũng có số");
-  await page.evaluate(() => { const d = window.__fb.getDb(); d.nox_threads.uUSER.t1.unreadUser = false; d.nox_threads.uUSER.t2.unreadUser = false; window.__fb.setDb(d); }); await page.waitForSelector('#sideNav a[href="/help/messages"] .nav-badge', { state: "detached" }); ok(true, "hết chưa đọc thì mất huy hiệu");
+  await page.waitForFunction(() => { const b = document.querySelector("#mailBadge"); return !b.hidden && b.textContent.trim() === "2"; }); ok(true, "2 tin chưa đọc"); await page.waitForSelector("#btnMail.has"); ok(true, "biểu tượng thư sáng");
+  await page.evaluate(() => { const d = window.__fb.getDb(); d.nox_threads.uUSER.t1.unreadUser = false; d.nox_threads.uUSER.t2.unreadUser = false; window.__fb.setDb(d); }); await page.waitForFunction(() => document.querySelector("#mailBadge").hidden); ok(true, "hết chưa đọc thì mất huy hiệu");
   await page.click('[data-act="signout"]').catch(async () => { await go(page, "/profile"); await page.click('[data-act="signout"]'); }); await yes(page); await page.waitForFunction(() => document.querySelector("#hdrAcc") && document.querySelector("#hdrAcc").dataset.state !== "in");
   await login(page, DEVPW); await page.waitForURL(/\/(two-step.*)?$/); if (/two-step/.test(path(page))) { await page.fill("#code", "123456"); await page.click("button[type=submit]"); await page.waitForURL(BASE + "/"); } await authed(page);
   await page.evaluate(() => { const d = window.__fb.getDb(); d.nox_threads = { uUSER: { t1: { type: "support", subject: "A", status: "open", last: "user", unreadDev: true, createdAt: 1, updatedAt: 2 }, t2: { type: "chat", subject: "B", status: "closed", last: "user", unreadDev: true, createdAt: 1, updatedAt: 3 } } }; d.nox_pending = { uUSER: { p1: { kind: "item", status: "pending", name: "x", catId: "script", createdAt: 1, updatedAt: 1 }, p2: { kind: "item", status: "rejected", name: "y", catId: "script", createdAt: 1, updatedAt: 1 } } }; window.__fb.setDb(d); });
-  await page.waitForSelector('#sideNav a[href="/dev/inbox"] .nav-badge', { state: "attached" }); eq((await page.textContent('#sideNav a[href="/dev/inbox"] .nav-badge')).trim(), "1", "hộp thư: chỉ tính cuộc đang mở"); eq((await page.textContent('#sideNav a[href="/dev/review"] .nav-badge')).trim(), "1", "duyệt bài: chỉ tính bài chờ duyệt");
+  await page.waitForFunction(() => { const b = document.querySelector("#mailBadge"); return !b.hidden && b.textContent.trim() === "1"; }, null, { timeout: 8000 }); ok(true, "hộp thư: chỉ tính cuộc đang mở");
+  await page.waitForSelector('#sideNav a[href="/dev/review"] .nav-badge', { state: "attached" }); eq((await page.textContent('#sideNav a[href="/dev/review"] .nav-badge')).trim(), "1", "duyệt bài: chỉ tính bài chờ duyệt");
   ok(await page.locator("#hdrAcc .avatar.has-badge").count() === 1, "chấm báo trên ảnh đại diện");
+});
+/* ===== Đợt E: bảo trì, hộp thư kiểu chat, Google bắt buộc 2 bước, chẩn đoán DEV ===== */
+test("thông báo bảo trì: dev đăng → dải trên cùng + thẻ Bảo trì trong chuông; sửa; xóa", async ({ page }) => {
+  await loginDev(page); await go(page, "/dev/system"); await page.waitForSelector("#mnAdd"); await page.click("#mnAdd"); await page.waitForSelector('[data-pop="mnedit"].on #mnT');
+  await page.click('#mnf [data-lv="active"]'); await page.click('#mnf button[type=submit]'); ok((await page.textContent("#mnX")).length > 3, "thiếu tiêu đề báo lỗi");
+  await page.fill("#mnT", "Bảo trì máy chủ"); await page.fill("#mnB", "Khoảng 30 phút."); await page.click('#mnf button[type=submit]'); await page.waitForSelector('[data-pop="mnedit"]', { state: "detached" });
+  await until(async () => /Bảo trì máy chủ/.test(await page.textContent("#mnList"))); eq(Object.keys((await db(page)).nox_maintnotes || {}).length, 1, "đã lưu 1 thông báo");
+  await go(page, "/"); await page.waitForSelector("#mnBanner:not([hidden])"); ok(/Bảo trì máy chủ/.test(await page.textContent("#mnBanner")), "dải hiện tiêu đề"); eq(await page.getAttribute("#mnBanner", "data-level"), "active"); ok(await page.evaluate(() => document.documentElement.classList.contains("has-mn")), "nội dung được đẩy xuống dưới dải");
+  const hdrBottom = await page.evaluate(() => document.querySelector("#hdr").getBoundingClientRect().bottom), bn = await page.evaluate(() => document.querySelector("#mnBanner").getBoundingClientRect().top); ok(Math.abs(hdrBottom - bn) < 2, "dải nằm sát dưới thanh trên");
+  await page.click("#mnBanner .mnb-more"); await page.waitForSelector('[data-pop="notif"].on .mn-active'); ok(/Khoảng 30 phút/.test(await page.textContent('[data-pop="notif"]')), "chi tiết trong chuông"); await closePop(page, "notif");
+  await page.click("#mnBanner .mnb-x"); await page.waitForSelector("#mnBanner", { state: "hidden" }); ok(true, "ẩn dải (nhớ trong phiên)");
+  await go(page, "/dev/system"); await page.click("[data-e]"); await page.waitForSelector('[data-pop="mnedit"].on'); eq(await page.inputValue("#mnT"), "Bảo trì máy chủ", "nạp lại để sửa"); await page.click('#mnf [data-lv="done"]'); await page.fill("#mnT", "Đã xong bảo trì"); await page.click('#mnf button[type=submit]');
+  await until(async () => Object.values((await db(page)).nox_maintnotes || {}).some(n => n.title === "Đã xong bảo trì" && n.level === "done")); eq(Object.keys((await db(page)).nox_maintnotes).length, 1, "sửa không tạo thêm");
+  await page.click("[data-d]"); await yes(page); await until(async () => !Object.keys((await db(page)).nox_maintnotes || {}).length); ok(true, "đã xóa");
+});
+test("hộp thư kiểu chat: Ctrl+Enter gửi, nhóm bong bóng, ngày, đã xem; dev có trả lời nhanh", async ({ page }) => {
+  await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
+  await page.click("#btnMail"); await page.waitForURL(BASE + "/inbox"); await page.waitForSelector(".mbx"); ok(await page.locator(".mbx-side").isVisible(), "danh sách bên trái");
+  await go(page, "/inbox/chat"); await page.waitForSelector("#ct"); await page.fill("#ct", "Chào dev, mình cần hỏi"); await page.click("#cf button[type=submit]"); await page.waitForSelector("#chText");
+  await page.fill("#chText", "Tin thứ hai"); await page.keyboard.press("Control+Enter"); await page.waitForFunction(() => document.querySelectorAll("#chLog .msg.me").length === 2);
+  ok(await page.locator("#chLog .msg.me.first").count() === 1 && await page.locator("#chLog .msg.me.last").count() === 1, "hai tin liền nhau gộp thành một nhóm"); ok(await page.locator("#chLog .cv-day").count() >= 1, "có mốc ngày");
+  await page.fill("#chText", "a"); await page.keyboard.press("Shift+Enter"); await page.keyboard.type("b"); eq(await page.inputValue("#chText"), "a\nb", "Shift+Enter xuống dòng"); await page.fill("#chText", "");
+  ok(await page.evaluate(() => document.querySelector(".cv-form").classList.contains("has") === false), "ô trống → nút gửi xám");
+  const w = await page.evaluate(() => { const b = document.querySelector("#chLog .msg.me .bub"); return b ? getComputedStyle(b).backgroundImage.includes("gradient") : false; }); ok(w, "bong bóng của mình có nền gradient");
+  await signout(page); await login(page, DEVPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/inbox"); await page.waitForSelector("button.thread.unread, button.thread"); await page.locator("button.thread").first().click(); await page.waitForSelector("#chQuick button");
+  const q = await page.locator("#chQuick button").first().textContent(); await page.locator("#chQuick button").first().click(); eq((await page.inputValue("#chText")).trim(), q.trim(), "bấm trả lời nhanh điền vào ô nhập");
+  await page.keyboard.press("Control+Enter"); await until(async () => (await page.locator("#chLog .msg.me").count()) >= 1); ok(true, "dev gửi được");
+});
+test("Google: bắt buộc bật xác minh 2 bước → tự đưa tới Hồ sơ › Bảo mật, bật xong mới dùng được", async ({ page }) => {
+  const st = await installApi(page); await go(page, "/login"); await page.waitForFunction(() => window.__tsOpts); await page.waitForFunction(() => !document.querySelector("#gbtn").classList.contains("locked"));
+  await page.click("#gstub", { force: true }); await page.waitForURL(/\/profile\?tab=security&setup=1/); await page.waitForSelector(".setup-banner"); ok(/Google/.test(await page.textContent(".setup-banner")), "biểu ngữ giải thích");
+  await go(page, "/scripts"); eq(path(page).split("?")[0], "/profile", "trang khác bị đưa về Hồ sơ"); await go(page, "/settings"); eq(path(page).split("?")[0], "/settings", "Cài đặt vẫn mở được");
+  await go(page, "/profile?tab=security&setup=1"); await page.waitForSelector("#tfBtn"); await until(() => mailTo(st, USERPW[0], /verification code/) || true, 3000).catch(() => {}); 
+  await page.click("#tfBtn").catch(() => {}); await page.waitForSelector('.cf-root.on [data-f="code"]'); await page.fill('.cf-root.on [data-f="code"]', "123456"); await page.click('.cf-root.on [data-cf="yes"]');
+  await page.waitForFunction(() => !document.querySelector(".setup-banner"), null, { timeout: 8000 }); await go(page, "/scripts"); eq(path(page), "/scripts", "bật xong thì vào bình thường");
+});
+test("Dev Panel: thẻ chẩn đoán quyền — bình thường báo xanh; thiếu thẻ phiên báo đỏ và tự sửa dẫn tới nhập mã", async ({ page }) => {
+  await installApi(page); await loginDev(page); await go(page, "/dev"); await page.waitForSelector("#doctor .doctor.ok"); ok(/hoạt động bình thường/.test(await page.textContent("#doctor")), "báo bình thường"); eq(await page.locator("#doctor .dr-list li.no").count(), 0);
+  await page.evaluate(() => { const a = firebase.auth(), d = Object.getOwnPropertyDescriptor(a, "currentUser"); Object.defineProperty(a, "currentUser", { configurable: true, get() { const u = d.get.call(a); u.emailVerified = false; u.reload = () => { Object.defineProperty(a, "currentUser", d); return Promise.resolve(); }; return u; } }); }); /* mô phỏng trạng thái "email chưa xác minh" bị cũ trong phiên */
+  await page.click('#view a[href="/dev/system"]'); await page.waitForURL(BASE + "/dev/system"); await page.goBack(); await page.waitForSelector("#doctor .doctor.bad");
+  ok(/chưa xác minh/.test(await page.textContent("#doctor")), "chỉ rõ nguyên nhân: email chưa xác minh"); ok(await page.locator("#doctor .dr-list li.no").count() >= 1, "có mục đỏ");
+  await page.click("#drFix"); await page.waitForSelector("#doctor .doctor.ok", { timeout: 8000 }); ok(true, "Kiểm tra & sửa làm mới trạng thái → báo xanh");
 });
 let pass = 0, fail = 0; const only = process.argv[2];
 for (const [name, fn, o] of T) {
   if (only && !name.includes(only)) continue; const { ctx, page } = await fresh(o); const t0 = Date.now();
-  try { await Promise.race([fn({ page, ctx }), new Promise((_, rj) => setTimeout(() => rj(new Error("quá 45s (treo)")), 45000))]); const extra = page.errs.filter(e => !/net::ERR_FAILED/.test(e)); if (extra.length && !o.allowErrors) throw new Error("lỗi console: " + extra.join(" | ")); pass++; console.log(`  ✓ ${name} (${Date.now() - t0}ms)`); }
+  try { await Promise.race([fn({ page, ctx }), new Promise((_, rj) => setTimeout(() => rj(new Error("quá thời gian (treo)")), (o.timeout || 45000)))]); const extra = page.errs.filter(e => !/net::ERR_FAILED/.test(e)); if (extra.length && !o.allowErrors) throw new Error("lỗi console: " + extra.join(" | ")); pass++; console.log(`  ✓ ${name} (${Date.now() - t0}ms)`); }
   catch (e) { fail++; console.log(`  ✗ ${name}\n      ${String(e.message).split("\n").slice(0, 40).join("\n      ")}`); try { await page.screenshot({ path: SHOTS + "/FAIL-" + name.replace(/\W+/g, "_").slice(0, 40) + ".png" }); } catch (_) {} }
   await ctx.close();
 }

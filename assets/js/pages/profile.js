@@ -1,7 +1,7 @@
 /* Hồ sơ cá nhân: ảnh đại diện, mô tả bản thân, tên hiển thị, bảo mật, đăng xuất. Khách (ẩn danh) chỉ thấy bản hạn chế. */
 import { esc, toast, fmtTime } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
-import { session, onAuth, updateDisplayName, resendVerification, resetPassword, providerLabel, canChangePassword, saveProfileFields, muteInfo, isEditor, twofaSend, twofaVerify, recoveryStart, recoveryConfirm, recoveryRemove, changeEmail, passwordCodeSend, changePasswordWithCode } from "../lib/auth.js";
+import { session, onAuth, updateDisplayName, resendVerification, resetPassword, providerLabel, canChangePassword, saveProfileFields, muteInfo, isEditor, twofaSend, twofaVerify, recoveryStart, recoveryConfirm, recoveryRemove, changeEmail, passwordCodeSend, changePassword } from "../lib/auth.js";
 import { serverReady } from "../lib/account.js";
 import { navigate } from "../lib/router.js";
 import { avatarHTML } from "../lib/ui.js";
@@ -18,7 +18,7 @@ const mailOk = { v: null };
 /* Hỏi mã 6 số (hộp thoại), cho nhập lại khi sai; trả true nếu thành công */
 async function askCode(o, verify) {
   for (;;) {
-    const v = await formDialog({ title: o.title, message: o.message, ok: o.ok, fields: [{ id: "code", label: "Mã gồm 6 chữ số", max: 7, otp: true, placeholder: "000000" }] });
+    const v = await formDialog({ kind: "code", title: o.title, message: o.message, ok: o.ok, fields: [{ id: "code", label: "Mã gồm 6 chữ số", max: 7, otp: true, placeholder: "000000" }] });
     if (!v) return false;
     try { await verify((v.code || "").replace(/\s+/g, "")); return true; }
     catch (x) { toast(friendly(x), "err"); if (/code_expired|too_many_tries/.test(x.code || "")) return false; }
@@ -32,7 +32,7 @@ function secHTML(u) {
         <button class="btn ${sec.twofa ? "ghost" : "primary"}" id="tfBtn" type="button" ${off}>${sec.twofa ? "Tắt" : "Bật"}</button></div>
       <div class="sec-row"><div><h4>Email khôi phục</h4><p translate="no">${rec ? esc(rec) : ""}</p>${rec ? "" : `<p>Chưa có. Dùng để lấy lại tài khoản nếu bạn mất quyền vào hộp thư chính.</p>`}</div>
         <div class="acts"><button class="btn ghost" id="rcBtn" type="button" ${off}>${rec ? "Đổi" : "Thêm"}</button>${rec ? `<button class="btn ghost" id="rcDel" type="button" ${off}>Xóa</button>` : ""}</div></div>
-      ${canChangePassword(u) ? `<div class="sec-row"><div><h4>Mật khẩu</h4><p>Để đổi mật khẩu, bạn cần mật khẩu hiện tại và một mã gửi tới email của bạn.</p></div><button class="btn ghost" id="pwBtn" type="button" ${off}>Đổi mật khẩu</button></div>` : ""}
+      ${canChangePassword(u) ? `<div class="sec-row"><div><h4>Mật khẩu</h4><p>Để đổi mật khẩu, chọn một cách xác nhận: mật khẩu hiện tại, email khôi phục hoặc xác minh 2 bước.</p></div><button class="btn ghost" id="pwBtn" type="button" ${off}>Đổi mật khẩu</button></div>` : ""}
       ${canChangePassword(u) ? `<div class="sec-row"><div><h4>Email đăng nhập</h4><p translate="no">${esc(u.email || "")}</p></div><button class="btn ghost" id="emBtn" type="button" ${off}>Đổi email</button></div>` : ""}
     </div></section>`;
 }
@@ -43,6 +43,10 @@ function fillSec(u) {
 }
 function wireSec(host, u) {
   const $ = x => host.querySelector(x), sec = session.sec || {};
+  if (session.needTwofaSetup) {
+    host.insertAdjacentHTML("afterbegin", `<div class="setup-banner" role="alert"><span>${ICO.shield}</span><div><b>Bật xác minh 2 bước để tiếp tục</b><p>Tài khoản đăng nhập bằng Google cũng cần xác minh 2 bước. Bấm “Bật” bên dưới, nhập mã gửi tới email của bạn là xong.</p></div></div>`);
+    if (/[?&]setup=1/.test(location.search) && !host.dataset.auto) { host.dataset.auto = "1"; setTimeout(() => { const b = $("#tfBtn"); if (b && !b.disabled && !sec.twofa) b.click(); }, 500); }
+  }
   $("#tfBtn").addEventListener("click", async () => {
     const on = !!sec.twofa, b = $("#tfBtn"); b.classList.add("busy");
     try {
@@ -52,35 +56,42 @@ function wireSec(host, u) {
     } catch (x) { b.classList.remove("busy"); toast(friendly(x), "err"); }
   });
   $("#rcBtn").addEventListener("click", async () => {
-    const v = await formDialog({ title: "Email khôi phục", message: "Nhập một email khác với email đăng nhập. Chúng tôi sẽ gửi mã để xác nhận.", ok: "Gửi mã", fields: [{ id: "email", label: "Email khôi phục", max: 120, placeholder: "example@gmail.com" }] });
+    const v = await formDialog({ kind: "email", title: "Email khôi phục", message: "Nhập một email khác với email đăng nhập. Chúng tôi sẽ gửi mã để xác nhận.", ok: "Gửi mã", fields: [{ id: "email", label: "Email khôi phục", max: 120, placeholder: "example@gmail.com" }] });
     if (!v) return; const em = (v.email || "").trim();
     try { const r = await recoveryStart(em); if (await askCode({ title: "Xác nhận email khôi phục", message: "Chúng tôi đã gửi mã tới " + (r.sentTo || em) + ".", ok: "Xác nhận" }, c => recoveryConfirm(c))) toast("Đã lưu email khôi phục."); }
     catch (x) { toast(friendly(x), "err"); }
   });
   const del = $("#rcDel"); if (del) del.addEventListener("click", async () => {
-    if (!(await confirmDialog({ title: "Xóa email khôi phục?", message: "Bạn sẽ không còn dùng được email này để lấy lại tài khoản.", ok: "Xóa", danger: true }))) return;
+    if (!(await confirmDialog({ kind: "email", title: "Xóa email khôi phục?", message: "Bạn sẽ không còn dùng được email này để lấy lại tài khoản.", ok: "Xóa", danger: true }))) return;
     try { await recoveryRemove(); toast("Đã xóa email khôi phục."); } catch (x) { toast(friendly(x), "err"); }
   });
   const pwb = $("#pwBtn"); if (pwb) pwb.addEventListener("click", async () => {
-    pwb.classList.add("busy");
-    try {
-      const r = await passwordCodeSend(); pwb.classList.remove("busy");
-      let msg = "Chúng tôi đã gửi mã tới " + (r.sentTo || u.email) + ". Nhập mật khẩu hiện tại, mã và mật khẩu mới.";
-      for (;;) {
-        const v = await formDialog({ title: "Đổi mật khẩu", message: msg, ok: "Đổi mật khẩu", fields: [{ id: "cur", label: "Mật khẩu hiện tại", type: "password", max: 200 }, { id: "code", label: "Mã gồm 6 chữ số", max: 7, otp: true, placeholder: "000000" }, { id: "pw", label: "Mật khẩu mới", type: "password", max: 200 }, { id: "pw2", label: "Nhập lại mật khẩu mới", type: "password", max: 200 }] });
-        if (!v) return;
-        const code = (v.code || "").replace(/\s+/g, ""), p = v.pw || "";
-        if (!v.cur) { msg = "Hãy nhập mật khẩu hiện tại."; continue; }
-        if (!/^\d{6}$/.test(code)) { msg = "Nhập mã gồm 6 chữ số."; continue; }
-        if (p.length < 8 || !/[A-Za-z]/.test(p) || !/\d/.test(p)) { msg = "Mật khẩu mới cần ít nhất 8 ký tự, gồm cả chữ và số."; continue; }
-        if (p !== v.pw2) { msg = "Mật khẩu nhập lại chưa khớp."; continue; }
-        try { await changePasswordWithCode(v.cur, code, p); toast("Đã đổi mật khẩu. Hãy đăng nhập lại bằng mật khẩu mới."); navigate("/login", { replace: true }); return; }
-        catch (x) { toast(friendly(x), "err"); if (/code_expired|too_many_tries/.test(x.code || "")) return; msg = "Kiểm tra lại thông tin rồi thử lại."; }
-      }
-    } catch (x) { pwb.classList.remove("busy"); toast(friendly(x), "err"); }
+    /* Bước 1: chọn cách xác nhận — chỉ hiện các cách tài khoản này đang dùng được */
+    const hasRec = !!(sec.recovery && sec.recovery.verified), opts = [["current", "Mật khẩu hiện tại"]];
+    if (hasRec) opts.push(["recovery", "Email khôi phục"]); if (sec.twofa) opts.push(["twofa", "Xác minh 2 bước"]);
+    let via = "current";
+    if (opts.length > 1) { const pick = await formDialog({ kind: "password", title: "Đổi mật khẩu", message: "Chọn cách xác nhận đây là bạn:", ok: "Tiếp tục", fields: [{ id: "via", label: "Xác nhận bằng", options: opts, value: "current" }] }); if (!pick) return; via = pick.via; }
+    let msg = via === "current" ? "Nhập mật khẩu hiện tại và mật khẩu mới." : "";
+    if (via !== "current") {
+      pwb.classList.add("busy");
+      try { const r = await passwordCodeSend(via); msg = "Chúng tôi đã gửi mã tới " + (r.sentTo || u.email) + ". Nhập mã và mật khẩu mới."; } catch (x) { toast(friendly(x), "err"); return; } finally { pwb.classList.remove("busy"); }
+    }
+    for (;;) {
+      const fields = via === "current" ? [{ id: "cur", label: "Mật khẩu hiện tại", type: "password", max: 200 }] : [{ id: "code", label: "Mã gồm 6 chữ số", max: 7, otp: true, placeholder: "000000" }];
+      fields.push({ id: "pw", label: "Mật khẩu mới", type: "password", new: true, max: 200 }, { id: "pw2", label: "Nhập lại mật khẩu mới", type: "password", new: true, max: 200 });
+      const v = await formDialog({ kind: "password", title: "Đổi mật khẩu", message: msg, ok: "Đổi mật khẩu", fields });
+      if (!v) return;
+      const code = (v.code || "").replace(/\s+/g, ""), p = v.pw || "";
+      if (via === "current" && !v.cur) { msg = "Hãy nhập mật khẩu hiện tại."; continue; }
+      if (via !== "current" && !/^\d{6}$/.test(code)) { msg = "Nhập mã gồm 6 chữ số."; continue; }
+      if (p.length < 8 || !/[A-Za-z]/.test(p) || !/\d/.test(p)) { msg = "Mật khẩu mới cần ít nhất 8 ký tự, gồm cả chữ và số."; continue; }
+      if (p !== v.pw2) { msg = "Mật khẩu nhập lại chưa khớp."; continue; }
+      try { await changePassword({ via, currentPassword: v.cur, code, password: p }); toast("Đã đổi mật khẩu. Hãy đăng nhập lại bằng mật khẩu mới."); navigate("/login", { replace: true }); return; }
+      catch (x) { toast(friendly(x), "err"); if (/code_expired|too_many_tries/.test(x.code || "")) return; msg = "Kiểm tra lại thông tin rồi thử lại."; }
+    }
   });
   const em = $("#emBtn"); if (em) em.addEventListener("click", async () => {
-    const v = await formDialog({ title: "Đổi email đăng nhập", message: "Chúng tôi sẽ gửi liên kết xác nhận tới email mới. Nhập mật khẩu hiện tại để tiếp tục.", ok: "Gửi liên kết", fields: [{ id: "email", label: "Email mới", max: 120, placeholder: "example@gmail.com" }, { id: "pw", label: "Mật khẩu hiện tại", type: "password", max: 200 }] });
+    const v = await formDialog({ kind: "email", title: "Đổi email đăng nhập", message: "Chúng tôi sẽ gửi liên kết xác nhận tới email mới. Nhập mật khẩu hiện tại để tiếp tục.", ok: "Gửi liên kết", fields: [{ id: "email", label: "Email mới", max: 120, placeholder: "example@gmail.com" }, { id: "pw", label: "Mật khẩu hiện tại", type: "password", max: 200 }] });
     if (!v) return;
     try { const r = await changeEmail((v.email || "").trim(), v.pw || ""); toast("Đã gửi liên kết xác nhận tới " + (r.sentTo || "email mới") + ". Mở thư để hoàn tất."); } catch (x) { toast(friendly(x), "err"); }
   });
@@ -171,7 +182,7 @@ export function mount(ctx) {
       try { await saveProfileFields({ avatar: await fileToAvatar(fl) }); toast("Đã cập nhật hồ sơ."); } catch (x) { ae.textContent = x.code && /^avatar\//.test(x.code) || /ảnh/i.test(x.message) ? x.message : friendly(x); } pk.classList.remove("busy");
     });
     const del = $q("#avDel"); if (del) del.addEventListener("click", async () => {
-      if (!(await confirmDialog({ title: "Xóa ảnh đại diện?", message: "Bạn sẽ quay về chữ cái đầu của tên.", ok: "Xóa ảnh", danger: true }))) return;
+      if (!(await confirmDialog({ kind: "media", title: "Xóa ảnh đại diện?", message: "Bạn sẽ quay về chữ cái đầu của tên.", ok: "Xóa ảnh", danger: true }))) return;
       try { await saveProfileFields({ avatar: "" }); toast("Đã cập nhật hồ sơ."); } catch (x) { ae.textContent = friendly(x); }
     });
     const cool = (btn, ms = 30000) => { btn.disabled = true; const label = btn.innerHTML; let left = ms / 1000; btn.textContent = "Gửi lại sau " + left + "s";

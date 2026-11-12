@@ -1,6 +1,6 @@
 /* Kho dữ liệu realtime dùng chung: mỗi node chỉ có MỘT listener cho cả ứng dụng. */
 import { db, TS } from "./firebase.js";
-import { DATA_ROOT, CATS_NODE, MAINT_NODE, NOTICE_NODE, THEME_NODE, TRACKS_NODE, TRACKDATA_NODE, MAX_TRACKS, USERS_NODE, UPDATES_NODE, ADMIN_NODE, THEME_PUBLIC_KEYS } from "./config.js";
+import { DATA_ROOT, CATS_NODE, MAINT_NODE, NOTICE_NODE, THEME_NODE, TRACKS_NODE, TRACKDATA_NODE, MAX_TRACKS, USERS_NODE, UPDATES_NODE, ADMIN_NODE, THEME_PUBLIC_KEYS, LIKES_NODE, MAINTNOTES_NODE } from "./config.js";
 import { session } from "./auth.js";
 import { pick, vi, validUrl } from "./util.js";
 import { isLocalImg } from "./avatar.js";
@@ -14,10 +14,12 @@ export const BASE_CATS = [
 ];
 /* Phân loại rủi ro do DEV gán cho danh mục (không gán = bình thường). Có phân loại thì người xem phải đọc cảnh báo trước khi vào. */
 export const RISKS = { "": "Bình thường", third: "Phần mềm bên thứ ba", hack: "Hack", mod: "Mod / chỉnh sửa", game: "Can thiệp trò chơi" };
+/* Thông báo bảo trì do DEV cập nhật: info = thông tin, planned = sắp bảo trì, active = đang bảo trì, done = đã hoàn tất */
+export const MNOTE_LEVELS = { info: "Thông tin", planned: "Sắp bảo trì", active: "Đang bảo trì", done: "Đã hoàn tất" };
 export const NEEDS = { code: "Cần code", url: "Cần link", any: "Link hoặc code" };
 export const riskOf = c => (c && RISKS[c.risk || ""] && c.risk) || "";
 export const store = {
-  cats: BASE_CATS.slice(), data: {}, status: {}, live: {}, maint: null, notice: null, updates: [], tracks: [], theme: {}, connected: false,
+  cats: BASE_CATS.slice(), data: {}, status: {}, live: {}, maint: null, notice: null, updates: [], maintNotes: [], likes: {}, tracks: [], theme: {}, connected: false,
   users: null, admins: {}, catsLoaded: false, started: false, removedBase: []
 };
 const subs = new Set();
@@ -145,6 +147,25 @@ function rebuildCats(map) {
   store.catsLoaded = true; catsResolve(); mark("cats"); emit("cats"); scheduleSave();
 }
 
+let likesRaw = {};
+function rebuildLikes() {
+  const me = session.user && !session.isGuest ? session.user.uid : "", out = {};
+  Object.keys(likesRaw).forEach(c => Object.keys(likesRaw[c] || {}).forEach(k => { const u = Object.keys(likesRaw[c][k] || {}).filter(x => likesRaw[c][k][x] === true); if (u.length) out[c + "/" + k] = { n: u.length, mine: !!me && u.includes(me) }; }));
+  store.likes = out; emit("likes");
+}
+export const likeInfo = (c, k) => store.likes[c + "/" + k] || { n: 0, mine: false };
+/* Đăng nhập/đăng xuất làm đổi "tôi đã thích" → tính lại */
+let lastLikeUid = "";
+export const syncLikesOwner = () => { const u = session.user && !session.isGuest ? session.user.uid : ""; if (u !== lastLikeUid) { lastLikeUid = u; rebuildLikes(); } };
+export function toggleLike(c, k) {
+  if (!db) return Promise.reject(new Error("Chưa kết nối được dữ liệu. Vui lòng tải lại trang."));
+  if (!session.user || session.isGuest) return Promise.reject(Object.assign(new Error("Hãy đăng nhập bằng tài khoản thật để thích bài viết."), { code: "app/login" }));
+  const uid = session.user.uid, on = !likeInfo(c, k).mine, ref = db.ref(LIKES_NODE + "/" + c + "/" + k + "/" + uid);
+  /* cập nhật ngay trên màn hình, Rules kiểm tra lại ở máy chủ */
+  const mark = v => { const l = ((likesRaw[c] = likesRaw[c] || {})[k] = likesRaw[c][k] || {}); if (v) l[uid] = true; else delete l[uid]; rebuildLikes(); };
+  mark(on);
+  return (on ? ref.set(true) : ref.remove()).then(() => on).catch(e => { mark(!on); throw denied(e); });
+}
 export function start() {
   if (store.started) return; store.started = true;
   hydrate();
@@ -166,6 +187,14 @@ export function start() {
     store.tracks = Object.keys(v).map(k => ({ id: k, name: String((v[k] && v[k].name) || "Nhạc nền"), ts: Number(v[k] && v[k].ts) || 0 })).sort((a, b) => a.ts - b.ts);
     emit("tracks");
   }, () => { store.tracks = []; emit("tracks"); });
+  db.ref(MAINTNOTES_NODE).on("value", s => {
+    const v = s.val() || {};
+    store.maintNotes = Object.keys(v).map(k => ({ key: k, title: String((v[k] && v[k].title) || ""), body: String((v[k] && v[k].body) || ""), level: MNOTE_LEVELS[v[k] && v[k].level] ? v[k].level : "info", start: Number(v[k] && v[k].start) || 0, end: Number(v[k] && v[k].end) || 0, ts: Number(v[k] && v[k].ts) || 0 }))
+      .filter(x => x.title).sort((a, b) => b.ts - a.ts);
+    emit("maintnotes");
+  }, () => { store.maintNotes = []; emit("maintnotes"); });
+  /* Lượt thích: một listener cho cả web (nox_likes/<danh mục>/<mục>/<uid>); đếm ngay trong trình duyệt */
+  db.ref(LIKES_NODE).on("value", s => { likesRaw = s.val() || {}; rebuildLikes(); }, () => { likesRaw = {}; rebuildLikes(); });
   db.ref(CATS_NODE).on("value", s => { rebuildCats(s.val() || {}); dlog("in", "Danh mục tùy chỉnh: " + Object.keys(s.val() || {}).length); }, () => rebuildCats({}));
   BASE_CATS.forEach(c => { if (!handlers[c.id] && store.cats.some(x => x.id === c.id)) attachCat(c.id); });
   dlog("ok", "Firebase sẵn sàng.");
@@ -292,3 +321,17 @@ export function removeTrack(id) {
 }
 export const setTheme = p => { guardDev(); return wrap(db.ref(THEME_NODE).update({ ...p, updatedAt: TS() })); };
 export const autoCloseMaintenance = () => { if (session.isDev && db) db.ref(MAINT_NODE).update({ enabled: false, by: "DEV", ts: TS() }).catch(() => {}); };
+
+/* Thông báo bảo trì (DEV): thêm / sửa / xóa */
+export function saveMaintNote(key, f) {
+  guardDev(); const title = String(f.title || "").trim(), body = String(f.body || "").trim();
+  if (!title) return Promise.reject(new Error("Vui lòng nhập tiêu đề."));
+  if (title.length > 120) return Promise.reject(new Error("Tiêu đề tối đa 120 ký tự."));
+  if (body.length > 2000) return Promise.reject(new Error("Nội dung tối đa 2000 ký tự."));
+  const o = { title, body, level: MNOTE_LEVELS[f.level] ? f.level : "info", start: Number(f.start) || null, end: Number(f.end) || null };
+  if (o.start && o.end && o.end < o.start) return Promise.reject(new Error("Giờ kết thúc phải sau giờ bắt đầu."));
+  return wrap(key ? db.ref(MAINTNOTES_NODE + "/" + key).update(o) : db.ref(MAINTNOTES_NODE).push(Object.assign(o, { ts: TS() })));
+}
+export const deleteMaintNote = key => { guardDev(); return wrap(db.ref(MAINTNOTES_NODE + "/" + key).remove()); };
+/* Bản ghi còn hiệu lực: chưa hoàn tất, hoặc vừa hoàn tất trong 24 giờ */
+export const liveMaintNotes = () => store.maintNotes.filter(n => n.level !== "done" || Date.now() - (n.end || n.ts) < 864e5);

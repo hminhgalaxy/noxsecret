@@ -1,5 +1,6 @@
 /* Bảng route duy nhất. Route tĩnh luôn khai báo TRƯỚC route có :tham-số để không bị che. */
 import { define } from "./lib/router.js";
+import { session } from "./lib/auth.js";
 const L = p => () => import("./pages/" + p + ".js");
 export const BASE_PATHS = [["scripts", "script"], ["apk", "apk"], ["ios", "ios"], ["links", "link"]];
 export const notFoundDef = { load: L("notfound"), title: "Không tìm thấy trang", guard: "public", noindex: true };
@@ -9,7 +10,7 @@ const catNeeds = extra => p => extra.catId ? ["data:" + extra.catId] : ["cats", 
 
 /* Tải sẵn các trang hay dùng lúc trình duyệt rảnh, để bấm vào là mở ngay (không chờ tải mã) */
 export function prefetchPages(devToo = false) {
-  const go = () => ["auth/login", "auth/register", "settings", "notifications", "categories", "items/list", "items/detail", "search", "profile"].concat(devToo ? ["dev/index", "dev/updates", "dev/records", "dev/system", "dev/test"] : [])
+  const go = () => ["auth/login", "auth/register", "settings", "inbox", "categories", "items/list", "items/detail", "search", "profile"].concat(devToo ? ["dev/index", "dev/updates", "dev/records", "dev/system", "dev/test"] : [])
     .forEach((p, i) => setTimeout(() => import("./pages/" + p + ".js").catch(() => {}), i * 120));
   "requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 2000);
 }
@@ -24,15 +25,17 @@ export function registerRoutes() {
   define("/profile", { load: L("profile"), guard: "auth", title: "Hồ sơ", needs: [] });
   define("/search", { load: L("search"), guard: "public", title: "Tìm kiếm", noindex: true, needs: ALL });
   define("/categories", { load: L("categories"), guard: "public", title: "Danh mục", desc: "Tất cả danh mục nội dung đã được kiểm duyệt trên SKIBIDI SCRIPT WEB.", needs: ALL });
-  define("/notifications", { load: L("notifications"), guard: "public", title: "Thông báo", desc: "Thông báo mới nhất từ SKIBIDI SCRIPT WEB.", needs: ["notice", "updates"] });
+  define("/notifications", { load: L("redirect"), guard: "public", to: "/", open: "updates", title: "Thông báo", noindex: true, needs: ["notice", "updates"] });
   [["skibidiscript", "/skibidiscript"], ["about", "/about"], ["guide", "/guide"], ["apk-safety", "/apk-safety"], ["security", "/security"], ["terms", "/terms"], ["privacy", "/privacy"]].forEach(([k, p]) => define(p, { load: L("info"), guard: "public", info: k, needs: [] }));
   define("/favorites", { load: L("favorites"), guard: "public", title: "Yêu thích", noindex: true, needs: ALL });
   define("/help", { load: L("help"), guard: "public", title: "Câu hỏi thường gặp", desc: "Câu hỏi thường gặp về tài khoản, bảo mật, nội dung và cài đặt của SKIBIDI SCRIPT WEB.", needs: [] });
   define("/help/support", { load: L("help/support"), guard: "real", title: "Hỗ trợ", needs: [] });
   define("/help/report", { load: L("help/report"), guard: "real", title: "Báo cáo", needs: ["cats", "data:*"] });
-  define("/help/chat", { load: L("help/messages"), guard: "real", title: "Nhắn tin với dev", chat: true, needs: [] });
-  define("/help/messages", { load: L("help/messages"), guard: "real", title: "Tin nhắn của tôi", needs: [] });
-  define("/help/messages/:tid", { load: L("help/messages"), guard: "real", title: "Cuộc trò chuyện", needs: [] });
+  define("/help/chat", { load: L("redirect"), guard: "real", to: "/inbox/chat", title: "Nhắn tin với dev", needs: [] });
+  define("/help/messages", { load: L("redirect"), guard: "real", to: "/inbox", title: "Hộp thư", needs: [] });
+  define("/inbox", { load: L("inbox"), guard: "real", title: "Hộp thư", noindex: true, needs: () => (session.isDev ? ["users"] : []) });
+  define("/inbox/:tid", { load: L("inbox"), guard: "real", title: "Hộp thư", noindex: true, needs: () => (session.isDev ? ["users"] : []) });
+  define("/help/messages/:tid", { load: L("redirect"), guard: "real", to: "/inbox/:tid", title: "Hộp thư", needs: [] });
   define("/help/submit", { load: L("help/submit"), guard: "real", title: "Đăng nội dung", needs: ["cats"] });
   define("/settings", { load: L("settings"), guard: "public", title: "Cài đặt", noindex: true, needs: ["theme"] });
   define("/404", notFoundDef);
@@ -52,7 +55,7 @@ export function registerRoutes() {
   BASE_PATHS.forEach(([seg, catId]) => define("/dev/data/" + seg, { load: L("dev/records"), guard: "dev", catId, needs: catNeeds({ catId }) }));
   define("/dev/data/c/:node", { load: L("dev/records"), guard: "dev", custom: true, needs: catNeeds({ custom: true }) });
   define("/dev/categories", { load: L("dev/categories"), guard: "dev", title: "Danh mục", needs: ["cats"] });
-  define("/dev/inbox", { load: L("dev/inbox"), guard: "dev", title: "Hộp thư", needs: ["users"] });
+  define("/dev/inbox", { load: L("redirect"), guard: "dev", to: "/inbox", title: "Hộp thư", needs: [] });
   define("/dev/review", { load: L("dev/review"), guard: "dev", title: "Duyệt bài", needs: ["cats", "users"] });
   define("/dev/users", { load: L("dev/users"), guard: "dev", title: "Người dùng", needs: ["users"] });
   define("/dev/mail", { load: L("dev/mail"), guard: "dev", title: "Gửi thư", needs: ["users"] });

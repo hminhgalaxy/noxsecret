@@ -144,11 +144,19 @@ function createApi(deps) {
       try { await mail(email, T.render("passwordChangedAlert", { name: r.displayName || "" })); } catch (_) {}
       return ok();
     },
-    /* Đổi mật khẩu khi đang đăng nhập: cần mật khẩu hiện tại + mã gửi về email. */
-    async "password-code-send"({ token }) {
+    /* Đổi mật khẩu khi đang đăng nhập: chỉ cần MỘT trong ba cách xác nhận —
+       "current"  = nhập mật khẩu hiện tại;
+       "recovery" = mã gửi tới email khôi phục (đã xác minh);
+       "twofa"    = mã xác minh 2 bước gửi tới email đăng nhập (cần đã bật xác minh 2 bước). */
+    async "password-code-send"({ token, body }) {
       const { u, err } = await who(token, { needVerifiedSession: true }); if (err) return err;
       if (u.provider !== "password") return fail(400, "not_password", "Your account signs in with Google, so there's no password to change here.");
       if (!u.verified) return fail(403, "unverified", "Verify your email first.");
+      if (body && body.via === "recovery") {
+        if (!(u.sec.recovery && u.sec.recovery.verified && u.sec.recovery.email)) return fail(400, "no_recovery", "You haven't added a verified recovery email yet.");
+        return issueCode(u, "password", u.sec.recovery.email, "passwordCode");
+      }
+      if (!u.sec.twofa) return fail(400, "no_twofa", "Turn on two-step verification first, or use your current password.");
       return issueCode(u, "password", u.email, "passwordCode");
     },
     async "password-change"({ token, body, geo }) {
@@ -156,10 +164,17 @@ function createApi(deps) {
       if (u.provider !== "password") return fail(400, "not_password", "Your account signs in with Google, so there's no password to change here.");
       if (!u.verified) return fail(403, "unverified", "Verify your email first.");
       if (!(await limit("pwchg:" + u.uid, 8, HOUR))) return fail(429, "rate_limited", "Too many attempts. Try again in a while.");
-      if (typeof body.currentPassword !== "string" || !body.currentPassword || !(await deps.verifyPassword(u.email, body.currentPassword))) return fail(403, "wrong_password", "That password isn't right.");
       if (!strongPw(body.password)) return fail(400, "weak_password", "Use at least 8 characters, with letters and numbers.");
-      if (body.password === body.currentPassword) return fail(400, "same_password", "Choose a password you haven't used here before.");
-      const c = await checkCode(u, "password", body.code); if (c.err) return c.err;
+      const via = ["twofa", "recovery"].includes(body.via) ? body.via : "current";
+      if (via === "current") {
+        if (typeof body.currentPassword !== "string" || !body.currentPassword || !(await deps.verifyPassword(u.email, body.currentPassword))) return fail(403, "wrong_password", "That password isn't right.");
+        if (body.password === body.currentPassword) return fail(400, "same_password", "Choose a password you haven't used here before.");
+      } else {
+        if (via === "twofa" && !u.sec.twofa) return fail(400, "no_twofa", "Turn on two-step verification first, or use your current password.");
+        if (via === "recovery" && !(u.sec.recovery && u.sec.recovery.verified)) return fail(400, "no_recovery", "You haven't added a verified recovery email yet.");
+        const c = await checkCode(u, "password", body.code); if (c.err) return c.err;
+        if (c.c.to !== (via === "recovery" ? lc(u.sec.recovery.email) : lc(u.email))) return fail(400, "code_expired", "That code has expired. Request a new one.");
+      }
       await auth.updateUser(u.uid, { password: body.password }); await auth.revokeRefreshTokens(u.uid);
       try { await mail(u.email, T.render("passwordChangedAlert", { name: await nameOfProfile(u.uid) || await nameOf(u.uid), place: placeOf(geo) })); } catch (_) {}
       return ok({ relogin: true });

@@ -258,4 +258,44 @@ console.log("ĐỢT C: danh mục do DEV quản lý, bài chờ duyệt, hỗ tr
   t("người dùng không đăng được bài", T("nox_updates/u_usr", { title: "x", ts: 1, tag: "new" }, USER), false);
   t("DEV sửa tiêu đề và loại một lệnh", eng.write([{ segs: split("nox_updates/u_new/title"), value: "y" }, { segs: split("nox_updates/u_new/tag"), value: "fix" }], DEV, rr).ok, true);
 }
+
+/* ===== Đợt E: thích · lưu bài · ghi chú bảo trì · probe · xem trước tin nhắn ===== */
+{
+  console.log("\nĐỢT E: THÍCH, LƯU BÀI, GHI CHÚ BẢO TRÌ, CHẨN ĐOÁN DEV");
+  const rr = JSON.parse(JSON.stringify(root)); const T = (p, v, a, r = rr) => eng.write([{ segs: split(p), value: v }], a, r).ok, Rd = (p, a) => eng.canRead(split(p), a, rr);
+  const g2 = a => ({ ...a, token: { ...a.token, auth_time: 100, tf1: 100 } }); // đã nhập mã phiên
+  const gate = JSON.parse(JSON.stringify(root)); gate.nox_security = { u1: { gate: true }, d1: { gate: true } };
+  t("khách đọc lượt thích (công khai)", Rd("nox_likes/script/s1", null), true);
+  t("user thích bài bằng uid của mình", T("nox_likes/script/s1/u1", true, USER), true);
+  t("không thích hộ người khác", T("nox_likes/script/s1/u2", true, USER), false);
+  t("khách ẩn danh không thích được", T("nox_likes/script/s1/g1", true, GUEST), false);
+  t("giá trị khác true bị chặn", T("nox_likes/script/s1/u1", 5, USER), false);
+  t("bỏ thích (xóa)", T("nox_likes/script/s1/u1", null, USER), true);
+  t("bật cổng 2 bước mà chưa nhập mã phiên → không thích được", T("nox_likes/script/s1/u1", true, { ...USER, token: { ...USER.token, auth_time: 100 } }, gate), false);
+  t("đã nhập mã phiên → thích được", T("nox_likes/script/s1/u1", true, g2(USER), gate), true);
+  t("chủ đọc danh sách lưu của mình", Rd("nox_saved/u1", USER), true);
+  t("người khác KHÔNG đọc danh sách lưu", Rd("nox_saved/u1", OTHER), false);
+  t("khách KHÔNG đọc nox_saved", Rd("nox_saved", null), false);
+  t("lưu bài (số thời gian)", T("nox_saved/u1/script/s1", 1700000000000, USER), true);
+  t("lưu giá trị không phải số bị chặn", T("nox_saved/u1/script/s1", "x", USER), false);
+  t("không ghi vào danh sách lưu của người khác", T("nox_saved/u1/script/s1", 1, OTHER), false);
+  t("khách ẩn danh không lưu được", T("nox_saved/g1/script/s1", 1, GUEST), false);
+  const note = { title: "Bảo trì máy chủ", body: "Từ 22h", level: "planned", start: 1, end: 2, ts: 1 };
+  t("ai cũng đọc được ghi chú bảo trì", Rd("nox_maintnotes", null), true);
+  t("DEV đăng ghi chú bảo trì", T("nox_maintnotes/n1", note, DEV), true);
+  t("user thường KHÔNG đăng", T("nox_maintnotes/n1", note, USER), false);
+  t("DEV chưa xác minh email KHÔNG đăng", T("nox_maintnotes/n1", note, DEV_UNVERIFIED), false);
+  t("mức độ lạ bị chặn", T("nox_maintnotes/n1", { ...note, level: "evil" }, DEV), false);
+  t("tiêu đề rỗng bị chặn", T("nox_maintnotes/n1", { ...note, title: "" }, DEV), false);
+  t("nội dung quá 2000 ký tự bị chặn", T("nox_maintnotes/n1", { ...note, body: "x".repeat(2001) }, DEV), false);
+  t("khóa lạ bị chặn", T("nox_maintnotes/n1", { ...note, evil: 1 }, DEV), false);
+  t("DEV xóa ghi chú", T("nox_maintnotes/n1", null, DEV), true);
+  t("DEV có cổng 2 bước chưa nhập mã → bị chặn (đúng nguyên nhân 'không có quyền')", T("nox_maintnotes/n1", note, { ...DEV, token: { ...DEV.token, auth_time: 100 } }, gate), false);
+  t("DEV nhập mã phiên → đăng được", T("nox_maintnotes/n1", note, g2(DEV), gate), true);
+  t("probe: DEV ghi/đọc được", [T("nox_probe/last", 1, DEV), Rd("nox_probe/last", DEV)].join(), "true,true");
+  t("probe: user thường không ghi/đọc", [T("nox_probe/last", 1, USER), Rd("nox_probe/last", USER)].join(), "false,false");
+  t("probe: DEV thiếu thẻ phiên bị chặn (chẩn đoán phát hiện đúng)", T("nox_probe/last", 1, { ...DEV, token: { ...DEV.token, auth_time: 100 } }, gate), false);
+  t("tin nhắn: preview ≤ 140 ký tự", [T("nox_threads/u1/t1/preview", "a".repeat(140), USER, JSON.parse(JSON.stringify(root))), T("nox_threads/u1/t1/preview", "a".repeat(141), USER, JSON.parse(JSON.stringify(root)))].join(), "true,false");
+}
+
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

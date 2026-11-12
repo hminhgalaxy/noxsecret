@@ -32,6 +32,11 @@ export function decide(guard, s, here) {
     let nx = here; try { const u = new URL(here, "http://x"); if (/^\/(login|register|forgot-password|two-step)$/.test(u.pathname)) nx = u.searchParams.get("next") || "/"; } catch (_) {}
     return { to: "/two-step" + (nx && nx !== "/" ? "?next=" + encodeURIComponent(nx) : ""), replace: true };
   }
+  /* Tài khoản Google chưa bật xác minh 2 bước: chỉ cho vào Hồ sơ/Cài đặt/trang pháp lý/đăng nhập cho tới khi bật xong */
+  if (real && s.needTwofaSetup && guard !== "twofa") {
+    let pth = here; try { pth = new URL(here, "http://x").pathname; } catch (_) {}
+    if (!/^\/(profile|settings|login|logout|two-step|auth\/action|terms|privacy|security|about|guide|skibidiscript|apk-safety)(\/|$)/.test(pth)) return { to: "/profile?tab=security&setup=1", replace: true, toast: "Tài khoản Google cần bật xác minh 2 bước để tiếp tục." };
+  }
   if (!guard || guard === "public") return null;
   if (guard === "twofa") return !real ? { to: "/login", replace: true } : (!s.twofaPending ? { to: "__next__", replace: true } : null);
   if (guard === "guest") return real ? { to: "__next__", replace: true } : null;
@@ -114,6 +119,8 @@ export async function render({ pop = false } = {}) {
     view.querySelector("#retryRoute").onclick = () => render({ pop: false }); cur = { def, params: m.params, path: url.pathname }; hooks.onRoute(cur); return;
   }
   runCleanups();
+  /* Giữ chiều cao khung nội dung trong lúc dựng trang mới để chân trang/thanh cuộn không nhảy (hết giật, hết chớp) */
+  view.style.minHeight = Math.min(view.offsetHeight, 3000) + "px";
   view.classList.remove("leaving"); view.innerHTML = ""; hooks.setPage({ reset: true });
   const el = document.createElement("div"); el.className = "page"; view.appendChild(el);
   cur = { def, params: m.params, path: url.pathname, pattern: m.path };
@@ -133,6 +140,7 @@ export async function render({ pop = false } = {}) {
   }
   if (id !== navId) return;
   barEnd();
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (id === navId) view.style.minHeight = ""; }));
   if (pop) { const y = scrollPos.get(history.state && history.state.k); window.scrollTo(0, y || 0); } else window.scrollTo(0, 0);
   view.focus && view.focus({ preventScroll: true });
 }

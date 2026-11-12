@@ -20,6 +20,7 @@ function world() {
     a: { uid: "uA", email: "a@example.com", email_verified: true, auth_time: NOW0 / 1000 - 60, firebase: { sign_in_provider: "password" } },
     aOld: { uid: "uA", email: "a@example.com", email_verified: true, auth_time: NOW0 / 1000 - 7200, firebase: { sign_in_provider: "password" } },
     aUnv: { uid: "uA", email: "a@example.com", email_verified: false, auth_time: NOW0 / 1000 - 60, firebase: { sign_in_provider: "password" } },
+    gg: { uid: "uA", email: "a@example.com", email_verified: true, auth_time: NOW0 / 1000 - 60, firebase: { sign_in_provider: "google.com" } },
     guest: { uid: "gg1", firebase: { sign_in_provider: "anonymous" } },
     b: { uid: "uB", email: "b@example.com", email_verified: true, auth_time: NOW0 / 1000 - 60, firebase: { sign_in_provider: "password" } }
   };
@@ -101,19 +102,31 @@ console.log("ĐẶT LẠI MẬT KHẨU BẰNG MÃ");
   await w3.call("reset-confirm", { email: "a@example.com", code: "123456", password: "Matkhau123" }); t("đổi qua email khôi phục: không tự coi email chính là đã xác minh", [w3.users.uA.emailVerified, w3.calls.some(c => c[0] === "update" && c[2].password)], [undefined, true]);
   const w4 = world(); for (let i = 0; i < 12; i++) await w4.call("reset-confirm", { email: "a@example.com", code: "000000", password: "Matkhau123" }); t("giới hạn số lần thử theo email", (await w4.call("reset-confirm", { email: "a@example.com", code: "000000", password: "Matkhau123" })).status, 429); }
 
-console.log("ĐỔI MẬT KHẨU TRONG HỒ SƠ (MÃ + MẬT KHẨU HIỆN TẠI)");
+console.log("ĐỔI MẬT KHẨU TRONG HỒ SƠ (MẬT KHẨU CŨ · 2 BƯỚC · EMAIL KHÔI PHỤC)");
 { const w = world();
   t("chưa đăng nhập → 401", (await w.call("password-code-send")).status, 401);
-  const r = await w.call("password-code-send", {}, "a"); t("gửi mã tới email đăng nhập", [r.status, w.sent.at(-1).to, /password change code/.test(w.sent.at(-1).subject)], [200, "a@example.com", true]);
-  t("sai mật khẩu hiện tại → 403, không dùng mã", (await w.call("password-change", { code: "123456", currentPassword: "nope", password: "Moimatkhau9" }, "a")).body.code, "wrong_password");
-  t("thiếu mã / sai mã → từ chối", (await w.call("password-change", { code: "000000", currentPassword: "pw-ok", password: "Moimatkhau9" }, "a")).body.code, "wrong_code");
-  t("mật khẩu mới yếu → từ chối", (await w.call("password-change", { code: "123456", currentPassword: "pw-ok", password: "short1" }, "a")).body.code, "weak_password");
-  t("trùng mật khẩu cũ → từ chối", (await w.call("password-change", { code: "123456", currentPassword: "pw-ok", password: "pw-ok" }, "a")).body.code, "weak_password");
-  const ok2 = await w.call("password-change", { code: "123456", currentPassword: "pw-ok", password: "Moimatkhau9" }, "a");
-  t("đủ mã + mật khẩu hiện tại → đổi, thu hồi phiên, yêu cầu đăng nhập lại", [ok2.status, ok2.body.relogin, w.calls.some(c => c[0] === "update" && c[2].password === "Moimatkhau9"), w.calls.some(c => c[0] === "revoke")], [200, true, true, true]);
+  t("cách 'mật khẩu hiện tại': sai mật khẩu → 403, không đổi", (await w.call("password-change", { currentPassword: "nope", password: "Moimatkhau9" }, "a")).body.code, "wrong_password");
+  t("thiếu mật khẩu hiện tại → 403", (await w.call("password-change", { password: "Moimatkhau9" }, "a")).body.code, "wrong_password");
+  t("mật khẩu mới yếu → từ chối", (await w.call("password-change", { currentPassword: "pw-ok", password: "short1" }, "a")).body.code, "weak_password");
+  t("trùng mật khẩu cũ → từ chối", (await w.call("password-change", { currentPassword: "pw-ok", password: "pw-ok" }, "a")).body.code, "weak_password");
+  const ok1 = await w.call("password-change", { currentPassword: "pw-ok", password: "Moimatkhau9" }, "a");
+  t("đúng mật khẩu hiện tại → đổi, thu hồi phiên, yêu cầu đăng nhập lại", [ok1.status, ok1.body.relogin, w.calls.some(c => c[0] === "update" && c[2].password === "Moimatkhau9"), w.calls.some(c => c[0] === "revoke")], [200, true, true, true]);
   t("thư báo đã đổi mật khẩu", w.sent.at(-1).subject, "Your SkibidiScript password was changed");
-  t("tài khoản Google → không có mật khẩu để đổi", (await w.call("password-code-send", {}, "guest")).status, 403);
-  const w2 = world(); w2.data = { nox_security: { uA: { twofa: true, gate: true } } };
+  t("chưa bật 2 bước → không gửi mã 2 bước được", (await w.call("password-code-send", {}, "a")).body.code, "no_twofa");
+  t("chưa có email khôi phục → không dùng được", (await w.call("password-code-send", { via: "recovery" }, "a")).body.code, "no_recovery");
+  t("tài khoản Google → không có mật khẩu để đổi", [(await w.call("password-code-send", {}, "gg")).body.code, (await w.call("password-change", { currentPassword: "x", password: "Moimatkhau9" }, "gg")).body.code], ["not_password", "not_password"]); }
+{ const w = world(); w.data = { nox_security: { uA: { twofa: true, gate: true } } }; w.tokens.a = { ...w.tokens.a, tf1: w.tokens.a.auth_time };
+  const r = await w.call("password-code-send", {}, "a"); t("có 2 bước: gửi mã tới email đăng nhập", [r.status, w.sent.at(-1).to, /password change code/.test(w.sent.at(-1).subject)], [200, "a@example.com", true]);
+  t("sai mã → từ chối", (await w.call("password-change", { via: "twofa", code: "000000", password: "Moimatkhau9" }, "a")).body.code, "wrong_code");
+  const k = await w.call("password-change", { via: "twofa", code: "123456", password: "Moimatkhau9" }, "a");
+  t("đúng mã 2 bước → đổi được (không cần mật khẩu cũ)", [k.status, k.body.relogin, w.calls.some(c => c[0] === "update" && c[2].password === "Moimatkhau9")], [200, true, true]);
+  t("mã dùng 1 lần", (await w.call("password-change", { via: "twofa", code: "123456", password: "Khacmatkhau8" }, "a")).status !== 200, true); }
+{ const w = world(); w.data = { nox_security: { uA: { recovery: { email: "backup@example.com", verified: true } } } };
+  const r = await w.call("password-code-send", { via: "recovery" }, "a"); t("email khôi phục: mã gửi tới email khôi phục", [r.status, w.sent.at(-1).to], [200, "backup@example.com"]);
+  t("chưa bật 2 bước → cách 2 bước bị từ chối", (await w.call("password-change", { via: "twofa", code: "123456", password: "Moimatkhau9" }, "a")).body.code, "no_twofa");
+  const k = await w.call("password-change", { via: "recovery", code: "123456", password: "Moimatkhau9" }, "a");
+  t("đúng mã gửi tới email khôi phục → đổi được", [k.status, w.calls.some(c => c[0] === "update" && c[2].password === "Moimatkhau9")], [200, true]); }
+{ const w2 = world(); w2.data = { nox_security: { uA: { twofa: true, gate: true } } };
   t("bật 2 bước mà chưa nhập mã phiên → 403", (await w2.call("password-code-send", {}, "a")).body.code, "twofa_required"); }
 
 console.log("KIỂM TRA IP KHI ĐĂNG NHẬP (login-check)");

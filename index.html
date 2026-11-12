@@ -28,6 +28,8 @@
 <meta name="twitter:description" content="A high-security utility site for sharing APK packages, reviewed before publishing.">
 <meta name="twitter:image" content="https://skibidiscript.vercel.app/assets/img/og.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/img/favicon-48.png" sizes="48x48" type="image/png">
+<link rel="icon" href="/assets/img/favicon-96.png" sizes="96x96" type="image/png">
 <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml">
 <link rel="mask-icon" href="/assets/img/logo.svg" color="#0a0a0a">
 <link rel="icon" href="/assets/img/icon-192.png" sizes="192x192" type="image/png">
@@ -38,14 +40,13 @@
 <link rel="preconnect" href="https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app" crossorigin>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/400.css" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/600.css" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/700.css" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/be-vietnam-pro@latest/800.css" media="print" onload="this.media='all'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"></noscript>
 <script>/* Áp dụng sáng/tối và bỏ qua màn chờ TRƯỚC khi vẽ để không bị nháy */
-(function(){try{var d=document.documentElement,p=localStorage.getItem("ssw_theme"),l=p==="light"||(p==="system"&&matchMedia("(prefers-color-scheme: light)").matches);d.dataset.theme=l?"light":"dark";var g=localStorage.getItem("ssw_gfx");d.dataset.gfx=g==="mid"||g==="high"?g:"low";if(sessionStorage.getItem("ssw_splash")==="1"||localStorage.getItem("ssw_nosplash")==="1"||d.dataset.gfx==="low")d.classList.add("no-splash");if(localStorage.getItem("ssw_bg")==="0")d.dataset.bg="off";if(localStorage.getItem("ssw_hc")==="1")d.dataset.contrast="high";if(localStorage.getItem("ssw_rm")==="1")d.dataset.motion="reduced";if(localStorage.getItem("ssw_dens")==="compact")d.dataset.density="compact";if(localStorage.getItem("ssw_glass")==="1")d.dataset.glass="on";d.lang=localStorage.getItem("ssw_lang")==="vi"?"vi":"en";if(localStorage.getItem("ssw_side")==="0")d.classList.add("side-off")}catch(e){}})();</script>
-<style>html.no-splash #splash{display:none}</style>
+(function(){try{var d=document.documentElement,p=localStorage.getItem("ssw_theme"),l=p==="light"||(p==="system"&&matchMedia("(prefers-color-scheme: light)").matches);d.dataset.theme=l?"light":"dark";var g=localStorage.getItem("ssw_gfx");d.dataset.gfx=g==="mid"||g==="high"?g:"low";if(sessionStorage.getItem("ssw_splash")==="1"||localStorage.getItem("ssw_nosplash")==="1"||d.dataset.gfx==="low")d.classList.add("no-splash");if(localStorage.getItem("ssw_bg")==="0")d.dataset.bg="off";if(localStorage.getItem("ssw_hc")==="1")d.dataset.contrast="high";if(localStorage.getItem("ssw_crisp")==="1")d.dataset.crisp="on";if(localStorage.getItem("ssw_rm")==="1")d.dataset.motion="reduced";if(localStorage.getItem("ssw_dens")==="compact")d.dataset.density="compact";if(localStorage.getItem("ssw_glass")==="1")d.dataset.glass="on";d.lang=localStorage.getItem("ssw_lang")==="vi"?"vi":"en";if(localStorage.getItem("ssw_side")==="0")d.classList.add("side-off")}catch(e){}})();</script>
+<style>html{background:#0a0a0a}html[data-theme=light]{background:#fafafa}html.no-splash #splash{display:none}</style>
 <noscript><style>#splash{display:none}</style></noscript>
 <link rel="stylesheet" href="/assets/css/tokens.css">
 <link rel="stylesheet" href="/assets/css/base.css">
@@ -68,6 +69,9 @@
 <link rel="stylesheet" href="/assets/css/glass-plus.css">
 <link rel="stylesheet" href="/assets/css/help.css">
 <link rel="stylesheet" href="/assets/css/features.css">
+<link rel="stylesheet" href="/assets/css/ui2.css">
+<link rel="stylesheet" href="/assets/css/chat.css">
+<link rel="stylesheet" href="/assets/css/v2.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://skibidiscript.vercel.app/#site","name":"SKIBIDI SCRIPT WEB","alternateName":["skibidiscript","Skibidi Script","SkibidiScript Web","skibidiscript.vercel.app"],"url":"https://skibidiscript.vercel.app/","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/search?q={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"Organization","@id":"https://skibidiscript.vercel.app/#org","name":"SKIBIDI SCRIPT WEB","alternateName":["skibidiscript","Skibidi Script"],"url":"https://skibidiscript.vercel.app/","logo":{"@type":"ImageObject","@id":"https://skibidiscript.vercel.app/#logo","url":"https://skibidiscript.vercel.app/assets/img/icon-512.png","contentUrl":"https://skibidiscript.vercel.app/assets/img/icon-512.png","width":512,"height":512,"caption":"SKIBIDI SCRIPT WEB"},"image":{"@id":"https://skibidiscript.vercel.app/#logo"}}]}</script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -127,9 +131,11 @@
   <a class="brand hd-brand" href="/" aria-label="SKIBIDI SCRIPT WEB — Trang chủ"><svg class="mark" aria-hidden="true"><use href="#logo"/></svg><span class="word"><b>SKIBIDI</b><span>SCRIPT WEB</span></span></a>
   <div class="hd-r">
     <a class="bell" id="btnBell" href="/notifications" aria-label="Thông báo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9Z"/><path d="M10 20a2.5 2.5 0 0 0 4 0"/></svg><i class="bell-badge" id="bellBadge" hidden></i></a>
+    <a class="hdr-btn mailbtn" id="btnMail" href="/inbox" aria-label="Hộp thư"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="m4 8 8 5.6L20 8"/></svg><i class="bell-badge" id="mailBadge" hidden></i></a>
     <div id="hdrAcc" data-state="out"></div>
   </div>
 </header>
+<div id="mnBanner" role="status" hidden></div>
 
 <div id="sideOv"></div>
 <aside id="side" aria-label="Menu">
@@ -148,7 +154,7 @@
     <div class="foot-main">
       <div class="foot-about"><a class="brand" href="/" aria-label="Trang chủ"><svg class="mark" aria-hidden="true"><use href="#logo"/></svg><span class="word"><b>SKIBIDI</b><span>SCRIPT WEB</span></span></a>
         <p>skibidiscript — website tiện ích chia sẻ gói APK bảo mật cao. Nội dung được kiểm duyệt trước khi đăng; website không cổ xúy hack hay can thiệp trò chơi.</p></div>
-      <nav class="foot-col" aria-label="Khám phá"><h4>Khám phá</h4><a href="/">Trang chủ</a><a href="/categories">Danh mục</a><a href="/search">Tìm kiếm</a><a href="/notifications">Thông báo</a></nav>
+      <nav class="foot-col" aria-label="Khám phá"><h4>Khám phá</h4><a href="/">Trang chủ</a><a href="/categories">Danh mục</a><a href="/search">Tìm kiếm</a><a href="/favorites">Yêu thích &amp; đã lưu</a></nav>
       <nav class="foot-col" aria-label="Thông tin"><h4>Thông tin</h4><a href="/skibidiscript">skibidiscript là gì?</a><a href="/about">Giới thiệu</a><a href="/guide">Hướng dẫn sử dụng</a><a href="/apk-safety">Tải APK an toàn</a><a href="/security">Bảo mật &amp; an toàn</a><a href="/terms">Điều khoản sử dụng</a><a href="/privacy">Chính sách riêng tư</a><a href="/help">Câu hỏi thường gặp</a></nav>
       <nav class="foot-col" aria-label="Tài khoản"><h4>Tài khoản</h4><a href="/login" data-guest-only>Đăng nhập</a><a href="/register" data-guest-only>Đăng ký</a><a href="/profile">Hồ sơ</a><a href="/settings">Cài đặt</a></nav>
     </div>
@@ -159,7 +165,7 @@
 <nav id="tabbar" aria-label="Điều hướng nhanh">
   <a class="tab" href="/" data-tab="home"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21.5v-6.5h6v6.5"/></svg></span>Trang chủ</a>
   <button class="tab" type="button" id="tabCats" data-tab="cats"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg></span>Danh mục</button>
-  <a class="tab" href="/search" data-tab="search"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>Tìm kiếm</a>
+  <a class="tab" href="/favorites" data-tab="saved"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.6 3.6 4.5 6.9 4.5c2 0 3.8 1.1 5.1 3 1.3-1.9 3.1-3 5.1-3 3.3 0 5.2 3.1 4.1 6.6-1.7 4.8-9.2 9.4-9.2 9.4Z"/></svg></span>Đã lưu</a>
   <a class="tab" href="/login" data-tab="me" id="tabMe"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg></span><span id="tabMeL">Đăng nhập</span></a>
 </nav>
 

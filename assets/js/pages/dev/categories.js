@@ -34,7 +34,7 @@ export function mount(ctx) {
     if (rs) { S.restoreCategory(rs.dataset.restore).then(() => toast("Đã khôi phục danh mục.")).catch(x => toast(friendly(x), "err")); return; }
     if (ed) {
       const c = S.catById(ed.dataset.edit); if (!c) return;
-      const v = await formDialog({ title: "Sửa danh mục", message: "", ok: "Lưu", fields: [
+      const v = await formDialog({ kind: "category", title: "Sửa danh mục", message: "", ok: "Lưu", fields: [
         { id: "name", label: "Tên danh mục", value: c.label, max: 60 }, { id: "sub", label: "Mô tả ngắn", value: c.sub, max: 120 },
         { id: "icon", label: "Biểu tượng", value: c.icon || "box", options: PICK_ICONS.map(k => [k, k]) },
         { id: "risk", label: "Phân loại", value: c.risk || "", options: Object.entries(S.RISKS) }, { id: "need", label: "Mục cần có", value: c.need || "any", options: Object.entries(S.NEEDS) }] });

@@ -12,8 +12,8 @@
       "destination": "/api/feed"
     },
     {
-      "source": "/((?!assets/|api/|robots\\.txt|opensearch\\.xml|manifest\\.webmanifest|favicon|\\.well-known/).*)",
-      "destination": "/index.html"
+      "source": "/((?!assets/|api/|index\\.html|robots\\.txt|opensearch\\.xml|manifest\\.webmanifest|favicon|\\.well-known/).*)",
+      "destination": "/api/page?p=/$1"
     }
   ],
   "headers": [
@@ -85,5 +85,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/page.js": {
+      "includeFiles": "index.html"
+    }
+  }
 }
