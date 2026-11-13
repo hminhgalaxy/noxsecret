@@ -66,7 +66,7 @@ export function openPopup(o) {
   place();
   requestAnimationFrame(() => { root.classList.add("on"); place(); });
   if (o.onMount) o.onMount(handle);
-  setTimeout(() => { const f = box.querySelector("[autofocus],[role=menuitem],input,textarea,button:not(.pop-x)"); (f || box).focus && (f || box).focus({ preventScroll: true }); }, 30);
+  setTimeout(() => { if (closed) return; const f = box.querySelector("[autofocus],[role=menuitem],input,textarea,button:not(.pop-x)"); (f || box).focus && (f || box).focus({ preventScroll: true }); }, 30);
   return handle;
 }
 export const closePopup = id => { const h = open.get(id); if (h) h.close(); };

@@ -31,18 +31,20 @@ export function createThread({ type, subject, text, ref, wantPost, id }) {
   return wrap(db.ref().update(t)).then(() => tid);
 }
 /* Gửi thêm tin: người dùng (asDev=false) hoặc DEV trả lời (asDev=true, uid = chủ cuộc trò chuyện) */
-export function sendMsg(uid, tid, text, asDev = false) {
+const ATT_LABEL = { image: "[Ảnh] ", video: "[Video] ", file: "[Tệp] " };
+export function sendMsg(uid, tid, text, asDev = false, att = null) {
   if (!asDev) need(); else if (!session.isDev) throw err("Bạn không có quyền thực hiện thao tác này.");
-  const body = cleanText(text); if (!body) throw err("Hãy nhập nội dung.");
+  const cap = cleanText(text); if (!cap && !att) throw err("Hãy nhập nội dung.");
+  const body = cap || (ATT_LABEL[att.kind] || "[Tệp] ") + String(att.name || "").slice(0, 60);
   const mid = db.ref(MSGS + "/" + uid + "/" + tid).push().key, t = {};
-  t[MSGS + "/" + uid + "/" + tid + "/" + mid] = { from: asDev ? "dev" : "user", text: body, ts: TS() };
+  t[MSGS + "/" + uid + "/" + tid + "/" + mid] = Object.assign({ from: asDev ? "dev" : "user", ts: TS() }, cap ? { text: cap } : {}, att ? { att: { id: att.id, name: att.name, mime: att.mime, kind: att.kind, size: att.size } } : {});
   Object.assign(t, asDev ? { [THREADS + "/" + uid + "/" + tid + "/last"]: "dev", [THREADS + "/" + uid + "/" + tid + "/unreadUser"]: true, [THREADS + "/" + uid + "/" + tid + "/unreadDev"]: false, [THREADS + "/" + uid + "/" + tid + "/updatedAt"]: TS(), [THREADS + "/" + uid + "/" + tid + "/preview"]: body.slice(0, 140) }
     : { [THREADS + "/" + uid + "/" + tid + "/last"]: "user", [THREADS + "/" + uid + "/" + tid + "/unreadDev"]: true, [THREADS + "/" + uid + "/" + tid + "/unreadUser"]: false, [THREADS + "/" + uid + "/" + tid + "/updatedAt"]: TS(), [THREADS + "/" + uid + "/" + tid + "/preview"]: body.slice(0, 140) });
   return wrap(db.ref().update(t));
 }
 export const markRead = (uid, tid, asDev) => db && db.ref(THREADS + "/" + uid + "/" + tid + (asDev ? "/unreadDev" : "/unreadUser")).set(false).catch(() => {});
 export const setThreadStatus = (uid, tid, status) => { if (!session.isDev) throw err("Bạn không có quyền thực hiện thao tác này."); return wrap(db.ref(THREADS + "/" + uid + "/" + tid).update({ status, updatedAt: TS() })); };
-export const deleteThread = (uid, tid) => { if (!session.isDev) throw err("Bạn không có quyền thực hiện thao tác này."); return wrap(db.ref().update({ [THREADS + "/" + uid + "/" + tid]: null, [MSGS + "/" + uid + "/" + tid]: null })); };
+export const deleteThread = (uid, tid) => { if (!session.isDev) throw err("Bạn không có quyền thực hiện thao tác này."); return wrap(db.ref().update({ [THREADS + "/" + uid + "/" + tid]: null, [MSGS + "/" + uid + "/" + tid]: null, ["nox_files/" + uid + "/" + tid]: null, ["nox_filemeta/" + uid + "/" + tid]: null, ["nox_filecount/" + uid + "/" + tid]: null })); };
 export const listenAllThreads = cb => listen(THREADS, v => { const out = []; Object.keys(v || {}).forEach(uid => rows(v[uid]).forEach(t => out.push({ ...t, uid, tid: t.key }))); cb(out.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))); });
 
 /* ───── Quyền đăng bài (DEV cấp) + điều kiện ───── */

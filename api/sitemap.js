@@ -2,7 +2,7 @@
 const SITE = "https://skibidiscript.vercel.app";
 const DB = "https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app";
 const BASE = [["scripts", "scripts"], ["apks", "apk"], ["links", "links"], ["ios", "ios"]]; // [thư mục dữ liệu, đường dẫn trang]
-const STATIC = ["/", "/skibidiscript", "/categories", "/scripts", "/apk", "/ios", "/links", "/help", "/about", "/guide", "/apk-safety", "/security", "/terms", "/privacy"];
+const STATIC = ["/", "/library", "/skibidiscript", "/categories", "/scripts", "/apk", "/ios", "/links", "/help", "/about", "/guide", "/apk-safety", "/security", "/terms", "/privacy"];
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 async function keys(path) {
   try { const r = await fetch(DB + "/" + path + ".json?shallow=true"); if (!r.ok) return []; const j = await r.json(); return j && typeof j === "object" ? Object.keys(j) : []; } catch (_) { return []; }
@@ -12,6 +12,7 @@ module.exports = async (req, res) => {
   try {
     const parts = await Promise.all(BASE.map(async ([node, seg]) => (await keys("nox_data/" + node)).map(k => "/" + seg + "/" + encodeURIComponent(k))));
     parts.forEach(p => urls.push(...p));
+    try { const r = await fetch(DB + "/nox_shop/items.json"); if (r.ok) { const v = (await r.json()) || {}; Object.keys(v).filter(k => v[k] && v[k].name && v[k].active !== false && /^[A-Za-z0-9_-]{1,40}$/.test(k)).forEach(k => urls.push("/shop/" + encodeURIComponent(k))); } } catch (_) {}
     let cats = {}; try { const r = await fetch(DB + "/nox_categories.json"); if (r.ok) cats = (await r.json()) || {}; } catch (_) {}
     const customs = Object.values(cats).map(c => c && String(c.node || "").toLowerCase()).filter(n => /^[a-z0-9-]+$/.test(n || ""));
     for (const n of customs) { urls.push("/c/" + n); (await keys("nox_data/" + n)).forEach(k => urls.push("/c/" + n + "/" + encodeURIComponent(k))); }

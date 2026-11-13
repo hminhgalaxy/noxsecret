@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>skibidiscript — SKIBIDI SCRIPT WEB: Secure APK sharing & utility hub</title>
-<meta name="description" content="A high-security APK-sharing utility site. Content is reviewed before publishing; third-party software is clearly flagged. We don't promote hacking.">
+<title>skibidiscript — SKIBIDI SCRIPT WEB: Shop & secure APK sharing hub</title>
+<meta name="description" content="SKIBIDI SCRIPT WEB: a digital shop with wallet top-up by bank transfer, plus a high-security hub for reviewed scripts and APKs. Third-party software is clearly flagged. We don't promote hacking.">
 <meta name="keywords" content="skibidiscript, skibidi script, skibidiscript web, skibidiscript.vercel.app, skibidi script web, apk, script, secure apk sharing, utility apps, verified downloads">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#0a0a0a">
@@ -16,7 +16,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SKIBIDI SCRIPT WEB">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="skibidiscript — SKIBIDI SCRIPT WEB: Secure APK sharing & utility hub">
+<meta property="og:title" content="skibidiscript — SKIBIDI SCRIPT WEB: Shop & secure APK sharing hub">
 <meta property="og:description" content="A high-security utility site for sharing APK packages, reviewed before publishing.">
 <meta property="og:url" content="https://skibidiscript.vercel.app/">
 <meta property="og:image" content="https://skibidiscript.vercel.app/assets/img/og.png">
@@ -24,7 +24,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="SKIBIDI SCRIPT WEB">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="skibidiscript — SKIBIDI SCRIPT WEB: Secure APK sharing & utility hub">
+<meta name="twitter:title" content="skibidiscript — SKIBIDI SCRIPT WEB: Shop & secure APK sharing hub">
 <meta name="twitter:description" content="A high-security utility site for sharing APK packages, reviewed before publishing.">
 <meta name="twitter:image" content="https://skibidiscript.vercel.app/assets/img/og.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -72,6 +72,7 @@
 <link rel="stylesheet" href="/assets/css/ui2.css">
 <link rel="stylesheet" href="/assets/css/chat.css">
 <link rel="stylesheet" href="/assets/css/v2.css">
+<link rel="stylesheet" href="/assets/css/shop.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://skibidiscript.vercel.app/#site","name":"SKIBIDI SCRIPT WEB","alternateName":["skibidiscript","Skibidi Script","SkibidiScript Web","skibidiscript.vercel.app"],"url":"https://skibidiscript.vercel.app/","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/search?q={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"Organization","@id":"https://skibidiscript.vercel.app/#org","name":"SKIBIDI SCRIPT WEB","alternateName":["skibidiscript","Skibidi Script"],"url":"https://skibidiscript.vercel.app/","logo":{"@type":"ImageObject","@id":"https://skibidiscript.vercel.app/#logo","url":"https://skibidiscript.vercel.app/assets/img/icon-512.png","contentUrl":"https://skibidiscript.vercel.app/assets/img/icon-512.png","width":512,"height":512,"caption":"SKIBIDI SCRIPT WEB"},"image":{"@id":"https://skibidiscript.vercel.app/#logo"}}]}</script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -130,6 +131,8 @@
   <div class="hd-l"><button id="btnMenu" type="button" aria-label="Mở menu" aria-expanded="false" aria-controls="side"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button></div>
   <a class="brand hd-brand" href="/" aria-label="SKIBIDI SCRIPT WEB — Trang chủ"><svg class="mark" aria-hidden="true"><use href="#logo"/></svg><span class="word"><b>SKIBIDI</b><span>SCRIPT WEB</span></span></a>
   <div class="hd-r">
+    <button class="bell cartbtn" id="btnCart" type="button" aria-label="Giỏ hàng" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h3l2.3 11.2a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6"/></svg><i class="bell-badge" id="cartBadge" hidden></i></button>
+    <a class="walletbtn" id="btnWallet" href="/wallet" aria-label="Ví của tôi" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M16.5 15h1.5"/><path d="M6 6l9.5-3L17 6"/></svg><b id="walletAmt">…</b></a>
     <a class="bell" id="btnBell" href="/notifications" aria-label="Thông báo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9Z"/><path d="M10 20a2.5 2.5 0 0 0 4 0"/></svg><i class="bell-badge" id="bellBadge" hidden></i></a>
     <a class="hdr-btn mailbtn" id="btnMail" href="/inbox" aria-label="Hộp thư"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="m4 8 8 5.6L20 8"/></svg><i class="bell-badge" id="mailBadge" hidden></i></a>
     <div id="hdrAcc" data-state="out"></div>
@@ -163,9 +166,10 @@
 </main>
 
 <nav id="tabbar" aria-label="Điều hướng nhanh">
-  <a class="tab" href="/" data-tab="home"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9 21.5v-6.5h6v6.5"/></svg></span>Trang chủ</a>
+  <a class="tab" href="/" data-tab="home"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>Cửa hàng</a>
   <button class="tab" type="button" id="tabCats" data-tab="cats"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg></span>Danh mục</button>
-  <a class="tab" href="/favorites" data-tab="saved"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.2-9.4C1.7 7.6 3.6 4.5 6.9 4.5c2 0 3.8 1.1 5.1 3 1.3-1.9 3.1-3 5.1-3 3.3 0 5.2 3.1 4.1 6.6-1.7 4.8-9.2 9.4-9.2 9.4Z"/></svg></span>Đã lưu</a>
+  <button class="tab" type="button" id="tabCart" aria-label="Giỏ hàng"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h3l2.3 11.2a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6"/></svg><i class="tab-badge" id="tabCartBadge" hidden></i></span>Giỏ</button>
+  <a class="tab" href="/wallet" data-tab="wallet"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M16.5 15h1.5"/><path d="M6 6l9.5-3L17 6"/></svg></span><span id="tabWalletL">Ví</span></a>
   <a class="tab" href="/login" data-tab="me" id="tabMe"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg></span><span id="tabMeL">Đăng nhập</span></a>
 </nav>
 

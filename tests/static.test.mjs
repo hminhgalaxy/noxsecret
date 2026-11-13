@@ -27,6 +27,20 @@ const mf = JSON.parse(txt("manifest.webmanifest")); t("manifest: id + shortcuts 
 t("manifest: icon tồn tại", mf.icons.every(i => fs.existsSync(R(i.src.slice(1)))), true);
 const sec = txt(".well-known/security.txt"); t("security.txt: Contact + Expires tương lai", [/^Contact: https:\/\//m.test(sec), new Date((sec.match(/^Expires: (.+)$/m) || [])[1]) > new Date()], [true, true]);
 t("favicon.ico là ICO", fs.readFileSync(R("favicon.ico")).subarray(0, 4).toString("hex"), "00000100");
+
+/* ── Cửa hàng: trang sản phẩm có SEO riêng, ví/đơn hàng không lập chỉ mục ── */
+const pageRun = async (p, db) => { const old = globalThis.fetch; globalThis.fetch = async u => ({ ok: true, json: async () => db(String(u)) }); const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end(b) { this.b = b; } }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); try { await require("../api/page.js")({ query: { p }, url: "/api/page?p=" + p, headers: {} }, res); } finally { globalThis.fetch = old; } return res; };
+const prod = u => u.includes("nox_shop/items/sp1") ? { name: "Key VIP <30 ngày>", desc: "Giao tự động", price: 59000, stock: 3, active: true } : u.includes("nox_shop/items/off") ? { name: "Ẩn", price: 1, active: false } : null;
+const pg = await pageRun("/shop/sp1", prod);
+t("shop: trang sản phẩm 200 + Product/Offer VND", [pg.statusCode, /"@type":"Product"/.test(pg.b), /"priceCurrency":"VND"/.test(pg.b), /"price":"59000"/.test(pg.b), /schema.org\/InStock/.test(pg.b)], [200, true, true, true, true]);
+t("shop: escape HTML tên sản phẩm", /Key VIP &lt;30/.test(pg.b) && !/Key VIP <30/.test(pg.b), true);
+t("shop: canonical /shop/sp1 + cho lập chỉ mục", /rel="canonical" href="https:\/\/skibidiscript.vercel.app\/shop\/sp1"/.test(pg.b) && /index,follow/.test(pg.b), true);
+t("shop: sản phẩm ẩn / không có → 404", [(await pageRun("/shop/off", prod)).statusCode, (await pageRun("/shop/zzz", prod)).statusCode], [404, 404]);
+const pw = await pageRun("/wallet", () => null); t("ví/đơn hàng: noindex", [pw.statusCode, /noindex/.test(pw.b), pw.h["X-Robots-Tag"]], [200, true, "noindex"]);
+const lib = await pageRun("/library", () => null); t("/library: có tiêu đề riêng, lập chỉ mục", /<title>Content library/.test(lib.b) && /index,follow/.test(lib.b), true);
+const smShop = await run("../api/sitemap.js", u => u.includes("nox_shop/items") ? { sp1: { name: "A", active: true }, off: { name: "B", active: false } } : u.includes("shallow") ? {} : {});
+t("sitemap: có /library + sản phẩm đang bán, không có sản phẩm ẩn", [smShop.b.includes("/library</loc>"), smShop.b.includes("/shop/sp1</loc>"), smShop.b.includes("/shop/off")], [true, true, false]);
+t("robots: chặn /wallet /orders", /Disallow: \/wallet/.test(robots) && /Disallow: \/orders/.test(robots), true);
 const ix = txt("index.html");
 t("index: tiêu đề có thương hiệu skibidiscript", /<title>skibidiscript — SKIBIDI SCRIPT WEB/.test(ix), true);
 t("index: liên kết feed + opensearch + canonical", [/rel="alternate" type="application\/atom\+xml"/.test(ix), /rel="search" type="application\/opensearchdescription\+xml"/.test(ix), /rel="canonical" href="https:\/\/skibidiscript\.vercel\.app\/"/.test(ix)], [true, true, true]);

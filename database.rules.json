@@ -359,7 +359,7 @@
         "$tid": {
           "$mid": {
             ".write": "((auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !data.exists()) || ((auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !newData.exists()) || ((auth.uid === $uid && (auth != null && auth.token.firebase.sign_in_provider !== 'anonymous' && (!root.child('nox_admin').child(auth.uid).child('banUntil').exists() || root.child('nox_admin').child(auth.uid).child('banUntil').val() <= now)) && (!root.child('nox_admin').child(auth.uid).child('muteUntil').exists() || root.child('nox_admin').child(auth.uid).child('muteUntil').val() <= now) && !data.exists() && newData.exists() && root.child('nox_threads').child($uid).child($tid).child('status').val() !== 'closed') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time))",
-            ".validate": "newData.hasChildren(['from', 'text', 'ts'])",
+            ".validate": "newData.hasChildren(['from', 'ts']) && ((newData.child('text').exists() && newData.child('text').val().length >= 1) || newData.child('att').exists())",
             "from": {
               ".validate": "newData.isString() && ((newData.val() === 'user' && auth.uid === $uid) || (newData.val() === 'dev' && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))"
             },
@@ -371,6 +371,27 @@
             },
             "$other": {
               ".validate": false
+            },
+            "att": {
+              ".validate": "newData.hasChildren(['id', 'name', 'mime', 'kind', 'size'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val().length <= 60 && root.child('nox_filemeta').child($uid).child($tid).child(newData.parent().child('id').val()).exists() && root.child('nox_filemeta').child($uid).child($tid).child(newData.parent().child('id').val()).child('by').val() === auth.uid"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val() === root.child('nox_filemeta').child($uid).child($tid).child(newData.parent().child('id').val()).child('name').val()"
+              },
+              "mime": {
+                ".validate": "newData.isString() && newData.val() === root.child('nox_filemeta').child($uid).child($tid).child(newData.parent().child('id').val()).child('mime').val()"
+              },
+              "kind": {
+                ".validate": "newData.isString() && newData.val() === root.child('nox_filemeta').child($uid).child($tid).child(newData.parent().child('id').val()).child('kind').val()"
+              },
+              "size": {
+                ".validate": "newData.isNumber() && newData.val() === root.child('nox_filemeta').child($uid).child($tid).child(newData.parent().child('id').val()).child('size').val()"
+              },
+              "$other": {
+                ".validate": false
+              }
             }
           }
         }
@@ -459,6 +480,162 @@
     "nox_probe": {
       ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
       ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)"
+    },
+    "nox_shop": {
+      ".read": true,
+      ".write": false,
+      "cats": {
+        "$id": {
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+          ".validate": "newData.hasChildren(['name'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+          },
+          "sort": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000 && newData.val() % 1 === 0"
+          },
+          "icon": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 24"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "items": {
+        "$id": {
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+          ".validate": "newData.hasChildren(['name', 'price'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+          },
+          "desc": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 2000"
+          },
+          "price": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000 && newData.val() % 1 === 0"
+          },
+          "stock": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 99999 && newData.val() % 1 === 0"
+          },
+          "cat": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 40"
+          },
+          "img": {
+            ".validate": "newData.isString() && newData.val().length <= 36000 && newData.val().matches(/^data:image\\/(jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+$/)"
+          },
+          "imgs": {
+            "$k": {
+              ".validate": "newData.isString() && newData.val().length <= 36000 && newData.val().matches(/^data:image\\/(jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+$/)"
+            }
+          },
+          "active": {
+            ".validate": "newData.isBoolean()"
+          },
+          "mode": {
+            ".validate": "newData.isString() && (newData.val() === 'lines' || newData.val() === 'text' || newData.val() === 'manual')"
+          },
+          "sold": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000 && newData.val() % 1 === 0"
+          },
+          "sort": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000 && newData.val() % 1 === 0"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "nox_shopsecret": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
+      ".write": false,
+      "$id": {
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time)",
+        "text": {
+          ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 20000"
+        },
+        "lines": {
+          "$k": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 5000"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "nox_wallet": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))"
+      }
+    },
+    "nox_txs": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))"
+      }
+    },
+    "nox_orders": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "nox_topups": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "nox_bankhook": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
+      ".write": false
+    },
+    "nox_topcodes": {
+      ".read": false,
+      ".write": false
+    },
+    "nox_files": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))",
+        "$tid": {
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !newData.exists()"
+        }
+      }
+    },
+    "nox_filemeta": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))",
+        "$tid": {
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !newData.exists()"
+        }
+      }
+    },
+    "nox_filecount": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))",
+        "$tid": {
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !newData.exists()"
+        }
+      }
     }
   }
 }

@@ -9,14 +9,18 @@ import { icoOf, avatarHTML } from "./ui.js";
 import { unreadCount } from "./updates.js";
 
 const LINKS = {
-  home: { href: "/", label: "Trang chủ", icon: "home", exact: true },
+  home: { href: "/", label: "Cửa hàng", icon: "bag", exact: true },
+  library: { href: "/library", label: "Kho nội dung", icon: "layers", exact: true },
+  wallet: { href: "/wallet", label: "Ví của tôi", icon: "wallet", exact: true },
+  inbox: { href: "/inbox", label: "Hộp thư", icon: "mail", exact: false },
+  orders: { href: "/orders", label: "Lịch sử mua hàng", icon: "receipt", exact: true },
   favs: { href: "/favorites", label: "Yêu thích & đã lưu", icon: "heart" },
   profile: { href: "/profile", label: "Hồ sơ", icon: "user" },
   settings: { href: "/settings", label: "Cài đặt", icon: "gear" },
   help: [{ href: "/help", label: "Câu hỏi thường gặp", icon: "bulb", exact: true }, { href: "/help/support", label: "Hỗ trợ", icon: "mail" }, { href: "/help/report", label: "Báo cáo", icon: "flag" }, { href: "/help/chat", label: "Nhắn tin với dev", icon: "chat" }],
   allCats: { href: "/categories", label: "Tất cả danh mục", icon: "grid", exact: true },
   dev: [{ href: "/dev", label: "Tổng quan", icon: "dash", exact: true }, { href: "/dev/data", label: "Dữ liệu", icon: "box" },
-        { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
+        { href: "/dev/shop", label: "Cửa hàng", icon: "bag" }, { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
         { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" }, { href: "/dev/review", label: "Duyệt bài", icon: "check" }, { href: "/dev/mail", label: "Gửi thư", icon: "mail" },
         { href: "/dev/system", label: "Bảo trì & thông báo", icon: "wrench" }, { href: "/dev/test", label: "Kiểm tra hệ thống", icon: "check" }]
 };
@@ -47,14 +51,18 @@ export function setGroup(id, open, save = true) {
 let navKey = "";
 export function renderNav(force) {
   const side = $("#sideNav"); if (!side) return;
-  const key = store.cats.map(c => c.id + c.label).join("|") + "#" + (session.user ? "u" : "g") + (session.isDev ? "d" : "");
+  const key = store.cats.map(c => c.id + c.label).join("|") + "#" + (session.user ? (session.isGuest ? "g2" : "u") : "g") + (session.isDev ? "d" : "");
   if (!force && key === navKey) { renderCounts(); return; }
   navKey = key;
   const cats = store.cats.map(c => ({ href: "/" + c.path, label: c.label, icon: c.icon || c.id, cnt: (store.data[c.id] || []).length, cid: c.id }));
   const catItems = [link(LINKS.allCats, "disc-item", 0)].concat(cats.map((c, i) => link(c, "disc-item", i + 1))).join("");
   const devItems = LINKS.dev.map((l, i) => link(l, "disc-item", i)).join("");
-  side.innerHTML = `<span class="nav-sec">Khám phá</span>
+  const real = session.user && !session.isGuest;
+  side.innerHTML = `<span class="nav-sec">Mua sắm</span>
     ${link(LINKS.home)}
+    ${real ? link(LINKS.wallet) + link(LINKS.orders) : ""}
+    <span class="nav-sec">Khám phá</span>
+    ${link(LINKS.library)}
     ${link(LINKS.favs)}
     ${group("cats", { title: "Danh mục", icon: "grid", count: cats.length }, catItems)}
     <span class="nav-sec">Của bạn</span>
@@ -95,11 +103,11 @@ export function markActive(auto = true) {
   const bg = best && best.closest(".disc"); if (auto && bg && !bg.classList.contains("open")) setGroup(bg.dataset.g, true, false);
   markTabs(path);
 }
-const CAT_PATHS = () => ["/categories"].concat(store.cats.map(c => "/" + c.path));
+const CAT_PATHS = () => ["/categories", "/favorites"].concat(store.cats.map(c => "/" + c.path));
 function markTabs(path) {
   const t = p => path === p || path.startsWith(p + "/");
   let which = null;
-  if (path === "/") which = "home"; else if (t("/favorites")) which = "saved";
+  if (path === "/" || t("/shop")) which = "home"; else if (t("/wallet") || t("/orders")) which = "wallet"; else if (t("/library")) which = "cats";
   else if (["/profile", "/login", "/register", "/forgot-password", "/settings"].some(t)) which = "me";
   else if (CAT_PATHS().some(t)) which = "cats";
   $$("#tabbar .tab").forEach(a => { const on = a.dataset.tab === which; a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });

@@ -26,7 +26,7 @@ router.configure({
   view: $("#view"), setPage, notFound: notFoundDef, safeNext, waitFor: S.waitFor,
   onRoute(cur) {
     document.body.dataset.route = cur.pattern || cur.path;
-    maybeNotice(); markActive(true); applyMaint(); renderAccount(); closeDrawer();
+    maybeNotice(); markActive(true); applyMaint(); renderAccount(); closeDrawer(); dispatchEvent(new Event("ssw:route"));
   }
 });
 
@@ -52,6 +52,8 @@ import { initPalette } from "./lib/palette.js"; import { initNetStatus } from ".
 import { initNotifPanel } from "./lib/notifpanel.js";
 import { renderMnBanner } from "./lib/mnbanner.js";
 initPalette(); initNetStatus(); initBackTop(); initBadges(); initNotifPanel();
+import { initShopHeader } from "./lib/walletchip.js"; initShopHeader();
+import { initChatWidget } from "./lib/chatwidget.js"; initChatWidget();
 renderNav(true); renderSound(); renderNotifDot();
 S.start();
 const first = initI18n().then(() => router.render({ pop: false }));

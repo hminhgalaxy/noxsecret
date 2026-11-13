@@ -9,6 +9,7 @@ const BASE = { scripts: ["scripts", "Scripts"], apk: ["apks", "APK"], links: ["l
 const PAGES = {
   "/": null,
   "/skibidiscript": ["What is skibidiscript? — SKIBIDI SCRIPT WEB", "skibidiscript (SKIBIDI SCRIPT WEB) is a high-security website for sharing APK packages, scripts and useful links, reviewed before publishing."],
+  "/library": ["Content library — SKIBIDI SCRIPT WEB", "Reviewed scripts, APKs, iOS files and links on SKIBIDI SCRIPT WEB, with clear warnings before you install anything."],
   "/categories": ["All categories — skibidiscript", "Browse every category of reviewed content on SKIBIDI SCRIPT WEB: scripts, APKs, iOS and links."],
   "/about": ["About skibidiscript — SKIBIDI SCRIPT WEB", "Who runs SKIBIDI SCRIPT WEB, what it offers and how content is reviewed before it is published."],
   "/guide": ["User guide — skibidiscript", "How to browse, search, copy code, save and like posts on SKIBIDI SCRIPT WEB."],
@@ -18,7 +19,7 @@ const PAGES = {
   "/privacy": ["Privacy policy — skibidiscript", "What data SKIBIDI SCRIPT WEB keeps, why, and how you can control it."],
   "/help": ["Help & FAQ — skibidiscript", "Frequently asked questions about accounts, security, content and settings on SKIBIDI SCRIPT WEB."]
 };
-const PRIVATE = /^\/(dev|login|register|forgot-password|two-step|auth|profile|settings|search|favorites|inbox|help\/|notifications)/;
+const PRIVATE = /^\/(dev|login|register|forgot-password|two-step|auth|profile|settings|search|favorites|inbox|wallet|orders|help\/|notifications)/;
 const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const clip = (s, n) => { s = String(s == null ? "" : s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s; };
 async function getJson(p, timeout = 2500) {
@@ -50,7 +51,7 @@ function head(h, m) {
   return h;
 }
 const crumbs = list => ({ "@type": "BreadcrumbList", itemListElement: list.map(([name, url], i) => ({ "@type": "ListItem", position: i + 1, name, item: url })) });
-const nav = `<p><a href="/">Home</a> · <a href="/categories">Categories</a> · <a href="/scripts">Scripts</a> · <a href="/apk">APK</a> · <a href="/ios">iOS</a> · <a href="/links">Links</a> · <a href="/help">Help</a> · <a href="/about">About</a></p>`;
+const nav = `<p><a href="/">Shop</a> · <a href="/library">Library</a> · <a href="/categories">Categories</a> · <a href="/scripts">Scripts</a> · <a href="/apk">APK</a> · <a href="/ios">iOS</a> · <a href="/links">Links</a> · <a href="/help">Help</a> · <a href="/about">About</a></p>`;
 const listHtml = (seg, items) => items.length ? `<ul>${items.map(([k, it]) => `<li><a href="/${seg}/${encodeURIComponent(k)}">${esc(clip(it.name, 120))}</a>${it.desc ? " — " + esc(clip(it.desc, 140)) : ""}</li>`).join("")}</ul>` : "";
 async function items(node) {
   const v = await getJson("nox_data/" + encodeURIComponent(node) + '.json?orderBy="ts"&limitToLast=40');
@@ -60,6 +61,16 @@ async function resolve(p) {
   const seg = p.split("/").filter(Boolean).map(s => { try { return decodeURIComponent(s); } catch (_) { return s; } });
   if (p === "/" || PAGES[p]) { const e = PAGES[p]; return { ok: true, title: e ? e[0] : null, desc: e ? e[1] : null, url: SITE + (p === "/" ? "/" : p), body: e ? `<h1>${esc(e[0].split(" — ")[0])}</h1><p>${esc(e[1])}</p>${nav}` : null, ld: e ? { "@context": "https://schema.org", "@graph": [{ "@type": "WebPage", "@id": SITE + p + "#page", url: SITE + p, name: e[0], description: e[1], isPartOf: { "@id": SITE + "/#site" }, publisher: { "@id": SITE + "/#org" } }, crumbs([["Home", SITE + "/"], [e[0].split(" — ")[0], SITE + p]])] } : null }; }
   if (PRIVATE.test(p)) return { ok: true, noindex: true, title: NAME + " — skibidiscript", desc: "SKIBIDI SCRIPT WEB (skibidiscript).", url: SITE + "/" };
+  if (seg[0] === "shop" && seg.length === 2 && /^[A-Za-z0-9_-]{1,40}$/.test(seg[1])) {
+    const it = await getJson("nox_shop/items/" + encodeURIComponent(seg[1]) + ".json");
+    if (!it || typeof it !== "object" || !it.name || it.active === false) return { ok: false };
+    const url = SITE + "/shop/" + encodeURIComponent(seg[1]), price = Math.max(0, Math.floor(Number(it.price) || 0)), inStock = typeof it.stock !== "number" || it.stock > 0;
+    const d = clip(it.desc || `${it.name} — buy with your wallet balance on SKIBIDI SCRIPT WEB. Instant delivery after payment.`, 160), t = `${clip(it.name, 70)} — Shop · skibidiscript`;
+    return { ok: true, title: t, desc: d, url,
+      body: `<h1>${esc(it.name)}</h1><p>${esc(clip(it.desc, 600))}</p><p>${price.toLocaleString("en-US")} VND — ${inStock ? "In stock" : "Out of stock"}</p><p><a href="/">Shop</a></p>${nav}`,
+      ld: { "@context": "https://schema.org", "@graph": [{ "@type": "Product", "@id": url + "#product", name: String(it.name), description: d, url,
+        offers: { "@type": "Offer", url, priceCurrency: "VND", price: String(price), availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", seller: { "@type": "Organization", name: NAME } } }, crumbs([["Home", SITE + "/"], [String(it.name), url]])] } };
+  }
   let node = null, label = null, root = null;
   if (BASE[seg[0]]) { node = BASE[seg[0]][0]; label = BASE[seg[0]][1]; root = "/" + seg[0]; }
   else if (seg[0] === "c" && /^[a-z0-9-]+$/.test(seg[1] || "")) { node = seg[1]; root = "/c/" + seg[1]; const cats = await getJson("nox_categories.json"); const c = cats && Object.values(cats).find(x => x && String(x.node || "").toLowerCase() === node); if (!c) return { ok: false }; label = String(c.label || node); }

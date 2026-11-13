@@ -14,6 +14,20 @@ export const SEED = {
   },
   nox_categories: { "-c1": { name: "Mod", node: "mod", icon: "bolt", color: "#ff647c", sub: "Danh mục Mod", createdAt: 1700000000000 } },
   nox_updates: { "-u1": { title: "Thêm APK mới", body: "Đã thêm vài APK mới vào kho.", ts: 1700000600000 } },
+  nox_shop: {
+    cats: { "-k1": { name: "Key & Tài khoản", sort: 1 }, "-k2": { name: "Script VIP", sort: 2 } },
+    items: {
+      "-p1": { name: "Key VIP 30 ngày", desc: "Key kích hoạt VIP trong 30 ngày, giao tự động ngay sau khi thanh toán.", price: 59000, cat: "-k1", stock: 5, mode: "lines", active: true, sort: 3, createdAt: 1700000000000, sold: 12 },
+      "-p2": { name: "Script Auto Farm Pro", desc: "Bản script đầy đủ tính năng, cập nhật thường xuyên.", price: 120000, cat: "-k2", mode: "text", active: true, sort: 2, createdAt: 1700000100000, sold: 40 },
+      "-p3": { name: "Tài khoản Premium (hết hàng)", desc: "Tạm hết hàng.", price: 250000, cat: "-k1", stock: 0, mode: "lines", active: true, sort: 1, createdAt: 1700000200000 },
+      "-p4": { name: "Gói hỗ trợ cài đặt", desc: "Dev hỗ trợ cài đặt trực tiếp qua hộp thư.", price: 30000, mode: "manual", active: true, sort: 0, createdAt: 1700000300000 }
+    }
+  },
+  nox_shopsecret: { "-p1": { lines: { l1: "KEY-AAAA-0001", l2: "KEY-AAAA-0002", l3: "KEY-AAAA-0003", l4: "KEY-AAAA-0004", l5: "KEY-AAAA-0005" } }, "-p2": { text: "https://example.com/script-pro" } },
+  nox_wallet: { uUSER: { balance: 125000, code: "SKN20481937" } },
+  nox_topcodes: { SKN20481937: "uUSER" },
+  nox_orders: { uUSER: { "-o1": { status: "paid", total: 59000, ts: 1700000700000, items: [{ id: "-p1", name: "Key VIP 30 ngày", price: 59000, qty: 1 }], delivery: [{ id: "-p1", name: "Key VIP 30 ngày", qty: 1, lines: ["KEY-AAAA-1111"] }] } } },
+  nox_txs: { uUSER: { "-t1": { type: "topup", amount: 200000, ts: 1700000600000, note: "Nạp qua ngân hàng" }, "-t2": { type: "purchase", amount: -59000, ts: 1700000700000, note: "Key VIP 30 ngày" } } },
   nox_maintenance: { enabled: false },
   nox_notice: { title: "Chào mừng", body: "Đây là thông báo thử nghiệm.", enabled: true, updatedAt: 1700000500000 },
   nox_theme: { bgType: "none", bgData: "", audioData: "", audioName: "", api: { endpoint: "https://baconbypass.xyz", key: "SECRET-KEY-123" } }

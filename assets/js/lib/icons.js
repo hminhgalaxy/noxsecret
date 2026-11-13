@@ -109,4 +109,13 @@ ICO.info = _s('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="
 ICO.checkCircle = _s('<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16 9.5"/>');
 ICO.eyeOff = _s('<path d="M3 3l18 18"/><path d="M10.6 6.2A9.8 9.8 0 0 1 12 6c5 0 8.5 4.2 9.5 6a12.6 12.6 0 0 1-2.9 3.5M6.5 7.4A12.7 12.7 0 0 0 2.5 12c1 1.8 4.5 6 9.5 6 1.3 0 2.5-.3 3.6-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>');
 ICO.smile = _s('<circle cx="12" cy="12" r="9"/><path d="M8.5 14c.9 1.2 2 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><path d="M9 9.5h.01M15 9.5h.01"/>');
+ICO.wallet = _s('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M16.5 15h1.5"/><path d="M6 6l9.5-3L17 6"/>');
+ICO.cart = _s('<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h3l2.3 11.2a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6"/>');
+ICO.receipt = _s('<path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6"/>');
+ICO.clip = _s('<path d="M20 11.5 11.8 19.7a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/>');
+ICO.minus = _s('<path d="M5 12h14"/>');
+ICO.qr = _s('<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM18 14h2.5M14 18h2.5v2.5"/>');
+ICO.bank = _s('<path d="M3 10 12 4l9 6"/><path d="M5.5 10.5v7M10 10.5v7M14 10.5v7M18.5 10.5v7"/><path d="M3 20h18"/>');
+ICO.file = _s('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/>');
+ICO.download2 = _s('<path d="M12 4v11"/><path d="m7.5 11 4.5 4.5 4.5-4.5"/><path d="M5 20h14"/>');
 ICO.brand = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="7" fill="currentColor"/><path d="M15.6 8.4c-.6-1-1.7-1.6-3.2-1.6-1.9 0-3.1 1-3.1 2.4 0 1.5 1.2 2 3.2 2.4 2.2.5 3.7 1.3 3.7 3.3 0 2-1.7 3.3-4 3.3-1.9 0-3.4-.8-4.1-2.3" fill="none" stroke="var(--on-strong,#fff)" stroke-width="2" stroke-linecap="round"/></svg>`;

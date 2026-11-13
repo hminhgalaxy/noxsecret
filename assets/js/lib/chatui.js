@@ -4,6 +4,7 @@ import { esc, fmtTime } from "./util.js";
 import { ICO } from "./icons.js";
 import * as H from "./help.js";
 import { friendly } from "./messages.js";
+import { ACCEPT, prepareFile, uploadChatFile, attHTML, wireAttachments, fmtSize } from "./chatfile.js";
 
 export const unreadFor = (t, asDev) => !!(asDev ? t.unreadDev : t.unreadUser);
 export const badgeFor = t => `<span class="badge${t.type === "report" ? " strong" : ""}">${esc(H.TYPE_LABEL[t.type] || "")}</span>${t.status === "closed" ? ' <span class="badge">Đã đóng</span>' : ""}`;
@@ -24,6 +25,9 @@ export function mountConversation(box, { uid, tid, asDev = false, peer, extra, o
     <div class="cv-logwrap"><div class="chat-log cv-log" id="chLog" role="log" aria-live="polite" aria-label="Tin nhắn"></div><button class="cv-down" id="chDown" type="button" aria-label="Xuống tin mới nhất" hidden>${ICO.chevD}<i id="chNew" hidden></i></button></div>
     ${asDev ? `<div class="cv-quick" id="chQuick" aria-label="Trả lời nhanh">${QUICK.map(q => `<button type="button" translate="no">${esc(q)}</button>`).join("")}</div>` : ""}
     <form class="chat-form cv-form" id="chForm" novalidate><label class="sr" for="chText">Nội dung tin nhắn</label>
+      <div class="cv-pend" id="chPend" hidden></div>
+      <input type="file" id="chFile" accept="${ACCEPT}" hidden>
+      <button class="cv-attach" id="chAtt" type="button" aria-label="Đính kèm ảnh, video hoặc tệp" title="Đính kèm ảnh, video hoặc tệp">${ICO.clip}</button>
       <div class="cv-input"><textarea id="chText" rows="1" maxlength="2000" placeholder="Nhập tin nhắn…" enterkeyhint="send"></textarea></div>
       <button class="cv-send" type="submit" aria-label="Gửi">${ICO.send}</button></form>
     <p class="form-error cv-err" id="chErr" role="alert"></p></div>`;
@@ -49,10 +53,11 @@ export function mountConversation(box, { uid, tid, asDev = false, peer, extra, o
       const me = m.from === mine;
       const seen = me && i === msgs.length - 1 && thread && (asDev ? thread.unreadUser === false : thread.unreadDev === false) && thread.last === mine;
       out.push(`<div class="msg ${me ? "me" : "them"}${first ? " first" : ""}${lastInGroup ? " last" : ""}${fresh && i >= msgs.length - fresh ? " pop" : ""}">${!me && first ? avatarChip(m.from === "dev" ? "D" : peerName(), m.from === "dev" ? "dev sm" : "sm") : !me ? `<span class="cv-av sm ghost"></span>` : ""}
-        <div class="msg-col">${!me && first && m.from === "dev" ? `<small class="who">Dev</small>` : ""}<div class="bub" translate="no">${linkify(m.text)}</div>${lastInGroup ? `<time datetime="${new Date(m.ts || Date.now()).toISOString()}">${esc(clock(m.ts))}${seen ? ` · <span class="seen">${ICO.check}Đã xem</span>` : ""}</time>` : ""}</div></div>`);
+        <div class="msg-col">${!me && first && m.from === "dev" ? `<small class="who">Dev</small>` : ""}${m.att ? attHTML(m.att, uid, tid) : ""}${m.text ? `<div class="bub" translate="no">${linkify(m.text)}</div>` : ""}${lastInGroup ? `<time datetime="${new Date(m.ts || Date.now()).toISOString()}">${esc(clock(m.ts))}${seen ? ` · <span class="seen">${ICO.check}Đã xem</span>` : ""}</time>` : ""}</div></div>`);
       prev = m;
     });
     log.innerHTML = out.join(""); fresh = 0;
+    wireAttachments(log, id => { for (const m of msgs) if (m.att && m.att.id === id) return m.att; return null; });
     if (stick) log.scrollTop = log.scrollHeight;
   };
   const toBottom = () => { log.scrollTo({ top: log.scrollHeight, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); };
@@ -62,14 +67,31 @@ export function mountConversation(box, { uid, tid, asDev = false, peer, extra, o
     const grew = m.length - msgs.length; if (msgs.length && grew > 0) { fresh = grew; if (!stick) { const n = $("#chNew"); n.hidden = false; n.textContent = String((parseInt(n.textContent, 10) || 0) + grew); down.hidden = false; } }
     msgs = m; drawLog();
   })];
-  ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 140) + "px"; form.classList.toggle("has", !!ta.value.trim()); });
+  ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 140) + "px"; form.classList.toggle("has", !!ta.value.trim() || !!pending); });
   const fine = matchMedia("(pointer:fine)").matches;
   ta.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey || (fine && !e.shiftKey && !e.isComposing))) { e.preventDefault(); form.requestSubmit(); } });
+  /* đính kèm: chọn tệp / dán ảnh / kéo thả → xem trước ở trên ô nhập, gửi cùng tin nhắn */
+  let pending = null; const pend = $("#chPend"), file = $("#chFile");
+  const drawPend = busy => {
+    pend.hidden = !pending; form.classList.toggle("has", !!pending || !!ta.value.trim()); if (!pending) { pend.innerHTML = ""; return; }
+    pend.innerHTML = `<span class="pn-th">${pending.kind === "image" ? `<img src="${pending.data}" alt="">` : pending.kind === "video" ? ICO.video : ICO.file}</span><span class="pn-tx"><b translate="no">${esc(pending.name)}</b><small>${busy ? esc(busy) : esc(fmtSize(pending.size))}</small></span>${busy ? "" : `<button type="button" class="pn-x" aria-label="Bỏ tệp đính kèm">${ICO.x}</button>`}`;
+    const x = pend.querySelector(".pn-x"); if (x) x.addEventListener("click", () => { pending = null; drawPend(); ta.focus(); });
+  };
+  const pick = async f => { if (!f || sending) return; er.textContent = ""; try { pending = await prepareFile(f); drawPend(); } catch (x) { er.textContent = (x && x.message) || "Không đọc được tệp này."; } };
+  $("#chAtt").addEventListener("click", () => file.click());
+  file.addEventListener("change", () => { const f = file.files && file.files[0]; file.value = ""; pick(f); });
+  ta.addEventListener("paste", e => { const f = e.clipboardData && [...e.clipboardData.files].find(x => /^image\//.test(x.type)); if (f) { e.preventDefault(); pick(f); } });
+  box.addEventListener("dragover", e => { if (e.dataTransfer && [...e.dataTransfer.types].includes("Files")) e.preventDefault(); });
+  box.addEventListener("drop", e => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) { e.preventDefault(); pick(f); } });
   const q = $("#chQuick"); if (q) q.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; ta.value = b.textContent; ta.dispatchEvent(new Event("input")); ta.focus(); });
   form.addEventListener("submit", async e => {
-    e.preventDefault(); if (sending) return; er.textContent = ""; const v = ta.value.trim(); if (!v) { ta.focus(); return; }
+    e.preventDefault(); if (sending) return; er.textContent = ""; const v = ta.value.trim(); if (!v && !pending) { ta.focus(); return; }
     sending = true; form.classList.add("busy"); stick = true;
-    try { await H.sendMsg(uid, tid, v, asDev); ta.value = ""; ta.style.height = "auto"; form.classList.remove("has"); } catch (x) { er.textContent = friendly(x); }
+    try {
+      let att = null;
+      if (pending) { drawPend("Đang tải lên…"); att = await uploadChatFile(pending, { tid, owner: uid }); }
+      await H.sendMsg(uid, tid, v, asDev, att); ta.value = ""; ta.style.height = "auto"; pending = null; drawPend(); form.classList.remove("has");
+    } catch (x) { er.textContent = friendly(x); drawPend(); }
     sending = false; form.classList.remove("busy"); ta.focus();
   });
   drawHead(); drawLog();

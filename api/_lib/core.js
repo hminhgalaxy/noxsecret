@@ -316,15 +316,23 @@ function createApi(deps) {
     return r;
   }
 
+  /* Cửa hàng / ví / nạp tiền / tệp chat: xem api/_lib/shop.js (cần Firebase Admin, KHÔNG cần Brevo) */
+  const shop = db && auth && db.tx ? require("./shop").createShop({ db, env, now, rnd, who, limit, devOnly, ok, fail }) : null;
+  if (shop) Object.assign(A, shop.actions);
+
   /* Điểm vào: req = { action, body, token, ip } → { status, body } */
-  return async function handle(req) {
+  async function handle(req) {
     const action = String(req.action || "");
     if (!Object.prototype.hasOwnProperty.call(A, action)) return fail(400, "bad_request", "Unknown request.");
-    if (action !== "status" && !configured()) return fail(501, "not_configured", "The email service isn't set up yet.");
+    const isShop = !!(shop && Object.prototype.hasOwnProperty.call(shop.actions, action));
+    if (action !== "status" && !(isShop ? !!(auth && db) : configured())) return fail(501, "not_configured", isShop ? "The shop isn't set up yet." : "The email service isn't set up yet.");
     /* Tường lửa lớp ứng dụng: mỗi IP tối đa 240 yêu cầu / 10 phút (chặn dồn dập); chi tiết từng hành động còn có giới hạn riêng. */
     if (req.ip && action !== "status" && !(await limit("ipall:" + sha(req.ip), 240, 10 * 60 * 1000))) return fail(429, "rate_limited", "Too many requests. Slow down and try again in a few minutes.");
     try { return await A[action]({ token: req.token, body: req.body || {}, ip: req.ip, geo: req.geo || {} }); }
     catch (e) { console.error("account:" + action, e && e.code, e && e.message); if (e && e.code === "mail_failed") return fail(502, "mail_failed", "We couldn't send the email right now. The site owner has been notified in the server log."); return fail(500, "server_error", "Something went wrong. Please try again."); }
-  };
+  }
+  handle.webhook = shop ? shop.webhook : async () => ({ status: 503, body: { success: false, message: "not configured" } });
+  handle.shop = shop;
+  return handle;
 }
 module.exports = { createApi, EMAIL_RE };

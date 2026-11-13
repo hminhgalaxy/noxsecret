@@ -150,3 +150,31 @@ Nếu đổi tên miền: đặt biến môi trường `SITE_URL` trên Vercel (
 ### Còn hạn chế (nói thật)
 - Đã kiểm thử bằng Firebase giả + Rules mô phỏng; **chưa thử trên Firebase/Vercel thật của bạn**.
 - Không ai đảm bảo được thứ hạng/logo trên Google; phải chờ Google lập chỉ mục lại.
+
+## Đợt Shop — web thành cửa hàng, ví, nạp tiền QR, chat nổi
+
+**Trang chủ `/` giờ là Cửa hàng.** Kho script/APK cũ vẫn còn, chuyển sang `/library` ("Kho nội dung").
+
+### Bạn cần làm (theo thứ tự)
+1. **Dán `database.rules.json` mới** vào Firebase → Realtime Database → Rules → Publish. (Rules khóa chặt: trình duyệt KHÔNG thể ghi ví/đơn/giao dịch/sản phẩm; chỉ máy chủ ghi.)
+2. **Bảo đảm Vercel đã có biến Firebase Admin** (như các đợt trước: dùng để ghi ví, đơn hàng).
+3. **Bật nhận tiền tự động (bắt buộc nếu muốn "chuyển khoản là tự cộng tiền")**: ngân hàng không tự báo cho web, nên phải dùng một dịch vụ trung gian đọc biến động số dư rồi gọi web của bạn. Hỗ trợ **SePay** hoặc **Casso** (cả hai đều có gói miễn phí/giá rẻ — bạn tự đăng ký, mình không đăng ký thay được):
+   - Đăng ký SePay (hoặc Casso) → liên kết tài khoản **Techcombank** của bạn.
+   - Thêm Webhook, địa chỉ: `https://<tên-miền-của-bạn>/api/bank-webhook`.
+   - SePay: chọn kiểu xác thực **API Key**, đặt khóa bất kỳ dài, rồi đặt biến Vercel `SEPAY_API_KEY` = đúng khóa đó. (Nếu dùng chữ ký HMAC thì thêm `SEPAY_SECRET`.) Casso: đặt `CASSO_SECURE_TOKEN` = secure-token của Casso.
+   - Vercel → Settings → Environment Variables → thêm biến → **Redeploy**.
+   - Vào `/dev/shop` → tab **Nạp tiền & ví**: phải hiện "Máy chủ đã có khoá bảo mật cho webhook". Chuyển thử 10.000 ₫ kèm mã `SKN…` của chính bạn để kiểm tra.
+4. (Tuỳ chọn) đổi tài khoản nhận tiền bằng biến `BANK_BIN`, `BANK_ACCOUNT`, `BANK_ACCOUNT_NAME`, `BANK_NAME`. Mặc định đã là Techcombank của bạn theo QR bạn gửi.
+
+### Cách hoạt động
+- Mỗi tài khoản có **mã nạp riêng** dạng `SKN12345678` (trang **Ví**). Khách chuyển khoản **kèm đúng mã này trong nội dung**, web nhận biến động số dư qua webhook và cộng tiền (thường 30–60 giây). Một giao dịch chỉ cộng **một lần** dù webhook gửi lại.
+- **Nạp tiền** (chỉ với tài khoản đã đăng nhập và xác minh email, chỉ qua ngân hàng): chọn mức giá cố định (hoặc nhập số khác, 10.000–50.000.000 ₫, làm tròn nghìn) → web tạo **mã QR VietQR kèm đúng số tiền và nội dung**; quét bằng app ngân hàng nào cũng được. Popup tự đổi sang "Nạp tiền thành công" khi tiền vào.
+- **Cửa hàng**: mục lục (lọc), tìm kiếm, sắp xếp, giỏ hàng, trang sản phẩm có SEO riêng. Thanh toán bằng số dư ví; hàng tự động giao ngay (mỗi dòng 1 key, hoặc cùng 1 nội dung), hoặc "giao tay" qua Hộp thư. Hết hàng thì khóa nút mua. Trừ tiền/tồn kho làm trong giao dịch nguyên tử, lỗi giữa chừng tự hoàn lại.
+- **Số dư** hiện ngay trên thanh đầu trang và trong khung chat. **Lịch sử mua hàng** ở `/orders`, lịch sử giao dịch ở `/wallet`.
+- **Dev** (`/dev/shop`): thêm/sửa/xóa/ẩn sản phẩm (ảnh bìa + nhiều ảnh, giá, số lượng, mục lục, cách giao hàng), quản lý mục lục, xem đơn + hoàn tiền, cộng/trừ tiền thủ công, gán giao dịch chuyển sai nội dung, xem trạng thái webhook.
+- **Chat nổi** góc dưới bên phải (thay cho trang "Nhắn tin với dev"): gửi chữ, **ảnh, video, tệp**. Vì dùng Realtime Database (không có Firebase Storage) nên giới hạn: **ảnh ≤ 300 KB (tự nén), video và tệp ≤ 450 KB**. Tệp chạy được như .exe/.bat bị từ chối.
+
+### Chưa kiểm chứng được ở đây (nói thật)
+- Webhook đã test với dữ liệu giả theo định dạng SePay/Casso, **chưa test với tài khoản SePay/Casso/Techcombank thật** (cần khóa của bạn). Hãy chuyển thử số nhỏ sau khi cấu hình.
+- Mã QR đã kiểm tra bằng bộ giải mã (khung khớp đúng mã QR tĩnh của bạn), nhưng chưa quét bằng app ngân hàng thật.
+- Không ai bảo đảm thứ hạng Google; trang sản phẩm đã có tiêu đề/mô tả/schema Product riêng, có trong sitemap.

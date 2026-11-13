@@ -13,7 +13,9 @@ function makeAdmin(env) {
   if (!admin.apps.length) admin.initializeApp({ credential: admin.credential.cert(sa), databaseURL: env.FIREBASE_DATABASE_URL || "https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app" });
   const a = admin.auth(), d = admin.database();
   const auth = { verifyIdToken: t => a.verifyIdToken(t, true), getUser: u => a.getUser(u), getUserByEmail: e => a.getUserByEmail(e), setCustomUserClaims: (u, c) => a.setCustomUserClaims(u, c), updateUser: (u, p) => a.updateUser(u, p), revokeRefreshTokens: u => a.revokeRefreshTokens(u), generateEmailVerificationLink: e => a.generateEmailVerificationLink(e), generatePasswordResetLink: e => a.generatePasswordResetLink(e), generateVerifyAndChangeEmailLink: (e, n) => a.generateVerifyAndChangeEmailLink(e, n) };
-  const db = { get: async p => (await d.ref(p).get()).val(), set: (p, v) => d.ref(p).set(v), update: (p, o) => d.ref(p).update(o), remove: p => d.ref(p).remove() };
+  const db = { get: async p => (await d.ref(p).get()).val(), set: (p, v) => d.ref(p).set(v), update: (p, o) => d.ref(p).update(o), remove: p => d.ref(p).remove(),
+    /* Giao dịch nguyên tử: fn(giá trị hiện tại) → giá trị mới (undefined = huỷ). Trả { committed, value } */
+    tx: async (p, fn) => { const r = await d.ref(p).transaction(fn, undefined, false); return { committed: r.committed, value: r.snapshot.val() }; } };
   return { auth, db };
 }
 function makeMailer(env) {

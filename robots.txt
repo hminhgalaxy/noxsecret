@@ -6,6 +6,9 @@ Disallow: /register
 Disallow: /forgot-password
 Disallow: /profile
 Disallow: /settings
+Disallow: /wallet
+Disallow: /orders
+Disallow: /inbox
 Disallow: /search
 Disallow: /help/
 Disallow: /two-step

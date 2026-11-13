@@ -298,4 +298,51 @@ console.log("ĐỢT C: danh mục do DEV quản lý, bài chờ duyệt, hỗ tr
   t("tin nhắn: preview ≤ 140 ký tự", [T("nox_threads/u1/t1/preview", "a".repeat(140), USER, JSON.parse(JSON.stringify(root))), T("nox_threads/u1/t1/preview", "a".repeat(141), USER, JSON.parse(JSON.stringify(root)))].join(), "true,false");
 }
 
+console.log("ĐỢT SHOP: cửa hàng, ví, đơn hàng, tệp chat");
+{
+  const N = Date.now(), D = { ...DEV, token: { ...DEV.token, auth_time: 100, tf1: 100 } }, U1 = USER, U2 = OTHER;
+  const sh = JSON.parse(JSON.stringify(root));
+  sh.nox_shop = { items: { p1: { name: "Key", price: 1000, stock: 3, mode: "lines", active: true } }, cats: { c1: { name: "Game" } } };
+  sh.nox_shopsecret = { p1: { lines: { a: "K1" } } };
+  sh.nox_wallet = { u1: { code: "SKN12345678", balance: 5000 } }; sh.nox_txs = { u1: { t1: { type: "topup", amount: 5000, ts: 1 } } };
+  sh.nox_orders = { u1: { o1: { status: "paid", total: 1000 } } }; sh.nox_topups = { u1: { x: { amount: 50000, status: "pending" } } }; sh.nox_bankhook = { sepay_1: { status: "credited" } }; sh.nox_topcodes = { SKN12345678: "u1" };
+  sh.nox_security = { u1: { twofa: true, gate: true }, d1: { gate: true } };
+  sh.nox_threads = { u1: { chat: { type: "chat", status: "open", createdAt: 1, updatedAt: 1 } } };
+  sh.nox_filemeta = { u1: { chat: { f1: { name: "a.png", mime: "image/png", kind: "image", size: 1000, by: "u1" }, f2: { name: "d.png", mime: "image/png", kind: "image", size: 500, by: "d1" } } } };
+  sh.nox_files = { u1: { chat: { f1: { name: "a.png", data: "data:image/png;base64,AAAA", by: "u1" } } } };
+  const U1G = { ...U1, token: { ...U1.token, auth_time: 100, tf1: 100 } };
+  const P = (p, v, a, rr = sh) => eng.write([{ segs: split(p), value: v }], a, rr).ok, Rd = (p, a, rr = sh) => eng.canRead(split(p), a, rr);
+  const prod = { name: "Script VIP", price: 50000, stock: 10, cat: "c1", mode: "text", active: true, createdAt: N };
+  t("shop: ai cũng đọc được hàng và mục lục (kể cả khách)", [Rd("nox_shop/items", null), Rd("nox_shop/cats", null)].join(), "true,true");
+  t("shop: DEV thêm/sửa/xoá hàng", [P("nox_shop/items/p2", prod, D), P("nox_shop/items/p1/price", 2000, D), P("nox_shop/items/p1", null, D)].join(), "true,true,true");
+  t("shop: user thường / khách KHÔNG thêm, sửa giá, sửa kho, xoá hàng", [P("nox_shop/items/p2", prod, U1G), P("nox_shop/items/p1/price", 1, U1G), P("nox_shop/items/p1/stock", 999, U1G), P("nox_shop/items/p1", null, U1G), P("nox_shop/items/p2", prod, null)].join(), "false,false,false,false,false");
+  t("shop: DEV chưa nhập mã phiên (2FA) bị chặn đúng như các phần khác", P("nox_shop/items/p2", prod, { ...DEV, token: { ...DEV.token, auth_time: 100 } }), false);
+  t("shop: giá âm / giá lẻ / quá lớn bị chặn", [P("nox_shop/items/p2", { ...prod, price: -1 }, D), P("nox_shop/items/p2", { ...prod, price: 10.5 }, D), P("nox_shop/items/p2", { ...prod, price: 2e9 }, D)].join(), "false,false,false");
+  t("shop: kho âm / lẻ bị chặn; kho 0 được", [P("nox_shop/items/p2", { ...prod, stock: -1 }, D), P("nox_shop/items/p2", { ...prod, stock: 1.5 }, D), P("nox_shop/items/p2", { ...prod, stock: 0 }, D)].join(), "false,false,true");
+  t("shop: thiếu tên/giá, mode lạ, khoá lạ bị chặn", [P("nox_shop/items/p2", { price: 1 }, D), P("nox_shop/items/p2", { ...prod, mode: "hack" }, D), P("nox_shop/items/p2", { ...prod, evil: 1 }, D)].join(), "false,false,false");
+  t("shop: ảnh hàng chỉ nhận data:image jpeg/png/webp ≤ 36.000 ký tự", [P("nox_shop/items/p2", { ...prod, img: "data:image/jpeg;base64," + "A".repeat(2000) }, D), P("nox_shop/items/p2", { ...prod, img: "data:image/svg+xml;base64,AAAA" }, D), P("nox_shop/items/p2", { ...prod, img: "data:image/png;base64," + "A".repeat(37000) }, D), P("nox_shop/items/p2", { ...prod, imgs: { a: "data:image/png;base64,AAAA", b: "data:image/webp;base64,BBBB" } }, D)].join(), "true,false,false,true");
+  t("shop: DEV thêm mục lục; user thì không", [P("nox_shop/cats/c2", { name: "Tài khoản", sort: 2 }, D), P("nox_shop/cats/c2", { name: "x" }, U1G)].join(), "true,false");
+  t("nội dung giao hàng (shopsecret): chỉ DEV đọc/ghi", [Rd("nox_shopsecret/p1", D), Rd("nox_shopsecret/p1", U1G), Rd("nox_shopsecret", null), P("nox_shopsecret/p1/text", "https://x", D), P("nox_shopsecret/p1/text", "hack", U1G)].join(), "true,false,false,true,false");
+  t("ví: chủ đọc ví của mình, người khác không, DEV có", [Rd("nox_wallet/u1", U1G), Rd("nox_wallet/u1", U2), Rd("nox_wallet/u1", D), Rd("nox_wallet", U1G), Rd("nox_wallet", null)].join(), "true,false,true,false,false");
+  t("ví: KHÔNG ai ghi được từ trình duyệt — kể cả chủ ví và DEV (chỉ máy chủ)", [P("nox_wallet/u1/balance", 99999999, U1G), P("nox_wallet/u1", { code: "SKN1", balance: 1e9 }, U1G), P("nox_wallet/u1/balance", 99999999, D), P("nox_wallet/u2", { code: "SKN2", balance: 1e9 }, U2)].join(), "false,false,false,false");
+  t("lịch sử giao dịch: chủ/DEV đọc, người khác không; không ai ghi", [Rd("nox_txs/u1", U1G), Rd("nox_txs/u1", U2), Rd("nox_txs/u1", D), P("nox_txs/u1/t9", { type: "topup", amount: 1e9, ts: 1 }, U1G), P("nox_txs/u1/t1", null, U1G), P("nox_txs/u1/t1", null, D)].join(), "true,false,true,false,false,false");
+  t("đơn hàng: chủ đọc đơn của mình, DEV đọc tất cả, người khác không; không ai ghi/sửa/xoá", [Rd("nox_orders/u1/o1", U1G), Rd("nox_orders/u1", U2), Rd("nox_orders", D), P("nox_orders/u1/o1/status", "refunded", U1G), P("nox_orders/u1/o9", { status: "paid", total: 0 }, U1G), P("nox_orders/u1/o1", null, D)].join(), "true,false,true,false,false,false");
+  t("yêu cầu nạp: chủ đọc; không ai ghi", [Rd("nox_topups/u1", U1G), Rd("nox_topups/u1", U2), P("nox_topups/u1/x/status", "done", U1G)].join(), "true,false,false");
+  t("giao dịch ngân hàng: chỉ DEV đọc; không ai ghi", [Rd("nox_bankhook", D), Rd("nox_bankhook", U1G), P("nox_bankhook/sepay_9", { status: "credited" }, D), P("nox_bankhook/sepay_9", { status: "credited" }, U1G)].join(), "true,false,false,false");
+  t("chỉ mục mã nạp: không ai đọc/ghi từ trình duyệt", [Rd("nox_topcodes", D), Rd("nox_topcodes/SKN12345678", U1G), P("nox_topcodes/SKN99999999", "u1", U1G)].join(), "false,false,false");
+  /* tệp đính kèm trong tin nhắn */
+  const att = { id: "f1", name: "a.png", mime: "image/png", kind: "image", size: 1000 };
+  const msg = (extra, from = "user") => ({ from, ts: N, ...extra });
+  t("tin nhắn chỉ có tệp (không chữ) hợp lệ khi tệp do chính người gửi tải lên", P("nox_msgs/u1/chat/m1", msg({ att }), U1G), true);
+  t("tin nhắn vừa chữ vừa tệp hợp lệ", P("nox_msgs/u1/chat/m1", msg({ text: "xem giúp", att }), U1G), true);
+  t("tin nhắn không chữ không tệp bị chặn", P("nox_msgs/u1/chat/m1", msg({}), U1G), false);
+  t("tệp không tồn tại (id bịa) bị chặn", P("nox_msgs/u1/chat/m1", msg({ att: { ...att, id: "zzz" } }), U1G), false);
+  t("dùng tệp do người khác tải lên (f2 do dev) bị chặn", P("nox_msgs/u1/chat/m1", msg({ att: { id: "f2", name: "d.png", mime: "image/png", kind: "image", size: 500 } }), U1G), false);
+  t("khai gian loại/kích thước/tên so với tệp thật bị chặn", [P("nox_msgs/u1/chat/m1", msg({ att: { ...att, mime: "text/html" } }), U1G), P("nox_msgs/u1/chat/m1", msg({ att: { ...att, kind: "video" } }), U1G), P("nox_msgs/u1/chat/m1", msg({ att: { ...att, size: 1 } }), U1G), P("nox_msgs/u1/chat/m1", msg({ att: { ...att, name: "virus.exe" } }), U1G), P("nox_msgs/u1/chat/m1", msg({ att: { ...att, extra: 1 } }), U1G)].join(), "false,false,false,false,false");
+  t("DEV gửi tệp do chính DEV tải (f2) trong cuộc trò chuyện của user", P("nox_msgs/u1/chat/m2", msg({ att: { id: "f2", name: "d.png", mime: "image/png", kind: "image", size: 500 } }, "dev"), D), true);
+  t("tin có tệp vẫn bị chặn khi người dùng bị tắt tiếng", P("nox_msgs/u1/chat/m1", msg({ att }), U1G, { ...sh, nox_admin: { u1: { muteUntil: N + 3600000 } } }), false);
+  t("tệp đính kèm: chủ + DEV đọc, người khác không; không ai ghi mới", [Rd("nox_files/u1/chat/f1", U1G), Rd("nox_files/u1/chat/f1", D), Rd("nox_files/u1/chat/f1", U2), Rd("nox_files/u1", null), P("nox_files/u1/chat/f9", { data: "data:image/png;base64,AAAA" }, U1G), P("nox_files/u1/chat/f9", { data: "x" }, D)].join(), "true,true,false,false,false,false");
+  t("DEV xoá được tệp/bộ đếm khi xoá cuộc trò chuyện; user thì không", [P("nox_files/u1/chat", null, D), P("nox_filemeta/u1/chat", null, D), P("nox_filecount/u1/chat", null, D), P("nox_files/u1/chat", null, U1G)].join(), "true,true,true,false");
+}
+
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

@@ -10,13 +10,17 @@ const catNeeds = extra => p => extra.catId ? ["data:" + extra.catId] : ["cats", 
 
 /* Tải sẵn các trang hay dùng lúc trình duyệt rảnh, để bấm vào là mở ngay (không chờ tải mã) */
 export function prefetchPages(devToo = false) {
-  const go = () => ["auth/login", "auth/register", "settings", "inbox", "categories", "items/list", "items/detail", "search", "profile"].concat(devToo ? ["dev/index", "dev/updates", "dev/records", "dev/system", "dev/test"] : [])
+  const go = () => ["auth/login", "auth/register", "settings", "inbox", "categories", "items/list", "items/detail", "search", "profile", "shop/home", "shop/product", "shop/wallet"].concat(devToo ? ["dev/index", "dev/updates", "dev/records", "dev/system", "dev/test"] : [])
     .forEach((p, i) => setTimeout(() => import("./pages/" + p + ".js").catch(() => {}), i * 120));
   "requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 2000);
 }
 
 export function registerRoutes() {
-  define("/", { load: L("home"), guard: "public", needs: [...ALL, "updates"] });
+  define("/", { load: L("shop/home"), guard: "public", needs: [] });
+  define("/library", { load: L("home"), guard: "public", title: "Kho nội dung", desc: "Kho script, APK, iOS và liên kết đã được kiểm duyệt trên SKIBIDI SCRIPT WEB.", needs: [...ALL, "updates"] });
+  define("/shop/:id", { load: L("shop/product"), guard: "public", needs: [] });
+  define("/wallet", { load: L("shop/wallet"), guard: "real", title: "Ví của tôi", noindex: true, needs: [] });
+  define("/orders", { load: L("shop/orders"), guard: "real", title: "Lịch sử mua hàng", noindex: true, needs: [] });
   define("/login", { load: L("auth/login"), guard: "guest", title: "Đăng nhập", desc: "Đăng nhập để dùng đầy đủ tính năng của SKIBIDI SCRIPT WEB." });
   define("/register", { load: L("auth/register"), guard: "guest", title: "Đăng ký", desc: "Tạo tài khoản miễn phí trên SKIBIDI SCRIPT WEB." });
   define("/forgot-password", { load: L("auth/forgot"), guard: "guest", title: "Quên mật khẩu", desc: "Đặt lại mật khẩu tài khoản của bạn." });
@@ -31,7 +35,7 @@ export function registerRoutes() {
   define("/help", { load: L("help"), guard: "public", title: "Câu hỏi thường gặp", desc: "Câu hỏi thường gặp về tài khoản, bảo mật, nội dung và cài đặt của SKIBIDI SCRIPT WEB.", needs: [] });
   define("/help/support", { load: L("help/support"), guard: "real", title: "Hỗ trợ", needs: [] });
   define("/help/report", { load: L("help/report"), guard: "real", title: "Báo cáo", needs: ["cats", "data:*"] });
-  define("/help/chat", { load: L("redirect"), guard: "real", to: "/inbox/chat", title: "Nhắn tin với dev", needs: [] });
+  define("/help/chat", { load: L("redirect"), guard: "real", to: "/", open: "chat", title: "Nhắn tin với dev", needs: [] });
   define("/help/messages", { load: L("redirect"), guard: "real", to: "/inbox", title: "Hộp thư", needs: [] });
   define("/inbox", { load: L("inbox"), guard: "real", title: "Hộp thư", noindex: true, needs: () => (session.isDev ? ["users"] : []) });
   define("/inbox/:tid", { load: L("inbox"), guard: "real", title: "Hộp thư", noindex: true, needs: () => (session.isDev ? ["users"] : []) });
@@ -54,6 +58,7 @@ export function registerRoutes() {
   define("/dev/data", { load: L("dev/data"), guard: "dev", title: "Quản lý dữ liệu", needs: ALL });
   BASE_PATHS.forEach(([seg, catId]) => define("/dev/data/" + seg, { load: L("dev/records"), guard: "dev", catId, needs: catNeeds({ catId }) }));
   define("/dev/data/c/:node", { load: L("dev/records"), guard: "dev", custom: true, needs: catNeeds({ custom: true }) });
+  define("/dev/shop", { load: L("dev/shop"), guard: "dev", title: "Quản lý cửa hàng", needs: ["users"] });
   define("/dev/categories", { load: L("dev/categories"), guard: "dev", title: "Danh mục", needs: ["cats"] });
   define("/dev/inbox", { load: L("redirect"), guard: "dev", to: "/inbox", title: "Hộp thư", needs: [] });
   define("/dev/review", { load: L("dev/review"), guard: "dev", title: "Duyệt bài", needs: ["cats", "users"] });
