@@ -205,8 +205,13 @@ console.log("ĐỢT C: danh mục do DEV quản lý, bài chờ duyệt, hỗ tr
   t("duyệt: user thường KHÔNG tự đưa bài lên công khai", P("nox_data/mod/k2", { name: "x", url: "https://a.b" }, U1, r4), false);
   t("từ chối: DEV ghi status rejected + lý do", P("nox_pending/u1/p1", { ...item, status: "rejected", note: "Thiếu mô tả" }, D, r4), true);
   t("chủ bài tự rút bài (xóa)", P("nox_pending/u1/p1", null, U1, r4), true);
-  t("hỗ trợ: user đăng nhập tạo yêu cầu của mình", P("nox_threads/u1/t2", { type: "support", subject: "Xin cấp phép đăng bài", status: "open", createdAt: N, updatedAt: N, wantPost: true, last: "user", unreadDev: true }, U1), true);
-  t("báo cáo: có ref hợp lệ", P("nox_threads/u1/t3", { type: "report", status: "open", createdAt: N, updatedAt: N, ref: { kind: "item", catId: "script", key: "s1", title: "A", reason: "malware" } }, U1), true);
+  /* ĐỢT SHOP 2 */
+  t("nox_shopcfg: chỉ DEV đọc; không ai ghi từ trình duyệt (chỉ máy chủ ghi qua API)", [R("nox_shopcfg/bank", U1), R("nox_shopcfg/bank", DEV), P("nox_shopcfg/bank", { bin: "970407" }, DEV)].join(), "false,true,false");
+  t("DEV đọc được lịch sử giao dịch, hóa đơn nạp của khách; khách chỉ đọc của mình", [R("nox_txs/u1", DEV), R("nox_topups/u1", DEV), R("nox_topups/u1", U1), R("nox_topups/u1", U2)].join(), "true,true,true,false");
+  t("DEV sửa được hồ sơ người dùng khác (qua kiểm tra dữ liệu); user thường không sửa của người khác", [P("nox_users/u1/name", "Tên do dev sửa", DEV), P("nox_users/u1/name", "Hack", U2)].join(), "true,false");
+  t("hỗ trợ (đã xóa): user KHÔNG tạo được cuộc mới loại support", P("nox_threads/u1/t2", { type: "support", subject: "Xin cấp phép đăng bài", status: "open", createdAt: N, updatedAt: N, wantPost: true, last: "user", unreadDev: true }, U1), false);
+  t("chat: user tạo cuộc trò chuyện loại chat của mình (xin cấp phép đăng bài qua chat)", P("nox_threads/u1/t2c", { type: "chat", status: "open", createdAt: N, updatedAt: N, wantPost: true, last: "user", unreadDev: true }, U1), true);
+  t("báo cáo (đã xóa): user KHÔNG tạo được cuộc mới loại report", P("nox_threads/u1/t3", { type: "report", status: "open", createdAt: N, updatedAt: N, ref: { kind: "item", catId: "script", key: "s1", title: "A", reason: "malware" } }, U1), false);
   t("báo cáo: lý do lạ bị chặn", P("nox_threads/u1/t3", { type: "report", status: "open", createdAt: N, updatedAt: N, ref: { kind: "item", reason: "hack" } }, U1), false);
   t("hỗ trợ: khách KHÔNG tạo", P("nox_threads/g1/t1", { type: "support", status: "open", createdAt: N, updatedAt: N }, GUEST), false);
   t("hỗ trợ: không tạo/đọc hộ người khác", [P("nox_threads/u1/t9", { type: "chat", status: "open", createdAt: N, updatedAt: N }, U2), Rd("nox_threads/u1", U2), Rd("nox_threads/u1", U1), Rd("nox_threads", D), Rd("nox_threads", U1)].join(), "false,false,true,true,false");

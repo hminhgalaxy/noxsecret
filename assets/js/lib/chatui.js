@@ -37,7 +37,7 @@ export function mountConversation(box, { uid, tid, asDev = false, peer, extra, o
     const name = peerName(), closed = thread.status === "closed";
     head.innerHTML = `${onBack ? `<button class="cv-back" type="button" data-x="back" aria-label="Quay lại danh sách">${ICO.back}</button>` : ""}
       ${avatarChip(asDev ? name : "D", asDev ? "" : "dev")}
-      <div class="chat-title cv-who"><b translate="no">${esc(thread.subject || H.TYPE_LABEL[thread.type] || "")}</b><small><span translate="no">${esc(name)}</span> · <span>${esc(H.TYPE_LABEL[thread.type] || "")}</span>${thread.ref ? ` · <span translate="no">${esc(H.REPORT_REASONS[thread.ref.reason] || "")}</span>` : ""}${closed ? ` · <span>Đã đóng</span>` : ` · <i class="cv-live"></i><span>Đang mở</span>`}</small></div>
+      <div class="chat-title cv-who"><b translate="no">${esc(thread.subject || H.TYPE_LABEL[thread.type] || "")}</b><small><span translate="no">${esc(name)}</span> · <span>${esc(H.TYPE_LABEL[thread.type] || "")}</span>${closed ? ` · <span>Đã đóng</span>` : ` · <i class="cv-live"></i><span>Đang mở</span>`}</small></div>
       ${extra ? extra(thread) : ""}`;
     if (onBack) head.querySelector('[data-x="back"]').addEventListener("click", onBack);
     if (onExtra) onExtra(head, thread);

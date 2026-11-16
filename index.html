@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-skin="midnight">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,7 +7,7 @@
 <meta name="description" content="SKIBIDI SCRIPT WEB: a digital shop with wallet top-up by bank transfer, plus a high-security hub for reviewed scripts and APKs. Third-party software is clearly flagged. We don't promote hacking.">
 <meta name="keywords" content="skibidiscript, skibidi script, skibidiscript web, skibidiscript.vercel.app, skibidi script web, apk, script, secure apk sharing, utility apps, verified downloads">
 <meta name="robots" content="index,follow,max-image-preview:large">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#0b1020">
 <meta name="color-scheme" content="dark light">
 <meta name="application-name" content="SKIBIDI SCRIPT WEB">
 <meta name="apple-mobile-web-app-title" content="skibidiscript">
@@ -45,10 +45,11 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" onload="this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"></noscript>
 <script>/* Áp dụng sáng/tối và bỏ qua màn chờ TRƯỚC khi vẽ để không bị nháy */
-(function(){try{var d=document.documentElement,p=localStorage.getItem("ssw_theme"),l=p==="light"||(p==="system"&&matchMedia("(prefers-color-scheme: light)").matches);d.dataset.theme=l?"light":"dark";var g=localStorage.getItem("ssw_gfx");d.dataset.gfx=g==="mid"||g==="high"?g:"low";if(sessionStorage.getItem("ssw_splash")==="1"||localStorage.getItem("ssw_nosplash")==="1"||d.dataset.gfx==="low")d.classList.add("no-splash");if(localStorage.getItem("ssw_bg")==="0")d.dataset.bg="off";if(localStorage.getItem("ssw_hc")==="1")d.dataset.contrast="high";if(localStorage.getItem("ssw_crisp")==="1")d.dataset.crisp="on";if(localStorage.getItem("ssw_rm")==="1")d.dataset.motion="reduced";if(localStorage.getItem("ssw_dens")==="compact")d.dataset.density="compact";if(localStorage.getItem("ssw_glass")==="1")d.dataset.glass="on";d.lang=localStorage.getItem("ssw_lang")==="vi"?"vi":"en";if(localStorage.getItem("ssw_side")==="0")d.classList.add("side-off")}catch(e){}})();</script>
-<style>html{background:#0a0a0a}html[data-theme=light]{background:#fafafa}html.no-splash #splash{display:none}</style>
+(function(){try{var d=document.documentElement,c=function(k){var m=document.cookie.split("; ").filter(function(x){return x.indexOf(k+"=")===0})[0];if(m)return decodeURIComponent(m.slice(k.length+1));try{return localStorage.getItem(k)}catch(e){return null}};var p=c("ssw_theme"),l=p==="light"||(p==="system"&&matchMedia("(prefers-color-scheme: light)").matches);d.dataset.theme=l?"light":"dark";var sk=c("ssw_skin");d.dataset.skin=/^(aurora|ocean|emerald|sunset|rose|classic)$/.test(sk)?sk:"midnight";var g=c("ssw_gfx");d.dataset.gfx=g==="mid"||g==="high"?g:"low";if(sessionStorage.getItem("ssw_splash")==="1"||c("ssw_nosplash")==="1"||d.dataset.gfx==="low")d.classList.add("no-splash");if(c("ssw_bg")==="0")d.dataset.bg="off";if(c("ssw_hc")==="1")d.dataset.contrast="high";if(c("ssw_crisp")==="1")d.dataset.crisp="on";if(c("ssw_rm")==="1")d.dataset.motion="reduced";if(c("ssw_dens")==="compact")d.dataset.density="compact";if(c("ssw_glass")==="1")d.dataset.glass="on";d.lang=c("ssw_lang")==="vi"?"vi":"en";if(c("ssw_side")==="0")d.classList.add("side-off")}catch(e){}})();</script>
+<style>html{background:#07080f}html[data-theme=light]{background:#f8f9fd}html[data-skin=classic]{background:#0a0a0a}html[data-skin=classic][data-theme=light]{background:#fafafa}html.no-splash #splash{display:none}</style>
 <noscript><style>#splash{display:none}</style></noscript>
 <link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/skins.css">
 <link rel="stylesheet" href="/assets/css/base.css">
 <link rel="stylesheet" href="/assets/css/layout.css">
 <link rel="stylesheet" href="/assets/css/components.css">
@@ -73,6 +74,8 @@
 <link rel="stylesheet" href="/assets/css/chat.css">
 <link rel="stylesheet" href="/assets/css/v2.css">
 <link rel="stylesheet" href="/assets/css/shop.css">
+<link rel="stylesheet" href="/assets/css/shop2.css">
+<link rel="stylesheet" href="/assets/css/glass-liquid.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://skibidiscript.vercel.app/#site","name":"SKIBIDI SCRIPT WEB","alternateName":["skibidiscript","Skibidi Script","SkibidiScript Web","skibidiscript.vercel.app"],"url":"https://skibidiscript.vercel.app/","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/search?q={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"Organization","@id":"https://skibidiscript.vercel.app/#org","name":"SKIBIDI SCRIPT WEB","alternateName":["skibidiscript","Skibidi Script"],"url":"https://skibidiscript.vercel.app/","logo":{"@type":"ImageObject","@id":"https://skibidiscript.vercel.app/#logo","url":"https://skibidiscript.vercel.app/assets/img/icon-512.png","contentUrl":"https://skibidiscript.vercel.app/assets/img/icon-512.png","width":512,"height":512,"caption":"SKIBIDI SCRIPT WEB"},"image":{"@id":"https://skibidiscript.vercel.app/#logo"}}]}</script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>

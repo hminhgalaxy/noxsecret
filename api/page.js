@@ -17,7 +17,6 @@ const PAGES = {
   "/security": ["Security — skibidiscript", "How SKIBIDI SCRIPT WEB protects accounts: 2-step verification, reviewed content and clear warnings for third-party software."],
   "/terms": ["Terms of use — skibidiscript", "The rules for using SKIBIDI SCRIPT WEB."],
   "/privacy": ["Privacy policy — skibidiscript", "What data SKIBIDI SCRIPT WEB keeps, why, and how you can control it."],
-  "/help": ["Help & FAQ — skibidiscript", "Frequently asked questions about accounts, security, content and settings on SKIBIDI SCRIPT WEB."]
 };
 const PRIVATE = /^\/(dev|login|register|forgot-password|two-step|auth|profile|settings|search|favorites|inbox|wallet|orders|help\/|notifications)/;
 const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

@@ -44,7 +44,7 @@ export function openItemMenu(anchor, c, k) {
   const h = openPopup({ id: "itemmenu", variant: "menu", anchor, title: "Tùy chọn bài viết",
     html: `<div class="pm">${row("like", mine ? ICO.heartFill : ICO.heart, mine ? "Bỏ thích" : "Thích")}${row("save", saved ? ICO.bookmarkFill : ICO.bookmark, saved ? "Bỏ lưu bài viết" : "Lưu bài viết")}
       <hr>${row("share", ICO.share, "Chia sẻ…")}${row("copy", ICO.copy, "Sao chép liên kết")}${row("tab", ICO.newtab, "Mở trong tab mới")}${it.code ? row("code", ICO.script || ICO.copy, "Sao chép code") : ""}
-      <hr>${row("report", ICO.flag, "Báo cáo bài viết")}${staff ? `<hr>${row("edit", ICO.pencil, "Sửa bài viết")}${row("del", ICO.trash, "Xóa bài viết", "danger")}` : ""}</div>` });
+      ${staff ? `<hr>${row("edit", ICO.pencil, "Sửa bài viết")}${row("del", ICO.trash, "Xóa bài viết", "danger")}` : ""}</div>` });
   h.el.addEventListener("click", async e => {
     const b = e.target.closest("[data-m]"); if (!b) return; const m = b.dataset.m;
     if (m === "like") { const fake = document.createElement("button"); fake.dataset.cat = c; fake.dataset.key = k; doLike(fake); }
@@ -53,7 +53,6 @@ export function openItemMenu(anchor, c, k) {
     else if (m === "copy") copyText(location.origin + href).then(() => toast("Đã sao chép liên kết.", "ok")).catch(() => toast("Không sao chép được liên kết.", "err"));
     else if (m === "tab") window.open(href, "_blank", "noopener");
     else if (m === "code") copyText(it.code).then(() => { toast("Đã sao chép code."); S.incCopies(c, it); }).catch(() => toast("Không sao chép được.", "err"));
-    else if (m === "report") { if (!session.user || session.isGuest) { toast("Hãy đăng nhập để báo cáo bài viết.", "err"); navigate("/login?next=" + encodeURIComponent("/help/report?cat=" + c + "&key=" + k)); } else navigate("/help/report?cat=" + encodeURIComponent(c) + "&key=" + encodeURIComponent(k)); }
     else if (m === "edit") navigate(href + "/edit");
     else if (m === "del") armDelete(b, () => S.deleteItem(c, k).then(() => toast("Đã xóa.")).catch(x => toast(friendly(x), "err")), { title: "Xóa bài viết này?", message: "Bài sẽ bị xóa khỏi website. Hành động này không thể hoàn tác.", kind: "delete" });
   });

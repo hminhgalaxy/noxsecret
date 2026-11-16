@@ -1,10 +1,11 @@
 /* Cài đặt: giao diện, kính mờ, ngôn ngữ, nhạc nền và tài khoản. */
 import { ACCENTS, getAccent, setAccent } from "../lib/accent.js";
+import { listCookies, clearSiteCookies, cookiesEnabled } from "../lib/cookie.js";
 import { esc, toast } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
 import { session, onAuth, resendVerification } from "../lib/auth.js";
-import { getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, isCrisp, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
+import { SKINS, getSkin, setSkin, getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, isCrisp, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
 import { confirmDialog } from "../lib/confirm.js";
 import { getLang, setLang } from "../lib/i18n.js";
 import { hasMusic, toggleSound, playlist, currentTrack, nextTrack } from "../lib/media.js";
@@ -43,6 +44,8 @@ export function mount(ctx) {
         <div class="set-fields" id="bgFields" aria-disabled="${isBgHidden()}">${rng("bgBright", "Độ sáng hình nền", 30, 150, getBgBright(), "%", isBgHidden() || !onHigh)}</div></section>
       <section class="set-card"><h3>${ICO.link}Ngôn ngữ</h3><p class="muted">Chọn ngôn ngữ hiển thị của website.</p>
         <div class="seg" role="radiogroup" aria-label="Ngôn ngữ" translate="no">${[["en", "English"], ["vi", "Tiếng Việt"]].map(([v, l]) => `<button type="button" role="radio" aria-checked="${getLang() === v}" data-lang="${v}" class="${getLang() === v ? "on" : ""}">${l}</button>`).join("")}</div></section>
+      <section class="set-card wide"><h3>${ICO.paint}Chủ đề màu</h3><p class="muted">Đổi cả bảng màu của website. Có bản tối và sáng cho từng chủ đề; “Cổ điển” là đen · trắng · xám.</p>
+        <div class="skins" role="radiogroup" aria-label="Chủ đề màu">${SKINS.map(k => `<button type="button" role="radio" class="skin${k.id === getSkin() ? " on" : ""}" aria-checked="${k.id === getSkin()}" data-skin="${k.id}" style="--sk-a:${k.a};--sk-b:${k.b}"><i aria-hidden="true"></i><b>${k.label}</b><small>${k.hint}</small></button>`).join("")}</div></section>
       <section class="set-card"><h3>${ICO.sparkles || ICO.star}Màu nhấn</h3><p class="muted">Đổi màu nút chính, viền chọn và công tắc.</p>
         <div class="swatches" role="radiogroup" aria-label="Màu nhấn">${ACCENTS.map(a => `<button type="button" role="radio" class="swatch${a.id === getAccent() ? " on" : ""}" aria-checked="${a.id === getAccent()}" aria-label="${a.label}" title="${a.label}" data-accent="${a.id}"><i style="${a.hex ? "background:" + a.hex : ""}" class="${a.hex ? "" : "def"}"></i></button>`).join("")}</div></section>
       <section class="set-card"><h3>${ICO.music}Âm thanh</h3><p class="muted">${hasMusic() ? "Website có nhạc nền. Bạn có thể bật hoặc tắt tại đây." : "Hiện website chưa có nhạc nền."}</p>
@@ -55,8 +58,13 @@ export function mount(ctx) {
         ${session.devBlocked ? `<p class="form-error">${esc(session.devBlocked)}</p>` : ""}
         <div class="acts"><a class="btn primary" href="/profile">Xem hồ sơ</a>${!u.emailVerified ? `<button class="btn ghost" id="verify" type="button">Gửi lại email xác minh</button>` : ""}<button class="btn ghost" data-act="signout" type="button">${ICO.out}Đăng xuất</button></div>`
         : `<p class="muted">Bạn chưa đăng nhập.</p><div class="acts"><a class="btn primary" href="/login?next=/settings">Đăng nhập</a><a class="btn ghost" href="/register">Tạo tài khoản</a></div>`}</section>
+      <section class="set-card wide"><h3>${ICO.shield}Cookie</h3><p class="muted">${cookiesEnabled() ? "Website dùng cookie của chính nó để nhớ cài đặt, ngôn ngữ, chủ đề, giỏ hàng và trạng thái menu trên thiết bị này. Không có cookie quảng cáo hay theo dõi." : "Trình duyệt của bạn đang tắt cookie nên cài đặt chỉ được nhớ tạm."}</p>
+        <ul class="cookie-list" translate="no">${listCookies().map(c => `<li>${esc(c.name)}</li>`).join("") || "<li>(chưa có)</li>"}</ul>
+        <div class="acts"><button class="btn ghost" id="ckClear" type="button">Xóa cookie của website</button></div></section>
       <section class="set-card wide"><h3>${ICO.refresh || ICO.out}Đặt lại</h3><p class="muted">Đưa giao diện, kính mờ, hình nền, âm thanh và trợ năng về mặc định. Ngôn ngữ và tài khoản không đổi.</p>
         <div class="acts"><button class="btn danger" id="resetAll" type="button">Đặt lại cài đặt hiển thị</button></div></section></div>`;
+    ctx.el.querySelectorAll("[data-skin]").forEach(b => b.addEventListener("click", () => { setSkin(b.dataset.skin); draw(); const e = ctx.el.querySelector(`[data-skin="${b.dataset.skin}"]`); if (e) e.focus(); }));
+    const ck = ctx.el.querySelector("#ckClear"); if (ck) ck.addEventListener("click", () => { clearSiteCookies(); resetPrefs(); setAccent(""); draw(); toast("Đã xóa cookie và đặt lại cài đặt."); });
     ctx.el.querySelectorAll("[data-theme]").forEach(b => b.addEventListener("click", () => { setThemePref(b.dataset.theme); draw(); }));
     ctx.el.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", async () => { await setLang(b.dataset.lang); ctx.el.querySelectorAll("[data-lang]").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-checked", on); }); }));
     const $q = x => ctx.el.querySelector(x), redraw = id => { draw(); const e = $q("#" + id); if (e) e.focus(); };

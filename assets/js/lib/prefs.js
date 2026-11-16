@@ -1,13 +1,23 @@
 /* Cài đặt người dùng (lưu trình duyệt): giao diện sáng/tối, kính mờ, âm thanh */
 const K_THEME = "ssw_theme", K_MUTE = "ssw_muted", K_GLASS = "ssw_glass";
-const get = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
-const set = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) {} };
+import { kvGet, kvSet } from "./cookie.js";
+const get = k => kvGet(k), set = (k, v) => kvSet(k, v);
 /* Mặc định "dark" (giữ nguyên diện mạo site gốc); "system" là lựa chọn của người dùng */
+/* Chủ đề màu: Midnight (mặc định) · Aurora · Ocean · Emerald · Sunset · Rose · Cổ điển (đen-trắng-xám). Lưu trong cookie. */
+export const SKINS = [
+  { id: "midnight", label: "Midnight", hint: "Xanh đêm", a: "#0b1020", b: "#9fb0ff" }, { id: "aurora", label: "Aurora", hint: "Tím cực quang", a: "#120b22", b: "#c9a6ff" },
+  { id: "ocean", label: "Ocean", hint: "Xanh biển", a: "#061a1f", b: "#8fe3ff" }, { id: "emerald", label: "Emerald", hint: "Xanh ngọc", a: "#07170f", b: "#8df0b9" },
+  { id: "sunset", label: "Sunset", hint: "Cam hoàng hôn", a: "#1f0f08", b: "#ffb08a" }, { id: "rose", label: "Rose", hint: "Hồng đào", a: "#1f0a13", b: "#ffa3c4" },
+  { id: "classic", label: "Cổ điển", hint: "Đen · trắng · xám", a: "#0a0a0a", b: "#fafafa" }
+];
+export const getSkin = () => { const v = get("ssw_skin"); return SKINS.some(x => x.id === v) ? v : "midnight"; };
+export function applySkin() { document.documentElement.dataset.skin = getSkin(); }
+export function setSkin(id) { set("ssw_skin", id === "midnight" ? null : id); applySkin(); applyThemePref(); emit(); }
 export const getThemePref = () => { const v = get(K_THEME); return v === "light" || v === "system" ? v : "dark"; };
 export const resolveTheme = (pref = getThemePref()) => pref === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : pref;
 export function applyThemePref() {
-  const r = resolveTheme(); document.documentElement.dataset.theme = r; if (isGlass()) applyGlass();
-  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = r === "light" ? "#fafafa" : "#0a0a0a";
+  const r = resolveTheme(); document.documentElement.dataset.theme = r; applySkin(); if (isGlass()) applyGlass();
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) { const sk = SKINS.find(x => x.id === getSkin()); m.content = r === "light" ? "#fafafa" : (sk ? sk.a : "#0a0a0a"); }
   return r;
 }
 export function setThemePref(p) { set(K_THEME, p); applyThemePref(); emit(); }
@@ -17,7 +27,7 @@ export const setMuted = m => set(K_MUTE, m ? "1" : null);
 /* ── Số đo lưu trình duyệt ── */
 const num = (k, d, lo, hi) => { const v = parseFloat(get(k)); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 const emit = () => document.dispatchEvent(new CustomEvent("prefs-change"));
-export const K_ALL = ["ssw_gfx", "ssw_theme", "ssw_muted", "ssw_glass", "ssw_gl_blur", "ssw_gl_clear", "ssw_bg", "ssw_bg_bright", "ssw_vol", "ssw_rm", "ssw_hc", "ssw_dens", "ssw_nosplash", "ssw_side", "ssw_crisp"];
+export const K_ALL = ["ssw_skin", "ssw_gfx", "ssw_theme", "ssw_muted", "ssw_glass", "ssw_gl_blur", "ssw_gl_clear", "ssw_bg", "ssw_bg_bright", "ssw_vol", "ssw_rm", "ssw_hc", "ssw_dens", "ssw_nosplash", "ssw_side", "ssw_crisp"];
 
 /* Kính mờ: tắt (mặc định) = khung đặc theo giao diện; bật = khung trong suốt, chỉ còn viền.
    Hai thanh chỉnh: Độ mờ (làm mờ phần phía sau khung) và Độ trong (khung trong tới mức nào). */

@@ -4,6 +4,7 @@ import { db } from "./firebase.js";
 import { session, onAuth } from "./auth.js";
 import { api, apiMessage } from "./account.js";
 import { dlog } from "./log.js";
+import { kvGet, kvSet } from "./cookie.js";
 
 export const SHOP = "nox_shop";
 export const shop = { items: null, cats: null, wallet: null, orders: null, txs: null, topups: null, info: null, connected: false };
@@ -18,6 +19,8 @@ export const moneyShort = n => { n = Math.floor(Number(n) || 0); return n >= 1e6
 export const signedMoney = n => (n > 0 ? "+" : n < 0 ? "−" : "") + money(Math.abs(n));
 
 /* ───── Chuẩn hóa dữ liệu ───── */
+/* Ngân hàng hay dùng: [tên, mã BIN (NAPAS), tên viết tắt hiện trong QR]. Dev vẫn có thể nhập tay BIN khác. */
+export const BANKS = [["Vietcombank", "970436", "VCB"], ["VietinBank", "970415", "CTG"], ["BIDV", "970418", "BIDV"], ["Agribank", "970405", "AGR"], ["Techcombank", "970407", "TCB"], ["MB Bank", "970422", "MB"], ["ACB", "970416", "ACB"], ["VPBank", "970432", "VPB"], ["TPBank", "970423", "TPB"], ["Sacombank", "970403", "STB"], ["HDBank", "970437", "HDB"], ["VIB", "970441", "VIB"], ["SHB", "970443", "SHB"], ["OCB", "970448", "OCB"], ["MSB", "970426", "MSB"], ["SeABank", "970440", "SEA"], ["Eximbank", "970431", "EIB"], ["LPBank", "970449", "LPB"], ["Nam A Bank", "970428", "NAB"], ["Bac A Bank", "970409", "BAB"]];
 export const MODES = { text: "Giao tự động: cùng một nội dung (link, mã…)", lines: "Giao tự động: mỗi dòng là một sản phẩm (key, tài khoản…)", manual: "Giao tay: dev gửi qua hộp thư" };
 export function normProduct(id, o) {
   o = o && typeof o === "object" ? o : {};
@@ -62,13 +65,22 @@ function syncUser() {
     live("nox_topups/" + uid, v => { shop.topups = rows(v).sort((a, b) => (b.ts || 0) - (a.ts || 0)); emit("topups"); })
   ];
 }
+/* Hóa đơn nạp tiền: quá hạn (10 phút) mà chưa thấy tiền → Thất bại (máy chủ cũng chốt lại, trình duyệt hiển thị đúng ngay khi hết giờ) */
+export const TOPUP_TTL = 10 * 60 * 1000;
+export const TOPUP_ST = { pending: ["Đang chờ", "warn"], done: ["Thành công", "ok"], failed: ["Thất bại", "bad"], cancelled: ["Đã hủy", ""] };
+export function topupStatus(t, at = Date.now()) {
+  let s = t && t.status; if (!TOPUP_ST[s]) s = "pending";
+  if (s === "pending" && at > (Number(t.expiresAt) || (Number(t.ts) || 0) + TOPUP_TTL)) s = "failed";
+  return s;
+}
+export const topupLeft = (t, at = Date.now()) => Math.max(0, (Number(t.expiresAt) || (Number(t.ts) || 0) + TOPUP_TTL) - at);
 export const balance = () => (shop.wallet ? shop.wallet.balance : 0);
 export const canUseWallet = () => real() && !!session.user.emailVerified;
 
 /* ───── Giỏ hàng (lưu trong trình duyệt này) ───── */
 const CK = "ssw_cart";
-let cart = (() => { try { const v = JSON.parse(localStorage.getItem(CK)); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (_) { return {}; } })();
-const saveCart = () => { try { localStorage.setItem(CK, JSON.stringify(cart)); } catch (_) {} emit("cart"); };
+let cart = (() => { try { const v = JSON.parse(kvGet(CK)); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (_) { return {}; } })();
+const saveCart = () => { kvSet(CK, JSON.stringify(cart)); emit("cart"); };
 export const cartCount = () => Object.values(cart).reduce((s, q) => s + (Number(q) || 0), 0);
 export const cartLines = () => Object.keys(cart).map(id => ({ id, qty: cart[id], p: productById(id) })).filter(l => l.p && l.p.active);
 export const cartTotal = () => cartLines().reduce((s, l) => s + l.p.price * l.qty, 0);
@@ -86,7 +98,7 @@ const SHOP_MSG = {
   bad_amount: "Số tiền từ 10.000 đến 50.000.000 ₫, làm tròn đến nghìn đồng.", insufficient: "Số dư không đủ. Hãy nạp thêm tiền vào ví.", out_of_stock: "Rất tiếc, có món đã hết hàng hoặc không đủ số lượng.",
   gone: "Có món trong giỏ không còn bán nữa.", bad_cart: "Giỏ hàng không hợp lệ. Hãy kiểm tra lại số lượng.", banned: "Tài khoản này đang bị khóa.", conflict: "Hệ thống đang bận, hãy thử lại.",
   bad_file: "Tệp này không được hỗ trợ. Hãy gửi ảnh, video, PDF, ZIP hoặc tệp văn bản.", too_big: "Tệp quá lớn.", too_many_files: "Cuộc trò chuyện này đã đạt giới hạn số tệp.", closed: "Cuộc trò chuyện này đã đóng.", muted: "Bạn đang bị tắt tiếng nên chưa gửi được tệp.",
-  unverified: "Hãy xác minh email trước khi dùng ví và mua hàng.", not_configured: "Cửa hàng chưa được bật trên máy chủ. Quản trị viên cần cấu hình Firebase Admin."
+  bad_bank: "Thông tin ngân hàng chưa hợp lệ. Kiểm tra lại mã BIN, số tài khoản và tên chủ tài khoản.", unverified: "Hãy xác minh email trước khi dùng ví và mua hàng.", not_configured: "Cửa hàng chưa được bật trên máy chủ. Quản trị viên cần cấu hình Firebase Admin."
 };
 async function call(action, body) { const r = await api(action, body); if (!r.ok) throw err(r); return r; }
 export async function loadWalletInfo(force) { if (shop.info && !force) return shop.info; const r = await call("wallet-info"); shop.info = r; emit("info"); return r; }
@@ -94,5 +106,10 @@ export const createTopup = amount => call("topup-create", { amount });
 export async function checkout(lines) { const r = await call("shop-buy", { items: lines.map(l => ({ id: l.id, qty: l.qty })) }); clearCart(lines.map(l => l.id)); return r; }
 export const devAdjust = (uid, amount, note) => call("wallet-adjust", { uid, amount, note });
 export const devAssign = (hook, uid) => call("bank-assign", { hook, uid });
+export const devDeliver = (uid, oid) => call("order-deliver", { uid, oid });
 export const devRefund = (uid, oid) => call("order-refund", { uid, oid });
 export const devShopStatus = () => call("shop-status");
+export const devBankSet = b => call("bank-set", b);
+export const devBankReset = () => call("bank-set", { reset: true });
+export const devBankQr = (amount, content) => call("bank-qr", { amount, content });
+export const sweepTopups = () => call("topup-sweep");

@@ -94,6 +94,36 @@ console.log("WEBHOOK NGÂN HÀNG");
   const as = await asg.call("bank-assign", { hook: "sepay_400", uid: "uA" }, "dev"); t("DEV gán → cộng ví, đánh dấu credited", [as.status, as.body.balance, asg.data.nox_bankhook.sepay_400.status], [200, 70000, "credited"]);
   t("gán lần hai bị từ chối (không cộng trùng)", [(await asg.call("bank-assign", { hook: "sepay_400", uid: "uA" }, "dev")).status, asg.data.nox_wallet.uA.balance], [404, 70000]); void cc; }
 
+console.log("NGÂN HÀNG DEV + HÓA ĐƠN 10 PHÚT");
+{ const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code;
+  t("người thường không đặt được ngân hàng / tạo QR dev", [(await w.call("bank-set", { bin: "970436", account: "123456789", name: "A B", bank: "Vietcombank" }, "a")).status, (await w.call("bank-qr", {}, "a")).status], [403, 403]);
+  t("dev: BIN sai bị từ chối", (await w.call("bank-set", { bin: "12", account: "123456789", name: "NGUYEN VAN A", bank: "VCB" }, "dev")).body.code, "bad_bank");
+  t("dev: số tài khoản sai bị từ chối", (await w.call("bank-set", { bin: "970436", account: "12ab", name: "NGUYEN VAN A", bank: "VCB" }, "dev")).body.code, "bad_bank");
+  const set = await w.call("bank-set", { bin: "970436", account: "0011 0022 33", name: "Nguyễn Văn A", bank: "Vietcombank", short: "VCB" }, "dev");
+  t("dev liên kết Vietcombank: tên chuẩn hoá không dấu, in hoa; số tk bỏ khoảng trắng", [set.status, set.body.bank.account, set.body.bank.name, set.body.linked], [200, "00110022" + "33", "NGUYEN VAN A", true]);
+  const qr = await w.call("bank-qr", { amount: 125000, content: "Don hang #12" }, "dev");
+  t("dev tạo QR: đúng BIN/tk/số tiền/nội dung đã làm sạch", [qr.status, qr.body.qr.includes("0006970436"), qr.body.qr.includes("00110022" + "33"), qr.body.qr.includes("5406125000"), qr.body.qr.includes("0811Don hang 12"), qr.body.qr.slice(-4)], [200, true, true, true, true, require("../api/_lib/vietqr.js").crc16(qr.body.qr.slice(0, -4))]);
+  const tp = await w.call("topup-create", { amount: 50000 }, "a");
+  t("QR nạp của người dùng dùng ngân hàng dev vừa liên kết", [tp.body.bank.bank, tp.body.qr.includes("0006970436"), tp.body.qr.includes("0811" + code), tp.body.expiresAt - tp.body.ts], ["Vietcombank", true, true, 600000]);
+  t("webhook của tài khoản KHÔNG phải ngân hàng liên kết bị bỏ qua", (await w.hook(sePay(901, 50000, code))).body.results, ["ignored"]);
+  t("webhook đúng tài khoản liên kết thì cộng", (await w.hook(sePay(902, 50000, code, { accountNumber: "0011002233" }))).body.results, ["credited"]);
+  t("hóa đơn thành công", Object.values(w.data.nox_topups.uA)[0].status, "done");
+  const st = await w.call("shop-status", {}, "dev"); t("shop-status báo đã liên kết + người liên kết", [st.body.linked, st.body.bank.short, st.body.linkedBy], [true, "VCB", DEVE]);
+  const rs = await w.call("bank-set", { reset: true }, "dev"); t("dev gỡ liên kết → quay về mặc định", [rs.body.linked, rs.body.bank.bank], [false, "Techcombank"]); }
+{ const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code;
+  const r1 = await w.call("topup-create", { amount: 50000 }, "a"); const id1 = r1.body.id;
+  clock += 9 * 60000; t("9 phút: vẫn chờ", (await w.call("topup-sweep", {}, "a")).body.failed, 0);
+  clock += 2 * 60000; t("quá 10 phút: chuyển Thất bại (failed)", [(await w.call("topup-sweep", {}, "a")).body.failed, w.data.nox_topups.uA[id1].status], [1, "failed"]);
+  t("lần nữa không đếm lại", (await w.call("topup-sweep", {}, "a")).body.failed, 0);
+  { const r = await w.call("topup-create", { amount: 20000 }, "a"); clock += 11 * 60000; await w.call("wallet-info", {}, "a"); t("wallet-info cũng chốt hóa đơn quá hạn", w.data.nox_topups.uA[r.body.id].status, "failed"); }
+  /* tiền đến muộn: vẫn cộng vào ví (không mất tiền của khách), hóa đơn đánh dấu done + late */
+  const late = await w.hook(sePay(777, 50000, code, { accountNumber: "19077584659010" }));
+  t("tiền đến muộn vẫn được cộng", [late.body.results, w.data.nox_wallet.uA.balance], [["credited"], 50000]);
+  t("hóa đơn thất bại → done + late", [w.data.nox_topups.uA[id1].status, w.data.nox_topups.uA[id1].late], ["done", true]);
+  const w2 = world(); const c2 = (await w2.call("wallet-info", {}, "a")).body.code; const o1 = (await w2.call("topup-create", { amount: 30000 }, "a")).body.id; const o2 = (await w2.call("topup-create", { amount: 40000 }, "a")).body.id;
+  t("tạo hóa đơn mới thì hóa đơn chờ cũ → cancelled", [w2.data.nox_topups.uA[o1].status, w2.data.nox_topups.uA[o2].status], ["cancelled", "pending"]);
+  t("khách A không sweep được hóa đơn của B (chỉ của mình)", (await w2.call("topup-sweep", {}, "b")).body.failed, 0); }
+
 console.log("MUA HÀNG");
 { const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code; await w.call("wallet-info", {}, "b");
   w.data.nox_shop = { items: {

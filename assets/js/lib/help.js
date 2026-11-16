@@ -1,4 +1,4 @@
-/* Tầng dữ liệu cho mục Trợ giúp: hỗ trợ / báo cáo / nhắn tin với dev, quyền đăng bài và bài chờ duyệt.
+/* Tầng dữ liệu cho tin nhắn với dev (chat nổi + Hộp thư; hỗ trợ/báo cáo cũ chỉ còn để xem lại), quyền đăng bài và bài chờ duyệt.
    Quyền thật do database.rules.json quyết định; các hàm ở đây chỉ gửi đúng định dạng và dịch lỗi ra tiếng Việt. */
 import { db, TS } from "./firebase.js";
 import { session } from "./auth.js";
@@ -8,8 +8,7 @@ import { validUrl } from "./util.js";
 import { isLocalImg } from "./avatar.js";
 
 export const THREADS = "nox_threads", MSGS = "nox_msgs", PENDING = "nox_pending", PERMS = "nox_perms";
-export const REPORT_REASONS = { malware: "Có mã độc / virus", scam: "Lừa đảo", copyright: "Vi phạm bản quyền", inappropriate: "Nội dung không phù hợp", broken: "Link hỏng / không hoạt động", other: "Lý do khác" };
-export const TYPE_LABEL = { support: "Hỗ trợ", report: "Báo cáo", chat: "Nhắn tin" };
+export const TYPE_LABEL = { support: "Hỗ trợ (cũ)", report: "Báo cáo (cũ)", chat: "Nhắn tin" };
 const err = m => Object.assign(new Error(m), { code: "app/help" });
 const denied = e => { const x = new Error(e && (e.code === "PERMISSION_DENIED" || e.code === "permission-denied") ? "Bạn không có quyền thực hiện thao tác này (có thể đang bị khóa hoặc bị tắt tiếng)." : "Chưa gửi được. Vui lòng kiểm tra mạng và thử lại."); x.code = e && e.code; return x; };
 const need = () => { if (!db) throw err("Chưa kết nối được dữ liệu. Vui lòng tải lại trang."); if (!session.user || session.user.isAnonymous) throw err("Hãy đăng nhập bằng tài khoản thật để dùng tính năng này."); return session.user.uid; };

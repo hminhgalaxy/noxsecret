@@ -1,6 +1,7 @@
 /* Ngôn ngữ giao diện: English (mặc định) và Tiếng Việt (chữ gốc viết sẵn trong mã).
    Khi chọn English, từ điển (i18n-en.js) được nạp và mọi chữ trên trang được dịch tại chỗ — kể cả nội dung dựng sau đó
    (thông báo, hộp thoại, trang mới). Chọn lại Tiếng Việt thì khôi phục nguyên bản. Nội dung do người quản trị nhập không bị dịch. */
+import { kvGet, kvSet } from "./cookie.js";
 const K = "ssw_lang";
 const ATTRS = ["placeholder", "aria-label", "title", "alt", "value"];
 let dict = null, lang = "vi", mo = null; /* "vi" = chưa dịch (chữ gốc trong mã) cho tới khi initI18n chạy */
@@ -8,7 +9,7 @@ const listeners = new Set();
 const textOrig = new WeakMap(), textDone = new WeakMap(), attrOrig = new WeakMap();
 
 /* Ngôn ngữ chính của web là English; chỉ khi người dùng chủ động chọn Tiếng Việt mới dùng bản Việt */
-export const getLang = () => { try { return localStorage.getItem(K) === "vi" ? "vi" : "en"; } catch (_) { return "en"; } };
+export const getLang = () => (kvGet(K) === "vi" ? "vi" : "en");
 export const onLangChange = fn => { listeners.add(fn); return () => listeners.delete(fn); };
 
 /* Dịch một chuỗi (giữ nguyên khoảng trắng đầu/cuối). Tiếng Việt → trả nguyên. */
@@ -72,7 +73,7 @@ async function load() { if (!dict) dict = (await import("./i18n-en.js")).default
 
 export async function setLang(l, save = true) {
   l = l === "en" ? "en" : "vi";
-  if (save) try { localStorage.setItem(K, l); } catch (_) {}
+  if (save) kvSet(K, l);
   if (l === "en") { await load(); lang = "en"; document.documentElement.lang = "en"; walk(document.body); walk(document.querySelector("head > title") || document.body); observe(); }
   else { lang = "vi"; document.documentElement.lang = "vi"; if (mo) { mo.disconnect(); mo = null; } restore(document.body); }
   listeners.forEach(f => { try { f(lang); } catch (_) {} });

@@ -20,7 +20,7 @@ export function mount(ctx) {
     cond.innerHTML = `<div class="formcard"><span class="dsec">3 điều kiện để đăng bài</span><ul class="conds">
       ${row(c.email, "Email đã được xác minh", `<button class="btn ghost sm" type="button" data-a="verify">Gửi thư xác minh</button>`)}
       ${row(c.twofa, "Đã bật xác minh 2 bước", `<a class="btn ghost sm" href="/profile?tab=security">Bật ngay</a>`)}
-      ${row(c.perm, "Được quản trị viên cấp phép đăng bài", `<a class="btn ghost sm" href="/help/support?post=1">Xin cấp phép</a>`)}</ul>
+      ${row(c.perm, "Được quản trị viên cấp phép đăng bài", `<button class="btn ghost sm" type="button" data-open-chat>Nhắn dev xin cấp phép</button>`)}</ul>
       <p class="sub-note">Nội dung gửi lên sẽ hiện nhãn "Đang xem xét" và chỉ được đăng công khai khi quản trị viên phê duyệt. Chỉ nhận link https://, ảnh chọn từ máy. Không gửi mã độc, hack, mod hay phần mềm vi phạm điều khoản.</p></div>`;
     const can = H.canPost(perm); if (can !== lastCan) { lastCan = can; drawForm(); }
   };

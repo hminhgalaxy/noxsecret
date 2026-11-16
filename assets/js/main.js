@@ -54,6 +54,8 @@ import { renderMnBanner } from "./lib/mnbanner.js";
 initPalette(); initNetStatus(); initBackTop(); initBadges(); initNotifPanel();
 import { initShopHeader } from "./lib/walletchip.js"; initShopHeader();
 import { initChatWidget } from "./lib/chatwidget.js"; initChatWidget();
+import { initMailPanel } from "./lib/mailpanel.js"; initMailPanel();
+import { initCookieBar } from "./lib/cookiebar.js"; initCookieBar();
 renderNav(true); renderSound(); renderNotifDot();
 S.start();
 const first = initI18n().then(() => router.render({ pop: false }));

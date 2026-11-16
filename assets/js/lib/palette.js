@@ -5,22 +5,24 @@ import { store, items, catById, itemHref } from "./store.js";
 import { session } from "./auth.js";
 import { navigate } from "./router.js";
 import { recent } from "./favs.js";
+import { visibleProducts, money } from "./shop.js";
 
 let root = null, prev = null;
 const pages = () => [
-  { label: "Trang chủ", href: "/", icon: "home", kw: "home trang chu skibidiscript" }, { label: "Tất cả danh mục", href: "/categories", icon: "grid", kw: "categories danh muc" },
+  { label: "Cửa hàng", href: "/", icon: "bag", kw: "shop store cua hang trang chu home mua sam" }, { label: "Tất cả danh mục", href: "/categories", icon: "grid", kw: "categories danh muc" },
   { label: "Tìm kiếm", href: "/search", icon: "search", kw: "search tim kiem" }, { label: "Yêu thích", href: "/favorites", icon: "heart", kw: "favorites yeu thich da xem gan day recent" },
   { label: "Thông báo", href: "/notifications", icon: "bell", kw: "notifications thong bao cap nhat updates" }, { label: "Cài đặt", href: "/settings", icon: "gear", kw: "settings cai dat do hoa mau am thanh" },
-  { label: "Câu hỏi thường gặp", href: "/help", icon: "bulb", kw: "help faq hoi dap tro giup" }, { label: "Hỗ trợ", href: "/help/support", icon: "mail", kw: "support ho tro" }, { label: "Báo cáo", href: "/help/report", icon: "flag", kw: "report bao cao" },
+  { label: "Kho nội dung", href: "/library", icon: "layers", kw: "library kho noi dung script apk" },
   { label: "skibidiscript là gì?", href: "/skibidiscript", icon: "home", kw: "about gioi thieu skibidiscript la gi" }, { label: "Hướng dẫn sử dụng", href: "/guide", icon: "book", kw: "guide huong dan" }, { label: "Tải APK an toàn", href: "/apk-safety", icon: "shield", kw: "apk safety an toan" },
   { label: "Bảo mật & an toàn", href: "/security", icon: "shield", kw: "security bao mat" }
-].concat(session.user && !session.isGuest ? [{ label: "Hồ sơ", href: "/profile", icon: "user", kw: "profile ho so tai khoan" }, { label: "Hộp thư", href: "/inbox", icon: "envelope", kw: "inbox messages hop thu tin nhan" }, { label: "Đăng nội dung", href: "/help/submit", icon: "plus", kw: "submit dang bai gui bai" }] : [{ label: "Đăng nhập", href: "/login", icon: "user", kw: "login dang nhap" }])
+].concat(session.user && !session.isGuest ? [{ label: "Ví của tôi", href: "/wallet", icon: "wallet", kw: "wallet vi so du balance" }, { label: "Nạp tiền vào ví", act: "topup", icon: "plus", kw: "nap tien topup deposit bank ngan hang qr" }, { label: "Lịch sử mua hàng", href: "/orders", icon: "receipt", kw: "orders history lich su mua hang don hang" }, { label: "Nhắn tin với dev", act: "chat", icon: "chat", kw: "chat dev nhan tin ho tro support" }, { label: "Hồ sơ", href: "/profile", icon: "user", kw: "profile ho so tai khoan" }, { label: "Hộp thư", href: "/inbox", icon: "envelope", kw: "inbox messages hop thu tin nhan" }, { label: "Đăng nội dung", href: "/help/submit", icon: "plus", kw: "submit dang bai gui bai" }] : [{ label: "Đăng nhập", href: "/login", icon: "user", kw: "login dang nhap" }])
   .concat(session.isDev ? [{ label: "Dev Panel", href: "/dev", icon: "shield", kw: "dev quan tri" }, { label: "Duyệt bài", href: "/dev/review", icon: "check", kw: "review duyet bai" }, { label: "Dev: Danh mục", href: "/dev/categories", icon: "grid", kw: "dev categories" }] : []);
 
 export function search(q) {
   const k = vi(q).trim(), out = [];
   const hit = s => !k || vi(s).includes(k);
-  pages().filter(p => hit(p.label + " " + p.kw)).slice(0, k ? 6 : 8).forEach(p => out.push({ g: "Trang", label: p.label, href: p.href, icon: p.icon }));
+  pages().filter(p => hit(p.label + " " + p.kw)).slice(0, k ? 6 : 8).forEach(p => out.push({ g: "Trang", label: p.label, href: p.href, act: p.act, icon: p.icon }));
+  if (k) visibleProducts().filter(p => hit(p.name + " " + (p.desc || ""))).slice(0, 5).forEach(p => out.push({ g: "Cửa hàng", label: p.name, sub: money(p.price), href: "/shop/" + p.id, icon: "bag" }));
   store.cats.filter(c => hit(c.label + " " + (c.sub || ""))).slice(0, 5).forEach(c => out.push({ g: "Danh mục", label: c.label, href: "/" + c.path, icon: c.icon || c.id }));
   if (k) { let n = 0; for (const c of store.cats) { for (const it of items(c.id) || []) { if (n >= 8) break; if (hit(it.name + " " + (it.desc || ""))) { out.push({ g: "Nội dung", label: it.name, sub: c.label, href: itemHref(c.id, it.key), icon: c.icon || c.id }); n++; } } } }
   else recent().slice(0, 4).forEach(r => { const c = catById(r.c), it = c && (items(c.id) || []).find(x => x.key === r.k); if (it) out.push({ g: "Xem gần đây", label: it.name, sub: c.label, href: itemHref(c.id, it.key), icon: c.icon || c.id }); });
@@ -43,7 +45,8 @@ export function openPalette() {
     inp.setAttribute("aria-activedescendant", res.length ? "cmdk-" + sel : "");
   };
   const mark = () => { list.querySelectorAll(".cmdk-o").forEach(o => { const on = +o.dataset.i === sel; o.classList.toggle("on", on); o.setAttribute("aria-selected", on); if (on) o.scrollIntoView({ block: "nearest" }); }); inp.setAttribute("aria-activedescendant", "cmdk-" + sel); };
-  const go = i => { const r = res[i]; if (!r) return; closePalette(); navigate(r.href); };
+  const go = i => { const r = res[i]; if (!r) return; closePalette();
+    if (r.act === "topup") import("./topup.js").then(m => m.openTopup()); else if (r.act === "chat") import("./chatwidget.js").then(m => m.openChat()); else navigate(r.href); };
   inp.addEventListener("input", () => { sel = 0; draw(); });
   root.addEventListener("keydown", e => {
     if (e.key === "Escape") { e.preventDefault(); closePalette(); }

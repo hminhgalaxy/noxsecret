@@ -48,4 +48,6 @@ const ld = JSON.parse(ix.match(/<script type="application\/ld\+json">(.+?)<\/scr
 t("JSON-LD: alternateName chứa skibidiscript", [site.alternateName.includes("skibidiscript"), org.alternateName.includes("skibidiscript")], [true, true]);
 t("JSON-LD: SearchAction trỏ /search", JSON.stringify(site).includes("/search?q={search_term_string}"), true);
 t("noscript: có nội dung thương hiệu + liên kết", /<noscript>[\s\S]*skibidiscript[\s\S]*href="\/skibidiscript"[\s\S]*<\/noscript>/.test(ix), true);
+const en = (await import("../assets/js/lib/i18n-en.js")).default;
+t("i18n: mẫu có nhóm bắt phải chèn lại $n trong bản dịch (không mất số tiền/tên)", en.P.filter(([rx, rep]) => { const n = (rx.source.match(/\((?!\?)/g) || []).length - (rx.source.match(/\\\(/g) || []).length; return n > 0 && !/\$\d/.test(rep); }).map(x => x[0].source), []);
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

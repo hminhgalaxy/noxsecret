@@ -19,12 +19,6 @@ const STEPS = [
   ["Mở mục bạn cần", "Xem mô tả và chi tiết của từng mục trước khi dùng."],
   ["Sao chép hoặc mở link", "Bấm Sao chép code hoặc Mở link là xong."]
 ];
-const FAQ = [
-  ["Tôi có cần tài khoản để dùng không?", "Không. Bạn có thể xem và sao chép mọi nội dung công khai mà không cần đăng nhập. Tài khoản dùng để có hồ sơ cá nhân của riêng bạn."],
-  ["Làm sao để sao chép code?", "Mở một mục có code rồi bấm Sao chép code. Code sẽ được chép vào bộ nhớ tạm của thiết bị."],
-  ["Bao lâu thì có nội dung mới?", "Nội dung được cập nhật trực tiếp. Khi có tin mới, biểu tượng chuông ở đầu trang sẽ báo cho bạn."],
-  ["Tôi quên mật khẩu thì sao?", "Vào trang Đăng nhập, bấm Quên mật khẩu và nhập email. Chúng tôi sẽ gửi một mã 6 số tới email; nhập đúng mã cùng mật khẩu mới là xong."]
-];
 
 export function mount(ctx) {
   ctx.setPage({ hero: true, title: null, desc: "skibidiscript — website tiện ích chia sẻ gói APK bảo mật cao: nội dung kiểm duyệt trước khi đăng, cảnh báo rõ phần mềm bên thứ ba. Không cổ xúy hack." });
@@ -57,9 +51,7 @@ export function mount(ctx) {
     <section aria-labelledby="hw"><div class="sec-head"><h2 id="hw">Vì sao chọn SKIBIDI SCRIPT WEB?</h2></div>
       <div class="feats">${FEATS.map(([ic, t, d]) => `<div class="feat"><span class="feat-ico">${ICO[ic] || ICO.box}</span><h3>${esc(t)}</h3><p>${esc(d)}</p></div>`).join("")}</div></section>
     <section aria-labelledby="hs"><div class="sec-head"><h2 id="hs">Bắt đầu thế nào?</h2></div>
-      <ol class="steps">${STEPS.map(([t, d], i) => `<li class="step"><span class="step-n">${i + 1}</span><div><h3>${esc(t)}</h3><p>${esc(d)}</p></div></li>`).join("")}</ol></section>
-    <section aria-labelledby="hf"><div class="sec-head"><h2 id="hf">Câu hỏi thường gặp</h2><a href="/help">Xem tất cả</a></div>
-      <div class="faqs">${FAQ.map(([q, a]) => `<details class="faq"><summary>${esc(q)}${ICO.chevD}</summary><p>${esc(a)}</p></details>`).join("")}</div></section>`;
+      <ol class="steps">${STEPS.map(([t, d], i) => `<li class="step"><span class="step-n">${i + 1}</span><div><h3>${esc(t)}</h3><p>${esc(d)}</p></div></li>`).join("")}</ol></section>`;
 
   const $ = s => ctx.el.querySelector(s);
   const track = $("#track"), dots = $("#dots"), num = $("#num"), news = $("#news"), stats = $("#stats");

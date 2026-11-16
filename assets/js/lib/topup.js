@@ -4,7 +4,7 @@ import { esc, toast, copyText, copyFx } from "./util.js";
 import { ICO } from "./icons.js";
 import { qrSvg } from "./qr.js";
 import { session } from "./auth.js";
-import { shop, subscribeShop, balance, canUseWallet, loadWalletInfo, createTopup, money } from "./shop.js";
+import { shop, subscribeShop, balance, canUseWallet, loadWalletInfo, createTopup, money, topupStatus, topupLeft, startShop } from "./shop.js";
 import { navigate } from "./router.js";
 
 const PRESETS = [20000, 50000, 100000, 200000, 500000, 1000000];
@@ -13,8 +13,9 @@ const copyBtn = (v, label = "Sao chép") => `<button class="btn soft sm tp-copy"
 export async function openTopup(opts = {}) {
   if (!session.user || session.isGuest) { toast("Hãy đăng nhập để nạp tiền.", "err"); navigate("/login?next=" + encodeURIComponent(location.pathname)); return null; }
   if (!canUseWallet()) { toast("Hãy xác minh email trước khi nạp tiền.", "err"); return null; }
-  let off = () => {}, amount = Math.max(0, Math.floor(opts.amount || 0)), info = null, base = 0, stop = false;
-  const h = openPopup({ id: "topup", variant: "sheet", wide: true, title: "Nạp tiền vào ví", icon: "wallet", onClose: () => { stop = true; off(); } });
+  startShop();
+  let off = () => {}, tick = 0, amount = Math.max(0, Math.floor(opts.amount || 0)), info = null, base = 0, stop = false;
+  const h = openPopup({ id: "topup", variant: "sheet", wide: true, title: "Nạp tiền vào ví", icon: "wallet", onClose: () => { stop = true; off(); clearInterval(tick); } });
 
   const step1 = (err = "") => {
     h.setBody(`<div class="tp">
@@ -38,9 +39,12 @@ export async function openTopup(opts = {}) {
     });
   };
 
+  const mmss = ms => { const t = Math.ceil(ms / 1000); return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0"); };
   const step2 = r => {
-    base = balance();
+    base = balance(); clearInterval(tick);
+    const exp = Number(r.expiresAt) || (Date.now() + 600000), total = Math.max(1, exp - (Number(r.ts) || exp - 600000));
     h.setBody(`<div class="tp tp2">
+      <div class="tp-timer" role="timer" aria-live="off"><span>${ICO.clock || ICO.info}Hóa đơn hết hạn sau</span><b id="tpClock">${mmss(Math.max(0, exp - Date.now()))}</b><i class="tp-bar"><u id="tpBar"></u></i></div>
       <div class="tp-qrwrap"><div class="tp-qr" aria-live="polite">${qrSvg(r.qr, { label: "Mã QR chuyển khoản " + money(r.amount) })}</div><p class="tp-scan">Mở app ngân hàng → Quét mã QR</p></div>
       <div class="tp-info">
         <div class="tp-amount"><small>Số tiền</small><b>${money(r.amount)}</b></div>
@@ -57,9 +61,25 @@ export async function openTopup(opts = {}) {
     </div>`);
     const box = h.body;
     box.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => copyText(b.dataset.copy).then(() => { copyFx(b); toast("Đã sao chép."); }).catch(() => toast("Không sao chép được.", "err"))));
-    box.querySelector("#tpBack").addEventListener("click", () => { off(); step1(); });
+    box.querySelector("#tpBack").addEventListener("click", () => { off(); clearInterval(tick); step1(); });
     box.querySelector("#tpClose").addEventListener("click", () => h.close());
-    off(); off = subscribeShop(t => { if (stop || t !== "wallet" || !shop.wallet) return; const got = balance() - base; if (got > 0) { off(); done(got); } });
+    const clock = box.querySelector("#tpClock"), bar = box.querySelector("#tpBar");
+    const paint = () => { const left = Math.max(0, exp - Date.now()); clock.textContent = mmss(left); bar.style.width = Math.max(0, Math.min(100, left / total * 100)) + "%"; box.querySelector(".tp-timer").classList.toggle("low", left < 60000); if (left <= 0) { clearInterval(tick); off(); failed(r); } };
+    paint(); tick = setInterval(paint, 1000);
+    off(); off = subscribeShop(t => {
+      if (stop) return;
+      if (t === "topups") { const rec = (shop.topups || []).find(x => x.id === r.id); if (rec && topupStatus(rec) === "done") { off(); clearInterval(tick); done(rec.amount); return; } }
+      if (t === "wallet" && shop.wallet) { const got = balance() - base; if (got > 0) { off(); clearInterval(tick); done(got); } }
+    });
+  };
+
+  const failed = r => {
+    h.setBody(`<div class="tp tp-fail"><span class="tp-failico">${ICO.warn}</span><h3>Hóa đơn thất bại</h3><p class="tp-got bad">${money(r.amount)}</p>
+      <p>Hóa đơn đã quá 10 phút mà hệ thống chưa nhận được tiền. Nếu bạn đã chuyển khoản, tiền vẫn sẽ được cộng vào ví khi ngân hàng báo về — bạn không bị mất tiền.</p>
+      <div class="form-acts"><button class="btn ghost" id="tpX" type="button">Đóng</button><button class="btn primary" id="tpNew" type="button">${ICO.qr}Tạo hóa đơn mới</button></div></div>`);
+    h.body.querySelector("#tpX").addEventListener("click", () => h.close());
+    h.body.querySelector("#tpNew").addEventListener("click", () => { amount = r.amount; step1(); });
+    off(); off = subscribeShop(t => { if (stop || t !== "topups") return; const rec = (shop.topups || []).find(x => x.id === r.id); if (rec && topupStatus(rec) === "done") { off(); done(rec.amount); } });
   };
 
   const done = got => {
@@ -74,6 +94,9 @@ export async function openTopup(opts = {}) {
   try { info = await loadWalletInfo(); } catch (e) { h.setBody(`<div class="tp"><div class="statebox err">${ICO.warn}<p>${esc(e.message)}</p></div><div class="form-acts"><button class="btn soft" id="tpClose" type="button">Đóng</button></div></div>`); h.body.querySelector("#tpClose").addEventListener("click", () => h.close()); return h; }
   /* chờ số dư tải xong để tính đúng "tiền vừa vào" */
   for (let i = 0; i < 40 && !shop.wallet && !stop; i++) await new Promise(r => setTimeout(r, 100));
-  if (!stop) step1();
+  if (stop) return h;
+  const inv = opts.invoice;
+  if (inv && inv.qr && inv.bank) { const st = topupStatus(inv); if (st === "pending") { step2(inv); return h; } if (st === "failed") { failed(inv); return h; } if (st === "done") { done(inv.amount); return h; } }
+  step1();
   return h;
 }

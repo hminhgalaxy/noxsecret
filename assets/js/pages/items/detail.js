@@ -39,7 +39,6 @@ export async function mount(ctx) {
         ${likeBtnHTML(cat.id, it.key, "btn ghost")}${saveBtnHTML(cat.id, it.key)}
         <button class="btn ghost" type="button" id="shareBtn">${ICO.share}Chia sẻ</button>${moreBtnHTML(cat.id, it.key)}
         <a class="btn ghost" href="${base}">${ICO.back}Quay lại</a>
-        <a class="btn ghost" href="/help/report?cat=${encodeURIComponent(cat.id)}&amp;key=${encodeURIComponent(it.key)}">${ICO.flag}Báo cáo</a>
         ${(session.isDev || session.isEditor) ? `<button class="btn danger" type="button" id="delBtn">${ICO.trash}Xóa</button>` : ""}
       </div></article>`;
     pushRecent(cat.id, it.key);

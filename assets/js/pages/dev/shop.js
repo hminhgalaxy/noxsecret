@@ -3,11 +3,11 @@ import { esc, toast, fmtTime, copyText } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";
 import { db } from "../../lib/firebase.js";
-import { shop, subscribeShop, startShop, money, signedMoney, MODES, normProduct, catList, catName, devAdjust, devAssign, devRefund, devShopStatus } from "../../lib/shop.js";
+import { shop, subscribeShop, startShop, money, signedMoney, MODES, normProduct, catList, catName, devAdjust, devAssign, devRefund, devDeliver, devShopStatus } from "../../lib/shop.js";
 import { fileToItemImage } from "../../lib/avatar.js";
 import { openPopup } from "../../lib/popup.js";
-import { formDialog, confirmDialog } from "../../lib/confirm.js";
-import { armDelete } from "../../lib/ui.js";
+import { popConfirm, popForm } from "../../lib/shoppop.js";
+import { openBankLink, resetBank, openDevQr } from "../../lib/bankpop.js";
 import { friendly } from "../../lib/messages.js";
 import { locked, devCrumb } from "./shared.js";
 
@@ -43,7 +43,7 @@ export function mount(ctx) {
       const row = e.target.closest(".dv-p"); if (!row) return; const p = (shop.items || []).find(x => x.id === row.dataset.id); if (!p) return;
       if (e.target.closest("[data-ed]")) productForm(p);
       else if (e.target.closest("[data-vis]")) ref("nox_shop/items/" + p.id + "/active").set(!p.active).then(() => toast(p.active ? "Đã ẩn sản phẩm." : "Đã hiện sản phẩm.")).catch(x => toast(friendly(x), "err"));
-      else { const b = e.target.closest("[data-del]"); if (b) armDelete(b, () => Promise.all([ref("nox_shop/items/" + p.id).remove(), ref("nox_shopsecret/" + p.id).remove()]).then(() => toast("Đã xóa sản phẩm.")).catch(x => toast(friendly(x), "err")), { title: "Xóa sản phẩm này?", message: "Đơn hàng đã bán vẫn được giữ trong lịch sử của khách." }); }
+      else if (e.target.closest("[data-del]")) popConfirm({ tone: "danger", title: "Xóa sản phẩm này?", message: "Sản phẩm biến khỏi cửa hàng. Đơn hàng đã bán vẫn được giữ trong lịch sử của khách.", details: [["Sản phẩm", p.name], ["Giá", money(p.price)], ["Đã bán", String(p.sold)]], ok: "Xóa sản phẩm" }).then(y => y && Promise.all([ref("nox_shop/items/" + p.id).remove(), ref("nox_shopsecret/" + p.id).remove()]).then(() => toast("Đã xóa sản phẩm.")).catch(x => toast(friendly(x), "err")));
     });
   };
 
@@ -114,45 +114,55 @@ export function mount(ctx) {
     body.innerHTML = `<div class="dv-bar"><span class="dsec">${L.length} mục</span><button class="btn primary sm" id="addC" type="button">${ICO.plus}Thêm mục lục</button></div>
       <div class="dlist">${L.length ? L.map(c => `<div class="drow" data-id="${esc(c.id)}"><span class="ci">${ICO.tag}</span><span class="nm">${esc(c.name)}<small>Thứ tự ${c.sort} · ${(shop.items || []).filter(p => p.cat === c.id).length} sản phẩm</small></span><button class="ib" data-ed type="button" aria-label="Sửa mục">${ICO.pencil}</button><button class="ib del" data-del type="button" aria-label="Xóa mục">${ICO.trash}</button></div>`).join("") : `<div class="statebox sm">${ICO.tag}<p>Chưa có mục lục. Thêm mục để khách lọc sản phẩm dễ hơn.</p></div>`}</div>`;
     const edit = async c => {
-      const v = await formDialog({ kind: "category", title: c ? "Sửa mục lục" : "Thêm mục lục", ok: "Lưu", fields: [{ id: "name", label: "Tên mục", value: c ? c.name : "", max: 60 }, { id: "sort", label: "Thứ tự hiển thị (số nhỏ hiện trước)", value: String(c ? c.sort : (L.length + 1) * 10), max: 6 }] });
-      if (!v) return; const name = String(v.name).trim(), sort = Number(String(v.sort).replace(/\D/g, "")) || 0;
-      if (!name) { toast("Vui lòng nhập tên mục.", "err"); return; }
       const id = c ? c.id : ref("nox_shop/cats").push().key;
-      ref("nox_shop/cats/" + id).set({ name, sort }).then(() => toast("Đã lưu mục lục.")).catch(x => toast(friendly(x), "err"));
+      await popForm({ title: c ? "Sửa mục lục" : "Thêm mục lục", headIcon: "tag", icon: "tag", tone: "info", ok: "Lưu mục lục", okIcon: "check", pair: true,
+        fields: [{ id: "name", label: "Tên mục", value: c ? c.name : "", max: 60, required: true }, { id: "sort", label: "Thứ tự (số nhỏ hiện trước)", value: String(c ? c.sort : (L.length + 1) * 10), max: 6, inputmode: "numeric" }],
+        check: v => (!String(v.name).trim() ? "Vui lòng nhập tên mục." : ""),
+        submit: v => ref("nox_shop/cats/" + id).set({ name: String(v.name).trim(), sort: Number(String(v.sort).replace(/\D/g, "")) || 0 }).then(() => toast("Đã lưu mục lục.")) });
     };
     body.querySelector("#addC").addEventListener("click", () => edit(null));
     body.querySelector(".dlist").addEventListener("click", e => { const row = e.target.closest(".drow[data-id]"); if (!row) return; const c = L.find(x => x.id === row.dataset.id); if (!c) return;
-      if (e.target.closest("[data-ed]")) edit(c); else { const b = e.target.closest("[data-del]"); if (b) armDelete(b, () => ref("nox_shop/cats/" + c.id).remove().then(() => toast("Đã xóa mục lục.")).catch(x => toast(friendly(x), "err")), { title: "Xóa mục lục này?", message: "Sản phẩm trong mục vẫn còn, chỉ không thuộc mục nào." }); } });
+      if (e.target.closest("[data-ed]")) edit(c); else if (e.target.closest("[data-del]")) popConfirm({ tone: "danger", title: "Xóa mục lục này?", message: "Sản phẩm trong mục vẫn còn, chỉ không thuộc mục nào.", details: [["Mục lục", c.name]], ok: "Xóa mục lục" }).then(y => y && ref("nox_shop/cats/" + c.id).remove().then(() => toast("Đã xóa mục lục.")).catch(x => toast(friendly(x), "err"))); });
   };
 
   /* ───── Đơn hàng ───── */
   const drawOrders = () => {
     if (orders === null) { body.innerHTML = '<p class="sub-note">Đang tải…</p>'; return; }
-    const pend = orders.filter(o => o.status === "pending" && Date.now() - (o.ts || 0) > 5 * 60000).length, man = orders.filter(o => o.status === "paid" && o.manual).length;
+    const pend = orders.filter(o => o.status === "pending" && Date.now() - (o.ts || 0) > 5 * 60000).length, man = orders.filter(o => o.status === "paid" && o.manual && !o.delivered).length;
     body.innerHTML = `<div class="dv-bar"><span class="dsec">${orders.length} đơn</span>${man ? `<span class="badge strong">${man} đơn giao tay</span>` : ""}${pend ? `<span class="badge">${pend} đơn kẹt cần kiểm tra</span>` : ""}</div>
       <div class="dlist">${orders.length ? orders.slice(0, 200).map(o => `<div class="drow dv-o" data-uid="${esc(o.uid)}" data-id="${esc(o.id)}"><span class="nm"><span translate="no">#${esc(o.id.slice(-8).toUpperCase())} · ${esc(userLabel(o.uid))}</span><small translate="no">${esc((o.items || []).map(i => i.name + " ×" + i.qty).join(", "))} · ${esc(fmtTime(o.ts))}</small></span>
-        <span class="od-st ${o.status === "paid" ? "ok" : o.status === "refunded" ? "bad" : "warn"}">${o.status === "paid" ? (o.manual ? "Cần giao tay" : "Hoàn tất") : o.status === "refunded" ? "Đã hoàn" : "Đang xử lý"}</span><b>${money(o.total)}</b>${o.status === "paid" ? `<button class="btn ghost sm" data-rf type="button">Hoàn tiền</button>` : ""}</div>`).join("") : `<div class="statebox sm">${ICO.receipt}<p>Chưa có đơn hàng nào.</p></div>`}</div>`;
-    body.querySelector(".dlist").addEventListener("click", async e => { const b = e.target.closest("[data-rf]"); if (!b) return; const row = b.closest(".dv-o");
-      if (!(await confirmDialog({ kind: "warn", title: "Hoàn tiền đơn này?", message: "Tiền sẽ được cộng lại vào ví của khách. Hàng đã giao không tự thu hồi.", ok: "Hoàn tiền" }))) return;
-      b.disabled = true; devRefund(row.dataset.uid, row.dataset.id).then(() => toast("Đã hoàn tiền.")).catch(x => { b.disabled = false; toast(x.message, "err"); }); });
+        <span class="od-st ${o.status === "paid" ? "ok" : o.status === "refunded" ? "bad" : "warn"}">${o.status === "paid" ? (o.manual ? (o.delivered ? "Đã giao tay" : "Cần giao tay") : "Hoàn tất") : o.status === "refunded" ? "Đã hoàn" : "Đang xử lý"}</span><b>${money(o.total)}</b>${o.status === "paid" && o.manual && !o.delivered ? `<button class="btn soft sm" data-dv type="button">Đã giao</button>` : ""}${o.status === "paid" ? `<button class="btn ghost sm" data-rf type="button">Hoàn tiền</button>` : ""}</div>`).join("") : `<div class="statebox sm">${ICO.receipt}<p>Chưa có đơn hàng nào.</p></div>`}</div>`;
+    body.querySelector(".dlist").addEventListener("click", async e => {
+      const rf = e.target.closest("[data-rf]"), dv = e.target.closest("[data-dv]"), b = rf || dv; if (!b) return; const row = b.closest(".dv-o"), o = orders.find(x => x.id === row.dataset.id && x.uid === row.dataset.uid); if (!o) return;
+      if (dv) { b.disabled = true; devDeliver(o.uid, o.id).then(() => toast("Đã đánh dấu đã giao.")).catch(x => { b.disabled = false; toast(x.message, "err"); }); return; }
+      if (!(await popConfirm({ tone: "warn", icon: "back", title: "Hoàn tiền đơn này?", message: "Tiền sẽ được cộng lại vào ví của khách. Hàng đã giao không tự thu hồi.", details: [["Đơn", "#" + o.id.slice(-8).toUpperCase()], ["Khách", userLabel(o.uid)], ["Hoàn lại", money(o.total), "strong"]], ok: "Hoàn tiền" }))) return;
+      b.disabled = true; devRefund(o.uid, o.id).then(() => toast("Đã hoàn tiền.")).catch(x => { b.disabled = false; toast(x.message, "err"); }); });
   };
 
   /* ───── Nạp tiền & ví ───── */
   const drawMoney = () => {
     const url = location.origin + "/api/bank-webhook", on = status && !status.err && (status.hook.sepayKey || status.hook.sepaySecret || status.hook.casso);
-    body.innerHTML = `<section class="dv-card"><h3>Nhận tiền tự động</h3>
+    const bk = status && !status.err ? status.bank : null;
+    body.innerHTML = `<section class="dv-card dv-bank"><h3>Ngân hàng nhận tiền</h3>${!bk ? '<p class="sub-note">Đang tải…</p>' : `<div class="bk"><span class="bk-ico">${ICO.bank}</span><div class="bk-m"><b translate="no">${esc(bk.bank)}</b><span translate="no">${esc(bk.account)} · ${esc(bk.name)}</span><span class="od-st ${status.linked ? "ok" : "warn"}">${status.linked ? "Đã liên kết bởi dev" : "Đang dùng mặc định của máy chủ"}</span></div></div>
+        <p class="sub-note">Mã QR nạp tiền của mọi người dùng được tạo từ tài khoản này, kèm số tiền và mã riêng của từng tài khoản.</p>
+        <div class="dv-bar"><button class="btn primary sm" id="bkLink" type="button">${ICO.bank}${status.linked ? "Đổi ngân hàng" : "Liên kết ngân hàng"}</button><button class="btn soft sm" id="bkQr" type="button">${ICO.qr}Tạo mã QR</button>${status.linked ? `<button class="btn ghost sm" id="bkReset" type="button">Gỡ liên kết</button>` : ""}</div>`}</section>
+      <section class="dv-card"><h3>Nhận tiền tự động</h3>
       ${!status ? '<p class="sub-note">Đang kiểm tra…</p>' : status.err ? `<p class="form-error">${esc(status.err)}</p>` : `<p class="dv-st ${on ? "ok" : "bad"}">${on ? ICO.checkCircle : ICO.warn}<span>${on ? "Máy chủ đã có khoá bảo mật cho webhook." : "Chưa đặt khoá webhook trên Vercel — tiền chuyển vào sẽ KHÔNG tự cộng."}</span></p>
-        <dl class="dv-dl"><div><dt>Ngân hàng nhận</dt><dd translate="no">${esc(status.bank.bank)} · ${esc(status.bank.account)} · ${esc(status.bank.name)}</dd></div><div><dt>Địa chỉ webhook</dt><dd><code translate="no">${esc(url)}</code> <button class="btn soft sm" id="cpU" type="button">${ICO.copy}<span>Sao chép</span></button></dd></div></dl>`}</section>
+        <dl class="dv-dl"><div><dt>Địa chỉ webhook</dt><dd><code translate="no">${esc(url)}</code> <button class="btn soft sm" id="cpU" type="button">${ICO.copy}<span>Sao chép</span></button></dd></div></dl>`}</section>
       <section class="dv-card"><h3>Cộng / trừ tiền thủ công</h3><form class="pf pf-line" id="adj" novalidate><div class="field"><label for="adE">Email tài khoản</label><input id="adE" type="email" autocomplete="off" placeholder="khach@gmail.com"></div><div class="field"><label for="adA">Số tiền (₫, số âm để trừ)</label><input id="adA" inputmode="numeric" autocomplete="off" placeholder="50000"></div><div class="field"><label for="adN">Ghi chú</label><input id="adN" maxlength="120" autocomplete="off" placeholder="Bù tiền / sửa lỗi…"></div><button class="btn primary" type="submit">Áp dụng</button></form><p class="form-error" id="adErr" role="alert"></p></section>
       <section class="dv-card"><h3>Giao dịch ngân hàng nhận được</h3><div class="dlist">${hooks === null ? '<p class="sub-note">Đang tải…</p>' : hooks.length ? hooks.slice(0, 100).map(x => { const [lab, tone] = HOOK_ST[x.status] || [x.status, ""]; return `<div class="drow" data-k="${esc(x.key)}"><span class="nm"><span translate="no">${esc(x.content || "(không nội dung)")}</span><small>${esc(fmtTime(x.ts))}${x.uid ? " · " + esc(userLabel(x.uid)) : ""}</small></span><span class="od-st ${tone}">${lab}</span><b>${money(x.amount)}</b>${x.status === "unmatched" ? '<button class="btn ghost sm" data-as type="button">Gán cho tài khoản</button>' : ""}</div>`; }).join("") : `<div class="statebox sm">${ICO.bank}<p>Chưa nhận giao dịch nào.</p></div>`}</div></section>`;
+    const refresh = () => devShopStatus().then(r => { status = r; if (tab === "money") draw(); }).catch(() => {});
+    const bl = body.querySelector("#bkLink"); if (bl) bl.addEventListener("click", () => openBankLink(bk, refresh));
+    const bq = body.querySelector("#bkQr"); if (bq) bq.addEventListener("click", () => openDevQr());
+    const br = body.querySelector("#bkReset"); if (br) br.addEventListener("click", () => resetBank(refresh));
     const cp = body.querySelector("#cpU"); if (cp) cp.addEventListener("click", () => copyText(url).then(() => toast("Đã sao chép.")));
     body.querySelector("#adj").addEventListener("submit", async e => { e.preventDefault(); const err = body.querySelector("#adErr"); err.textContent = "";
       const email = body.querySelector("#adE").value.trim().toLowerCase(), amt = Number(body.querySelector("#adA").value.replace(/[^\d-]/g, "")), u = (S.store.users || []).find(x => String(x.email || "").toLowerCase() === email);
       if (!u) { err.textContent = "Không tìm thấy tài khoản có email này."; return; } if (!amt) { err.textContent = "Nhập số tiền khác 0."; return; }
-      if (!(await confirmDialog({ kind: "warn", title: "Điều chỉnh số dư?", message: (amt > 0 ? "Cộng " : "Trừ ") + money(Math.abs(amt)) + " cho " + u.email + ".", ok: "Áp dụng" }))) return;
+      if (!(await popConfirm({ tone: amt > 0 ? "ok" : "warn", icon: amt > 0 ? "plus" : "minus", title: "Điều chỉnh số dư?", message: "Thao tác được ghi vào lịch sử giao dịch của khách.", details: [["Tài khoản", u.email], [amt > 0 ? "Cộng" : "Trừ", money(Math.abs(amt)), "strong"]], ok: "Áp dụng" }))) return;
       devAdjust(u.uid, amt, body.querySelector("#adN").value.trim()).then(r => { toast("Số dư mới: " + money(r.balance)); e.target.reset(); }).catch(x => { err.textContent = x.message; }); });
     body.querySelector(".dlist")?.addEventListener("click", async e => { const b = e.target.closest("[data-as]"); if (!b) return; const key = b.closest("[data-k]").dataset.k;
-      const v = await formDialog({ kind: "email", title: "Gán giao dịch cho tài khoản", message: "Chỉ dùng khi khách chuyển sai nội dung. Tiền sẽ được cộng vào ví tài khoản này.", ok: "Gán & cộng tiền", fields: [{ id: "email", label: "Email tài khoản", max: 120 }] }); if (!v) return;
+      const v = await popForm({ title: "Gán giao dịch cho tài khoản", headIcon: "users", icon: "info", tone: "warn", message: "Chỉ dùng khi khách chuyển sai nội dung. Tiền sẽ được cộng vào ví tài khoản này.", ok: "Gán & cộng tiền", fields: [{ id: "email", label: "Email tài khoản", type: "email", max: 120, required: true }], check: x => (!String(x.email).trim() ? "Hãy nhập email tài khoản." : "") }); if (!v) return;
       const u = (S.store.users || []).find(x => String(x.email || "").toLowerCase() === String(v.email).trim().toLowerCase()); if (!u) { toast("Không tìm thấy tài khoản có email này.", "err"); return; }
       devAssign(key, u.uid).then(() => toast("Đã cộng tiền cho " + u.email + ".")).catch(x => toast(x.message, "err")); });
   };

@@ -178,3 +178,31 @@ Nếu đổi tên miền: đặt biến môi trường `SITE_URL` trên Vercel (
 - Webhook đã test với dữ liệu giả theo định dạng SePay/Casso, **chưa test với tài khoản SePay/Casso/Techcombank thật** (cần khóa của bạn). Hãy chuyển thử số nhỏ sau khi cấu hình.
 - Mã QR đã kiểm tra bằng bộ giải mã (khung khớp đúng mã QR tĩnh của bạn), nhưng chưa quét bằng app ngân hàng thật.
 - Không ai bảo đảm thứ hạng Google; trang sản phẩm đã có tiêu đề/mô tả/schema Product riêng, có trong sitemap.
+
+## Đợt Shop 2 — liên kết ngân hàng, hóa đơn 10 phút, cửa sổ nhỏ, giao diện mới
+
+### Bạn cần làm
+1. **Dán lại `database.rules.json`** (Firebase → Realtime Database → Rules → Publish). Có thêm `nox_shopcfg` (chỉ dev đọc, chỉ máy chủ ghi), dev đọc được nhật ký ví/đơn để quản trị, và cuộc trò chuyện mới chỉ còn kiểu "chat".
+2. **Vercel → Redeploy** (biến môi trường như đợt trước; vẫn cần `SEPAY_API_KEY` hoặc Casso). Không cần biến mới.
+3. **Liên kết ngân hàng**: đăng nhập dev → `/dev/shop` → tab **Nạp tiền & ví** → thẻ **Ngân hàng nhận tiền** → **Liên kết** (chọn ngân hàng, nhập số tài khoản, tên chủ tài khoản VIẾT HOA không dấu). Từ lúc đó mọi mã QR nạp tiền dùng tài khoản này. **Tạo mã QR** = tạo QR bất kỳ (nhập số tiền + nội dung) để tự thu tiền. **Gỡ liên kết** = quay về tài khoản mặc định/biến môi trường.
+   - Nhớ: tài khoản liên kết trên web phải **trùng tài khoản đã gắn với SePay/Casso**, nếu không webhook sẽ không khớp.
+
+### Thay đổi chính
+- **Hóa đơn nạp tiền có hạn 10 phút** (đồng hồ đếm ngược). Quá hạn mà chưa được duyệt ⇒ **Thất bại**. Tạo hóa đơn mới sẽ hủy hóa đơn chờ cũ. Danh sách hóa đơn ở trang **Ví**, bấm vào để mở lại.
+  - Thiết kế "không mất tiền khách": nếu khách vẫn chuyển sau khi hóa đơn thất bại, tiền **vẫn được cộng** và hóa đơn chuyển thành hoàn tất (đánh dấu "đến muộn").
+- **Cửa sổ nhỏ (pop-up) riêng** thay cho các hộp thoại xấu: xác nhận, hoàn tiền, điều chỉnh ví, xóa, liên kết ngân hàng, hóa đơn, chi tiết đơn…
+- **Hộp thư** là cửa sổ nhỏ bấm từ biểu tượng thư (2 tab: Tin nhắn / Hoạt động). Trang `/inbox` đầy đủ có lọc (chưa đọc, cũ…); dev có thêm khối "Việc cần xử lý".
+- **Đã xóa**: Báo cáo, Hỗ trợ, FAQ, trang Nhắn tin với dev. Chat chỉ còn là cửa sổ nhỏ góc dưới. Các đường dẫn cũ (`/help/*`) tự mở khung chat. Cuộc trò chuyện cũ (hỗ trợ/báo cáo) vẫn xem được ở Hộp thư → lọc "Cũ".
+- **Mỗi món đã mua**: Xem trực tiếp, Tải file về, Chia sẻ, mã đơn (`#XXXXXXXX`), thời gian mua, số tiền, trạng thái "Thành công". Mở ở `/orders` hoặc bấm từ lịch sử ví.
+- **Số dư hiện trên thanh đầu cả trên điện thoại** (giỏ hàng chuyển xuống thanh dưới).
+- **Chủ đề màu** (Cài đặt): Midnight (mặc định), Aurora, Ocean, Emerald, Sunset, Rose, Cổ điển (đen–trắng–xám cũ).
+- **Cookie**: tùy chọn giao diện/giỏ hàng/ngôn ngữ lưu bằng cookie (có dự phòng localStorage); có thanh xin đồng ý và mục quản lý/xóa cookie trong Cài đặt.
+- **Kính lỏng**: viền kính, ánh sáng; menu và popup được làm đục hơn để chữ phía sau không đè lên. (Đã sửa lỗi CSS làm nền menu bị trong suốt.)
+- **Sửa lỗi**: trang Cài đặt từng bị lỗi script; mở thẳng `/inbox?tab=activity` không hiện nội dung.
+
+### Về đoạn Python Firebase Admin bạn gửi
+Website chạy Node trên Vercel (đã dùng `FIREBASE_SERVICE_ACCOUNT` + `firebase-admin`), nên đoạn Python không được web dùng. Mình thêm `tools/admin.py` để bạn tự chạy trên máy: xem ví/đơn/hóa đơn, xem ngân hàng đã liên kết, cộng/trừ ví. **Chưa chạy thử với dữ liệu thật** — giữ file khóa `serviceAccountKey.json` bí mật.
+
+### Chưa kiểm chứng được (nói thật)
+- Chưa test với SePay/Casso/ngân hàng thật; chưa quét mã QR bằng app ngân hàng thật; chưa thử trên thiết bị thật (chỉ trình duyệt giả lập kích thước điện thoại).
+- Không ai bảo đảm thứ hạng Google.

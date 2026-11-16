@@ -5,7 +5,8 @@
    Dữ liệu (trong nox_*):
      wallet/<uid>     { code, balance, applied{key:ts}, createdAt }
      topcodes/<MÃ>    uid                          (tra ngược mã chuyển khoản → tài khoản)
-     topups/<uid>/<id>{ amount, status: pending|done|expired, ts }
+     topups/<uid>/<id>{ amount, code, status: pending|done|failed|cancelled, ts, expiresAt(+10 phút), late? }  (quá 10 phút chưa thấy tiền → failed)
+     shopcfg/bank     { bin, account, name, bank, short, by, ts }  (ngân hàng nhận tiền do DEV liên kết; thiếu thì dùng biến môi trường / mặc định)
      txs/<uid>/<id>   { type: topup|purchase|refund|adjust, amount(+/-), balance, note, ref, ts }
      orders/<uid>/<id>{ status: pending|paid|refunded, items[], total, delivery[], ts }
      bankhook/<khoá>  { status: processing|credited|unmatched|ignored, amount, content, uid, ts }
@@ -15,10 +16,12 @@ const crypto = require("crypto");
 const { vietqr } = require("./vietqr");
 
 const MIN = 60 * 1000, HOUR = 60 * MIN, DAY = 24 * HOUR;
+const TOPUP_TTL = 10 * MIN;
 const MIN_TOPUP = 10000, MAX_TOPUP = 50000000, MAX_ORDER = 1000000000;
 const ID_RE = /^[A-Za-z0-9_-]{1,60}$/;
 const CODE_PREFIX = "SKN";
-const BANK_DEFAULT = { bin: "970407", account: "19077584659010", name: "TANG HOANG MINH", bank: "Techcombank" };
+const BANK_DEFAULT = { bin: "970407", account: "19077584659010", name: "TANG HOANG MINH", bank: "Techcombank", short: "TCB" };
+const cleanTxt = (v, max) => String(v == null ? "" : v).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, c => (c === "đ" ? "d" : "D")).replace(/[^A-Za-z0-9 ]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
 
 /* Tệp đính kèm chat: đuôi tệp → loại. Mọi thứ khác (đặc biệt tệp chạy được như .exe/.bat) đều bị từ chối. */
 const EXT = {
@@ -45,7 +48,13 @@ function sniff(buf, ext) { /* chữ ký đầu tệp phải khớp đuôi tệp 
 function createShop(deps) {
   const { db, who, limit, devOnly, ok, fail } = deps;
   const env = deps.env || {}, now = deps.now || (() => Date.now()), rnd = deps.rnd || ((a, b) => crypto.randomInt(a, b));
-  const bank = { bin: String(env.BANK_BIN || BANK_DEFAULT.bin), account: String(env.BANK_ACCOUNT || BANK_DEFAULT.account), name: String(env.BANK_ACCOUNT_NAME || BANK_DEFAULT.name), bank: String(env.BANK_NAME || BANK_DEFAULT.bank) };
+  const envBank = { bin: String(env.BANK_BIN || BANK_DEFAULT.bin), account: String(env.BANK_ACCOUNT || BANK_DEFAULT.account), name: String(env.BANK_ACCOUNT_NAME || BANK_DEFAULT.name), bank: String(env.BANK_NAME || BANK_DEFAULT.bank), short: String(env.BANK_SHORT || BANK_DEFAULT.short) };
+  /* Ngân hàng nhận tiền: DEV liên kết trong trang quản trị (lưu nox_shopcfg/bank); chưa liên kết thì dùng biến môi trường / mặc định */
+  async function getBank() {
+    let c = null; try { c = await db.get("nox_shopcfg/bank"); } catch (_) {}
+    if (c && typeof c === "object" && /^\d{6}$/.test(String(c.bin)) && /^\d{6,19}$/.test(String(c.account)) && c.name) return Object.assign({}, envBank, { bin: String(c.bin), account: String(c.account), name: String(c.name), bank: String(c.bank || envBank.bank), short: String(c.short || cleanTxt(c.bank, 10) || "BANK"), linked: true, by: c.by || "", linkedAt: c.ts || 0 });
+    return Object.assign({ linked: false }, envBank);
+  }
   const newId = (p) => p + now().toString(36) + crypto.randomBytes(5).toString("hex");
   const int = (v) => (Number.isFinite(Number(v)) && Math.floor(Number(v)) === Number(v) ? Number(v) : NaN);
 
@@ -84,7 +93,7 @@ function createShop(deps) {
     }
     throw new Error("no code");
   }
-  const bankInfo = () => ({ bin: bank.bin, account: bank.account, name: bank.name, bank: bank.bank });
+  const bankInfo = (b) => ({ bin: b.bin, account: b.account, name: b.name, bank: b.bank });
   const verifiedUser = async (token) => {
     const r = await who(token, { needVerifiedSession: true }); if (r.err) return r;
     if (!r.u.verified) return { err: fail(403, "unverified", "Verify your email first.") };
@@ -93,12 +102,18 @@ function createShop(deps) {
     return r;
   };
 
+  async function sweepTopups(uid) {
+    const t = now(), all = (await db.get("nox_topups/" + uid)) || {}; let n = 0;
+    for (const k of Object.keys(all)) { const o = all[k] || {}; if (o.status === "pending" && t > (o.expiresAt || (o.ts || 0) + TOPUP_TTL)) { await db.update("nox_topups/" + uid + "/" + k, { status: "failed", failedAt: t }); n++; } }
+    return n;
+  }
+
   const A = {
     /* Số dư + mã nạp + thông tin ngân hàng (tạo ví lần đầu) */
     async "wallet-info"({ token }) {
       const { u, err } = await verifiedUser(token); if (err) return err;
-      const w = await ensureWallet(u.uid);
-      return ok({ code: w.code, balance: Math.floor(w.balance || 0), bank: bankInfo(), min: MIN_TOPUP, max: MAX_TOPUP });
+      const w = await ensureWallet(u.uid); await sweepTopups(u.uid);
+      return ok({ code: w.code, balance: Math.floor(w.balance || 0), bank: bankInfo(await getBank()), min: MIN_TOPUP, max: MAX_TOPUP, ttl: TOPUP_TTL });
     },
     /* Tạo yêu cầu nạp số tiền cố định → trả chuỗi VietQR kèm số tiền + nội dung (= mã của tài khoản) */
     async "topup-create"({ token, body }) {
@@ -106,11 +121,21 @@ function createShop(deps) {
       const amount = int(body.amount);
       if (!(amount >= MIN_TOPUP && amount <= MAX_TOPUP) || amount % 1000 !== 0) return fail(400, "bad_amount", "Choose an amount between 10,000 and 50,000,000 VND, in steps of 1,000.");
       if (!(await limit("topup:" + u.uid, 20, HOUR))) return fail(429, "rate_limited", "Too many requests. Try again in a while.");
-      const w = await ensureWallet(u.uid), id = newId("t"), t = now();
+      const w = await ensureWallet(u.uid), id = newId("t"), t = now(), bk = await getBank();
       const old = (await db.get("nox_topups/" + u.uid)) || {};
-      for (const k of Object.keys(old)) if (t - (old[k].ts || 0) > 3 * DAY) await db.remove("nox_topups/" + u.uid + "/" + k);
-      await db.set("nox_topups/" + u.uid + "/" + id, { amount, status: "pending", ts: t });
-      return ok({ id, amount, code: w.code, bank: bankInfo(), qr: vietqr({ bin: bank.bin, account: bank.account, amount, content: w.code, merchant: "TCB" }), expiresAt: t + DAY });
+      for (const k of Object.keys(old)) {
+        const o = old[k] || {};
+        if (t - (o.ts || 0) > 3 * DAY) await db.remove("nox_topups/" + u.uid + "/" + k);
+        else if (o.status === "pending") await db.update("nox_topups/" + u.uid + "/" + k, t > (o.expiresAt || (o.ts || 0) + TOPUP_TTL) ? { status: "failed", failedAt: t } : { status: "cancelled", cancelledAt: t });
+      }
+      const qr = vietqr({ bin: bk.bin, account: bk.account, amount, content: w.code, merchant: bk.short });
+      await db.set("nox_topups/" + u.uid + "/" + id, { amount, code: w.code, status: "pending", ts: t, expiresAt: t + TOPUP_TTL, qr, bank: bankInfo(bk) });
+      return ok({ id, amount, code: w.code, bank: bankInfo(bk), qr, ts: t, expiresAt: t + TOPUP_TTL });
+    },
+    /* Chốt các hóa đơn nạp quá 10 phút mà chưa thấy tiền → "Thất bại" (trình duyệt cũng tự hiển thị đúng, hàm này để lưu lại) */
+    async "topup-sweep"({ token }) {
+      const { u, err } = await verifiedUser(token); if (err) return err;
+      return ok({ failed: await sweepTopups(u.uid) });
     },
 
     /* Mua hàng: trừ ví + giữ hàng + giao hàng trong một luồng; lỗi giữa chừng thì hoàn lại hàng và xoá đơn */
@@ -185,7 +210,30 @@ function createShop(deps) {
     /* Trạng thái cấu hình nhận tiền tự động (chỉ báo "đã đặt khoá hay chưa", KHÔNG lộ khoá) */
     async "shop-status"({ token }) {
       const { err } = await devOnly(token); if (err) return err;
-      return ok({ bank: bankInfo(), hook: { sepayKey: !!env.SEPAY_API_KEY, sepaySecret: !!env.SEPAY_SECRET, casso: !!env.CASSO_SECURE_TOKEN }, adminDb: true });
+      const bk = await getBank();
+      return ok({ bank: Object.assign(bankInfo(bk), { short: bk.short }), linked: !!bk.linked, linkedBy: bk.by || "", linkedAt: bk.linkedAt || 0, hook: { sepayKey: !!env.SEPAY_API_KEY, sepaySecret: !!env.SEPAY_SECRET, casso: !!env.CASSO_SECURE_TOKEN }, adminDb: true });
+    },
+    /* DEV liên kết ngân hàng nhận tiền: mã QR nạp tiền của mọi người dùng sẽ dùng tài khoản này */
+    async "bank-set"({ token, body }) {
+      const { u, err } = await devOnly(token); if (err) return err;
+      if (body.reset === true) { await db.remove("nox_shopcfg/bank"); return ok({ bank: bankInfo(await getBank()), linked: false }); }
+      const bin = String(body.bin || "").replace(/\s/g, ""), account = String(body.account || "").replace(/[\s.-]/g, ""), name = cleanTxt(body.name, 40).toUpperCase(), bankName = cleanTxt(body.bank, 40), short = cleanTxt(body.short || body.bank, 12).replace(/ /g, "") || "BANK";
+      if (!/^\d{6}$/.test(bin)) return fail(400, "bad_bank", "The bank code (BIN) must be 6 digits.");
+      if (!/^\d{6,19}$/.test(account)) return fail(400, "bad_bank", "The account number must be 6 to 19 digits.");
+      if (name.length < 3) return fail(400, "bad_bank", "Enter the account holder name (no accents).");
+      if (!bankName) return fail(400, "bad_bank", "Enter the bank name.");
+      const rec = { bin, account, name, bank: bankName, short, by: u.email.slice(0, 120), ts: now() };
+      await db.set("nox_shopcfg/bank", rec);
+      const bk = await getBank();
+      return ok({ bank: Object.assign(bankInfo(bk), { short: bk.short }), linked: true, qr: vietqr({ bin: bk.bin, account: bk.account, content: "TEST", merchant: bk.short }) });
+    },
+    /* DEV tạo mã QR bất kỳ bằng ngân hàng đã liên kết (số tiền tuỳ chọn + nội dung chuyển khoản) */
+    async "bank-qr"({ token, body }) {
+      const { err } = await devOnly(token); if (err) return err;
+      const amount = body.amount == null || body.amount === "" ? 0 : int(body.amount);
+      if (!(amount >= 0 && amount <= MAX_TOPUP * 20)) return fail(400, "bad_amount", "Enter a whole amount (or leave it empty).");
+      const content = cleanTxt(body.content, 25), bk = await getBank();
+      return ok({ qr: vietqr({ bin: bk.bin, account: bk.account, amount, content, merchant: bk.short }), amount, content, bank: bankInfo(bk) });
     },
     async "wallet-adjust"({ token, body }) { /* cộng/trừ tay (bù tiền, xử lý giao dịch khách ghi sai nội dung) */
       const { u, err } = await devOnly(token); if (err) return err;
@@ -208,6 +256,13 @@ function createShop(deps) {
       if (r.ok) await logTx(uid, "h_" + key, { type: "topup", amount: h.amount, balance: r.balance, note: "Bank transfer (assigned by admin)", ref: key, by: u.email.slice(0, 120) });
       await db.update("nox_bankhook/" + key, { status: "credited", uid, assignedBy: u.email.slice(0, 120), ts: now() });
       return ok({ balance: r.balance });
+    },
+    async "order-deliver"({ token, body }) { /* đánh dấu đơn giao tay đã giao xong */
+      const { u, err } = await devOnly(token); if (err) return err;
+      const uid = String(body.uid || ""), oid = String(body.oid || ""); if (!ID_RE.test(uid) || !ID_RE.test(oid)) return fail(400, "bad_request", "Missing data.");
+      const o = await db.get("nox_orders/" + uid + "/" + oid); if (!o || o.status !== "paid" || !o.manual) return fail(404, "not_found", "That order doesn't need manual delivery.");
+      await db.update("nox_orders/" + uid + "/" + oid, { delivered: true, deliveredAt: now(), deliveredBy: u.email.slice(0, 120) });
+      return ok({});
     },
     async "order-refund"({ token, body }) {
       const { u, err } = await devOnly(token); if (err) return err;
@@ -277,7 +332,7 @@ function createShop(deps) {
   }
   async function processOne(x) {
     if (x.dir !== "in" || !(x.amount > 0)) return "ignored";
-    if (x.account && x.account !== bank.account) return "ignored";
+    const bk = await getBank(); if (x.account && x.account !== bk.account) return "ignored";
     const t = now(); let first = false;
     await db.tx("nox_bankhook/" + x.key, (cur) => { first = false; if (cur === null) { first = true; return { status: "processing", amount: x.amount, content: x.content, ts: t }; } if (cur.status === "processing" && t - (cur.ts || 0) > 2 * MIN) { first = true; return Object.assign({}, cur, { ts: t }); } return cur; });
     if (!first) return "duplicate";
@@ -286,8 +341,11 @@ function createShop(deps) {
     const r = await walletApply(uid, x.amount, { key: "h_" + x.key });
     if (r.ok) {
       await logTx(uid, "h_" + x.key, { type: "topup", amount: x.amount, balance: r.balance, note: "Bank transfer", ref: x.key });
-      const ps = (await db.get("nox_topups/" + uid)) || {}; const hit = Object.keys(ps).filter(k => ps[k].status === "pending" && ps[k].amount === x.amount).sort((a, b) => ps[a].ts - ps[b].ts)[0];
-      if (hit) await db.update("nox_topups/" + uid + "/" + hit, { status: "done", doneAt: t });
+      /* khớp hóa đơn nạp: ưu tiên hóa đơn còn hạn; tiền đến muộn (hóa đơn đã Thất bại/Đã hủy) vẫn được cộng và đánh dấu "đến muộn" */
+      const ps = (await db.get("nox_topups/" + uid)) || {}, ks = Object.keys(ps).filter(k => ps[k].amount === x.amount).sort((a, b) => ps[b].ts - ps[a].ts);
+      const live = ks.filter(k => ps[k].status === "pending" && t <= (ps[k].expiresAt || (ps[k].ts || 0) + TOPUP_TTL)), lateK = ks.filter(k => ps[k].status === "failed" || ps[k].status === "cancelled" || ps[k].status === "pending");
+      if (live.length) await db.update("nox_topups/" + uid + "/" + live[live.length - 1], { status: "done", doneAt: t });
+      else if (lateK.length) await db.update("nox_topups/" + uid + "/" + lateK[0], { status: "done", doneAt: t, late: true });
     } else if (!r.dup) throw new Error("credit failed " + (r.reason || ""));
     await db.update("nox_bankhook/" + x.key, { status: "credited", uid, code });
     return "credited";
@@ -302,6 +360,6 @@ function createShop(deps) {
     for (const x of list) res.push(await processOne(x));
     return { status: 200, body: { success: true, results: res } };
   }
-  return { actions: A, webhook, bank: bankInfo, codeFrom, ensureWallet };
+  return { actions: A, webhook, bank: async () => bankInfo(await getBank()), getBank, codeFrom, ensureWallet, sweepTopups };
 }
-module.exports = { createShop, MIN_TOPUP, MAX_TOPUP, EXT, sniff };
+module.exports = { createShop, MIN_TOPUP, MAX_TOPUP, TOPUP_TTL, EXT, sniff };

@@ -32,9 +32,9 @@ export function registerRoutes() {
   define("/notifications", { load: L("redirect"), guard: "public", to: "/", open: "updates", title: "Thông báo", noindex: true, needs: ["notice", "updates"] });
   [["skibidiscript", "/skibidiscript"], ["about", "/about"], ["guide", "/guide"], ["apk-safety", "/apk-safety"], ["security", "/security"], ["terms", "/terms"], ["privacy", "/privacy"]].forEach(([k, p]) => define(p, { load: L("info"), guard: "public", info: k, needs: [] }));
   define("/favorites", { load: L("favorites"), guard: "public", title: "Yêu thích", noindex: true, needs: ALL });
-  define("/help", { load: L("help"), guard: "public", title: "Câu hỏi thường gặp", desc: "Câu hỏi thường gặp về tài khoản, bảo mật, nội dung và cài đặt của SKIBIDI SCRIPT WEB.", needs: [] });
-  define("/help/support", { load: L("help/support"), guard: "real", title: "Hỗ trợ", needs: [] });
-  define("/help/report", { load: L("help/report"), guard: "real", title: "Báo cáo", needs: ["cats", "data:*"] });
+  define("/help", { load: L("redirect"), guard: "public", to: "/", title: "Trợ giúp", noindex: true, needs: [] });
+  define("/help/support", { load: L("redirect"), guard: "real", to: "/", open: "chat", title: "Nhắn tin với dev", needs: [] });
+  define("/help/report", { load: L("redirect"), guard: "real", to: "/", open: "chat", title: "Nhắn tin với dev", needs: [] });
   define("/help/chat", { load: L("redirect"), guard: "real", to: "/", open: "chat", title: "Nhắn tin với dev", needs: [] });
   define("/help/messages", { load: L("redirect"), guard: "real", to: "/inbox", title: "Hộp thư", needs: [] });
   define("/inbox", { load: L("inbox"), guard: "real", title: "Hộp thư", noindex: true, needs: () => (session.isDev ? ["users"] : []) });

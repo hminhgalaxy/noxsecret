@@ -1,0 +1,45 @@
+/* ═══ KÍNH LỎNG (Liquid Glass) — chỉ khi bật "Kính mờ" ═══
+   • Khung thường: nền trong, VIỀN KÍNH sáng ở góc trên-trái và góc dưới-phải (đường gradient), vệt phản chiếu bên trong.
+   • Menu / popup / thanh trên-dưới: kính MỜ ĐỤC (lớp nền ~88%) + làm mờ mạnh để chữ phía sau không đè lên chữ của menu. */
+:root{--lq-rim-a:rgba(255,255,255,.78);--lq-rim-b:rgba(255,255,255,.10);--lq-rim-c:rgba(255,255,255,.04);--lq-rim-d:rgba(255,255,255,.46);--lq-hi:rgba(255,255,255,.34);--lq-lo:rgba(255,255,255,.07);--lq-drop:rgba(0,0,0,.5);--lq-sheen:rgba(255,255,255,.1);--lq-menu:88%}
+:root[data-theme="light"]{--lq-rim-a:rgba(255,255,255,.98);--lq-rim-b:rgba(255,255,255,.35);--lq-rim-c:rgba(0,0,0,.05);--lq-rim-d:rgba(0,0,0,.2);--lq-hi:rgba(255,255,255,.95);--lq-lo:rgba(0,0,0,.05);--lq-drop:rgba(30,40,80,.24);--lq-sheen:rgba(255,255,255,.55);--lq-menu:90%}
+
+/* Khung thường: viền kính gradient + phản chiếu */
+:root[data-glass="on"] :is(.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.statebox,.pcard,.od,.act-row,.inv,.dv-card,.skin,.tx,.oi,.todo,.mbx){
+  border:1px solid transparent;
+  background:
+    linear-gradient(150deg,var(--lq-sheen),transparent 38%,transparent 70%,color-mix(in srgb,var(--lq-sheen) 45%,transparent)) padding-box,
+    linear-gradient(var(--surface),var(--surface)) padding-box,
+    linear-gradient(135deg,var(--lq-rim-a),var(--lq-rim-b) 28%,var(--lq-rim-c) 58%,var(--lq-rim-d)) border-box;
+  box-shadow:inset 0 1.5px 0 var(--lq-hi),inset 0 -1px 0 var(--lq-lo),inset 1px 0 0 var(--lq-lo),0 14px 34px -18px var(--lq-drop);
+  -webkit-backdrop-filter:blur(var(--gl-blur,16px)) saturate(1.5);backdrop-filter:blur(var(--gl-blur,16px)) saturate(1.5)}
+
+/* Nút / chip / biểu tượng kính */
+:root[data-glass="on"] :is(.btn.soft,.btn.ghost,.chip,.bell,.nav-btn,#btnMenu,.walletbtn,.me,.seg button.on){
+  border:1px solid transparent;
+  background:linear-gradient(var(--surface-2),var(--surface-2)) padding-box,linear-gradient(135deg,var(--lq-rim-a),var(--lq-rim-b) 35%,var(--lq-rim-c) 65%,var(--lq-rim-d)) border-box;
+  box-shadow:inset 0 1px 0 var(--lq-hi),0 8px 18px -12px var(--lq-drop)}
+:root[data-glass="on"] :is(.btn.soft,.btn.ghost):hover{filter:brightness(1.08)}
+
+/* Menu, popup, bảng ghi chú: kính mờ đục để chữ phía sau không lộ ra */
+:root[data-glass="on"] :is(#side,.pop-root>.pop,.cf,.pop-menu,#cw .cw-panel,.ck,.toast,.att-lb>img,.mp,.pal,.palette,.cmdk){
+  background:
+    linear-gradient(150deg,var(--lq-sheen),transparent 45%),
+    color-mix(in srgb,var(--bg) var(--lq-menu),transparent)!important;
+  -webkit-backdrop-filter:blur(30px) saturate(1.7)!important;backdrop-filter:blur(30px) saturate(1.7)!important;
+  border:1px solid var(--lq-rim-d);
+  box-shadow:inset 0 1.5px 0 var(--lq-hi),inset 0 -1px 0 var(--lq-lo),0 28px 60px -22px var(--lq-drop)!important}
+:root[data-glass="on"] #side{border-right:1px solid var(--lq-rim-d)}
+:root[data-glass="on"] .pop-head{background:transparent!important}
+/* Thanh trên / thanh dưới: đủ đục để cuộn qua không bị chồng chữ */
+:root[data-glass="on"] :is(#hdr,#tabbar){
+  background:color-mix(in srgb,var(--bg) 74%,transparent)!important;
+  -webkit-backdrop-filter:blur(26px) saturate(1.6);backdrop-filter:blur(26px) saturate(1.6);
+  box-shadow:inset 0 -1px 0 var(--lq-lo),inset 0 1px 0 var(--lq-hi)}
+:root[data-glass="on"] #tabbar{border-top:1px solid var(--lq-rim-d)}
+:root[data-glass="on"] #hdr{border-bottom:1px solid var(--lq-rim-d)}
+/* Mục trong menu: hover dạng viên kính */
+:root[data-glass="on"] :is(#side a,#side button,.pop-menu button,.pop-menu a):hover{background:var(--lq-sheen)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root[data-glass="on"] :is(#side,.pop-root>.pop,.cf,.pop-menu,#cw .cw-panel,#hdr,#tabbar){background:var(--bg)!important}
+}
