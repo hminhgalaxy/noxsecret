@@ -206,3 +206,28 @@ Website chạy Node trên Vercel (đã dùng `FIREBASE_SERVICE_ACCOUNT` + `fireb
 ### Chưa kiểm chứng được (nói thật)
 - Chưa test với SePay/Casso/ngân hàng thật; chưa quét mã QR bằng app ngân hàng thật; chưa thử trên thiết bị thật (chỉ trình duyệt giả lập kích thước điện thoại).
 - Không ai bảo đảm thứ hạng Google.
+
+## Đợt Shop 3 — nhận Firebase Admin suôn sẻ, SEO cửa hàng, Scott người que
+
+### Bạn cần làm (theo thứ tự)
+1. **Dán lại `database.rules.json`** vào Firebase → Realtime Database → Rules → Publish (có thêm nút `nox_shopseo`). Quên bước này thì chỉ mục SEO shop không đọc được.
+2. Giải nén zip, đẩy lên GitHub, để Vercel deploy.
+3. Đăng nhập tài khoản dev → **Dev Panel → "Kết nối máy chủ"** (địa chỉ `/dev/connect`):
+   - Dán nguyên file khóa Firebase Admin (kể cả khi bị xuống dòng sai, thiếu ngoặc, dính `*****`…) — trang tự sửa những lỗi thường gặp và báo rõ lỗi nào không sửa được.
+   - Bấm sao chép giá trị → vào **Vercel → Settings → Environment Variables → tên `FIREBASE_SERVICE_ACCOUNT`** → dán → **Redeploy**.
+   - Quay lại trang, bấm "Kiểm tra máy chủ": thấy ✓ Firebase Admin là xong. Khóa **không bao giờ được lưu** ở trang web/cookie/cơ sở dữ liệu (máy chủ cần chính khóa này để vào được cơ sở dữ liệu nên không thể cất trong đó).
+   - Khóa bạn đã dán công khai trong chat trước đây coi như đã lộ: nên tạo khóa mới (Firebase → Project settings → Service accounts → Generate new private key) rồi xóa khóa cũ.
+4. Vào **Dev → Cửa hàng** một lần: web tự dựng chỉ mục SEO (`nox_shopseo`). Mỗi lần thêm/sửa/ẩn/xóa sản phẩm cũng tự cập nhật. Bán hàng xong số đã bán/tồn kho cũng tự cập nhật.
+5. Google Search Console: gửi lại `https://skibidiscript.vercel.app/sitemap.xml`, rồi "Xác thực bản sửa lỗi" cho báo cáo *"Bị loại trừ bởi thẻ noindex"*.
+
+### Mới
+- **Trang Kết nối máy chủ** cho dev (xem trên) + banner nhắc ở Dev Panel khi máy chủ chưa nhận Firebase Admin. Máy chủ giờ đọc được khóa dù dán sai kiểu (JSON, base64, có dấu nháy, xuống dòng thật…).
+- **SEO cửa hàng**: trang chủ shop có danh sách sản phẩm + mục lục cho Google đọc ngay; **mỗi mục lục là một trang riêng** `/shop/c/<mục>`; mỗi sản phẩm có ảnh thật `/img/shop/<id>.jpg` (dùng cho Google Hình ảnh, og:image, dữ liệu Product); sơ đồ trang có sản phẩm + mục lục + ảnh; `/shop` chuyển hướng vĩnh viễn về `/`; khi Firebase lỗi tạm thời trang trả 503 để Google thử lại, không bị gắn noindex nhầm.
+- **Scott** — người que ở góc dưới bên trái: chào mỗi lần vào web (tiếng Anh + tiếng Việt), trả lời ~50 chủ đề đơn giản (nạp tiền, đơn hàng, tài khoản, an toàn APK, cài đặt…), tính nhẩm, nói giờ, dịch vài chục từ Anh ↔ Việt, kể chuyện cười, thỉnh thoảng nhắc mẹo kèm từ vựng. Có hiệu ứng người que vẫy tay, suy nghĩ (đám mây + bóng đèn), nói, nhảy mừng. Bật/tắt ở Cài đặt.
+- **Gửi dev qua Scott**: nói "gửi dev" (hoặc "gửi dev: mô tả lỗi"). Scott hiện từng bước xem xét (đọc lỗi gần đây, kiểm tra kết nối/máy chủ) rồi gửi một tin vào cuộc trò chuyện với dev, kèm trang, lỗi, môi trường, trạng thái máy chủ. Khi trang vừa gặp lỗi, Scott **đề nghị** xem xét và gửi — chỉ gửi khi bạn bấm đồng ý. Cần tài khoản thật; chống gửi dồn dập (30 giây/lần, tối đa 5 tin mỗi lần mở web).
+
+### Chưa kiểm chứng được (nói thật)
+- Chưa chạy với Vercel/Firebase/SePay/Casso/ngân hàng thật — các phần đó kiểm thử bằng bản giả lập.
+- Không ai đảm bảo được thứ hạng Google; Google cần vài ngày đến vài tuần để thu thập lại sau khi gửi sitemap.
+- Scott trả lời theo kho câu hỏi có sẵn (khớp từ khóa), **không phải AI**: câu phức tạp sẽ được đề nghị gửi cho dev.
+- Hiệu ứng người que đã xem trên Chromium (máy tính + điện thoại giả lập); chưa thử Safari/Firefox thật.

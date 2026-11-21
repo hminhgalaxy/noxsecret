@@ -2,6 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": false,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/shop",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",
@@ -12,7 +19,11 @@
       "destination": "/api/feed"
     },
     {
-      "source": "/((?!assets/|api/|index\\.html|robots\\.txt|opensearch\\.xml|manifest\\.webmanifest|favicon|\\.well-known/).*)",
+      "source": "/img/shop/([A-Za-z0-9_-]+)\\.jpg",
+      "destination": "/api/img?id=$1"
+    },
+    {
+      "source": "/((?!assets/|api/|img/|index\\.html|robots\\.txt|opensearch\\.xml|manifest\\.webmanifest|favicon|\\.well-known/).*)",
       "destination": "/api/page?p=/$1"
     }
   ],

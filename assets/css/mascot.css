@@ -1,0 +1,103 @@
+/* Scott — người que trợ giúp (góc dưới bên trái, không đè lên thanh dưới, cookie, chat nổi) */
+#sc{position:fixed;left:10px;bottom:calc(var(--bar-h) + var(--safe-b) + 8px);z-index:235;pointer-events:none;--sc-ink:var(--text);--sc-acc:var(--acc)}
+#sc[hidden]{display:none}
+#sc>*{pointer-events:auto}
+@media(min-width:1024px){#sc{left:calc(var(--side-w) + 18px);bottom:14px;transition:left .5s var(--ez)}html.side-off #sc{left:18px}}
+@media(max-width:860px){body:has(.ck) #sc{display:none}}
+@media(max-width:640px){body.cw-open #sc{display:none}}
+.sc-fig{position:relative;display:block;width:58px;height:74px;padding:0;border:0;background:none;cursor:pointer;color:var(--sc-ink);-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+@media(min-width:1024px){.sc-fig{width:68px;height:86px}}
+.sc-fig:focus-visible{outline:2px solid var(--sc-acc);outline-offset:3px;border-radius:14px}
+.sc-svg{overflow:visible}
+.sc-svg path,.sc-svg ellipse.sc-m{fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.sc-svg .sc-face{fill:var(--bg);stroke:currentColor;stroke-width:4}
+.sc-svg .sc-m{stroke-width:2.6}
+.sc-svg .sc-eye{fill:currentColor}
+.sc-svg .sc-blush{fill:var(--sc-acc);opacity:.45}
+.sc-svg .sc-shadow{fill:rgba(0,0,0,.28)}
+/* tư thế theo trạng thái */
+.sc-armUp,.sc-armWave,.sc-armChin,.sc-mFlat,.sc-mOpen{display:none}
+[data-st=wave] .sc-armDown,[data-st=think] .sc-armDown,[data-st=happy] .sc-armDown{display:none}
+[data-st=wave] .sc-armWave{display:inline}
+[data-st=think] .sc-armChin{display:inline}
+[data-st=happy] .sc-armWave,[data-st=happy] .sc-armUp{display:inline}
+[data-st=happy] .sc-armL{display:none}
+[data-st=think] .sc-mSmile,[data-st=talk] .sc-mSmile{display:none}
+[data-st=think] .sc-mFlat{display:inline}
+[data-st=talk] .sc-mOpen{display:inline;transform-box:fill-box;transform-origin:center}
+[data-st=happy] .sc-mSmile{stroke-width:3.2}
+/* chuyển động */
+.sc-all{transform-box:view-box;transform-origin:48px 110px;animation:scBreath 3.2s ease-in-out infinite}
+.sc-armWave{transform-box:view-box;transform-origin:48px 50px;animation:scWave .55s ease-in-out infinite alternate}
+.sc-eye{transform-box:fill-box;transform-origin:center;animation:scBlink 4.6s infinite}
+[data-st=talk] .sc-mOpen{animation:scTalk .28s ease-in-out infinite alternate}
+[data-st=wave] .sc-all{animation:scHop .55s ease-in-out 3}
+[data-st=happy] .sc-all{animation:scJump .5s ease-out 4}
+[data-st=think] .sc-head{transform-box:view-box;transform-origin:48px 41px;animation:scTilt 2.2s ease-in-out infinite}
+[data-st=think] .sc-eyes{transform:translate(1.4px,-2px)}
+[data-st=think] .sc-legR{transform-box:view-box;transform-origin:48px 78px;animation:scTap .5s ease-in-out infinite alternate}
+@keyframes scBreath{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6px) scaleY(1.012)}}
+@keyframes scWave{from{transform:rotate(-12deg)}to{transform:rotate(16deg)}}
+@keyframes scBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes scTalk{from{transform:scaleY(.35)}to{transform:scaleY(1.15)}}
+@keyframes scHop{0%,100%{transform:translateY(0)}40%{transform:translateY(-9px)}}
+@keyframes scJump{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes scTilt{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(4deg)}}
+@keyframes scTap{from{transform:rotate(0)}to{transform:rotate(-9deg)}}
+/* đám mây suy nghĩ */
+.sc-cloud{position:absolute;left:62%;top:-34px;display:none;pointer-events:none}
+[data-st=think] .sc-cloud{display:block}
+.sc-cloud i{position:absolute;border-radius:50%;background:var(--surface);border:1.5px solid var(--line)}
+.sc-c1{width:5px;height:5px;left:0;top:38px;animation:scPuff 1.4s infinite}
+.sc-c2{width:8px;height:8px;left:6px;top:28px;animation:scPuff 1.4s .25s infinite}
+.sc-c3{position:absolute;left:10px;top:0;display:flex;gap:4px;align-items:center;min-width:46px;height:28px;padding:0 10px;border-radius:16px;background:var(--surface);border:1.5px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.sc-c3 b{width:6px;height:6px;border-radius:50%;background:var(--sc-ink);animation:scDot 1.2s ease-in-out infinite}
+.sc-c3 b:nth-child(2){animation-delay:.18s}.sc-c3 b:nth-child(3){animation-delay:.36s}
+.sc-c3 u{display:grid;opacity:0;text-decoration:none;font-size:15px;position:absolute;inset:0;place-items:center;background:var(--surface);border-radius:16px;animation:scBulb 3.6s ease-in-out infinite}
+@keyframes scDot{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-6px);opacity:1}}
+@keyframes scPuff{0%,100%{transform:scale(.7);opacity:.5}50%{transform:scale(1.1);opacity:1}}
+@keyframes scBulb{0%,70%{opacity:0}78%,92%{opacity:1}100%{opacity:0}}
+/* bong bóng nói */
+.sc-bubble{position:absolute;left:56px;bottom:46px;width:max-content;max-width:min(270px,calc(100vw - 96px));padding:11px 30px 11px 13px;border-radius:16px 16px 16px 4px;background:var(--surface);color:var(--text);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13.5px;line-height:1.4;opacity:0;transform:translateY(6px) scale(.96);transform-origin:0 100%;transition:opacity .2s,transform .25s var(--ez);cursor:pointer}
+.sc-bubble.on{opacity:1;transform:none}
+@media(min-width:1024px){.sc-bubble{left:64px;bottom:54px}}
+.sc-bt span{display:block;font-weight:600}.sc-bt small{display:block;margin-top:3px;color:var(--text-2);font-size:12px}
+.sc-w{display:block;margin-top:6px;font-style:normal;font-size:12px;color:var(--text-2)}.sc-w b{color:var(--sc-acc)}
+.sc-bx{position:absolute;top:5px;right:6px;width:22px;height:22px;border:0;border-radius:50%;background:none;color:var(--text-2);font-size:16px;line-height:1;cursor:pointer}
+.sc-bx:hover{background:var(--line)}
+.sc-ba{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.sc-btn{padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--bg-soft);color:var(--text);font:inherit;font-size:12.5px;cursor:pointer}
+.sc-btn.pri{background:var(--acc-grad);color:#0a0a0a;border-color:transparent;font-weight:600}
+/* khung trò chuyện */
+.sc-panel{position:absolute;left:0;bottom:calc(100% + 8px);width:min(350px,calc(100vw - 20px));max-height:min(520px,calc(100dvh - var(--head-h) - var(--bar-h) - 100px));display:flex;flex-direction:column;border-radius:18px;background:var(--surface);color:var(--text);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.45);overflow:hidden;opacity:0;transform:translateY(10px) scale(.97);transform-origin:0 100%;transition:opacity .2s,transform .25s var(--ez)}
+.sc-panel.on{opacity:1;transform:none}
+.sc-panel[hidden]{display:none}
+.sc-head2{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.sc-head2>div{flex:1;min-width:0}.sc-head2 b{display:block;font-size:14px}.sc-head2 small{display:block;color:var(--text-2);font-size:11.5px}
+.sc-av{width:30px;height:30px;border-radius:50%;background:var(--acc-grad);display:grid;place-items:center;flex:none}
+.sc-av::after{content:"";width:12px;height:12px;border-radius:50%;border:2.5px solid #0a0a0a;box-sizing:border-box}
+.sc-hx{border:0;background:none;color:var(--text-2);cursor:pointer;font:inherit;font-size:12px;padding:5px 8px;border-radius:8px}.sc-hx:hover{background:var(--line);color:var(--text)}
+.sc-min{font-size:20px;line-height:1;padding:2px 9px}
+.sc-log{flex:1;min-height:150px;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}
+.sc-m-row{display:flex;flex-direction:column;gap:5px;max-width:92%}.sc-m-row.me{align-self:flex-end;align-items:flex-end}
+.sc-msg{padding:8px 11px;border-radius:14px;font-size:13.5px;line-height:1.45;background:var(--bg-soft);border:1px solid var(--line);overflow-wrap:anywhere}
+.sc-m-row.me .sc-msg{background:var(--acc-grad);color:#0a0a0a;border-color:transparent}
+.sc-msg small{color:var(--text-2)}.sc-m-row.me .sc-msg small{color:inherit}
+.sc-go{display:flex;gap:6px;flex-wrap:wrap}.sc-go a{padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12.5px;color:var(--sc-acc);text-decoration:none;background:var(--bg-soft)}.sc-go a:hover{border-color:var(--sc-acc)}
+.sc-dots{display:inline-flex;gap:4px;padding:3px 2px}.sc-dots i{width:6px;height:6px;border-radius:50%;background:var(--text-2);animation:scDot 1s ease-in-out infinite}.sc-dots i:nth-child(2){animation-delay:.15s}.sc-dots i:nth-child(3){animation-delay:.3s}
+.sc-steps{margin:0;padding:0;list-style:none;display:grid;gap:5px}
+.sc-steps li{font-size:13px;color:var(--text-2);padding-left:22px;position:relative}
+.sc-steps li::before{content:"";position:absolute;left:3px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--line)}
+.sc-steps li.on{color:var(--text)}.sc-steps li.on::before{border-color:var(--sc-acc);border-top-color:transparent;animation:scSpin .7s linear infinite}
+.sc-steps li.ok{color:var(--text)}.sc-steps li.ok::before{border-color:#3ecf8e;background:#3ecf8e}
+@keyframes scSpin{to{transform:rotate(360deg)}}
+.sc-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 9px}.sc-chips[hidden]{display:none}
+.sc-chip{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg-soft);color:var(--text);font:inherit;font-size:12.5px;cursor:pointer}
+.sc-chip.pri{background:var(--acc-grad);color:#0a0a0a;border-color:transparent;font-weight:600}
+.sc-form{display:flex;gap:6px;padding:9px 10px;border-top:1px solid var(--line)}
+.sc-in{flex:1;min-width:0;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg-soft);color:var(--text);font:inherit;font-size:14px}
+.sc-in:focus{outline:2px solid var(--sc-acc);outline-offset:1px}
+.sc-send{width:38px;height:38px;border-radius:50%;border:0;background:var(--acc-grad);color:#0a0a0a;cursor:pointer;font-size:15px}
+/* giảm chuyển động */
+html[data-motion=reduced] #sc *{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){#sc *{animation:none!important;transition:none!important}}

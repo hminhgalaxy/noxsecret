@@ -185,4 +185,22 @@ console.log("TỆP ĐÍNH KÈM CHAT");
   const cap = world(); cap.data.nox_threads = { uA: { chat: { type: "chat", status: "open" } } }; cap.data.nox_filecount = { uA: { chat: 30 } }; t("mỗi cuộc trò chuyện tối đa 30 tệp", (await cap.call("chat-file", { tid: "chat", name: "a.png", data: du(png) }, "a")).body.code, "too_many_files");
   const mu = world(); mu.data.nox_threads = { uA: { chat: { type: "chat", status: "open" } } }; mu.data.nox_admin = { uA: { muteUntil: clock + 1e6 } }; t("bị tắt tiếng thì không gửi tệp", (await mu.call("chat-file", { tid: "chat", name: "a.png", data: du(png) }, "a")).body.code, "muted"); }
 
+console.log("CHỈ MỤC SEO CỬA HÀNG");
+{ const w = world(); await w.call("wallet-info", {}, "a"); const code = (await w.call("wallet-info", {}, "a")).body.code;
+  w.data.nox_shop = { items: {
+    k1: { name: "Key VIP", desc: "x".repeat(400), price: 30000, stock: 3, mode: "lines", active: true, sold: 2, createdAt: 5, cat: "c1", img: "data:image/png;base64,AAAA" },
+    u1: { name: "Không giới hạn", price: 100, mode: "text", active: true },
+    t1: { name: "Chỉ có ảnh phụ", price: 5, mode: "text", active: true, imgs: { b: "data:image/png;base64,BBBB" } },
+    off: { name: "Ẩn", price: 1, mode: "text", active: false },
+    bad: { price: 1 } } };
+  w.data.nox_shopsecret = { k1: { lines: { a: "A", b: "B", c: "C" } }, u1: { text: "T" } };
+  t("khách / người thường không dựng được chỉ mục (chỉ dev)", [(await w.call("seo-sync", {}, "a")).status, (await w.call("seo-sync", {}, "guest")).status, w.data.nox_shopseo === undefined], [403, 403, true]);
+  const r = await w.call("seo-sync", {}, "dev"); const ix = w.data.nox_shopseo;
+  t("dev dựng chỉ mục: chỉ sản phẩm có tên, KHÔNG chứa ảnh/kho bí mật", [r.status, r.body.count, Object.keys(ix).sort(), ix.k1.i, JSON.stringify(ix).includes("base64"), JSON.stringify(ix).includes("secret")], [200, 4, ["k1", "off", "t1", "u1"], 1, false, false]);
+  t("chỉ mục: mô tả cắt ≤200, kho vô hạn không có 's', hết/ẩn đánh dấu a=false, ảnh phụ vẫn tính là có ảnh", [ix.k1.d.length <= 200, "s" in ix.u1, ix.off.a, ix.t1.i, ix.k1.s, ix.k1.h, ix.k1.c], [true, false, false, 1, 3, 2, "c1"]);
+  await w.hook(sePay(1, 100000, code)); const b = await w.call("shop-buy", { items: [{ id: "k1", qty: 2 }] }, "a");
+  t("sau khi mua: chỉ mục tự cập nhật số đã bán + tồn kho", [b.status, w.data.nox_shopseo.k1.h, w.data.nox_shopseo.k1.s], [200, 4, 1]);
+  w.data.nox_shop.items.off.active = true; w.data.nox_shop.items.u1 = undefined; delete w.data.nox_shop.items.u1; await w.call("seo-sync", {}, "dev");
+  t("dựng lại: sản phẩm vừa hiện được cập nhật, sản phẩm bị xóa biến khỏi chỉ mục", [w.data.nox_shopseo.off.a, "u1" in w.data.nox_shopseo], [true, false]); }
+
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

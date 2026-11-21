@@ -15,6 +15,7 @@ Disallow: /two-step
 Disallow: /auth/
 Disallow: /api/
 
+Allow: /img/
 Allow: /feed.xml
 Allow: /opensearch.xml
 

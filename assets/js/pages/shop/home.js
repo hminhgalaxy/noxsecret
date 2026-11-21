@@ -28,7 +28,16 @@ export function bindProductGrid(root) {
 
 export function mount(ctx) {
   ctx.setPage({ hero: true, title: null });
-  let cat = "", q = "", sort = "new";
+  let cat = ctx.params && ctx.params.cat ? String(ctx.params.cat) : "", q = "", sort = "new";
+  const routeCat = cat; /* địa chỉ /shop/c/<mục> — mỗi mục lục là một trang riêng để Google lập chỉ mục */
+  const seoCat = () => {
+    if (!routeCat) return;
+    const known = catList().find(c => c.id === routeCat);
+    if (!known) { if (shop.items !== null) ctx.setPage({ hero: true, title: "Mục lục không tồn tại", noindex: true }); return; }
+    const n = visibleProducts().filter(p => p.cat === routeCat).length;
+    ctx.setPage({ hero: true, title: known.name + " — Cửa hàng", desc: "Mua " + known.name + " tại SKIBIDI SCRIPT WEB" + (n ? ": " + n + " sản phẩm" : "") + ". Thanh toán bằng số dư ví, nhận hàng ngay sau khi mua.", noindex: false,
+      crumbs: [{ label: "Cửa hàng", href: "/" }, { label: known.name }] });
+  };
   ctx.el.innerHTML = `<section class="sh-hero" aria-labelledby="shH">
       <div class="sh-hero-txt"><span class="eyebrow"><i></i>Cửa hàng chính thức</span><h1 id="shH">Mua nhanh. <span>Nhận hàng ngay.</span></h1>
         <p>Thanh toán bằng số dư ví, nạp tiền qua ngân hàng chỉ với một mã QR. Hàng tự động giao ngay sau khi mua.</p>
@@ -50,7 +59,7 @@ export function mount(ctx) {
   const drawCats = () => {
     const cs = catList(), used = new Set(visibleProducts().map(p => p.cat));
     const list = cs.filter(c => used.has(c.id));
-    if (cat && !list.some(c => c.id === cat)) cat = "";
+    if (cat && !list.some(c => c.id === cat) && shop.items !== null) cat = "";
     $("#shCats").hidden = !list.length;
     $("#shCats").innerHTML = `<button type="button" data-c="" class="${cat ? "" : "on"}" aria-pressed="${!cat}">Tất cả</button>` + list.map(c => `<button type="button" data-c="${esc(c.id)}" class="${cat === c.id ? "on" : ""}" aria-pressed="${cat === c.id}">${esc(c.name)}</button>`).join("");
   };
@@ -64,12 +73,12 @@ export function mount(ctx) {
     const r = $("#shReset"); if (r) r.addEventListener("click", () => { q = ""; cat = ""; $("#shQ").value = ""; drawCats(); drawGrid(); });
   };
   bindProductGrid(grid);
-  $("#shCats").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (!b) return; cat = b.dataset.c; drawCats(); drawGrid(); });
+  $("#shCats").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (!b) return; cat = b.dataset.c; if (routeCat || cat) { navigate(cat ? "/shop/c/" + encodeURIComponent(cat) : "/"); return; } drawCats(); drawGrid(); });
   $("#shSort").addEventListener("change", e => { sort = e.target.value; drawGrid(); });
   $("#shQ").addEventListener("input", e => { q = e.target.value; drawGrid(); });
   $("#shSearch").addEventListener("submit", e => e.preventDefault());
-  drawWallet(); drawCats(); drawGrid();
-  const off = subscribeShop(t => { if (t === "items" || t === "cats") { drawCats(); drawGrid(); } else if (t === "wallet") drawWallet(); });
+  drawWallet(); drawCats(); drawGrid(); seoCat();
+  const off = subscribeShop(t => { if (t === "items" || t === "cats") { drawCats(); drawGrid(); seoCat(); } else if (t === "wallet") drawWallet(); });
   const offAuth = () => {};
   return () => { off(); offAuth(); };
 }

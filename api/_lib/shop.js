@@ -50,6 +50,18 @@ function createShop(deps) {
   const env = deps.env || {}, now = deps.now || (() => Date.now()), rnd = deps.rnd || ((a, b) => crypto.randomInt(a, b));
   const envBank = { bin: String(env.BANK_BIN || BANK_DEFAULT.bin), account: String(env.BANK_ACCOUNT || BANK_DEFAULT.account), name: String(env.BANK_ACCOUNT_NAME || BANK_DEFAULT.name), bank: String(env.BANK_NAME || BANK_DEFAULT.bank), short: String(env.BANK_SHORT || BANK_DEFAULT.short) };
   /* Ngân hàng nhận tiền: DEV liên kết trong trang quản trị (lưu nox_shopcfg/bank); chưa liên kết thì dùng biến môi trường / mặc định */
+  /* Chỉ mục nhẹ cho SEO (nox_shopseo, ai cũng đọc, chỉ máy chủ ghi): tên, mô tả ngắn, giá, mục, tồn kho… KHÔNG có ảnh/nội dung bán,
+     để trang chủ/danh mục dựng sẵn cho Google mà không phải tải ảnh base64 của mọi sản phẩm. */
+  const seoOf = it => { it = it || {}; const o = { n: String(it.name || "").slice(0, 120), d: String(it.desc || "").replace(/\s+/g, " ").trim().slice(0, 200), p: Math.max(0, Math.floor(Number(it.price) || 0)), c: String(it.cat || "").slice(0, 40), t: Number(it.createdAt) || 0, h: Math.floor(Number(it.sold) || 0), a: it.active !== false };
+    if (typeof it.stock === "number") o.s = Math.max(0, Math.floor(it.stock)); if (it.img || (it.imgs && typeof it.imgs === "object" && (it.imgs.a || it.imgs.b || it.imgs.c))) o.i = 1; return o; };
+  async function seoSyncAll() {
+    const items = (await db.get("nox_shop/items")) || {}, idx = {};
+    for (const [k, it] of Object.entries(items)) if (ID_RE.test(k) && it && typeof it === "object" && it.name) idx[k] = seoOf(it);
+    await db.set("nox_shopseo", idx); return Object.keys(idx).length;
+  }
+  async function seoTouch(ids) { /* sau khi bán: cập nhật tồn kho + số đã bán trong chỉ mục (không lỗi thì thôi) */
+    for (const id of ids) { try { const b = "nox_shop/items/" + id, [stock, sold] = await Promise.all([db.get(b + "/stock"), db.get(b + "/sold")]); await db.update("nox_shopseo/" + id, { s: typeof stock === "number" ? Math.max(0, Math.floor(stock)) : null, h: Math.floor(Number(sold) || 0) }); } catch (_) {} }
+  }
   async function getBank() {
     let c = null; try { c = await db.get("nox_shopcfg/bank"); } catch (_) {}
     if (c && typeof c === "object" && /^\d{6}$/.test(String(c.bin)) && /^\d{6,19}$/.test(String(c.account)) && c.name) return Object.assign({}, envBank, { bin: String(c.bin), account: String(c.account), name: String(c.name), bank: String(c.bank || envBank.bank), short: String(c.short || cleanTxt(c.bank, 10) || "BANK"), linked: true, by: c.by || "", linkedAt: c.ts || 0 });
@@ -203,6 +215,7 @@ function createShop(deps) {
       await db.update("nox_orders/" + u.uid + "/" + oid, { status: "paid", delivery, balanceAfter: pay.balance, paidAt: now(), ...(manual ? { manual: true } : {}) });
       await logTx(u.uid, oid, { type: "purchase", amount: -total, balance: pay.balance, ref: oid, note: lines.map(l => l.name + " x" + l.qty).join(", ").slice(0, 200) });
       for (const l of lines) { try { await db.tx("nox_shop/items/" + l.id + "/sold", (c) => (c || 0) + l.qty); } catch (_) {} }
+      await seoTouch(lines.map(l => l.id));
       return ok({ orderId: oid, balance: pay.balance, total, delivery, manual });
     },
 
@@ -256,6 +269,10 @@ function createShop(deps) {
       if (r.ok) await logTx(uid, "h_" + key, { type: "topup", amount: h.amount, balance: r.balance, note: "Bank transfer (assigned by admin)", ref: key, by: u.email.slice(0, 120) });
       await db.update("nox_bankhook/" + key, { status: "credited", uid, assignedBy: u.email.slice(0, 120), ts: now() });
       return ok({ balance: r.balance });
+    },
+    async "seo-sync"({ token }) { /* dựng lại chỉ mục SEO của cửa hàng từ toàn bộ sản phẩm (DEV; tự gọi sau mỗi lần lưu/xóa/ẩn sản phẩm) */
+      const { err } = await devOnly(token); if (err) return err;
+      return ok({ count: await seoSyncAll() });
     },
     async "order-deliver"({ token, body }) { /* đánh dấu đơn giao tay đã giao xong */
       const { u, err } = await devOnly(token); if (err) return err;

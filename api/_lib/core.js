@@ -85,7 +85,8 @@ function createApi(deps) {
   }
 
   const A = {
-    async status() { return ok({ mail: configured(), twofa: configured(), problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] }); },
+    /* Công khai, KHÔNG lộ giá trị bí mật: chỉ nói phần nào đã bật + tên biến thiếu/sai. Trang Dev → Kết nối máy chủ dùng cái này. */
+    async status() { return ok({ mail: configured(), twofa: configured(), admin: !!(auth && db), shop: !!shop, hook: !!(env.SEPAY_API_KEY || env.SEPAY_SECRET || env.CASSO_SECURE_TOKEN), siteUrl: !!env.SITE_URL, problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] }); },
     async "mail-check"({ token }) {
       const { err } = await devOnly(token); if (err) return err;
       return ok({ checks: deps.liveCheck ? await deps.liveCheck() : [], problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] });

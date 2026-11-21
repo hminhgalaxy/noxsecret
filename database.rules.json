@@ -553,6 +553,10 @@
         }
       }
     },
+    "nox_shopseo": {
+      ".read": true,
+      ".write": false
+    },
     "nox_shopsecret": {
       ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
       ".write": false,

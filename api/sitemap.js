@@ -8,11 +8,19 @@ async function keys(path) {
   try { const r = await fetch(DB + "/" + path + ".json?shallow=true"); if (!r.ok) return []; const j = await r.json(); return j && typeof j === "object" ? Object.keys(j) : []; } catch (_) { return []; }
 }
 module.exports = async (req, res) => {
-  const urls = STATIC.slice();
+  const urls = STATIC.slice(), imgOf = {};
   try {
     const parts = await Promise.all(BASE.map(async ([node, seg]) => (await keys("nox_data/" + node)).map(k => "/" + seg + "/" + encodeURIComponent(k))));
     parts.forEach(p => urls.push(...p));
-    try { const r = await fetch(DB + "/nox_shop/items.json"); if (r.ok) { const v = (await r.json()) || {}; Object.keys(v).filter(k => v[k] && v[k].name && v[k].active !== false && /^[A-Za-z0-9_-]{1,40}$/.test(k)).forEach(k => urls.push("/shop/" + encodeURIComponent(k))); } } catch (_) {}
+    /* Cửa hàng: dùng chỉ mục nhẹ nox_shopseo (do máy chủ ghi); nếu chưa có thì đọc thẳng danh sách sản phẩm như trước */
+    try {
+      const [rx, rc] = await Promise.all([fetch(DB + "/nox_shopseo.json"), fetch(DB + "/nox_shop/cats.json")]);
+      let ix = rx.ok ? ((await rx.json()) || {}) : {}; const cs = rc.ok ? ((await rc.json()) || {}) : {};
+      let ids = Object.keys(ix).filter(k => ix[k] && ix[k].n && ix[k].a !== false && /^[A-Za-z0-9_-]{1,40}$/.test(k));
+      if (!ids.length) { const r = await fetch(DB + "/nox_shop/items.json"); if (r.ok) { const v = (await r.json()) || {}; ids = Object.keys(v).filter(k => v[k] && v[k].name && v[k].active !== false && /^[A-Za-z0-9_-]{1,40}$/.test(k)); ids.forEach(k => { ix[k] = { n: v[k].name, c: v[k].cat, i: v[k].img ? 1 : 0 }; }); } }
+      const used = new Set(); ids.forEach(k => { urls.push("/shop/" + encodeURIComponent(k)); if (ix[k].i) imgOf["/shop/" + encodeURIComponent(k)] = [SITE + "/img/shop/" + encodeURIComponent(k) + ".jpg", ix[k].n]; if (ix[k].c) used.add(String(ix[k].c)); });
+      Object.keys(cs).filter(k => cs[k] && cs[k].name && used.has(k) && /^[A-Za-z0-9_-]{1,40}$/.test(k)).forEach(k => urls.push("/shop/c/" + encodeURIComponent(k)));
+    } catch (_) {}
     let cats = {}; try { const r = await fetch(DB + "/nox_categories.json"); if (r.ok) cats = (await r.json()) || {}; } catch (_) {}
     const customs = Object.values(cats).map(c => c && String(c.node || "").toLowerCase()).filter(n => /^[a-z0-9-]+$/.test(n || ""));
     for (const n of customs) { urls.push("/c/" + n); (await keys("nox_data/" + n)).forEach(k => urls.push("/c/" + n + "/" + encodeURIComponent(k))); }
@@ -20,7 +28,7 @@ module.exports = async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   const IMG = "<image:image><image:loc>" + SITE + "/assets/img/icon-512.png</image:loc><image:title>SKIBIDI SCRIPT WEB</image:title></image:image>";
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
-    urls.slice(0, 5000).map(u => `  <url><loc>${esc(SITE + u)}</loc><lastmod>${today}</lastmod><priority>${u === "/" ? "1.0" : STATIC.includes(u) ? "0.8" : "0.6"}</priority>${u === "/" ? IMG : ""}</url>`).join("\n") + "\n</urlset>\n";
+    urls.slice(0, 5000).map(u => `  <url><loc>${esc(SITE + u)}</loc><lastmod>${today}</lastmod><priority>${u === "/" ? "1.0" : STATIC.includes(u) ? "0.8" : "0.6"}</priority>${u === "/" ? IMG : imgOf[u] ? `<image:image><image:loc>${esc(imgOf[u][0])}</image:loc><image:title>${esc(String(imgOf[u][1]).slice(0, 100))}</image:title></image:image>` : ""}</url>`).join("\n") + "\n</urlset>\n";
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
   res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
   res.status(200).send(xml);

@@ -2,10 +2,11 @@
    Thiếu biến nào thì phần đó "chưa cấu hình" và website tự dùng thư mặc định của Firebase. */
 let cached = null;
 
+const { parseServiceAccount } = require("./sa");
+/* Đọc khoan dung (xem sa.js): chịu được xuống dòng thật, dấu nháy bọc ngoài, base64, dấu * … */
 function loadServiceAccount(env) {
-  let raw = env.FIREBASE_SERVICE_ACCOUNT; if (!raw) return null;
-  raw = String(raw).trim();
-  try { if (!raw.startsWith("{")) raw = Buffer.from(raw, "base64").toString("utf8"); const j = JSON.parse(raw); if (j.private_key) j.private_key = String(j.private_key).replace(/\\n/g, "\n"); return j.client_email && j.private_key ? j : null; } catch (_) { return null; }
+  const raw = env.FIREBASE_SERVICE_ACCOUNT; if (!raw || !String(raw).trim()) return null;
+  const r = parseServiceAccount(raw); return r.ok ? r.sa : null;
 }
 function makeAdmin(env) {
   const sa = loadServiceAccount(env); if (!sa) return {};
@@ -57,7 +58,7 @@ function diagnose(env = process.env) {
   const key = String(env.BREVO_API_KEY || "").trim();
   if (key && !/^xkeysib-/.test(key)) add("bad:BREVO_API_KEY", "BREVO_API_KEY thường bắt đầu bằng \"xkeysib-\". Hãy tạo khoá API (không phải khoá SMTP \"xsmtpsib-\") ở Brevo → SMTP & API → API Keys.");
   if (/^xsmtpsib-/.test(key)) p.push({ code: "bad:smtp_key", msg: "Đây là khoá SMTP (xsmtpsib-), website cần khoá API (xkeysib-)." });
-  if (env.FIREBASE_SERVICE_ACCOUNT && String(env.FIREBASE_SERVICE_ACCOUNT).trim() && !loadServiceAccount(env)) add("bad:FIREBASE_SERVICE_ACCOUNT", "FIREBASE_SERVICE_ACCOUNT không đọc được: hãy dán NGUYÊN nội dung file JSON (bắt đầu bằng {) hoặc mã base64 của nó, có client_email và private_key.");
+  if (env.FIREBASE_SERVICE_ACCOUNT && String(env.FIREBASE_SERVICE_ACCOUNT).trim()) { const r = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT); if (!r.ok) add("bad:FIREBASE_SERVICE_ACCOUNT", "FIREBASE_SERVICE_ACCOUNT không đọc được: " + r.error.msg + " Cách dễ nhất: Dev → Kết nối máy chủ, dán file JSON vào, trang sẽ tạo sẵn giá trị đúng để dán vào Vercel."); }
   if (initError) add("init", "Khởi tạo Firebase Admin lỗi: " + initError);
   return p;
 }
@@ -81,4 +82,4 @@ async function liveCheck(env = process.env) {
   } catch (e) { out.push({ ok: false, msg: "Không gọi được Brevo: " + String((e && e.message) || e).slice(0, 120) }); }
   return out;
 }
-module.exports = { getApi, loadServiceAccount, makeMailer, diagnose, liveCheck };
+module.exports = { getApi, loadServiceAccount, makeMailer, diagnose, liveCheck, __loadServiceAccount: loadServiceAccount };

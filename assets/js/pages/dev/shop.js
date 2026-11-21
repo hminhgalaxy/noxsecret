@@ -3,7 +3,7 @@ import { esc, toast, fmtTime, copyText } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";
 import { db } from "../../lib/firebase.js";
-import { shop, subscribeShop, startShop, money, signedMoney, MODES, normProduct, catList, catName, devAdjust, devAssign, devRefund, devDeliver, devShopStatus } from "../../lib/shop.js";
+import { shop, subscribeShop, startShop, money, signedMoney, MODES, normProduct, catList, catName, devAdjust, devAssign, devRefund, devDeliver, devShopStatus, devSeoSync } from "../../lib/shop.js";
 import { fileToItemImage } from "../../lib/avatar.js";
 import { openPopup } from "../../lib/popup.js";
 import { popConfirm, popForm } from "../../lib/shoppop.js";
@@ -26,6 +26,8 @@ export function mount(ctx) {
   ctx.el.innerHTML = `<div class="chips dv-tabs" id="dvT" role="tablist">${TABS.map(([v, l]) => `<button type="button" role="tab" data-t="${v}" class="${v === tab ? "on" : ""}" aria-selected="${v === tab}">${l}</button>`).join("")}</div><div id="dvB"></div>`;
   const body = ctx.el.querySelector("#dvB");
   const offs = [];
+  let seoT = 0; const seoSync = () => { clearTimeout(seoT); seoT = setTimeout(() => { devSeoSync().catch(() => {}); }, 1200); }; /* cập nhật chỉ mục SEO ở máy chủ (gộp nhiều lần lưu liên tiếp) */
+  ref("nox_shopseo").once("value").then(sn => { if (!sn.exists()) seoSync(); }).catch(() => {}); /* lần đầu: dựng chỉ mục SEO nếu chưa có */
   const listen = (path, cb) => { const r = ref(path), h = r.on("value", s => cb(s.val()), () => cb({})); offs.push(() => r.off("value", h)); };
   listen("nox_orders", v => { orders = []; Object.keys(v || {}).forEach(u => Object.keys(v[u] || {}).forEach(o => orders.push({ uid: u, id: o, ...v[u][o] }))); orders.sort((a, b) => (b.ts || 0) - (a.ts || 0)); if (tab === "orders") draw(); });
   listen("nox_bankhook", v => { hooks = Object.keys(v || {}).map(k => ({ key: k, ...v[k] })).sort((a, b) => (b.ts || 0) - (a.ts || 0)); if (tab === "money") draw(); });
@@ -42,8 +44,8 @@ export function mount(ctx) {
     body.querySelector("#pl").addEventListener("click", e => {
       const row = e.target.closest(".dv-p"); if (!row) return; const p = (shop.items || []).find(x => x.id === row.dataset.id); if (!p) return;
       if (e.target.closest("[data-ed]")) productForm(p);
-      else if (e.target.closest("[data-vis]")) ref("nox_shop/items/" + p.id + "/active").set(!p.active).then(() => toast(p.active ? "Đã ẩn sản phẩm." : "Đã hiện sản phẩm.")).catch(x => toast(friendly(x), "err"));
-      else if (e.target.closest("[data-del]")) popConfirm({ tone: "danger", title: "Xóa sản phẩm này?", message: "Sản phẩm biến khỏi cửa hàng. Đơn hàng đã bán vẫn được giữ trong lịch sử của khách.", details: [["Sản phẩm", p.name], ["Giá", money(p.price)], ["Đã bán", String(p.sold)]], ok: "Xóa sản phẩm" }).then(y => y && Promise.all([ref("nox_shop/items/" + p.id).remove(), ref("nox_shopsecret/" + p.id).remove()]).then(() => toast("Đã xóa sản phẩm.")).catch(x => toast(friendly(x), "err")));
+      else if (e.target.closest("[data-vis]")) ref("nox_shop/items/" + p.id + "/active").set(!p.active).then(() => { seoSync(); toast(p.active ? "Đã ẩn sản phẩm." : "Đã hiện sản phẩm."); }).catch(x => toast(friendly(x), "err"));
+      else if (e.target.closest("[data-del]")) popConfirm({ tone: "danger", title: "Xóa sản phẩm này?", message: "Sản phẩm biến khỏi cửa hàng. Đơn hàng đã bán vẫn được giữ trong lịch sử của khách.", details: [["Sản phẩm", p.name], ["Giá", money(p.price)], ["Đã bán", String(p.sold)]], ok: "Xóa sản phẩm" }).then(y => y && Promise.all([ref("nox_shop/items/" + p.id).remove(), ref("nox_shopsecret/" + p.id).remove()]).then(() => { seoSync(); toast("Đã xóa sản phẩm."); }).catch(x => toast(friendly(x), "err")));
     });
   };
 
@@ -103,7 +105,7 @@ export function mount(ctx) {
       if (m === "lines") { const ls = txt.split(/\r?\n/).map(x => x.trim()).filter(Boolean); if (ls.length > 2000 || ls.some(x => x.length > 5000)) { err.textContent = "Tối đa 2.000 dòng, mỗi dòng không quá 5.000 ký tự."; return; } if (ls.length) { sec.lines = {}; ls.forEach((x, i) => { sec.lines["l" + String(i).padStart(5, "0")] = x; }); } item.stock = ls.length; }
       else { if (st !== null) item.stock = st; if (m === "text" && txt.trim()) sec.text = txt; }
       const ok = $("#pfOk"); ok.disabled = true;
-      try { await Promise.all([ref("nox_shop/items/" + id).set(item), Object.keys(sec).length ? ref("nox_shopsecret/" + id).set(sec) : ref("nox_shopsecret/" + id).remove()]); toast(p ? "Đã lưu sản phẩm." : "Đã thêm sản phẩm."); h.close(); }
+      try { await Promise.all([ref("nox_shop/items/" + id).set(item), Object.keys(sec).length ? ref("nox_shopsecret/" + id).set(sec) : ref("nox_shopsecret/" + id).remove()]); seoSync(); toast(p ? "Đã lưu sản phẩm." : "Đã thêm sản phẩm."); h.close(); }
       catch (ex) { ok.disabled = false; err.textContent = friendly(ex); }
     });
   };

@@ -36,6 +36,11 @@ t("shop: trang sản phẩm 200 + Product/Offer VND", [pg.statusCode, /"@type":"
 t("shop: escape HTML tên sản phẩm", /Key VIP &lt;30/.test(pg.b) && !/Key VIP <30/.test(pg.b), true);
 t("shop: canonical /shop/sp1 + cho lập chỉ mục", /rel="canonical" href="https:\/\/skibidiscript.vercel.app\/shop\/sp1"/.test(pg.b) && /index,follow/.test(pg.b), true);
 t("shop: sản phẩm ẩn / không có → 404", [(await pageRun("/shop/off", prod)).statusCode, (await pageRun("/shop/zzz", prod)).statusCode], [404, 404]);
+const legacy = await pageRun("/scripts/old1", u => u.includes("nox_data/scripts/old1") ? { title: "Bài cũ dùng title", description: "Mô tả cũ", script: "x" } : null);
+t("dữ liệu cũ (title/description): trang vẫn 200, lập chỉ mục, không noindex", [legacy.statusCode, /index,follow/.test(legacy.b), /noindex/.test(legacy.b), legacy.h["X-Robots-Tag"] || null, /Bài cũ dùng title/.test(legacy.b)], [200, true, false, null, true]);
+{ const old = globalThis.fetch; globalThis.fetch = async () => { throw new Error("net"); }; let pe; try { pe = await pageRun("/shop/sp1", () => null); } finally { globalThis.fetch = old; }
+  const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end(b) { this.b = b; } }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); globalThis.fetch = async () => { throw new Error("net"); }; try { await require("../api/page.js")({ query: { p: "/shop/sp1" }, url: "/api/page?p=/shop/sp1", headers: {} }, res); } finally { globalThis.fetch = old; }
+  t("Firebase lỗi mạng: trả 503 + Retry-After, KHÔNG gắn noindex/404, không cache", [res.statusCode, res.h["Retry-After"], res.h["X-Robots-Tag"] || null, res.h["Cache-Control"]], [503, "120", null, "no-store"]); }
 const pw = await pageRun("/wallet", () => null); t("ví/đơn hàng: noindex", [pw.statusCode, /noindex/.test(pw.b), pw.h["X-Robots-Tag"]], [200, true, "noindex"]);
 const lib = await pageRun("/library", () => null); t("/library: có tiêu đề riêng, lập chỉ mục", /<title>Content library/.test(lib.b) && /index,follow/.test(lib.b), true);
 const smShop = await run("../api/sitemap.js", u => u.includes("nox_shop/items") ? { sp1: { name: "A", active: true }, off: { name: "B", active: false } } : u.includes("shallow") ? {} : {});
@@ -48,6 +53,38 @@ const ld = JSON.parse(ix.match(/<script type="application\/ld\+json">(.+?)<\/scr
 t("JSON-LD: alternateName chứa skibidiscript", [site.alternateName.includes("skibidiscript"), org.alternateName.includes("skibidiscript")], [true, true]);
 t("JSON-LD: SearchAction trỏ /search", JSON.stringify(site).includes("/search?q={search_term_string}"), true);
 t("noscript: có nội dung thương hiệu + liên kết", /<noscript>[\s\S]*skibidiscript[\s\S]*href="\/skibidiscript"[\s\S]*<\/noscript>/.test(ix), true);
+/* ── Cửa hàng: trang chủ + trang mục lục + ảnh sản phẩm + sơ đồ trang dùng chỉ mục nox_shopseo ── */
+const PNG = "data:image/png;base64," + Buffer.from("89504e470d0a1a0a0000000d49484452", "hex").toString("base64");
+const SEO = { sp1: { n: "Key VIP <30 ngày>", d: "Giao tự động", p: 59000, c: "k1", t: 2, h: 5, a: true, i: 1 }, sp2: { n: "Tài khoản", d: "", p: 10000, c: "k2", t: 1, h: 0, a: true, s: 0 }, off: { n: "Ẩn", p: 1, a: false }, bad: { p: 5 } };
+const CATS = { k1: { name: "Key & Mã", sort: 1 }, k2: { name: "Tài khoản", sort: 2 }, k3: { name: "Trống", sort: 3 } };
+const shopDb = u => u.includes("nox_shopseo") ? SEO : u.includes("nox_shop/cats") ? CATS : u.includes("nox_shop/items/sp1/img") ? PNG : u.includes("nox_shop/items/sp1/active") ? true : u.includes("nox_shop/items/sp1") ? { name: "Key VIP <30 ngày>", price: 59000, active: true, img: PNG } : null;
+const hm = await pageRun("/", shopDb);
+t("trang chủ: 200, có h1 duy nhất, danh sách sản phẩm đang bán + mục lục, không có sản phẩm ẩn/thiếu tên", [hm.statusCode, (hm.b.match(/<h1[ >]/g) || []).length, /href="\/shop\/sp1"/.test(hm.b), /href="\/shop\/c\/k1"/.test(hm.b), /\/shop\/off/.test(hm.b), /\/shop\/bad/.test(hm.b), /"@type":"ItemList"/.test(hm.b)], [200, 1, true, true, false, false, true]);
+t("trang chủ: hết hàng được ghi, tên được escape", [/Tài khoản<\/a> — 10,000 VND \(out of stock\)/.test(hm.b), /Key VIP &lt;30/.test(hm.b)], [true, true]);
+const hmDown = await (async () => { const old = globalThis.fetch; globalThis.fetch = async () => { throw new Error("net"); }; const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end(b) { this.b = b; } }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); try { await require("../api/page.js")({ query: { p: "/" }, url: "/" }, res); } finally { globalThis.fetch = old; } return res; })();
+t("trang chủ khi Firebase lỗi: vẫn 200 (khung trang), không noindex", [hmDown.statusCode, /noindex/.test(hmDown.b)], [200, false]);
+const cp = await pageRun("/shop/c/k1", shopDb);
+t("mục lục: 200 + CollectionPage + ItemList + BreadcrumbList + canonical riêng + index", [cp.statusCode, /"@type":"CollectionPage"/.test(cp.b), /"@type":"ItemList"/.test(cp.b), /"@type":"BreadcrumbList"/.test(cp.b), /rel="canonical" href="https:\/\/skibidiscript.vercel.app\/shop\/c\/k1"/.test(cp.b), /index,follow/.test(cp.b)], [200, true, true, true, true, true]);
+t("mục lục: chỉ liệt kê sản phẩm của mục đó; escape &; og:image là ảnh thật", [/href="\/shop\/sp1"/.test(cp.b), /href="\/shop\/sp2"/.test(cp.b), /Key &amp; Mã/.test(cp.b), /og:image" content="https:\/\/skibidiscript.vercel.app\/img\/shop\/sp1.jpg"/.test(cp.b)], [true, false, true, true]);
+t("mục lục không tồn tại / id sai → 404 noindex", [(await pageRun("/shop/c/zzz", shopDb)).statusCode, (await pageRun("/shop/c/a%20b", shopDb)).statusCode], [404, 404]);
+const pimg = await pageRun("/shop/sp1", shopDb);
+t("sản phẩm: JSON-LD image + og:image trỏ /img/shop/<id>.jpg, thẻ img có alt, 1 h1", [/"image":\["https:\/\/skibidiscript.vercel.app\/img\/shop\/sp1.jpg"\]/.test(pimg.b), /og:image" content="https:\/\/skibidiscript.vercel.app\/img\/shop\/sp1.jpg"/.test(pimg.b), /<img src="[^"]+" alt="Key VIP/.test(pimg.b), (pimg.b.match(/<h1[ >]/g) || []).length], [true, true, true, 1]);
+/* kiểm tra cơ bản cho mọi loại trang công khai: tiêu đề, mô tả, canonical tuyệt đối khớp địa chỉ, og:*, JSON-LD hợp lệ */
+for (const [p, canon] of [["/", "https://skibidiscript.vercel.app/"], ["/shop/c/k1", "https://skibidiscript.vercel.app/shop/c/k1"], ["/shop/sp1", "https://skibidiscript.vercel.app/shop/sp1"], ["/library", "https://skibidiscript.vercel.app/library"]]) {
+  const r = await pageRun(p, shopDb), g = re => (r.b.match(re) || [])[1] || "";
+  const title = g(/<title>([^<]*)<\/title>/), desc = g(/<meta name="description" content="([^"]*)">/), lds = [...r.b.matchAll(/<script type="application\/ld\+json">(.+?)<\/script>/gs)].map(m => { try { return JSON.parse(m[1]); } catch (_) { return null; } });
+  t("SEO cơ bản " + p, [title.length >= 15 && title.length <= 75, desc.length >= 50 && desc.length <= 170, g(/<link rel="canonical" href="([^"]*)">/), g(/og:url" content="([^"]*)"/), /^https:\/\//.test(g(/og:image" content="([^"]*)"/)), lds.every(Boolean)], [true, true, canon, canon, true, true]);
+}
+const img = async (id, db) => { const old = globalThis.fetch; globalThis.fetch = async u => ({ ok: true, status: 200, json: async () => db(String(u)) }); const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end(b) { this.b = b; } }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); try { await require("../api/img.js")({ query: { id } }, res); } finally { globalThis.fetch = old; } return res; };
+const im1 = await img("sp1", shopDb);
+t("ảnh sản phẩm: 200, đúng Content-Type, nhị phân, cache dài", [im1.statusCode, im1.h["Content-Type"], Buffer.isBuffer(im1.b) && im1.b.length === 16, /s-maxage=86400/.test(im1.h["Cache-Control"])], [200, "image/png", true, true]);
+t("ảnh sản phẩm: id sai / sản phẩm ẩn / không có ảnh → 404", [(await img("../x", shopDb)).statusCode, (await img("sp1", u => u.includes("/active") ? false : PNG)).statusCode, (await img("sp9", () => null)).statusCode], [404, 404, 404]);
+t("ảnh sản phẩm: Firebase lỗi → 503 (không lưu cache)", (await (async () => { const old = globalThis.fetch; globalThis.fetch = async () => { throw new Error("net"); }; const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end() {} }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); try { await require("../api/img.js")({ query: { id: "sp1" } }, res); } finally { globalThis.fetch = old; } return [res.statusCode, res.h["Cache-Control"]]; })()), [503, "no-store"]);
+const sm2 = await run("../api/sitemap.js", u => u.includes("nox_shopseo") ? SEO : u.includes("nox_shop/cats") ? CATS : u.includes("shallow") ? {} : {});
+t("sitemap: dùng chỉ mục nhẹ — có sản phẩm đang bán + mục lục có hàng + ảnh, không có ẩn/trống", [sm2.b.includes("/shop/sp1</loc>"), sm2.b.includes("/shop/c/k1</loc>"), sm2.b.includes("/shop/c/k3"), sm2.b.includes("/shop/off"), sm2.b.includes("/img/shop/sp1.jpg")], [true, true, false, false, true]);
+t("vercel.json: /shop → / (301) và /img/ không bị rewrite vào page", [JSON.parse(txt("vercel.json")).redirects.some(r => r.source === "/shop" && r.destination === "/" && r.permanent), JSON.parse(txt("vercel.json")).rewrites.some(r => r.source.includes("img/shop") && r.destination.startsWith("/api/img")), /img\\\//.test(JSON.parse(txt("vercel.json")).rewrites.at(-1).source) || /img\//.test(JSON.parse(txt("vercel.json")).rewrites.at(-1).source)], [true, true, true]);
+t("robots: cho phép /img/ và sitemap", [/Allow: \/img\//.test(robots), /Sitemap: https:\/\/skibidiscript.vercel.app\/sitemap.xml/.test(robots)], [true, true]);
+
 const en = (await import("../assets/js/lib/i18n-en.js")).default;
 t("i18n: mẫu có nhóm bắt phải chèn lại $n trong bản dịch (không mất số tiền/tên)", en.P.filter(([rx, rep]) => { const n = (rx.source.match(/\((?!\?)/g) || []).length - (rx.source.match(/\\\(/g) || []).length; return n > 0 && !/\$\d/.test(rep); }).map(x => x[0].source), []);
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

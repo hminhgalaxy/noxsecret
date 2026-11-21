@@ -18,6 +18,7 @@ export function prefetchPages(devToo = false) {
 export function registerRoutes() {
   define("/", { load: L("shop/home"), guard: "public", needs: [] });
   define("/library", { load: L("home"), guard: "public", title: "Kho nội dung", desc: "Kho script, APK, iOS và liên kết đã được kiểm duyệt trên SKIBIDI SCRIPT WEB.", needs: [...ALL, "updates"] });
+  define("/shop/c/:cat", { load: L("shop/home"), guard: "public", needs: [] });
   define("/shop/:id", { load: L("shop/product"), guard: "public", needs: [] });
   define("/wallet", { load: L("shop/wallet"), guard: "real", title: "Ví của tôi", noindex: true, needs: [] });
   define("/orders", { load: L("shop/orders"), guard: "real", title: "Lịch sử mua hàng", noindex: true, needs: [] });
@@ -67,5 +68,6 @@ export function registerRoutes() {
   define("/dev/theme", { load: L("dev/theme"), guard: "dev", title: "Giao diện", needs: ["theme"] });
   define("/dev/updates", { load: L("dev/updates"), guard: "dev", title: "Cập nhật", needs: ["updates"] });
   define("/dev/test", { load: L("dev/test"), guard: "dev", title: "Kiểm tra hệ thống", needs: [] });
+  define("/dev/connect", { load: L("dev/connect"), guard: "dev", title: "Kết nối máy chủ", needs: [] });
   define("/dev/system", { load: L("dev/system"), guard: "dev", title: "Bảo trì & thông báo", needs: ["maint", "notice"] });
 }

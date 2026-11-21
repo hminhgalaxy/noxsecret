@@ -113,3 +113,4 @@ export const devBankSet = b => call("bank-set", b);
 export const devBankReset = () => call("bank-set", { reset: true });
 export const devBankQr = (amount, content) => call("bank-qr", { amount, content });
 export const sweepTopups = () => call("topup-sweep");
+export const devSeoSync = () => call("seo-sync");
