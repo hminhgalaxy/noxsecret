@@ -35,7 +35,7 @@ export function mount(ctx) {
     const known = catList().find(c => c.id === routeCat);
     if (!known) { if (shop.items !== null) ctx.setPage({ hero: true, title: "Mục lục không tồn tại", noindex: true }); return; }
     const n = visibleProducts().filter(p => p.cat === routeCat).length;
-    ctx.setPage({ hero: true, title: known.name + " — Cửa hàng", desc: "Mua " + known.name + " tại SKIBIDI SCRIPT WEB" + (n ? ": " + n + " sản phẩm" : "") + ". Thanh toán bằng số dư ví, nhận hàng ngay sau khi mua.", noindex: false,
+    ctx.setPage({ hero: true, title: known.name + " — Cửa hàng", desc: "Mua " + known.name + " tại Skibidi Web (Skibidi Shop)" + (n ? ": " + n + " sản phẩm" : "") + ". Thanh toán bằng số dư ví, nhận hàng ngay sau khi mua.", noindex: false,
       crumbs: [{ label: "Cửa hàng", href: "/" }, { label: known.name }] });
   };
   ctx.el.innerHTML = `<section class="sh-hero" aria-labelledby="shH">
@@ -45,8 +45,7 @@ export function mount(ctx) {
       <aside class="sh-wallet" id="shWallet" aria-label="Ví của bạn"></aside></section>
     <nav class="sh-cats" id="shCats" aria-label="Mục lục sản phẩm"></nav>
     <div class="sh-bar"><span class="sh-count" id="shCount" aria-live="polite"></span><label class="sh-sort"><span>Sắp xếp</span><select id="shSort" aria-label="Sắp xếp">${SORTS.map(([v, l]) => `<option value="${v}">${l}</option>`).join("")}</select></label></div>
-    <div class="sh-grid" id="shGrid" aria-live="polite"></div>
-    <section class="sh-lib" aria-labelledby="libH"><div><h2 id="libH">Kho nội dung miễn phí</h2><p>Script, APK, iOS và liên kết đã được kiểm duyệt — xem và sao chép không cần trả phí.</p></div><a class="btn ghost" href="/library">${ICO.layers}Mở kho nội dung</a></section>`;
+    <div class="sh-grid" id="shGrid" aria-live="polite"></div>`;
   const $ = s => ctx.el.querySelector(s), grid = $("#shGrid");
 
   const drawWallet = () => {

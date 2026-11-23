@@ -1,0 +1,114 @@
+/* Skias — cái đầu biết nói (góc dưới bên trái, không đè lên thanh dưới, cookie, chat nổi). Khung nói/khung chat là kính mờ
+   ĐẶC (độ đục cao + làm mờ mạnh) nên chữ phía sau không bao giờ lộ ra đè lên chữ của Skias. */
+#sk{position:fixed;left:8px;bottom:calc(var(--bar-h) + var(--safe-b) + 16px);z-index:235;pointer-events:none;--sk-ink:#15151c;--sk-acc:var(--acc);--sk-face:#fff7ea;--sk-pane:color-mix(in srgb,var(--surface) 90%,transparent)}
+#sk[hidden]{display:none}
+#sk>*{pointer-events:auto}
+@media(min-width:1024px){#sk{left:calc(var(--side-w) + 18px);bottom:14px;transition:left .5s var(--ez)}html.side-off #sk{left:18px}}
+@media(max-width:860px){body:has(.ck) #sk{display:none}}
+@media(max-width:640px){body.cw-open #sk{display:none}}
+.sk-fig{position:relative;display:block;width:84px;height:88px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 6px 10px rgba(0,0,0,.32));transition:transform .25s var(--ez)}
+.sk-fig:hover{transform:translateY(-2px) scale(1.04)}.sk-fig:active{transform:scale(.95)}
+@media(min-width:1024px){.sk-fig{width:108px;height:113px}}
+.sk-fig:focus-visible{outline:3px solid var(--sk-acc);outline-offset:3px;border-radius:26px}
+.sk-svg{overflow:visible}
+.sk-svg .sk-face,.sk-av .sk-face{fill:var(--sk-face);stroke:var(--sk-ink);stroke-width:3.4}
+.sk-svg .sk-ear{fill:var(--sk-face);stroke:var(--sk-ink);stroke-width:3.2}
+.sk-svg .sk-ant{fill:none;stroke:var(--sk-ink);stroke-width:3.2;stroke-linecap:round}
+.sk-svg .sk-bulb{fill:var(--sk-acc);stroke:var(--sk-ink);stroke-width:2.6}
+.sk-svg .sk-sclera,.sk-av .sk-sclera{fill:#fff;stroke:var(--sk-ink);stroke-width:2.8}
+.sk-svg .sk-iris,.sk-av .sk-iris{fill:var(--sk-ink)}
+.sk-svg .sk-glint{fill:#fff}
+.sk-svg .sk-blush{fill:#ff7a8a;opacity:.5}
+.sk-svg .sk-shadow{fill:rgba(0,0,0,.3)}
+.sk-svg .sk-brow,.sk-svg .sk-joy,.sk-svg .sk-m,.sk-av .sk-m{fill:none;stroke:var(--sk-ink);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.sk-svg ellipse.sk-m{fill:#7a2230;stroke-width:3}
+/* tư thế theo trạng thái */
+.sk-mFlat,.sk-mOpen,.sk-joy{display:none}
+[data-st=think] .sk-mSmile,[data-st=talk] .sk-mSmile{display:none}
+[data-st=think] .sk-mFlat{display:inline}
+[data-st=talk] .sk-mOpen{display:inline;transform-box:fill-box;transform-origin:center}
+[data-st=happy] .sk-eye,[data-st=wave] .sk-eye{display:none}
+[data-st=happy] .sk-joy,[data-st=wave] .sk-joy{display:inline}
+[data-st=happy] .sk-mSmile,[data-st=wave] .sk-mSmile{stroke-width:4}
+[data-st=think] .sk-brows{transform:translateY(-4px)}
+[data-st=think] .sk-pup{transform:translate(-3.5px,-4.5px);animation:none}
+[data-st=happy] .sk-brows,[data-st=wave] .sk-brows{transform:translateY(-3px)}
+/* chuyển động: thở nhẹ, nghiêng đầu, nhìn quanh và CHỚP MẮT (có chớp đôi) */
+.sk-all{transform-box:view-box;transform-origin:60px 112px;animation:skFloat 3.8s ease-in-out infinite}
+.sk-head{transform-box:view-box;transform-origin:60px 100px;animation:skSway 7s ease-in-out infinite}
+.sk-eye{transform-box:fill-box;transform-origin:center;animation:skBlink 5.2s infinite}
+.sk-pup{animation:skLook 8s ease-in-out infinite}
+.sk-bulb{animation:skBulb 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+[data-st=talk] .sk-mOpen{animation:skTalk .28s ease-in-out infinite alternate}
+[data-st=wave] .sk-all{animation:skHop .55s ease-in-out 3}
+[data-st=happy] .sk-all{animation:skJump .5s ease-out 4}
+[data-st=think] .sk-head{animation:skTilt 2.2s ease-in-out infinite}
+@keyframes skFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px) scaleY(1.012)}}
+@keyframes skSway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2.5deg)}}
+@keyframes skBlink{0%,86%,100%{transform:scaleY(1)}88%{transform:scaleY(.06)}91%{transform:scaleY(1)}93%{transform:scaleY(.06)}96%{transform:scaleY(1)}}
+@keyframes skLook{0%,18%,100%{transform:translate(0,0)}26%,44%{transform:translate(3.4px,.6px)}52%,70%{transform:translate(-3.4px,.8px)}78%,90%{transform:translate(0,-1.5px)}}
+@keyframes skBulb{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes skTalk{from{transform:scaleY(.4)}to{transform:scaleY(1.15)}}
+@keyframes skHop{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}}
+@keyframes skJump{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+@keyframes skTilt{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(5deg)}}
+/* đám mây suy nghĩ */
+.sk-cloud{position:absolute;left:66%;top:-30px;display:none;pointer-events:none}
+[data-st=think] .sk-cloud{display:block}
+.sk-cloud i{position:absolute;border-radius:50%;background:var(--surface);border:1.5px solid var(--line-strong,var(--line))}
+.sk-c1{width:5px;height:5px;left:0;top:36px;animation:skPuff 1.4s infinite}
+.sk-c2{width:8px;height:8px;left:6px;top:26px;animation:skPuff 1.4s .25s infinite}
+.sk-c3{position:absolute;left:10px;top:0;display:flex;gap:4px;align-items:center;min-width:46px;height:26px;padding:0 10px;border-radius:16px;background:var(--surface);border:1.5px solid var(--line-strong,var(--line));box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.sk-c3 b{width:6px;height:6px;border-radius:50%;background:var(--text);animation:skDot 1.2s ease-in-out infinite}
+.sk-c3 b:nth-child(2){animation-delay:.18s}.sk-c3 b:nth-child(3){animation-delay:.36s}
+@keyframes skDot{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-6px);opacity:1}}
+@keyframes skPuff{0%,100%{transform:scale(.7);opacity:.5}50%{transform:scale(1.1);opacity:1}}
+/* bong bóng nói: kính mờ đặc */
+.sk-bubble,.sk-panel{background:var(--sk-pane);-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);color:var(--text);border:1px solid var(--line-strong,var(--line))}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.sk-bubble,.sk-panel{background:var(--surface)}}
+.sk-bubble{position:absolute;left:72px;bottom:52px;width:max-content;max-width:min(280px,calc(100vw - 96px));padding:12px 32px 12px 14px;border-radius:18px 18px 18px 5px;box-shadow:0 14px 36px rgba(0,0,0,.38);font-size:14px;line-height:1.45;opacity:0;transform:translateY(6px) scale(.96);transform-origin:0 100%;transition:opacity .2s,transform .25s var(--ez);cursor:pointer}
+.sk-bubble.on{opacity:1;transform:none}
+@media(min-width:1024px){.sk-bubble{left:92px;bottom:64px}}
+.sk-bt span{display:block;font-weight:700}.sk-bt small{display:block;margin-top:3px;color:var(--text-2);font-size:12.5px}
+.sk-bx{position:absolute;top:6px;right:7px;width:26px;height:26px;border:0;border-radius:50%;background:none;color:var(--text-2);font-size:18px;line-height:1;cursor:pointer}
+.sk-bx:hover{background:var(--line)}
+.sk-ba{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.sk-btn{min-height:34px;padding:6px 13px;border-radius:999px;border:1px solid var(--line-strong,var(--line));background:var(--bg-soft);color:var(--text);font:inherit;font-size:13px;cursor:pointer}
+.sk-btn.pri{background:var(--acc-grad);color:#0a0a0a;border-color:transparent;font-weight:700}
+/* khung trò chuyện */
+.sk-panel{position:absolute;left:0;bottom:calc(100% + 6px);width:min(360px,calc(100vw - 16px));max-height:min(540px,calc(100dvh - var(--head-h) - var(--bar-h) - 110px));display:flex;flex-direction:column;border-radius:20px;box-shadow:0 22px 60px rgba(0,0,0,.5);overflow:hidden;opacity:0;transform:translateY(10px) scale(.97);transform-origin:0 100%;transition:opacity .2s,transform .25s var(--ez)}
+.sk-panel.on{opacity:1;transform:none}
+.sk-panel[hidden]{display:none}
+.sk-head2{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.sk-head2>div{flex:1;min-width:0}.sk-head2 b{display:block;font-size:15px}.sk-head2 small{display:block;color:var(--text-2);font-size:12px}
+.sk-av{width:36px;height:36px;border-radius:50%;background:var(--acc-grad);display:grid;place-items:center;flex:none;overflow:hidden}
+.sk-av svg{width:30px;height:31px}
+.sk-hx{min-height:34px;border:0;background:none;color:var(--text-2);cursor:pointer;font:inherit;font-size:12.5px;padding:5px 9px;border-radius:9px}.sk-hx:hover{background:var(--line);color:var(--text)}
+.sk-min{font-size:22px;line-height:1;padding:2px 10px}
+.sk-modes{display:flex;gap:6px;padding:8px 12px 0}
+.sk-mode{flex:1;min-height:36px;padding:6px 10px;border-radius:12px;border:1px solid var(--line-strong,var(--line));background:var(--bg-soft);color:var(--text);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,border-color .2s}
+.sk-mode.on{background:var(--acc-grad);color:#0a0a0a;border-color:transparent}
+.sk-mode.locked{opacity:.72;border-style:dashed}
+.sk-log{flex:1;min-height:150px;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}
+.sk-m-row{display:flex;flex-direction:column;gap:5px;max-width:92%}.sk-m-row.me{align-self:flex-end;align-items:flex-end}
+.sk-msg{padding:9px 12px;border-radius:15px;font-size:14px;line-height:1.5;background:var(--surface-2,var(--bg-soft));border:1px solid var(--line);overflow-wrap:anywhere}
+.sk-m-row.me .sk-msg{background:var(--acc-grad);color:#0a0a0a;border-color:transparent}
+.sk-msg small{color:var(--text-2)}.sk-m-row.me .sk-msg small{color:inherit}
+.sk-go{display:flex;gap:6px;flex-wrap:wrap}.sk-go a{display:inline-flex;align-items:center;min-height:32px;padding:4px 12px;border-radius:999px;border:1px solid var(--line-strong,var(--line));font-size:13px;color:var(--sk-acc);text-decoration:none;background:var(--bg-soft)}.sk-go a:hover{border-color:var(--sk-acc)}
+.sk-dots{display:inline-flex;gap:4px;padding:3px 2px}.sk-dots i{width:6px;height:6px;border-radius:50%;background:var(--text-2);animation:skDot 1s ease-in-out infinite}.sk-dots i:nth-child(2){animation-delay:.15s}.sk-dots i:nth-child(3){animation-delay:.3s}
+.sk-steps{margin:0;padding:0;list-style:none;display:grid;gap:5px}
+.sk-steps li{font-size:13px;color:var(--text-2);padding-left:22px;position:relative}
+.sk-steps li::before{content:"";position:absolute;left:3px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--line)}
+.sk-steps li.on{color:var(--text)}.sk-steps li.on::before{border-color:var(--sk-acc);border-top-color:transparent;animation:skSpin .7s linear infinite}
+.sk-steps li.ok{color:var(--text)}.sk-steps li.ok::before{border-color:#3ecf8e;background:#3ecf8e}
+@keyframes skSpin{to{transform:rotate(360deg)}}
+.sk-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 9px}.sk-chips[hidden]{display:none}
+.sk-chip{min-height:34px;padding:5px 13px;border-radius:999px;border:1px solid var(--line-strong,var(--line));background:var(--bg-soft);color:var(--text);font:inherit;font-size:13px;cursor:pointer}
+.sk-chip.pri{background:var(--acc-grad);color:#0a0a0a;border-color:transparent;font-weight:700}
+.sk-form{display:flex;gap:6px;padding:9px 10px;border-top:1px solid var(--line)}
+.sk-in{flex:1;min-width:0;min-height:42px;padding:9px 14px;border-radius:999px;border:1px solid var(--line-strong,var(--line));background:var(--bg-soft);color:var(--text);font:inherit;font-size:16px}
+.sk-in:focus{outline:2px solid var(--sk-acc);outline-offset:1px}
+.sk-send{width:42px;height:42px;border-radius:50%;border:0;background:var(--acc-grad);color:#0a0a0a;cursor:pointer;font-size:16px}
+/* giảm chuyển động */
+html[data-motion=reduced] #sk *{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){#sk *{animation:none!important;transition:none!important}}

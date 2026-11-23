@@ -134,5 +134,5 @@ body.cw-open .ck{display:none}
 .cn-steps{margin:0 0 12px;padding-left:20px;display:grid;gap:8px;line-height:1.55;font-size:14px}
 .cn-steps code{padding:1px 6px;border-radius:6px;background:var(--surface-2);font-size:13px;word-break:break-all}
 #cnIn,#cnVal{width:100%;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all}
-.seg{display:grid;gap:8px}.seg label{display:flex;gap:8px;align-items:flex-start;line-height:1.4;font-size:14px}.seg small{color:var(--text-3)}
+.seg-list{display:grid;gap:8px}.seg-list label{display:flex;gap:8px;align-items:flex-start;line-height:1.4;font-size:14px}.seg-list small{color:var(--text-3)}
 .btn.sm{min-height:32px;padding:4px 10px;font-size:13px}

@@ -35,7 +35,7 @@ export function decide(guard, s, here) {
   /* Tài khoản Google chưa bật xác minh 2 bước: chỉ cho vào Hồ sơ/Cài đặt/trang pháp lý/đăng nhập cho tới khi bật xong */
   if (real && s.needTwofaSetup && guard !== "twofa") {
     let pth = here; try { pth = new URL(here, "http://x").pathname; } catch (_) {}
-    if (!/^\/(profile|settings|login|logout|two-step|auth\/action|terms|privacy|security|about|guide|skibidiscript|apk-safety)(\/|$)/.test(pth)) return { to: "/profile?tab=security&setup=1", replace: true, toast: "Tài khoản Google cần bật xác minh 2 bước để tiếp tục." };
+    if (!/^\/(profile|settings|login|logout|two-step|auth\/action|terms|privacy|security|about|guide|skibidiscript)(\/|$)/.test(pth)) return { to: "/profile?tab=security&setup=1", replace: true, toast: "Tài khoản Google cần bật xác minh 2 bước để tiếp tục." };
   }
   if (!guard || guard === "public") return null;
   if (guard === "twofa") return !real ? { to: "/login", replace: true } : (!s.twofaPending ? { to: "__next__", replace: true } : null);

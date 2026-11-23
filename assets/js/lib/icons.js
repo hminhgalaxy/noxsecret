@@ -2,10 +2,7 @@ export const SW = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-l
 export const ICO = {
   share:`<svg viewBox="0 0 24 24" ${SW}><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>`,
   clock:`<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
-  script:`<svg viewBox="0 0 24 24" ${SW}><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg>`,
-  apk:`<svg viewBox="0 0 24 24" ${SW}><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/><path d="M12 13v7"/></svg>`,
   link:`<svg viewBox="0 0 24 24" ${SW}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
-  ios:`<svg viewBox="0 0 24 24" ${SW}><path d="M15.6 8.6c-.2-2 1.5-3 1.5-3-1-1.4-2.5-1.6-3.1-1.6-1.4-.1-2.3.8-2.9.8-.6 0-1.6-.8-2.8-.8-1.6 0-3.8 1.3-3.8 4.9 0 3.3 2.5 7.4 4.1 7.4 1 0 1.4-.6 2.8-.6 1.3 0 1.7.6 2.8.6 1.6 0 4-4 4-7.2 0-2.4-1.8-3.4-2.6-3.5Z"/><path d="M12.2 3.9c0-1.5 1.2-2.7 2.7-2.7.1 1.6-1.3 2.8-2.7 2.7Z"/></svg>`,
   box:`<svg viewBox="0 0 24 24" ${SW}><path d="M3 8.5 12 4l9 4.5-9 4.5Z"/><path d="M3 8.5v7L12 20l9-4.5v-7"/></svg>`,
   star:`<svg viewBox="0 0 24 24" ${SW}><path d="m12 3 2.7 5.8 6.3.8-4.6 4.4 1.2 6.2L12 17.2 6.4 20.2l1.2-6.2L3 9.6l6.3-.8Z"/></svg>`,
   gift:`<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12"/><path d="M12 9S10.5 4 8 4a2.5 2.5 0 0 0 0 5Zm0 0s1.5-5 4-5a2.5 2.5 0 0 1 0 5Z"/></svg>`,

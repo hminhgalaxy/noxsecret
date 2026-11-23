@@ -56,7 +56,7 @@ import { initShopHeader } from "./lib/walletchip.js"; initShopHeader();
 import { initChatWidget } from "./lib/chatwidget.js"; initChatWidget();
 import { initMailPanel } from "./lib/mailpanel.js"; initMailPanel();
 import { initCookieBar } from "./lib/cookiebar.js"; initCookieBar();
-import { initMascot } from "./lib/mascot.js"; initMascot();
+import { initSkias } from "./lib/skias.js"; import { setDevProbe } from "./lib/util.js"; import { session as __sess } from "./lib/auth.js"; setDevProbe(() => !!__sess.isDev); initSkias();
 renderNav(true); renderSound(); renderNotifDot();
 S.start();
 const first = initI18n().then(() => router.render({ pop: false }));

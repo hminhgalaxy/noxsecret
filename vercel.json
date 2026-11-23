@@ -7,6 +7,51 @@
       "source": "/shop",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/scripts/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/scripts",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/apk/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/apk",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/ios/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/ios",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/links/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/links",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/apk-safety",
+      "destination": "/guide",
+      "permanent": true
     }
   ],
   "rewrites": [

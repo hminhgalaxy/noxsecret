@@ -16,8 +16,13 @@ export function fmtDate(ts) {
   return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear();
 }
 export function debounce(fn, ms) { let t; const w = (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; w.cancel = () => clearTimeout(t); return w; }
+/* Từ ngữ kỹ thuật chỉ hiện với tài khoản dev: người dùng thường thấy câu thân thiện thay thế */
+let devProbe = () => false;
+export const setDevProbe = f => { devProbe = f; };
+const TECH_RX = /Firebase|Realtime|Database|\bUID\b|\brules?\b|listener|\bSync\b|\bAPI\b|\bnode\b|\[DEV\]|DEV ONLY|permission|PERMISSION|nox_|undefined|\[object|\bJSON\b|\btoken\b|\bendpoint\b|\bHTTP\b|\bstack\b|TypeError|ReferenceError|SyntaxError|\bCORS\b|\bfetch\b|Admin SDK|\bserver error\b/;
+export const plain = (msg, fb = "Có lỗi xảy ra. Vui lòng thử lại.") => (devProbe() || !TECH_RX.test(String(msg == null ? "" : msg))) ? msg : fb;
 export function toast(msg, kind) {
-  const w = $("#toasts"); if (!w) return;
+  const w = $("#toasts"); if (!w) return; msg = plain(msg);
   const el = document.createElement("div"); el.className = "toast" + (kind === "err" ? " err" : ""); el.setAttribute("role", kind === "err" ? "alert" : "status");
   const ic = kind === "err"
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>'

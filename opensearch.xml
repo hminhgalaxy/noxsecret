@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
-  <ShortName>skibidiscript</ShortName>
-  <Description>Tìm trên SKIBIDI SCRIPT WEB (skibidiscript)</Description>
+  <ShortName>Skibidi Web</ShortName>
+  <Description>Tìm trên Skibidi Web</Description>
   <InputEncoding>UTF-8</InputEncoding>
   <Image width="48" height="48" type="image/x-icon">https://skibidiscript.vercel.app/favicon.ico</Image>
   <Url type="text/html" method="get" template="https://skibidiscript.vercel.app/search?q={searchTerms}"/>

@@ -31,10 +31,10 @@
   box-shadow:inset 0 1.5px 0 var(--lq-hi),inset 0 -1px 0 var(--lq-lo),0 28px 60px -22px var(--lq-drop)!important}
 :root[data-glass="on"] #side{border-right:1px solid var(--lq-rim-d)}
 :root[data-glass="on"] .pop-head{background:transparent!important}
-/* Thanh trên / thanh dưới: đủ đục để cuộn qua không bị chồng chữ */
+/* Thanh trên / thanh dưới: đục ~92% + làm mờ mạnh để chữ cuộn qua phía sau KHÔNG lộ ra chồng lên chữ của thanh */
 :root[data-glass="on"] :is(#hdr,#tabbar){
-  background:color-mix(in srgb,var(--bg) 74%,transparent)!important;
-  -webkit-backdrop-filter:blur(26px) saturate(1.6);backdrop-filter:blur(26px) saturate(1.6);
+  background:color-mix(in srgb,var(--bg) 92%,transparent)!important;
+  -webkit-backdrop-filter:blur(32px) saturate(1.6);backdrop-filter:blur(32px) saturate(1.6);
   box-shadow:inset 0 -1px 0 var(--lq-lo),inset 0 1px 0 var(--lq-hi)}
 :root[data-glass="on"] #tabbar{border-top:1px solid var(--lq-rim-d)}
 :root[data-glass="on"] #hdr{border-bottom:1px solid var(--lq-rim-d)}

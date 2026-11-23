@@ -4,19 +4,18 @@
 const fs = require("fs"), path = require("path");
 const SITE = "https://skibidiscript.vercel.app";
 const DB = "https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app";
-const NAME = "SKIBIDI SCRIPT WEB";
-const BASE = { scripts: ["scripts", "Scripts"], apk: ["apks", "APK"], links: ["links", "Links"], ios: ["ios", "iOS"] };
+const NAME = "Skibidi Web";
+const BASE = {}; /* các danh mục gốc cũ (Script/APK/iOS/Link) đã bị xóa khỏi web */
 const PAGES = {
   "/": null,
-  "/skibidiscript": ["What is skibidiscript? — SKIBIDI SCRIPT WEB", "skibidiscript (SKIBIDI SCRIPT WEB) is a high-security website for sharing APK packages, scripts and useful links, reviewed before publishing."],
-  "/library": ["Content library — SKIBIDI SCRIPT WEB", "Reviewed scripts, APKs, iOS files and links on SKIBIDI SCRIPT WEB, with clear warnings before you install anything."],
-  "/categories": ["All categories — skibidiscript", "Browse every category of reviewed content on SKIBIDI SCRIPT WEB: scripts, APKs, iOS and links."],
-  "/about": ["About skibidiscript — SKIBIDI SCRIPT WEB", "Who runs SKIBIDI SCRIPT WEB, what it offers and how content is reviewed before it is published."],
-  "/guide": ["User guide — skibidiscript", "How to browse, search, copy code, save and like posts on SKIBIDI SCRIPT WEB."],
-  "/apk-safety": ["APK safety tips — skibidiscript", "How to check an APK before installing it: sources, permissions, scanning and what to avoid."],
-  "/security": ["Security — skibidiscript", "How SKIBIDI SCRIPT WEB protects accounts: 2-step verification, reviewed content and clear warnings for third-party software."],
-  "/terms": ["Terms of use — skibidiscript", "The rules for using SKIBIDI SCRIPT WEB."],
-  "/privacy": ["Privacy policy — skibidiscript", "What data SKIBIDI SCRIPT WEB keeps, why, and how you can control it."],
+  "/skibidiscript": ["What is Skibidi Web (skibidiscript)? — Skibidi Shop", "Skibidi Web, also called Skibidi Shop or skibidiscript, is a digital shop: top up your wallet by bank transfer, buy and receive instantly."],
+  "/library": ["Content library — Skibidi Web", "Browse the free content library on Skibidi Web: posts reviewed before publishing, grouped by category."],
+  "/categories": ["All categories — Skibidi Web", "Browse every category of reviewed content on Skibidi Web."],
+  "/about": ["About Skibidi Web — Skibidi Shop", "Who runs Skibidi Web (skibidiscript), what the Skibidi shop offers and how payments and delivery work."],
+  "/guide": ["User guide — Skibidi Web", "How to top up your wallet, buy from the Skibidi shop, find your orders and keep your account safe on Skibidi Web."],
+  "/security": ["Security — Skibidi Web", "How Skibidi Web protects accounts and payments: 2-step verification, email codes and safe wallet top-ups."],
+  "/terms": ["Terms of use — Skibidi Web", "The rules for using Skibidi Web."],
+  "/privacy": ["Privacy policy — Skibidi Web", "What data Skibidi Web keeps, why, and how you can control it."],
 };
 const PRIVATE = /^\/(dev|login|register|forgot-password|two-step|auth|profile|settings|search|favorites|inbox|wallet|orders|help\/|notifications)/;
 const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -53,15 +52,15 @@ function head(h, m) {
   return h;
 }
 const crumbs = list => ({ "@type": "BreadcrumbList", itemListElement: list.map(([name, url], i) => ({ "@type": "ListItem", position: i + 1, name, item: url })) });
-const nav = `<p><a href="/">Shop</a> · <a href="/library">Library</a> · <a href="/categories">Categories</a> · <a href="/scripts">Scripts</a> · <a href="/apk">APK</a> · <a href="/ios">iOS</a> · <a href="/links">Links</a> · <a href="/help">Help</a> · <a href="/about">About</a></p>`;
+const nav = `<p><a href="/">Shop</a> · <a href="/library">Library</a> · <a href="/categories">Categories</a> · <a href="/guide">Guide</a> · <a href="/about">About</a></p>`;
 const listHtml = (seg, items) => items.length ? `<ul>${items.map(([k, it]) => `<li><a href="/${seg}/${encodeURIComponent(k)}">${esc(clip(it.name, 120))}</a>${it.desc ? " — " + esc(clip(it.desc, 140)) : ""}</li>`).join("")}</ul>` : "";
 async function items(node) {
   const v = await getJson("nox_data/" + encodeURIComponent(node) + '.json?orderBy="ts"&limitToLast=40');
   return v && typeof v === "object" ? Object.entries(v).map(([k, it]) => [k, norm(it)]).filter(([, it]) => it && typeof it === "object" && it.name).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0)) : [];
 }
 
-const HOME_T = "skibidiscript — SKIBIDI SCRIPT WEB: Shop & secure APK sharing hub";
-const HOME_D = "SKIBIDI SCRIPT WEB: digital shop with wallet top-up by bank transfer, plus a secure hub for reviewed scripts and APKs. Third-party software is clearly flagged.";
+const HOME_T = "Skibidi Web — Skibidi Shop: digital goods & instant delivery";
+const HOME_D = "Skibidi Web (skibidiscript) is a digital shop: top up your wallet by bank transfer, buy digital goods and receive them instantly. Browse the Skibidi shop.";
 const IDOK = /^[A-Za-z0-9_-]{1,40}$/;
 const vnd = n => Math.max(0, Math.floor(Number(n) || 0)).toLocaleString("en-US") + " VND";
 /* Chỉ mục nhẹ của cửa hàng (nox_shopseo, do máy chủ ghi) + mục lục. Trả về null nếu Firebase lỗi. */
@@ -83,17 +82,17 @@ async function resolve(p) {
   if (p === "/") {
     const sx = await shopIndex(), list = sx ? sx.list : [], cats = sx ? sx.cats : [];
     return { ok: true, title: HOME_T, desc: HOME_D, url: SITE + "/",
-      body: `<h1>SKIBIDI SCRIPT WEB — digital shop</h1><p>${esc(HOME_D)}</p>${catNav(cats)}${prodList(list)}${nav}`,
+      body: `<h1>Skibidi Web — Skibidi Shop</h1><p>${esc(HOME_D)}</p>${catNav(cats)}${prodList(list)}${nav}`,
       ld: list.length ? { "@context": "https://schema.org", "@graph": [itemListLd(list, SITE + "/#shop")] } : null };
   }
   if (PAGES[p]) { const e = PAGES[p]; return { ok: true, title: e ? e[0] : null, desc: e ? e[1] : null, url: SITE + (p === "/" ? "/" : p), body: e ? `<h1>${esc(e[0].split(" — ")[0])}</h1><p>${esc(e[1])}</p>${nav}` : null, ld: e ? { "@context": "https://schema.org", "@graph": [{ "@type": "WebPage", "@id": SITE + p + "#page", url: SITE + p, name: e[0], description: e[1], isPartOf: { "@id": SITE + "/#site" }, publisher: { "@id": SITE + "/#org" } }, crumbs([["Home", SITE + "/"], [e[0].split(" — ")[0], SITE + p]])] } : null }; }
-  if (PRIVATE.test(p)) return { ok: true, noindex: true, title: NAME + " — skibidiscript", desc: "SKIBIDI SCRIPT WEB (skibidiscript).", url: SITE + "/" };
+  if (PRIVATE.test(p)) return { ok: true, noindex: true, title: NAME, desc: "Skibidi Web — Skibidi Shop.", url: SITE + "/" };
   if (seg[0] === "shop" && seg[1] === "c" && seg.length === 3 && IDOK.test(seg[2])) {
     const sx = await shopIndex(); if (!sx) throw new Error("upstream");
     const c = sx.cats.find(x => x.id === seg[2]); if (!c) return { ok: false };
     const list = sx.list.filter(x => x.cat === c.id), url = SITE + "/shop/c/" + encodeURIComponent(c.id);
     const from = list.length ? Math.min(...list.map(x => x.price)) : 0;
-    const t = `${clip(c.name, 60)} — Shop · skibidiscript`, d = clip(list.length ? `Buy ${c.name} on SKIBIDI SCRIPT WEB: ${list.length} product${list.length === 1 ? "" : "s"} from ${vnd(from)}. Pay with your wallet balance and get instant delivery.` : `${c.name} on SKIBIDI SCRIPT WEB — products coming soon.`, 160);
+    const t = `${clip(c.name, 60)} — Skibidi Web`, d = clip(list.length ? `Buy ${c.name} on Skibidi Web: ${list.length} product${list.length === 1 ? "" : "s"} from ${vnd(from)}. Pay with your wallet balance and get instant delivery.` : `${c.name} on Skibidi Web — products coming soon.`, 160);
     return { ok: true, title: t, desc: d, url, image: list.find(x => x.img) ? imgUrl(list.find(x => x.img).id) : null,
       body: `<h1>${esc(c.name)}</h1><p>${esc(d)}</p>${catNav(sx.cats)}${prodList(list)}<p><a href="/">Shop</a></p>${nav}`,
       ld: { "@context": "https://schema.org", "@graph": [{ "@type": "CollectionPage", "@id": url + "#page", url, name: t, description: d, isPartOf: { "@id": SITE + "/#site" } }, ...(list.length ? [itemListLd(list, url + "#list")] : []), crumbs([["Home", SITE + "/"], [c.name, url]])] } };
@@ -104,7 +103,7 @@ async function resolve(p) {
     if (!it || typeof it !== "object" || !it.name || it.active === false) return { ok: false };
     const hasImg = !!(it.img || (it.imgs && (it.imgs.a || it.imgs.b || it.imgs.c))), im = hasImg ? imgUrl(seg[1]) : null;
     const url = SITE + "/shop/" + encodeURIComponent(seg[1]), price = Math.max(0, Math.floor(Number(it.price) || 0)), inStock = typeof it.stock !== "number" || it.stock > 0;
-    const d = clip(it.desc || `${it.name} — buy with your wallet balance on SKIBIDI SCRIPT WEB. Instant delivery after payment.`, 160), t = `${clip(it.name, 70)} — Shop · skibidiscript`;
+    const d = clip(it.desc || `${it.name} — buy with your wallet balance on Skibidi Web. Instant delivery after payment.`, 160), t = `${clip(it.name, 70)} — Skibidi Web`;
     return { ok: true, title: t, desc: d, url, image: im,
       body: `<h1>${esc(it.name)}</h1>${im ? `<img src="${esc(im)}" alt="${esc(clip(it.name, 120))}" width="480" height="480">` : ""}<p>${esc(clip(it.desc, 600))}</p><p>${price.toLocaleString("en-US")} VND — ${inStock ? "In stock" : "Out of stock"}</p><p><a href="/">Shop</a>${it.cat && IDOK.test(String(it.cat)) ? ` · <a href="/shop/c/${encodeURIComponent(String(it.cat))}">More in this category</a>` : ""}</p>${nav}`,
       ld: { "@context": "https://schema.org", "@graph": [{ "@type": "Product", "@id": url + "#product", name: String(it.name), description: d, url, sku: seg[1], ...(im ? { image: [im] } : {}),
@@ -115,7 +114,7 @@ async function resolve(p) {
   else if (seg[0] === "c" && /^[a-z0-9-]+$/.test(seg[1] || "")) { node = seg[1]; root = "/c/" + seg[1]; const cats = await getJson("nox_categories.json"); const c = cats && Object.values(cats).find(x => x && String(x.node || "").toLowerCase() === node); if (!c) return { ok: false }; label = String(c.label || node); }
   if (!node) return { ok: false };
   if (seg.length === (seg[0] === "c" ? 2 : 1)) {
-    const list = await items(node), t = `${label} — SKIBIDI SCRIPT WEB (skibidiscript)`, d = `Browse ${label} on SKIBIDI SCRIPT WEB: reviewed content, clear warnings, copy code or open links in one tap.`;
+    const list = await items(node), t = `${label} — Skibidi Web`, d = `Browse ${label} on Skibidi Web: reviewed content, clear warnings, copy code or open links in one tap.`;
     return { ok: true, title: t, desc: d, url: SITE + root, body: `<h1>${esc(label)}</h1><p>${esc(d)}</p>${listHtml(root.slice(1), list)}${nav}`,
       ld: { "@context": "https://schema.org", "@graph": [{ "@type": "CollectionPage", url: SITE + root, name: t, description: d, isPartOf: { "@id": SITE + "/#site" } }, crumbs([["Home", SITE + "/"], [label, SITE + root]])] } };
   }
@@ -124,13 +123,13 @@ async function resolve(p) {
     if (raw === undefined) throw new Error("upstream");
     const it = norm(raw);
     if (!it || typeof it !== "object" || !it.name) return { ok: false };
-    const url = SITE + root + "/" + encodeURIComponent(key), d = clip(it.desc || `${it.name} on SKIBIDI SCRIPT WEB — reviewed before publishing.`, 160), t = `${clip(it.name, 70)} — ${label} · skibidiscript`;
+    const url = SITE + root + "/" + encodeURIComponent(key), d = clip(it.desc || `${it.name} on Skibidi Web — reviewed before publishing.`, 160), t = `${clip(it.name, 70)} — ${label} · Skibidi Web`;
     const img = /^https:\/\//.test(it.img || "") ? it.img : null;
     return { ok: true, title: t, desc: d, url, image: img,
       body: `<h1>${esc(it.name)}</h1><p>${esc(clip(it.desc, 600))}</p><p><a href="${esc(root)}">${esc(label)}</a></p>${nav}`,
       ld: { "@context": "https://schema.org", "@graph": [{ "@type": "WebPage", "@id": url + "#page", url, name: String(it.name), description: d, ...(it.ts ? { datePublished: new Date(it.ts).toISOString() } : {}), ...(img ? { primaryImageOfPage: { "@type": "ImageObject", url: img } } : {}), isPartOf: { "@id": SITE + "/#site" }, publisher: { "@id": SITE + "/#org" } }, crumbs([["Home", SITE + "/"], [label, SITE + root], [String(it.name), url]])] } };
   }
-  return { ok: true, noindex: true, title: NAME + " — skibidiscript", desc: "SKIBIDI SCRIPT WEB (skibidiscript).", url: SITE + "/" };
+  return { ok: true, noindex: true, title: NAME, desc: "Skibidi Web — Skibidi Shop.", url: SITE + "/" };
 }
 module.exports = async (req, res) => {
   let p = "";
@@ -143,7 +142,7 @@ module.exports = async (req, res) => {
     /* Firebase tạm lỗi: trả 503 (không lưu cache, không gắn noindex) để Google tự thử lại, thay vì đánh dấu trang là noindex/404 */
     res.statusCode = 503; res.setHeader("Content-Type", "text/html; charset=utf-8"); res.setHeader("Retry-After", "120"); res.setHeader("Cache-Control", "no-store");
     return res.end("<!doctype html><meta charset=utf-8><title>Temporarily unavailable</title><p>The page is temporarily unavailable. Please try again in a moment.</p>"); }
-  if (!m.ok) { h = head(h, { title: "Page not found — SKIBIDI SCRIPT WEB", desc: "This page does not exist.", url: SITE + "/", noindex: true }); res.statusCode = 404; }
+  if (!m.ok) { h = head(h, { title: "Page not found — Skibidi Web", desc: "This page does not exist.", url: SITE + "/", noindex: true }); res.statusCode = 404; }
   else { res.statusCode = 200; if (m.title || m.noindex) h = head(h, m); }
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", m.ok && !m.noindex ? "public, s-maxage=300, stale-while-revalidate=3600" : "public, s-maxage=60");

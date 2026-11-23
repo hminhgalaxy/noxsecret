@@ -45,7 +45,7 @@ export function mount(ctx) {
     };
     if (b.dataset.a === "role") {
       const on = a.role === "editor";
-      if (await confirmDialog({ kind: "role", title: on ? "Gỡ quyền biên tập viên?" : "Cấp quyền biên tập viên?", message: on ? name + " sẽ không còn thêm, sửa hay xóa nội dung được." : name + " sẽ được thêm, sửa và xóa nội dung (Script, APK, iOS, Link...). Không đụng được vào danh mục, giao diện hay người dùng.", ok: on ? "Gỡ quyền" : "Cấp quyền", danger: on })) run({ role: on ? "" : "editor" }, on ? "Đã gỡ quyền." : "Đã cấp quyền.", on ? "unrole" : "role");
+      if (await confirmDialog({ kind: "role", title: on ? "Gỡ quyền biên tập viên?" : "Cấp quyền biên tập viên?", message: on ? name + " sẽ không còn thêm, sửa hay xóa nội dung được." : name + " sẽ được thêm, sửa và xóa nội dung (trong các danh mục). Không đụng được vào danh mục, giao diện hay người dùng.", ok: on ? "Gỡ quyền" : "Cấp quyền", danger: on })) run({ role: on ? "" : "editor" }, on ? "Đã gỡ quyền." : "Đã cấp quyền.", on ? "unrole" : "role");
     } else if (b.dataset.a === "mute") {
       if (act(a.muteUntil)) { if (await confirmDialog({ kind: "mute", title: "Bỏ mute?", message: name + " sẽ đổi được ảnh, mô tả và tên trở lại.", ok: "Bỏ mute" })) run({ muteUntil: "", muteReason: "" }, "Đã bỏ mute.", "unmute"); return; }
       const v = await formDialog({ kind: "mute", title: "Mute " + name + "?", message: "Người bị mute không đổi được ảnh, mô tả và tên hiển thị.", ok: "Mute", danger: true,

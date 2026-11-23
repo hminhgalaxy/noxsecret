@@ -65,13 +65,13 @@ console.log("XÁC MINH EMAIL / ĐẶT LẠI MẬT KHẨU");
 { const w = world();
   const r = await w.call("verify-email", {}, "aUnv"); t("gửi thư xác minh", [r.status, w.sent.length, w.sent[0].to], [200, 1, "a@example.com"]);
   t("liên kết trỏ về website (không phải firebaseapp)", /https:\/\/skibidiscript\.vercel\.app\/auth\/action\?mode=verifyEmail&amp;oobCode=VER/.test(w.sent[0].html), true);
-  t("tên người gửi/branding có trong thư", /SkibidiScript &bull; skibidiscript\.vercel\.app/.test(w.sent[0].html) && /icon-192\.png/.test(w.sent[0].html), true);
+  t("tên người gửi/branding có trong thư", /Skibidi Web &bull; skibidiscript\.vercel\.app/.test(w.sent[0].html) && /icon-192\.png/.test(w.sent[0].html), true);
   t("đã xác minh rồi → không gửi nữa", (await w.call("verify-email", {}, "a")).body.already, true);
   for (let i = 0; i < 4; i++) await w.call("verify-email", {}, "aUnv"); t("giới hạn 5 thư/giờ", (await w.call("verify-email", {}, "aUnv")).status, 429);
   const w2 = world();
-  await w2.call("reset", { email: "A@Example.com " }); t("reset: gửi tới email tồn tại (không phân biệt hoa thường)", [w2.sent.length, w2.sent[0].subject], [1, "123456 is your SkibidiScript password reset code"]);
+  await w2.call("reset", { email: "A@Example.com " }); t("reset: gửi tới email tồn tại (không phân biệt hoa thường)", [w2.sent.length, w2.sent[0].subject], [1, "123456 is your Skibidi Web password reset code"]);
   const r2 = await w2.call("reset", { email: "nobody@example.com" }); t("reset: email không tồn tại → vẫn ok, KHÔNG gửi", [r2.status, r2.body.ok, w2.sent.length], [200, true, 1]);
-  await w2.call("reset", { email: "g@example.com" }); t("reset: tài khoản Google → thư hướng dẫn dùng Google", w2.sent.at(-1).subject, "Sign in to SkibidiScript with Google");
+  await w2.call("reset", { email: "g@example.com" }); t("reset: tài khoản Google → thư hướng dẫn dùng Google", w2.sent.at(-1).subject, "Sign in to Skibidi Web with Google");
   t("reset: email sai định dạng → 400", (await w2.call("reset", { email: "abc" })).status, 400);
   const w3 = world(); for (let i = 0; i < 5; i++) await w3.call("reset", { email: "a@example.com" }); t("reset: giới hạn theo email (5/giờ)", (await w3.call("reset", { email: "a@example.com" })).status, 429);
   clock += 61 * 60 * 1000; t("reset: hết cửa sổ giờ thì gửi lại được", (await w3.call("reset", { email: "a@example.com" })).status, 200); clock = NOW0;
@@ -89,7 +89,7 @@ console.log("ĐẶT LẠI MẬT KHẨU BẰNG MÃ");
   t("mật khẩu yếu bị từ chối (không tiêu mã)", (await w.call("reset-confirm", { email: "a@example.com", code: "123456", password: "abc" })).body.code, "weak_password");
   t("mật khẩu chỉ chữ bị từ chối", (await w.call("reset-confirm", { email: "a@example.com", code: "123456", password: "abcdefghij" })).body.code, "weak_password");
   const ok1 = await w.call("reset-confirm", { email: "A@example.com", code: "123 456", password: "Matkhau123" });
-  t("đúng mã + mật khẩu mạnh → đổi được, đăng xuất mọi thiết bị, báo bằng thư", [ok1.status, w.calls.some(c => c[0] === "update" && c[1] === "uA" && c[2].password === "Matkhau123"), w.calls.some(c => c[0] === "revoke" && c[1] === "uA"), w.sent.at(-1).subject], [200, true, true, "Your SkibidiScript password was changed"]);
+  t("đúng mã + mật khẩu mạnh → đổi được, đăng xuất mọi thiết bị, báo bằng thư", [ok1.status, w.calls.some(c => c[0] === "update" && c[1] === "uA" && c[2].password === "Matkhau123"), w.calls.some(c => c[0] === "revoke" && c[1] === "uA"), w.sent.at(-1).subject], [200, true, true, "Your Skibidi Web password was changed"]);
   t("mã dùng được đúng 1 lần", (await w.call("reset-confirm", { email: "a@example.com", code: "123456", password: "Matkhau456" })).body.code, "code_expired");
   t("mã tới đúng email tài khoản → coi là đã xác minh email", w.users.uA.emailVerified, true);
   t("email không tồn tại → báo mã hết hạn (không lộ)", (await w.call("reset-confirm", { email: "nobody@example.com", code: "123456", password: "Matkhau123" })).body.code, "code_expired");
@@ -111,7 +111,7 @@ console.log("ĐỔI MẬT KHẨU TRONG HỒ SƠ (MẬT KHẨU CŨ · 2 BƯỚC �
   t("trùng mật khẩu cũ → từ chối", (await w.call("password-change", { currentPassword: "pw-ok", password: "pw-ok" }, "a")).body.code, "weak_password");
   const ok1 = await w.call("password-change", { currentPassword: "pw-ok", password: "Moimatkhau9" }, "a");
   t("đúng mật khẩu hiện tại → đổi, thu hồi phiên, yêu cầu đăng nhập lại", [ok1.status, ok1.body.relogin, w.calls.some(c => c[0] === "update" && c[2].password === "Moimatkhau9"), w.calls.some(c => c[0] === "revoke")], [200, true, true, true]);
-  t("thư báo đã đổi mật khẩu", w.sent.at(-1).subject, "Your SkibidiScript password was changed");
+  t("thư báo đã đổi mật khẩu", w.sent.at(-1).subject, "Your Skibidi Web password was changed");
   t("chưa bật 2 bước → không gửi mã 2 bước được", (await w.call("password-code-send", {}, "a")).body.code, "no_twofa");
   t("chưa có email khôi phục → không dùng được", (await w.call("password-code-send", { via: "recovery" }, "a")).body.code, "no_recovery");
   t("tài khoản Google → không có mật khẩu để đổi", [(await w.call("password-code-send", {}, "gg")).body.code, (await w.call("password-change", { currentPassword: "x", password: "Moimatkhau9" }, "gg")).body.code], ["not_password", "not_password"]); }
@@ -215,7 +215,7 @@ console.log("CHỈ DEV: cấm / mute / cấp quyền / thư mẫu");
   t("user thường KHÔNG gửi thư mẫu", (await w.call("dev-send", { to: "x@y.co", body: "hi" }, "a")).status, 403);
   t("user thường KHÔNG xem mẫu", (await w.call("dev-templates", {}, "a")).status, 403);
   t("không moderate được chủ website", (await w.call("moderate", { uid: "uDEV", op: "ban", until: clock + 1e6 }, "dev")).status, 400);
-  const r = await w.call("moderate", { uid: "uA", op: "role" }, "dev"); if (!r.body.ok) console.log("   moderate →", JSON.stringify(r)); t("cấp biên tập viên: ghi nox_admin + gửi thư", [r.status, w.data.nox_admin.uA.role, w.sent.at(-1).subject, w.sent.at(-1).to], [200, "editor", "You're now an editor on SkibidiScript", "a@example.com"]);
+  const r = await w.call("moderate", { uid: "uA", op: "role" }, "dev"); if (!r.body.ok) console.log("   moderate →", JSON.stringify(r)); t("cấp biên tập viên: ghi nox_admin + gửi thư", [r.status, w.data.nox_admin.uA.role, w.sent.at(-1).subject, w.sent.at(-1).to], [200, "editor", "You're now an editor on Skibidi Web", "a@example.com"]);
   await w.call("moderate", { uid: "uA", op: "mute", until: clock + 3600e3, reason: "Spam <b>" }, "dev"); t("mute: lưu hạn + lý do; thư có lý do (đã escape)", [w.data.nox_admin.uA.muteUntil, w.data.nox_admin.uA.muteReason, /Spam &lt;b&gt;/.test(w.sent.at(-1).html), w.data.nox_admin.uA.role], [clock + 3600e3, "Spam <b>", true, "editor"]);
   await w.call("moderate", { uid: "uA", op: "unmute" }, "dev"); t("unmute: xoá trường mute, giữ role", [w.data.nox_admin.uA.muteUntil, w.data.nox_admin.uA.role], [undefined, "editor"]);
   await w.call("moderate", { uid: "uB", op: "ban", until: clock + 3600e3, reason: "x" }, "dev"); t("ban có hạn: thu hồi phiên, KHÔNG khoá tài khoản", [w.calls.some(c => c[0] === "revoke" && c[1] === "uB"), w.users.uB.disabled], [true, undefined]);
@@ -227,7 +227,7 @@ console.log("CHỈ DEV: cấm / mute / cấp quyền / thư mẫu");
   t("uid lạ → 404", (await w.call("moderate", { uid: "zzzzzzzz", op: "role" }, "dev")).status, 404);
   t("uid kiểu tấn công đường dẫn → 400", (await w.call("moderate", { uid: "../nox_data", op: "role" }, "dev")).status, 400);
   const tp = await w.call("dev-templates", {}, "dev"); t("danh sách thư mẫu", [tp.body.replies.length >= 8, tp.body.system.includes("loginCode")], [true, true]);
-  const pv = await w.call("dev-preview", { type: "banned" }, "dev"); t("xem trước thư (có HTML + tiêu đề)", [pv.status, /<html/.test(pv.body.html), pv.body.subject], [200, true, "Your SkibidiScript account was suspended"]);
+  const pv = await w.call("dev-preview", { type: "banned" }, "dev"); t("xem trước thư (có HTML + tiêu đề)", [pv.status, /<html/.test(pv.body.html), pv.body.subject], [200, true, "Your Skibidi Web account was suspended"]);
   const sn = await w.call("dev-send", { uid: "uB", template: "custom", subject: "Hello {{name}}", body: "Hi {{name}},\n\nThanks!\n\n- one\n- two" }, "dev"); t("DEV gửi thư mẫu tới người dùng theo uid", [sn.status, w.sent.at(-1).to, /Hi there,|Hi /.test(w.sent.at(-1).text)], [200, "b@example.com", true]);
   const ts = await w.call("dev-send", { to: "someone@example.com", template: "custom", subject: "S", body: "B", test: true }, "dev"); t("gửi thử: luôn gửi về chính DEV", w.sent.at(-1).to, DEVE);
   t("thư trống → 400", (await w.call("dev-send", { to: "x@y.co", template: "custom", body: " " }, "dev")).status, 400);
@@ -238,9 +238,9 @@ console.log("CHỈ DEV: cấm / mute / cấp quyền / thư mẫu");
 
 console.log("THƯ MẪU");
 { const sys = Object.keys(T.SYSTEM); let vi = 0, noBrand = 0, noLogo = 0;
-  for (const k of sys) { const r = T.preview(k); if (/[À-ỹà-ỹ]/.test(r.html + r.subject)) vi++; if (!/SkibidiScript &bull; skibidiscript\.vercel\.app/.test(r.html)) noBrand++; if (!/icon-192\.png/.test(r.html)) noLogo++; }
-  for (const r of T.REPLIES) { const c = T.custom({ subject: r.subject, body: r.body, name: "A" }); if (/[À-ỹ]/.test(c.html)) vi++; if (!/SkibidiScript &bull;/.test(c.html)) noBrand++; }
-  t("100% tiếng Anh (không còn ký tự tiếng Việt)", vi, 0); t("mọi thư có dòng 'SkibidiScript • skibidiscript.vercel.app'", noBrand, 0); t("mọi thư hệ thống có logo", noLogo, 0);
+  for (const k of sys) { const r = T.preview(k); if (/[À-ỹà-ỹ]/.test(r.html + r.subject)) vi++; if (!/Skibidi Web &bull; skibidiscript\.vercel\.app/.test(r.html)) noBrand++; if (!/icon-192\.png/.test(r.html)) noLogo++; }
+  for (const r of T.REPLIES) { const c = T.custom({ subject: r.subject, body: r.body, name: "A" }); if (/[À-ỹ]/.test(c.html)) vi++; if (!/Skibidi Web &bull;/.test(c.html)) noBrand++; }
+  t("100% tiếng Anh (không còn ký tự tiếng Việt)", vi, 0); t("mọi thư có dòng 'Skibidi Web • skibidiscript.vercel.app'", noBrand, 0); t("mọi thư hệ thống có logo", noLogo, 0);
   const x = T.custom({ subject: "<script>alert(1)</script>", body: "<img src=x onerror=alert(1)> **bold** {{name}}", name: "<i>x</i>" });
   t("thư tự soạn: escape HTML (chống chèn mã)", [/<script>|<img src=x|<i>x<\/i>/.test(x.html), /<b>bold<\/b>/.test(x.html)], [false, true]);
   t("nút có địa chỉ lạ (javascript:) bị thay bằng trang chủ", /javascript:/.test(T.render("resetPassword", { url: "javascript:alert(1)" }).html), false);

@@ -231,3 +231,26 @@ Website chạy Node trên Vercel (đã dùng `FIREBASE_SERVICE_ACCOUNT` + `fireb
 - Không ai đảm bảo được thứ hạng Google; Google cần vài ngày đến vài tuần để thu thập lại sau khi gửi sitemap.
 - Scott trả lời theo kho câu hỏi có sẵn (khớp từ khóa), **không phải AI**: câu phức tạp sẽ được đề nghị gửi cho dev.
 - Hiệu ứng người que đã xem trên Chromium (máy tính + điện thoại giả lập); chưa thử Safari/Firefox thật.
+
+## Đợt Shop 4 — Skibidi Web, Skias (cái đầu biết nói), Skias AI cho dev, dọn mục cũ, sửa giao diện
+
+### Bạn cần làm (theo thứ tự)
+1. **`database.rules.json` KHÔNG đổi** so với Đợt Shop 3 (không cần dán lại nếu bạn đã dán rồi).
+2. Giải nén zip, đẩy lên GitHub, để Vercel deploy.
+3. Đăng nhập tài khoản dev → **Dev → Quản lý dữ liệu → thẻ "Dữ liệu cũ"** → bấm **"Xóa N mục cũ vĩnh viễn"** để dọn hẳn dữ liệu Script / APK / iOS / Link cũ khỏi cơ sở dữ liệu (không thể hoàn tác). Nếu chưa bấm: các mục cũ vẫn nằm trong cơ sở dữ liệu nhưng **không còn hiện ở đâu trên web**.
+4. Google Search Console: gửi lại `https://skibidiscript.vercel.app/sitemap.xml` (đã đổi tên thương hiệu và bỏ các trang cũ).
+5. Muốn thử Skias AI: đăng nhập dev → bấm cái đầu Skias → nút **✨ Skias AI**. Lần đầu Puter có thể hiện cửa sổ nhỏ yêu cầu đăng nhập/đồng ý Puter.
+
+### Mới
+- **Đổi tên thành "Skibidi Web"** (tiêu đề, mô tả, dữ liệu có cấu trúc, thư gửi đi, sơ đồ trang, tìm kiếm trình duyệt…). Từ khóa phụ "Skibidi Shop", "skibidi", "skibidiscript" vẫn có mặt để ai tìm các tên đó có cơ hội thấy web — **không ai đảm bảo được thứ hạng Google**.
+- **Xóa hẳn Script, APK, iOS, Link** khỏi web: không còn danh mục gốc, trang, menu, ô tìm kiếm, sơ đồ trang, cảnh báo APK, mẹo của Skias. Địa chỉ cũ (`/scripts`, `/apk`, `/ios`, `/links`, `/apk-safety`…) tự chuyển hướng về trang chủ/danh mục. Mọi danh mục giờ do dev tạo ở Dev → Danh mục (`/c/<tên>`).
+- **Skias thay Scott**: chỉ còn **cái đầu to hơn**, mắt chớp đầy đủ (có chớp đôi, nhìn quanh, vui/suy nghĩ/nói). Khung nói và khung chat là **kính mờ đục** (làm mờ mạnh + độ đục ≥ 85%) nên chữ phía sau không còn đè lên chữ của Skias. **Đã bỏ toàn bộ gợi ý** (nút câu hỏi gợi ý và mẹo tự hiện); chỉ còn các nút hành động như "Gửi dev". Kho câu trả lời tự động tăng lên ~76 chủ đề (mua hàng, nạp tiền, bảo hành, rút tiền, đổi email, Google, độ tương phản…), không còn từ kỹ thuật.
+- **Skias AI** (dùng puter.js): nút riêng trong khung chat, **bị khóa với tài khoản thường** (hiện 🔒 và thông báo), chỉ tài khoản dev dùng được. puter.js chỉ được tải khi dev bật chế độ này.
+- **Từ ngữ kỹ thuật chỉ dành cho dev**: thông báo lỗi chứa từ như Firebase, permission, nox_, token, API… được đổi thành "Có lỗi xảy ra. Vui lòng thử lại." với người dùng thường; dev vẫn thấy nguyên văn. Trang công khai vẫn được test quét từ kỹ thuật.
+- **Sửa giao diện** (theo ảnh bạn gửi): nút chọn Ngôn ngữ/Giao diện trong Cài đặt bị vỡ do một luật CSS của trang dev (`.seg`) ghi đè — đã tách riêng; thanh trên/thanh dưới khi bật Kính mờ đục hơn (≈92%) nên chữ cuộn phía sau không lộ; chấm huy hiệu trên avatar không còn bị cắt; nút Skias nằm cao hơn thanh dưới; nút bấm/ô nhập của Skias cao ≥ 34–42px, chữ ô nhập 16px (iPhone không tự phóng to).
+
+### Chưa kiểm chứng được (nói thật)
+- **Skias AI chưa thử với Puter thật** (ở đây không gọi được ra ngoài): đã test với bản giả lập `puter.ai.chat`. Puter có thể yêu cầu đăng nhập Puter/tính phí theo người dùng của họ; tên mô hình mặc định do Puter chọn.
+- **Khóa Skias AI là khóa ở giao diện** (nút bị khóa với tài khoản thường, mã không tải puter.js cho họ). Vì puter.js chạy trong trình duyệt nên không thể coi là bảo mật tuyệt đối — một người am hiểu vẫn có thể tự nạp puter.js trên máy mình (khi đó họ dùng tài khoản Puter của chính họ, không đụng tới dữ liệu/ví của web).
+- Chưa chạy với Vercel/Firebase/ngân hàng thật; chưa thử Safari/Firefox thật; ảnh giao diện chỉ xem trên Chromium (máy tính + điện thoại giả lập).
+- Đang giữ nguyên captcha (`turnstile.js`, `verify-captcha.js`) như bạn dặn.

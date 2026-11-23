@@ -1,4 +1,4 @@
-/* Thêm mới / chỉnh sửa nội dung (chỉ quản trị viên): /scripts/create, /scripts/:id/edit ... */
+/* Thêm mới / chỉnh sửa nội dung (chỉ quản trị viên): /c/:danh-mục/create, /c/:danh-mục/:id/edit */
 import { esc, toast } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";

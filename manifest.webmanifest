@@ -1,7 +1,7 @@
 {
-  "name": "SKIBIDI SCRIPT WEB",
-  "short_name": "skibidiscript",
-  "description": "Website tiện ích chia sẻ gói APK với bảo mật cao, nội dung được kiểm duyệt trước khi đăng.",
+  "name": "Skibidi Web",
+  "short_name": "Skibidi Web",
+  "description": "Skibidi Web (Skibidi Shop): cửa hàng số, nạp ví bằng chuyển khoản, nhận hàng ngay.",
   "lang": "vi",
   "start_url": "/",
   "scope": "/",

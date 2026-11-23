@@ -24,6 +24,5 @@ export function fieldsFor(cat) {
   else if (need === "url") f.push({ k: "url", label: "Link", req: true, type: "url", ph: "https://…" });
   else { f.push({ k: "url", label: "Link", type: "url", ph: "https://…" }); f.push({ k: "code", label: "Code", area: true, rows: 10, mono: true }); }
   f.push({ k: "img", label: "Ảnh minh họa (chọn từ máy, không bắt buộc)", image: true });
-  if (cat.id === "apk" || cat.id === "ios") f.push({ k: "vault", label: "Đánh dấu Vault", check: true });
   return f;
 }

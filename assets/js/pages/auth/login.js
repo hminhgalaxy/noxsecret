@@ -7,7 +7,7 @@ import { authMessage } from "../../lib/messages.js";
 import { emailError, EMAIL_EXAMPLE, nextOf, withNext, shell, field, pwField, wireEyes, setErr, busy, captchaHTML, googleHTML, setupSecurity, guestHTML, wireGuest } from "./shared.js";
 
 export function mount(ctx) {
-  ctx.setPage({ hero: true, title: "Đăng nhập", desc: "Đăng nhập để dùng đầy đủ tính năng của SKIBIDI SCRIPT WEB." });
+  ctx.setPage({ hero: true, title: "Đăng nhập", desc: "Đăng nhập để dùng đầy đủ tính năng của Skibidi Web." });
   const n = nextOf(ctx);
   ctx.el.innerHTML = shell("Chào mừng trở lại", "Đăng nhập để tiếp tục.", `${n ? `<p class="auth-note">Bạn cần đăng nhập để xem trang này.</p>` : ""}
     <form id="f" novalidate class="form">

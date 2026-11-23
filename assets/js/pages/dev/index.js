@@ -9,7 +9,7 @@ import { api } from "../../lib/account.js";
 
 const SHORTCUTS = [
   { href: "/dev/data", t: "Dữ liệu", d: "Thêm, sửa, xóa nội dung trong từng danh mục.", i: "box" },
-  { href: "/dev/categories", t: "Danh mục", d: "Thêm, sửa, xóa mọi danh mục (kể cả Script, APK, iOS, Link) và gán cảnh báo.", i: "grid" },
+  { href: "/dev/categories", t: "Danh mục", d: "Thêm, sửa, xóa danh mục nội dung và gán cảnh báo rủi ro.", i: "grid" },
   { href: "/inbox", t: "Hộp thư", d: "Hộp thư chung của website: tin nhắn, báo cáo và hỗ trợ (mở từ biểu tượng thư trên đầu trang).", i: "chat" },
   { href: "/dev/review", t: "Duyệt bài", d: "Duyệt hoặc từ chối mục và danh mục do người dùng gửi.", i: "check" },
   { href: "/dev/users", t: "Người dùng", d: "Những tài khoản đã đăng nhập vào website.", i: "users" },

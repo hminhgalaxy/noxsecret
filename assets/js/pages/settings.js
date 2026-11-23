@@ -5,7 +5,7 @@ import { esc, toast } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
 import { session, onAuth, resendVerification } from "../lib/auth.js";
-import { SKINS, getSkin, setSkin, getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, isCrisp, isScottOn, setScottOn, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
+import { SKINS, getSkin, setSkin, getThemePref, setThemePref, isMuted, isGlass, setGlass, getGlassBlur, getGlassClear, setGlassBlur, setGlassClear, GLASS_DEF, isBgHidden, setBgHidden, getBgBright, setBgBright, getVolume, setVolume, isReduceMotion, isHighContrast, isCompact, isIntroOff, isCrisp, isSkiasOn, setSkiasOn, setFlag, resetPrefs, getGfx, setGfx, GFX } from "../lib/prefs.js";
 import { confirmDialog } from "../lib/confirm.js";
 import { getLang, setLang } from "../lib/i18n.js";
 import { hasMusic, toggleSound, playlist, currentTrack, nextTrack } from "../lib/media.js";
@@ -53,7 +53,7 @@ export function mount(ctx) {
         ${hasMusic() ? `<div class="nowp"><span id="nowp" translate="no">${esc((currentTrack() || playlist()[0]).name)}</span>${playlist().length > 1 ? `<button type="button" class="btn ghost sm" id="nextBtn">Bài tiếp theo</button>` : ""}</div>` : ""}
         <div class="set-fields" aria-disabled="${isMuted()}">${rng("vol", "Âm lượng", 0, 100, getVolume(), "%", isMuted())}</div></section>
       <section class="set-card"><h3>${ICO.eye}Thoải mái khi dùng</h3><p class="muted">Giúp web dễ đọc và dễ chịu hơn.</p>
-        ${sw("rm", "Giảm chuyển động", isReduceMotion())}${sw("hc", "Tương phản cao", isHighContrast())}${sw("dens", "Bố cục gọn", isCompact())}${sw("intro", "Hiện màn hình mở đầu", !isIntroOff())}${sw("scottOn", "Hiện Scott (người que trợ giúp)", isScottOn())}</section>
+        ${sw("rm", "Giảm chuyển động", isReduceMotion())}${sw("hc", "Tương phản cao", isHighContrast())}${sw("dens", "Bố cục gọn", isCompact())}${sw("intro", "Hiện màn hình mở đầu", !isIntroOff())}${sw("skiasOn", "Hiện Skias (cái đầu trợ giúp)", isSkiasOn())}</section>
       <section class="set-card wide"><h3>${ICO.user}Tài khoản</h3>${u ? `<p class="muted">Đang đăng nhập với <b>${esc(u.email || "")}</b>${u.emailVerified ? "" : " · email chưa được xác minh"}.</p>
         ${session.devBlocked ? `<p class="form-error">${esc(session.devBlocked)}</p>` : ""}
         <div class="acts"><a class="btn primary" href="/profile">Xem hồ sơ</a>${!u.emailVerified ? `<button class="btn ghost" id="verify" type="button">Gửi lại email xác minh</button>` : ""}<button class="btn ghost" data-act="signout" type="button">${ICO.out}Đăng xuất</button></div>`
@@ -83,7 +83,7 @@ export function mount(ctx) {
     $q("#glReset").addEventListener("click", () => { setGlassBlur(GLASS_DEF.blur); setGlassClear(GLASS_DEF.clear); draw(); });
     $q("#bgShow").addEventListener("change", e => { setBgHidden(!e.target.checked); redraw("bgShow"); }); bindRng("bgBright", setBgBright); bindRng("vol", setVolume);
     [["rm", "motion", true], ["hc", "contrast", true], ["dens", "compact", true], ["intro", "intro", true]].forEach(([id, name]) => $q("#" + id).addEventListener("change", e => setFlag(name, e.target.checked)));
-    $q("#scottOn").addEventListener("change", e => { setScottOn(e.target.checked); toast(e.target.checked ? "Scott đã trở lại!" : "Đã ẩn Scott.", "ok"); });
+    $q("#skiasOn").addEventListener("change", e => { setSkiasOn(e.target.checked); toast(e.target.checked ? "Skias đã trở lại!" : "Đã ẩn Skias.", "ok"); });
     $q("#resetAll").addEventListener("click", async () => { if (await confirmDialog({ kind: "reset", title: "Đặt lại cài đặt hiển thị?", message: "Giao diện, kính mờ, hình nền, âm thanh và trợ năng sẽ về mặc định. Ngôn ngữ giữ nguyên.", ok: "Đặt lại", danger: true })) { resetPrefs(); setAccent(""); draw(); toast("Đã đặt lại cài đặt."); } });
     ctx.el.querySelectorAll("[data-accent]").forEach(b => b.addEventListener("click", () => { setAccent(b.dataset.accent); draw(); const e = ctx.el.querySelector(`[data-accent="${b.dataset.accent}"]`); if (e) e.focus(); }));
     const nb = $q("#nextBtn"); if (nb) nb.addEventListener("click", () => nextTrack());

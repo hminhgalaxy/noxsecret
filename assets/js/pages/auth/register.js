@@ -10,7 +10,7 @@ const score = p => { const r = rules(p); if (!p) return 0; let s = 0; if (r.len)
 const LABEL = ["", "Còn yếu", "Tạm được", "Khá tốt", "Rất mạnh"];
 
 export function mount(ctx) {
-  ctx.setPage({ hero: true, title: "Đăng ký", desc: "Tạo tài khoản miễn phí trên SKIBIDI SCRIPT WEB." });
+  ctx.setPage({ hero: true, title: "Đăng ký", desc: "Tạo tài khoản miễn phí trên Skibidi Web." });
   ctx.el.innerHTML = shell("Tạo tài khoản", "Chỉ mất chưa đầy một phút.", `<form id="f" novalidate class="form">
       ${field("name", "Họ và tên", { ac: "name", ph: "Nguyễn Văn A" })}
       ${field("email", "Email", { type: "email", ac: "username", ph: EMAIL_EXAMPLE })}

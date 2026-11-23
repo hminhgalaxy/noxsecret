@@ -1,6 +1,6 @@
-/* "Bộ não" của Scott: hiểu câu hỏi đơn giản bằng khớp từ khóa (không cần máy chủ, không gọi AI).
+/* "Bộ não" của Skias: hiểu câu hỏi đơn giản bằng khớp từ khóa (không cần máy chủ, không gọi AI).
    Thuần logic (không đụng DOM) để kiểm thử được trong Node. Hiểu tiếng Việt có dấu / không dấu và English, có bỏ qua lỗi gõ nhẹ. */
-import { KB, JOKES, DICT, TIPS, SUGGEST } from "./mascot-kb.js";
+import { KB, JOKES, DICT } from "./skias-kb.js";
 
 export const norm = s => String(s == null ? "" : s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
 const VI_CH = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
@@ -46,8 +46,8 @@ function mathAnswer(raw, lang) {
   try { return fmtNum(calc(s), lang); } catch (e) { return e === "div0" ? "div0" : null; }
 }
 
-const GREET = new Set(["xin chao", "chao", "chao ban", "hello", "hi", "hey", "hii", "alo", "yo", "helo", "hallo", "good morning", "chao buoi sang", "good evening", "good afternoon", "chao buoi toi", "chao buoi chieu", "xin chao scott", "hello scott", "hi scott", "hey scott", "chao scott"]);
-const THANKS = /^(?:cam on|camon|cam on ban|cam on nhieu|thanks|thank you|thank u|thx|tks|ty|thanks a lot|many thanks|cam on scott|thanks scott|thank you scott)\b/;
+const GREET = new Set(["xin chao", "chao", "chao ban", "hello", "hi", "hey", "hii", "alo", "yo", "helo", "hallo", "good morning", "chao buoi sang", "good evening", "good afternoon", "chao buoi toi", "chao buoi chieu", "xin chao skias", "hello skias", "hi skias", "hey skias", "chao skias"]);
+const THANKS = /^(?:cam on|camon|cam on ban|cam on nhieu|thanks|thank you|thank u|thx|tks|ty|thanks a lot|many thanks|cam on skias|thanks skias|thank you skias)\b/;
 const BYE = /^(?:tam biet|bye|goodbye|bye bye|see you|see ya|hen gap lai|ngu ngon|good night|chuc ngu ngon|bai bai|pp)\b/;
 const REPORT = /(?:^| )(?:gui|nhan|bao|chuyen|forward|send|tell|message|msg|contact|report|ping|ask|lien he|nho)(?: [a-z0-9]+){0,5} (?:cho |to |with |toi |voi )?(?:the )?(?:dev|developer|admin|quan tri|chu web|owner)(?: |$)|(?:^| )(?:bao loi|bao cao loi|report (?:a |an |the )?(?:bug|error|problem|issue)|found (?:a )?bug|co loi|bi loi|gap loi|something (?:is )?(?:broken|wrong)|not working|khong hoat dong|bi hong|hong roi|bug|support|ho tro|send (?:a )?report)(?: |$)/;
 const DAYS = { vi: ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"], en: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] };
@@ -74,11 +74,11 @@ export function answer(raw, opts = {}) {
   const { ui = "en", now = new Date(), rnd = Math.random } = opts, text = String(raw || "").replace(/\s+/g, " ").trim();
   if (!text) return null;
   const lang = detectLang(text, ui), nq = norm(text), tk = nq.split(" ").filter(Boolean), R = (o) => Object.assign({ lang, go: [], report: false }, o);
-  if (GREET.has(nq) || (tk.length <= 3 && GREET.has(tk.slice(0, 2).join(" "))) || (tk.length <= 2 && GREET.has(tk[0]))) return R({ kind: "greet", text: lang === "vi" ? "Xin chào! Mình là Scott 👋 Bạn cần mình giúp gì nào?" : "Hi there! I'm Scott 👋 What can I help you with?" });
+  if (GREET.has(nq) || (tk.length <= 3 && GREET.has(tk.slice(0, 2).join(" "))) || (tk.length <= 2 && GREET.has(tk[0]))) return R({ kind: "greet", text: lang === "vi" ? "Xin chào! Mình là Skias 👋 Bạn cần mình giúp gì nào?" : "Hi there! I'm Skias 👋 What can I help you with?" });
   if (THANKS.test(nq) && tk.length <= 6) return R({ kind: "thanks", text: lang === "vi" ? "Không có gì đâu! Cần gì cứ gọi mình nhé. 😊" : "You're welcome! Just call me if you need anything. 😊" });
   if (BYE.test(nq) && tk.length <= 5) return R({ kind: "bye", text: lang === "vi" ? "Tạm biệt nhé! Mình vẫn đứng đây nếu bạn cần. 👋" : "Bye for now! I'll be right here if you need me. 👋" });
   const m = mathAnswer(text, lang);
-  if (m === "div0") return R({ kind: "math", text: lang === "vi" ? "Chia cho 0 thì ngay cả người que cũng chịu thua! 🤯" : "Dividing by zero beats even a stick figure! 🤯" });
+  if (m === "div0") return R({ kind: "math", text: lang === "vi" ? "Chia cho 0 thì ngay cả cái đầu này cũng chịu thua! 🤯" : "Dividing by zero beats even a head like me! 🤯" });
   if (m) return R({ kind: "math", text: lang === "vi" ? `Kết quả là ${m}.` : `That's ${m}.` });
   if (/(?:^| )(?:may gio|gio hien tai|bay gio la may gio|what time|time is it|current time|time now|the time)(?: |$)/.test(nq)) return R({ kind: "time", text: lang === "vi" ? `Bây giờ là ${pad(now.getHours())}:${pad(now.getMinutes())} (giờ trên thiết bị của bạn).` : `It's ${pad(now.getHours())}:${pad(now.getMinutes())} (your device's clock).` });
   if (/(?:^| )(?:hom nay|today|what day|what date|ngay may|thu may|date today|todays date|ngay bao nhieu)(?: |$)/.test(nq) && /(?:ngay|thu|date|day)/.test(nq)) { const d = now, ds = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`; return R({ kind: "date", text: lang === "vi" ? `Hôm nay là ${DAYS.vi[d.getDay()]}, ngày ${ds}.` : `Today is ${DAYS.en[d.getDay()]}, ${ds} (day/month/year).` }); }
@@ -101,11 +101,4 @@ export function answer(raw, opts = {}) {
   return R({ kind: "unknown", text: lang === "vi" ? "Hmm, câu này hơi khó với mình. Bạn thử hỏi ngắn gọn hơn (ví dụ “nạp tiền”, “đơn hàng”, “quên mật khẩu”), hoặc để mình gửi câu hỏi cho dev nhé." : "Hmm, that one's a bit tricky for me. Try asking it shorter (e.g. “top up”, “orders”, “forgot password”), or let me send your question to the dev.", report: true });
 }
 
-/* Chọn mẹo: ưu tiên mẹo hợp trang hiện tại; idx để xoay vòng. */
-export function tip(path = "/", idx = 0) {
-  const here = TIPS.filter(t => t.at && t.at.test(path)), rest = TIPS.filter(t => !t.at);
-  const pool = here.length && idx % 2 === 0 ? here : rest.concat(here);
-  return pool[Math.abs(idx) % pool.length];
-}
-export const suggest = (lang = "en", n = 4, seed = 0) => { const L = SUGGEST.slice(), out = []; let s = seed || 1; while (out.length < n && L.length) { s = (s * 9301 + 49297) % 233280; out.push(L.splice(Math.floor(s / 233280 * L.length), 1)[0][lang === "vi" ? 0 : 1]); } return out; };
 export const KB_SIZE = KB.length;

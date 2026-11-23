@@ -1,4 +1,4 @@
-/* Chi tiết một mục: /scripts/:id, /apk/:id, ... */
+/* Chi tiết một mục: /c/:danh-mục/:id */
 import { esc, fmtTime, validUrl, toast } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";
@@ -27,7 +27,7 @@ export async function mount(ctx) {
     const hasUrl = validUrl(it.url), times = [];
     if (it.created) times.push("Đăng " + fmtTime(it.created)); if (it.ts && it.ts !== it.created) times.push("Cập nhật " + fmtTime(it.ts));
     ctx.el.innerHTML = `<article class="detail">
-      <div class="meta"><span class="badge">${icoOf(cat).replace("<svg", "<svg aria-hidden=\"true\"")}${esc(cat.label)}</span>${it.vault ? `<span class="badge strong">Vault</span>` : ""}
+      <div class="meta"><span class="badge">${icoOf(cat).replace("<svg", "<svg aria-hidden=\"true\"")}${esc(cat.label)}</span>
         ${it.copies != null ? `<span>Đã sao chép ${it.copies} lần</span>` : ""}${times.map(t => `<span>${esc(t)}</span>`).join("")}</div>
       ${it.img ? `<img class="detail-img" src="${esc(it.img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
       ${it.desc ? `<p class="detail-desc">${esc(it.desc)}</p>` : ""}

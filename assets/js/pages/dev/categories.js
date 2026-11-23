@@ -1,4 +1,4 @@
-/* Quản lý danh mục: thêm, sửa, xóa — kể cả Script / APK / iOS / Link (không còn cố định). Mỗi danh mục có phân loại rủi ro và kiểu nội dung. */
+/* Quản lý danh mục: thêm, sửa, xóa danh mục do dev tạo (Script / APK / iOS / Link cũ đã bị xóa khỏi web). Mỗi danh mục có phân loại rủi ro và kiểu nội dung. */
 import { esc, toast } from "../../lib/util.js";
 import { ICO, PICK_ICONS } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";

@@ -10,7 +10,7 @@ export function mount(ctx) {
   if (locked(ctx)) return;
   ctx.setPage({ title: "Cập nhật", crumbs: devCrumb, sub: "Đăng tin cập nhật. Mọi người sẽ thấy chuông thông báo sáng lên.", noindex: true });
   ctx.el.innerHTML = `<form class="formcard" id="uf" novalidate><span class="dsec">Bài mới</span>
-      <div class="field"><label for="uT">Tiêu đề</label><input id="uT" name="title" maxlength="120" autocomplete="off" placeholder="Ví dụ: Thêm mục APK mới"><p class="field-error" data-err="title" role="alert"></p></div>
+      <div class="field"><label for="uT">Tiêu đề</label><input id="uT" name="title" maxlength="120" autocomplete="off" placeholder="Ví dụ: Thêm sản phẩm mới"><p class="field-error" data-err="title" role="alert"></p></div>
       <div class="field"><label for="uG">Loại</label><select id="uG" name="tag"><option value="">Không phân loại</option>${Object.keys(S.UPD_TAGS).map(k => `<option value="${k}">${S.UPD_TAGS[k]}</option>`).join("")}</select></div>
       <div class="field"><label for="uB">Nội dung</label><textarea id="uB" name="body" rows="4" maxlength="2000" placeholder="Có gì mới trong lần cập nhật này? Bắt đầu dòng bằng dấu - để tạo danh sách."></textarea><p class="field-error" data-err="body" role="alert"></p></div>
       <p class="form-error" id="uE" role="alert"></p>

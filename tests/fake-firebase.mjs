@@ -5,15 +5,17 @@ const rules = fs.readFileSync(new URL("../database.rules.json", import.meta.url)
 export const DEV_EMAIL = "hminhgalaxy@gmail.com";
 export const SEED = {
   nox_data: {
-    scripts: { "-s1": { name: "Auto Farm Script", desc: "Tự động farm", code: "print('farm')", copies: 2, createdAt: 1700000000000 },
-               "-s2": { title: "Legacy Script", description: "Dữ liệu cũ dùng title/script", script: "print('old')", createdAt: 1690000000000 } },
-    apks: { "-a1": { name: "Demo APK", desc: "APK demo", url: "https://example.com/demo.apk", vault: true, createdAt: 1700000100000 } },
-    ios: { "-i1": { name: "Demo iOS", desc: "iOS demo", url: "https://example.com/demo.ipa", createdAt: 1700000200000 } },
-    links: { "-l1": { name: "Discord", desc: "Cộng đồng", url: "https://discord.gg/example", createdAt: 1700000300000 } },
-    mod: { "-m1": { name: "Mod Pack", desc: "Mod", url: "https://example.com/mod", createdAt: 1700000400000 } }
+    mod: { "-m1": { name: "Mod Pack", desc: "Mod", url: "https://example.com/mod", createdAt: 1700000400000 },
+           "-s1": { name: "Auto Farm Script", desc: "Tự động farm", code: "print('farm')", copies: 2, createdAt: 1700000000000 },
+           "-s2": { title: "Legacy Script", description: "Dữ liệu cũ dùng title/script", script: "print('old')", createdAt: 1690000000000 } },
+    /* 4 thư mục DỮ LIỆU CŨ (đã bị xóa khỏi giao diện; dev dọn bằng nút "Xóa mục cũ vĩnh viễn") */
+    scripts: { "-o1": { name: "Old Script", desc: "cũ", code: "x", createdAt: 1690000000000 } },
+    apks: { "-a1": { name: "Old APK", desc: "cũ", url: "https://example.com/demo.apk", createdAt: 1700000100000 } },
+    ios: { "-i1": { name: "Old iOS", desc: "cũ", url: "https://example.com/demo.ipa", createdAt: 1700000200000 } },
+    links: { "-l1": { name: "Old Link", desc: "cũ", url: "https://discord.gg/example", createdAt: 1700000300000 } }
   },
-  nox_categories: { "-c1": { name: "Mod", node: "mod", icon: "bolt", color: "#ff647c", sub: "Danh mục Mod", createdAt: 1700000000000 } },
-  nox_updates: { "-u1": { title: "Thêm APK mới", body: "Đã thêm vài APK mới vào kho.", ts: 1700000600000 } },
+  nox_categories: { "-c1": { name: "Mod", node: "mod", icon: "bolt", color: "#ff647c", sub: "Danh mục Mod", createdAt: 1700000000000 }, "-c2": { name: "Mẹo", node: "tips", icon: "book", color: "#4aa3ff", sub: "Danh mục Mẹo", createdAt: 1700000010000 }, "-c3": { name: "Tài nguyên", node: "assets", icon: "box", color: "#3ecf8e", sub: "Danh mục Tài nguyên", createdAt: 1700000020000 } },
+  nox_updates: { "-u1": { title: "Thêm sản phẩm mới", body: "Đã thêm vài sản phẩm mới vào kho.", ts: 1700000600000 } },
   nox_shop: {
     cats: { "-k1": { name: "Key & Tài khoản", sort: 1 }, "-k2": { name: "Script VIP", sort: 2 } },
     items: {

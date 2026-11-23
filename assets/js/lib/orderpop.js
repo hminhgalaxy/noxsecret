@@ -13,7 +13,7 @@ export const contentOf = d => (!d ? "" : d.lines ? d.lines.join("\n") : d.text ?
 export const canOpen = (o, it) => o.status === "paid" && !!contentOf(deliveryOf(o, it.id));
 export function receiptText(o, it) {
   const [st] = ORDER_ST[o.status] || [""];
-  return ["Đơn hàng " + orderCode(o) + " — SKIBIDI SCRIPT WEB", (it ? it.name + " × " + it.qty + " — " + money(it.price * it.qty) : (o.items || []).map(i => i.name + " × " + i.qty).join(", ") + " — " + money(o.total)), "Thời gian: " + fmtTime(o.paidAt || o.ts), "Trạng thái: " + st, location.origin + "/"].join("\n");
+  return ["Đơn hàng " + orderCode(o) + " — Skibidi Web", (it ? it.name + " × " + it.qty + " — " + money(it.price * it.qty) : (o.items || []).map(i => i.name + " × " + i.qty).join(", ") + " — " + money(o.total)), "Thời gian: " + fmtTime(o.paidAt || o.ts), "Trạng thái: " + st, location.origin + "/"].join("\n");
 }
 export function downloadItem(o, it) {
   const c = contentOf(deliveryOf(o, it.id)); if (!c) return false;

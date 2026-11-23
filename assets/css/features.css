@@ -24,7 +24,8 @@ kbd{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;padding:4px 6px;
 .nav-badge{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;display:inline-grid;place-items:center;font-size:11px;font-weight:700;background:var(--strong);color:var(--on-strong)}
 .nav-btn .nav-badge.grp{margin-left:8px}
 .has-badge{position:relative}
-.has-badge::after{content:"";position:absolute;top:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:var(--strong);border:2px solid var(--bg)}
+.avatar.has-badge{overflow:visible}.avatar.has-badge img{border-radius:50%}
+.has-badge::after{content:"";position:absolute;z-index:2;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--strong);border:2px solid var(--bg)}
 /* Mất kết nối */
 #netBar{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:1100;padding:10px 18px;border-radius:99px;background:var(--surface-2,var(--surface));border:1px solid var(--line-strong);box-shadow:0 12px 30px -12px rgba(0,0,0,.6);font-size:14px;max-width:calc(100vw - 32px);text-align:center}
 #netBar:not([hidden]){animation:cmdkIn .25s var(--ez,ease)}

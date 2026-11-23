@@ -14,10 +14,10 @@ t("feed: ngày không hợp lệ không làm sập", (await run("../api/feed.js"
 const feed0 = await run("../api/feed.js", () => null); t("feed: rỗng vẫn hợp lệ", [feed0.c, /<feed /.test(feed0.b), /<entry>/.test(feed0.b)], [200, true, false]);
 
 const sm = await run("../api/sitemap.js", u => u.includes("shallow") ? { k1: true } : {});
-for (const p of ["/skibidiscript", "/about", "/privacy", "/guide", "/apk-safety", "/security", "/terms"]) t("sitemap có " + p, sm.b.includes("<loc>https://skibidiscript.vercel.app" + p + "</loc>"), true);
+for (const p of ["/skibidiscript", "/about", "/privacy", "/guide", "/security", "/terms"]) t("sitemap có " + p, sm.b.includes("<loc>https://skibidiscript.vercel.app" + p + "</loc>"), true);
 t("sitemap: ảnh logo + schema ảnh", /image:loc>https:\/\/skibidiscript.vercel.app\/assets\/img\/icon-512.png/.test(sm.b) && /xmlns:image=/.test(sm.b), true);
 
-const os = txt("opensearch.xml"); t("OpenSearch: mẫu tìm kiếm", /template="https:\/\/skibidiscript\.vercel\.app\/search\?q=\{searchTerms\}"/.test(os) && /<ShortName>skibidiscript<\/ShortName>/.test(os), true);
+const os = txt("opensearch.xml"); t("OpenSearch: mẫu tìm kiếm", /template="https:\/\/skibidiscript\.vercel\.app\/search\?q=\{searchTerms\}"/.test(os) && /<ShortName>Skibidi Web<\/ShortName>/.test(os), true);
 const vj = JSON.parse(txt("vercel.json")), rw = vj.rewrites;
 t("vercel: /feed.xml → /api/feed (trước catch-all)", rw.findIndex(r => r.source === "/feed.xml" && r.destination === "/api/feed") < rw.length - 1 && rw.findIndex(r => r.source === "/feed.xml") >= 0, true);
 const catchAll = new RegExp("^" + rw[rw.length - 1].source + "$");
@@ -36,7 +36,7 @@ t("shop: trang sản phẩm 200 + Product/Offer VND", [pg.statusCode, /"@type":"
 t("shop: escape HTML tên sản phẩm", /Key VIP &lt;30/.test(pg.b) && !/Key VIP <30/.test(pg.b), true);
 t("shop: canonical /shop/sp1 + cho lập chỉ mục", /rel="canonical" href="https:\/\/skibidiscript.vercel.app\/shop\/sp1"/.test(pg.b) && /index,follow/.test(pg.b), true);
 t("shop: sản phẩm ẩn / không có → 404", [(await pageRun("/shop/off", prod)).statusCode, (await pageRun("/shop/zzz", prod)).statusCode], [404, 404]);
-const legacy = await pageRun("/scripts/old1", u => u.includes("nox_data/scripts/old1") ? { title: "Bài cũ dùng title", description: "Mô tả cũ", script: "x" } : null);
+const legacy = await pageRun("/c/mod/old1", u => u.includes("nox_categories") ? { c1: { name: "Mod", node: "mod" } } : u.includes("nox_data/mod/old1") ? { title: "Bài cũ dùng title", description: "Mô tả cũ", script: "x" } : null);
 t("dữ liệu cũ (title/description): trang vẫn 200, lập chỉ mục, không noindex", [legacy.statusCode, /index,follow/.test(legacy.b), /noindex/.test(legacy.b), legacy.h["X-Robots-Tag"] || null, /Bài cũ dùng title/.test(legacy.b)], [200, true, false, null, true]);
 { const old = globalThis.fetch; globalThis.fetch = async () => { throw new Error("net"); }; let pe; try { pe = await pageRun("/shop/sp1", () => null); } finally { globalThis.fetch = old; }
   const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end(b) { this.b = b; } }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); globalThis.fetch = async () => { throw new Error("net"); }; try { await require("../api/page.js")({ query: { p: "/shop/sp1" }, url: "/api/page?p=/shop/sp1", headers: {} }, res); } finally { globalThis.fetch = old; }
@@ -47,7 +47,7 @@ const smShop = await run("../api/sitemap.js", u => u.includes("nox_shop/items") 
 t("sitemap: có /library + sản phẩm đang bán, không có sản phẩm ẩn", [smShop.b.includes("/library</loc>"), smShop.b.includes("/shop/sp1</loc>"), smShop.b.includes("/shop/off")], [true, true, false]);
 t("robots: chặn /wallet /orders", /Disallow: \/wallet/.test(robots) && /Disallow: \/orders/.test(robots), true);
 const ix = txt("index.html");
-t("index: tiêu đề có thương hiệu skibidiscript", /<title>skibidiscript — SKIBIDI SCRIPT WEB/.test(ix), true);
+t("index: tiêu đề có thương hiệu Skibidi Web / Skibidi Shop", /<title>Skibidi Web — Skibidi Shop/.test(ix), true);
 t("index: liên kết feed + opensearch + canonical", [/rel="alternate" type="application\/atom\+xml"/.test(ix), /rel="search" type="application\/opensearchdescription\+xml"/.test(ix), /rel="canonical" href="https:\/\/skibidiscript\.vercel\.app\/"/.test(ix)], [true, true, true]);
 const ld = JSON.parse(ix.match(/<script type="application\/ld\+json">(.+?)<\/script>/s)[1]), site = ld["@graph"].find(x => x["@type"] === "WebSite"), org = ld["@graph"].find(x => x["@type"] === "Organization");
 t("JSON-LD: alternateName chứa skibidiscript", [site.alternateName.includes("skibidiscript"), org.alternateName.includes("skibidiscript")], [true, true]);

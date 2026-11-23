@@ -29,7 +29,7 @@ export function cardHTML(it, catId, i, showChip) {
   if (validUrl(it.url)) acts.push(`<a class="btn ghost sm" href="${esc(it.url.trim())}" target="_blank" rel="noopener noreferrer" data-stop>${ICO.ext}Mở link</a>`);
   acts.push(`<a class="btn soft sm" href="${href}" data-stop>Chi tiết</a>`);
   return `<article class="card" style="--d:${Math.min(i, 10) * 45}ms" data-href="${href}" tabindex="0">
-    <div class="card-top"><span class="ico">${icoOf(c)}</span>${showChip ? `<span class="badge">${esc(c.label)}</span>` : ""}${it.vault ? `<span class="badge strong">Vault</span>` : ""}<time>${it.ts ? esc(fmtTime(it.ts)) : ""}</time>${moreBtnHTML(catId, it.key)}</div>
+    <div class="card-top"><span class="ico">${icoOf(c)}</span>${showChip ? `<span class="badge">${esc(c.label)}</span>` : ""}<time>${it.ts ? esc(fmtTime(it.ts)) : ""}</time>${moreBtnHTML(catId, it.key)}</div>
     ${it.img ? `<img class="card-thumb" src="${esc(it.img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
     <h3 class="card-title"><a href="${href}" data-stop>${esc(it.name)}</a></h3>
     ${it.desc ? `<p class="card-desc">${esc(it.desc)}</p>` : ""}

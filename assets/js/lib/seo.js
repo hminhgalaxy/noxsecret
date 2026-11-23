@@ -1,9 +1,9 @@
 import { t, onLangChange, getLang } from "./i18n.js";
 /* SEO cho từng trang: tiêu đề, mô tả, canonical, Open Graph, chặn lập chỉ mục trang riêng tư. */
 export const SITE = "https://skibidiscript.vercel.app";
-export const NAME = "SKIBIDI SCRIPT WEB";
-export const DEFAULT_TITLE = "skibidiscript — " + NAME + ": Cửa hàng & nơi chia sẻ APK bảo mật cao";
-export const DEFAULT_DESC = "Cửa hàng số nạp tiền qua ngân hàng, nhận hàng ngay; kèm nơi chia sẻ APK bảo mật cao, kiểm duyệt kỹ. Không cổ xúy hack.";
+export const NAME = "Skibidi Web";
+export const DEFAULT_TITLE = NAME + " — Skibidi Shop: hàng số, nạp ví và nhận hàng ngay";
+export const DEFAULT_DESC = "Skibidi Web (skibidiscript) là cửa hàng số: nạp ví bằng chuyển khoản, mua hàng và nhận ngay. Xem Skibidi Shop.";
 const cut = (s, n) => { s = String(s || "").replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s; };
 function meta(sel, attr, val) {
   const el = document.head.querySelector(sel); if (!el) return;
@@ -25,7 +25,7 @@ function structured(o, url, full, d) {
 let last = {};
 export function applySeo(o = {}) {
   last = o; const { title, desc, path, noindex } = o;
-  const full = title ? t(title) + " · " + NAME + " (skibidiscript)" : t(DEFAULT_TITLE);
+  const full = title ? t(title) + " · " + NAME : t(DEFAULT_TITLE);
   const d = cut(t(desc || DEFAULT_DESC), 160);
   const url = SITE + (path && path !== "/" ? path.replace(/\/$/, "") : "/");
   document.title = full;

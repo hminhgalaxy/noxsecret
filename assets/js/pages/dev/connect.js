@@ -36,7 +36,7 @@ export async function mount(ctx) {
       <ol class="cn-steps"><li>Mở <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer">Vercel</a> → dự án của bạn → <b>Settings → Environment Variables</b>.</li>
         <li>Tên biến (gõ đúng): <code translate="no" id="cnName">FIREBASE_SERVICE_ACCOUNT</code> <button class="btn ghost sm" id="cnCopyName" type="button">Sao chép tên</button></li>
         <li>Giá trị: bấm <b>Sao chép giá trị</b> bên dưới rồi dán vào ô Value. Tick <b>Production</b> (nên tick cả Preview/Development). Bấm Save.</li></ol>
-      <div class="field"><label>Kiểu giá trị</label><div class="seg" role="radiogroup" aria-label="Kiểu giá trị"><label><input type="radio" name="cnKind" value="b64" checked> Base64 <small>(khuyên dùng, không dính xuống dòng/nháy)</small></label><label><input type="radio" name="cnKind" value="json"> JSON một dòng</label></div></div>
+      <div class="field"><label>Kiểu giá trị</label><div class="seg-list" role="radiogroup" aria-label="Kiểu giá trị"><label><input type="radio" name="cnKind" value="b64" checked> Base64 <small>(khuyên dùng, không dính xuống dòng/nháy)</small></label><label><input type="radio" name="cnKind" value="json"> JSON một dòng</label></div></div>
       <div class="field"><textarea id="cnVal" rows="4" readonly spellcheck="false" translate="no" aria-label="Giá trị cần dán vào Vercel"></textarea></div>
       <div class="form-acts"><button class="btn ghost" id="cnClear" type="button">Xóa khỏi trang này</button><button class="btn primary" id="cnCopy" type="button">${ICO.copy || ""}Sao chép giá trị</button></div></section>
     <section class="formcard" id="cnGo" hidden><span class="dsec">Bước 3 · Redeploy rồi kiểm tra</span>

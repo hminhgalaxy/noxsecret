@@ -207,7 +207,7 @@ a.me:hover{border-color:var(--line-strong);background:var(--surface-2)}
   #pagehead{padding-top:34px}
 }
 
-/* Màn hình rất hẹp (≤ 359px): thu gọn nút để tên SKIBIDI SCRIPT vẫn ở chính giữa và không đè lên nút hai bên */
+/* Màn hình rất hẹp (≤ 359px): thu gọn nút để tên Skibidi Web vẫn ở chính giữa và không đè lên nút hai bên */
 @media(max-width:359.98px){
   #hdr{padding:0 8px;gap:4px}
   .hd-r,#hdrAcc{gap:4px}

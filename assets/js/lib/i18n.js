@@ -16,6 +16,8 @@ export const onLangChange = fn => { listeners.add(fn); return () => listeners.de
 /* Dịch một chuỗi đã chuẩn hoá khoảng trắng; trả về undefined nếu không có bản dịch */
 function tr(key) {
   let out = dict.D[key];
+  /* tên web đã đổi thành "Skibidi Web": tận dụng bản dịch của câu cũ có tên "SKIBIDI SCRIPT WEB" */
+  if (out === undefined && key.indexOf("Skibidi Web") >= 0) { const r = tr(key.split("Skibidi Web").join("SKIBIDI SCRIPT WEB")); if (r !== undefined) return r.split("SKIBIDI SCRIPT WEB").join("Skibidi Web"); }
   if (out === undefined) {
     for (const [re, rep] of dict.P) { const r = re.exec(key); if (r) { out = rep.replace(/\$(\d)/g, (_, i) => { const c = r[+i]; if (c === undefined) return ""; const x = c.length < key.length ? tr(c.replace(/\s+/g, " ").trim()) : undefined; return x === undefined ? c : x; }); break; } }
     if (out !== undefined) for (const [re, rep] of dict.S || []) out = out.replace(re, rep);

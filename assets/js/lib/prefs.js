@@ -27,7 +27,7 @@ export const setMuted = m => set(K_MUTE, m ? "1" : null);
 /* ── Số đo lưu trình duyệt ── */
 const num = (k, d, lo, hi) => { const v = parseFloat(get(k)); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 const emit = () => document.dispatchEvent(new CustomEvent("prefs-change"));
-export const K_ALL = ["ssw_skin", "ssw_gfx", "ssw_theme", "ssw_muted", "ssw_glass", "ssw_gl_blur", "ssw_gl_clear", "ssw_bg", "ssw_bg_bright", "ssw_vol", "ssw_rm", "ssw_hc", "ssw_dens", "ssw_nosplash", "ssw_side", "ssw_crisp", "ssw_scott"];
+export const K_ALL = ["ssw_skin", "ssw_gfx", "ssw_theme", "ssw_muted", "ssw_glass", "ssw_gl_blur", "ssw_gl_clear", "ssw_bg", "ssw_bg_bright", "ssw_vol", "ssw_rm", "ssw_hc", "ssw_dens", "ssw_nosplash", "ssw_side", "ssw_crisp", "ssw_skias", "ssw_scott"];
 
 /* Kính mờ: tắt (mặc định) = khung đặc theo giao diện; bật = khung trong suốt, chỉ còn viền.
    Hai thanh chỉnh: Độ mờ (làm mờ phần phía sau khung) và Độ trong (khung trong tới mức nào). */
@@ -73,9 +73,9 @@ export function setVolume(v) { set("ssw_vol", Math.round(v)); emit(); }
 const flag = k => get(k) === "1";
 export const isReduceMotion = () => flag("ssw_rm"), isHighContrast = () => flag("ssw_hc"), isCompact = () => get("ssw_dens") === "compact", isIntroOff = () => flag("ssw_nosplash");
 export const isCrisp = () => flag("ssw_crisp");
-/* Scott (người que trợ giúp): bật mặc định, tắt được trong Cài đặt */
-export const isScottOn = () => get("ssw_scott") !== "0";
-export const setScottOn = on => { set("ssw_scott", on ? null : "0"); emit(); };
+/* Skias (cái đầu trợ giúp): bật mặc định, tắt được trong Cài đặt. Khóa cũ ssw_scott vẫn được dọn khi đặt lại */
+export const isSkiasOn = () => get("ssw_skias") !== "0" && get("ssw_scott") !== "0";
+export const setSkiasOn = on => { set("ssw_skias", on ? null : "0"); if (on) set("ssw_scott", null); emit(); };
 export function setFlag(name, on) {
   if (name === "crisp") set("ssw_crisp", on ? "1" : null);
   else if (name === "motion") set("ssw_rm", on ? "1" : null); else if (name === "contrast") set("ssw_hc", on ? "1" : null);

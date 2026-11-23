@@ -6,12 +6,9 @@ import { pick, vi, validUrl } from "./util.js";
 import { isLocalImg } from "./avatar.js";
 import { dlog } from "./log.js";
 
-export const BASE_CATS = [
-  { id: "script", label: "Script", node: "scripts", path: "scripts", color: "#a3a3a3", sub: "Kho script gọn gàng, được cập nhật liên tục.", base: true, need: "code" },
-  { id: "apk", label: "APK", node: "apks", path: "apk", color: "#a3a3a3", sub: "Kho APK và APK Vault.", base: true, need: "url" },
-  { id: "link", label: "LINK", node: "links", path: "links", color: "#a3a3a3", sub: "Những liên kết hữu ích.", base: true, need: "url" },
-  { id: "ios", label: "iOS", node: "ios", path: "ios", color: "#a3a3a3", sub: "Kho iOS và iOS Vault.", base: true, need: "url" }
-];
+/* Các danh mục gốc cũ (Script / APK / iOS / Link) đã bị xóa hẳn khỏi web; chỉ còn danh mục do dev tạo. */
+export const BASE_CATS = [];
+export const LEGACY_NODES = ["scripts", "apks", "links", "ios"]; /* thư mục dữ liệu cũ — dev có nút dọn trong Dữ liệu */
 /* Phân loại rủi ro do DEV gán cho danh mục (không gán = bình thường). Có phân loại thì người xem phải đọc cảnh báo trước khi vào. */
 export const RISKS = { "": "Bình thường", third: "Phần mềm bên thứ ba", hack: "Hack", mod: "Mod / chỉnh sửa", game: "Can thiệp trò chơi" };
 /* Thông báo bảo trì do DEV cập nhật: info = thông tin, planned = sắp bảo trì, active = đang bảo trì, done = đã hoàn tất */
@@ -40,7 +37,7 @@ export function normItem(key, o) {
   return {
     key, name: pick(o, ["name", "title"]) || "(không tên)", desc: pick(o, ["desc", "description", "note"]),
     url: pick(o, ["url", "link", "href"]), code: pick(o, ["code", "script"]), img: (v => isLocalImg(v) ? v : "")(pick(o, ["img", "image", "avatar", "thumb"])),
-    copies: o.copies != null ? Number(o.copies) || 0 : null, vault: !!(o.vault || o.vaulted),
+    copies: o.copies != null ? Number(o.copies) || 0 : null,
     ts: Number(o.updatedAt || o.editedAt || o.createdAt || 0) || null, created: Number(o.createdAt) || null
   };
 }
@@ -126,7 +123,7 @@ export function retryCat(id) { attachCat(id); }
 
 function rebuildCats(map) {
   map = map || {};
-  /* Danh mục gốc (Script/APK/iOS/Link) giờ cũng do DEV quản lý: bản ghi cùng khóa với id gốc là phần chỉnh sửa / đánh dấu đã xóa */
+  /* Không còn danh mục gốc: mọi danh mục đều do DEV tạo */
   const bases = BASE_CATS.filter(b => !(map[b.id] && map[b.id].removed === true)).map(b => {
     const o = map[b.id] || {};
     return cleanCat({ ...b, label: o.name || b.label, sub: o.sub != null ? o.sub : b.sub, color: o.color || b.color, icon: o.icon || undefined, risk: o.risk, need: NEEDS[o.need] ? o.need : b.need, key: b.id });

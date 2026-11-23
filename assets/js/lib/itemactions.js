@@ -33,7 +33,7 @@ export async function doLike(btn) {
 export function doSave(c, k) { const on = toggleFav(c, k); toast(on ? "Đã lưu bài viết." : "Đã bỏ lưu bài viết.", "ok"); refreshButtons(); return on; }
 export async function shareItem(c, k) {
   const it = S.item(c, k); if (!it) return;
-  const url = location.origin + S.itemHref(c, k), data = { title: it.name + " · SKIBIDI SCRIPT WEB", text: it.desc ? String(it.desc).slice(0, 120) : it.name, url };
+  const url = location.origin + S.itemHref(c, k), data = { title: it.name + " · Skibidi Web", text: it.desc ? String(it.desc).slice(0, 120) : it.name, url };
   try { if (navigator.share && matchMedia("(pointer:coarse)").matches) { await navigator.share(data); return; } } catch (e) { if (e && e.name === "AbortError") return; }
   copyText(url).then(() => toast("Đã sao chép liên kết để chia sẻ.", "ok")).catch(() => toast("Không sao chép được liên kết.", "err"));
 }

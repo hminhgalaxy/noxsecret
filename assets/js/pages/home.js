@@ -12,26 +12,26 @@ const FEATS = [
   ["grid", "Sắp xếp rõ ràng", "Mọi nội dung được chia theo danh mục. Tìm kiếm gõ có dấu hay không dấu đều ra kết quả."],
   ["bell", "Cập nhật liên tục", "Nội dung mới xuất hiện ngay, bạn không cần tải lại trang. Có chuông báo mỗi khi có tin mới."],
   ["bolt", "Mở nhanh, dùng mượt", "Trang tải tức thì và chạy mượt trên cả điện thoại lẫn máy tính."],
-  ["copy", "Sao chép một chạm", "Bấm một nút để sao chép code hoặc mở liên kết, không phải qua nhiều bước."]
+  ["copy", "Sao chép một chạm", "Bấm một nút để sao chép hoặc mở liên kết, không phải qua nhiều bước."]
 ];
 const STEPS = [
   ["Chọn danh mục", "Mở một danh mục bất kỳ ở thanh bên để xem các mục đã được kiểm duyệt."],
   ["Mở mục bạn cần", "Xem mô tả và chi tiết của từng mục trước khi dùng."],
-  ["Sao chép hoặc mở link", "Bấm Sao chép code hoặc Mở link là xong."]
+  ["Xem hoặc sao chép", "Bấm Sao chép hoặc Mở liên kết là xong."]
 ];
 
 export function mount(ctx) {
-  ctx.setPage({ hero: true, title: null, desc: "skibidiscript — website tiện ích chia sẻ gói APK bảo mật cao: nội dung kiểm duyệt trước khi đăng, cảnh báo rõ phần mềm bên thứ ba. Không cổ xúy hack." });
+  ctx.setPage({ hero: true, title: null, desc: "Kho nội dung miễn phí trên Skibidi Web: các bài đã được kiểm duyệt trước khi đăng, chia theo danh mục." });
   ctx.el.innerHTML = `<section class="hero" aria-labelledby="h1">
-      <span class="eyebrow"><i></i>skibidiscript · Luôn được cập nhật</span>
-      <h1 id="h1">APK tiện ích, bảo mật cao. <span>Kiểm duyệt trước khi đăng.</span></h1>
+      <span class="eyebrow"><i></i>Skibidi Web · Kho nội dung</span>
+      <h1 id="h1">Kho nội dung miễn phí. <span>Kiểm duyệt trước khi đăng.</span></h1>
       <p>Mọi thứ bạn cần được sắp xếp theo từng danh mục rõ ràng. Tìm nhanh, mở ngay, không rườm rà.</p>
       <form class="hero-search" id="heroSearch" role="search" action="/search">${ICO.search}
         <input type="search" name="q" placeholder="Bạn đang tìm gì?" aria-label="Tìm kiếm" autocomplete="off" enterkeyhint="search">
         <button class="btn primary" type="submit">Tìm</button></form>
       <div class="stat-strip" id="stats"></div>
     </section>
-    <section class="post-band" aria-labelledby="hp"><span class="pb-ico">${ICO.upload}</span><div><h2 id="hp">Có script hay APK muốn chia sẻ?</h2><p>Đăng bài để mọi người cùng dùng. Bài của bạn sẽ được xem xét trước khi hiển thị.</p></div><a class="btn primary" href="/help/submit">${ICO.plus}Đăng bài</a></section>
+    <section class="post-band" aria-labelledby="hp"><span class="pb-ico">${ICO.upload}</span><div><h2 id="hp">Bạn có nội dung muốn chia sẻ?</h2><p>Đăng bài để mọi người cùng dùng. Bài của bạn sẽ được xem xét trước khi hiển thị.</p></div><a class="btn primary" href="/help/submit">${ICO.plus}Đăng bài</a></section>
     <div class="home-grid">
       <section aria-labelledby="hc" class="home-cats">
         <div class="sec-head"><h2 id="hc">Danh mục</h2><a href="/categories">Xem tất cả</a></div>
@@ -48,7 +48,7 @@ export function mount(ctx) {
       </section>
     </div>
     <section aria-labelledby="hr" id="hrec" hidden><div class="sec-head"><h2 id="hr">Xem gần đây</h2><a href="/favorites">Yêu thích</a></div><div class="grid" id="hrGrid"></div></section>
-    <section aria-labelledby="hw"><div class="sec-head"><h2 id="hw">Vì sao chọn SKIBIDI SCRIPT WEB?</h2></div>
+    <section aria-labelledby="hw"><div class="sec-head"><h2 id="hw">Vì sao chọn Skibidi Web?</h2></div>
       <div class="feats">${FEATS.map(([ic, t, d]) => `<div class="feat"><span class="feat-ico">${ICO[ic] || ICO.box}</span><h3>${esc(t)}</h3><p>${esc(d)}</p></div>`).join("")}</div></section>
     <section aria-labelledby="hs"><div class="sec-head"><h2 id="hs">Bắt đầu thế nào?</h2></div>
       <ol class="steps">${STEPS.map(([t, d], i) => `<li class="step"><span class="step-n">${i + 1}</span><div><h3>${esc(t)}</h3><p>${esc(d)}</p></div></li>`).join("")}</ol></section>`;

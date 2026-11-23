@@ -1,4 +1,4 @@
-/* Trang thông tin công khai (Giới thiệu, Bảo mật, Hướng dẫn, Tải APK an toàn, Điều khoản, Riêng tư). Nội dung hai ngôn ngữ ở lib/info-content.js. */
+/* Trang thông tin công khai (Giới thiệu, Bảo mật, Hướng dẫn, Điều khoản, Riêng tư). Nội dung hai ngôn ngữ ở lib/info-content.js. */
 import { esc } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import { getLang, onLangChange } from "../lib/i18n.js";

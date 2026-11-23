@@ -19,7 +19,7 @@ export function riskGate(cat) {
     root.innerHTML = `<div class="rk" role="alertdialog" aria-modal="true" aria-labelledby="rkT" aria-describedby="rkD">
       <span class="rk-risk">${ICO.warn}${esc(RISKS[r])}</span><h4 id="rkT" translate="no">${esc(cat.label)}</h4>
       <p id="rkD">Danh mục này được quản trị viên phân loại là <b>${esc(RISKS[r])}</b>. Hãy đọc kỹ trước khi tiếp tục:</p>
-      <ul><li>Nội dung do bên thứ ba tạo ra, website không kiểm chứng được hoàn toàn và không chịu trách nhiệm về việc bạn sử dụng.</li><li>Có thể vi phạm điều khoản của ứng dụng hoặc trò chơi, dẫn tới khóa tài khoản, và có thể chứa mã độc.</li><li>SKIBIDI SCRIPT WEB không cổ xúy hack hay can thiệp trò chơi. Chỉ tiếp tục nếu bạn hiểu và tự chịu rủi ro.</li></ul>
+      <ul><li>Nội dung do bên thứ ba tạo ra, website không kiểm chứng được hoàn toàn và không chịu trách nhiệm về việc bạn sử dụng.</li><li>Có thể vi phạm điều khoản của ứng dụng hoặc trò chơi, dẫn tới khóa tài khoản, và có thể chứa mã độc.</li><li>Skibidi Web không cổ xúy hack hay can thiệp trò chơi. Chỉ tiếp tục nếu bạn hiểu và tự chịu rủi ro.</li></ul>
       <div class="bar" aria-hidden="true"><i id="rkBar"></i></div>
       <label class="check"><input type="checkbox" id="rkNo"> <span>Không hỏi lại với danh mục này</span></label>
       <div class="acts"><button type="button" class="btn ghost" id="rkBack">Quay lại</button><button type="button" class="btn primary" id="rkGo" disabled>Tôi đã đọc, tiếp tục</button></div></div>`;

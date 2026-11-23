@@ -1,4 +1,4 @@
-/* Danh sách nội dung của một danh mục: /scripts, /apk, /ios, /links, /c/:danh-mục */
+/* Danh sách nội dung của một danh mục: /c/:danh-mục */
 import { esc, vi } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";
@@ -17,7 +17,7 @@ export async function mount(ctx) {
   const sorted = a => { if (sort === "new") return a; const c = a.slice(), nm = (x, y) => String(x.name).localeCompare(String(y.name), "vi", { sensitivity: "base" });
     return sort === "old" ? c.reverse() : sort === "az" ? c.sort(nm) : sort === "za" ? c.sort((x, y) => nm(y, x)) : c.sort((x, y) => (y.copies || 0) - (x.copies || 0) || (y.ts || 0) - (x.ts || 0)); };
   const head = () => { const a = S.items(cat.id), n = (a || []).length;
-    ctx.setPage({ title: cat.label, sub: cat.sub, crumbs: crumbsFor(cat), count: a ? n + " mục" : null, desc: cat.label + " — " + (cat.sub || "Danh mục trên SKIBIDI SCRIPT WEB") + (a ? " (" + n + " mục)" : ""),
+    ctx.setPage({ title: cat.label, sub: cat.sub, crumbs: crumbsFor(cat), count: a ? n + " mục" : null, desc: cat.label + " — " + (cat.sub || "Danh mục trên Skibidi Web") + (a ? " (" + n + " mục)" : ""),
       ld: "CollectionPage", extra: a && n ? { "@type": "ItemList", name: cat.label, numberOfItems: n, itemListElement: a.slice(0, 20).map((it, i) => ({ "@type": "ListItem", position: i + 1, name: it.name, url: "https://skibidiscript.vercel.app" + S.catHref(cat) + "/" + encodeURIComponent(it.key) })) } : undefined,
       actions: (session.isDev || session.isEditor) ? `<a class="btn primary" href="${S.catHref(cat)}/create">${ICO.plus}Thêm mới</a>` : "" }); };
   ctx.el.innerHTML = `<div class="toolbar"><div class="field"><label class="sr" for="catFilter">Lọc nội dung</label><input id="catFilter" type="search" placeholder="Lọc trong ${esc(cat.label)}…" autocomplete="off"></div><div class="field sortf"><label class="sr" for="catSort">Sắp xếp</label><select id="catSort">${Object.keys(SORTS).map(k => `<option value="${k}"${k === sort ? " selected" : ""}>${SORTS[k]}</option>`).join("")}</select></div></div><div class="grid" id="grid"></div>`;
