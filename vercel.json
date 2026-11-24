@@ -64,11 +64,23 @@
       "destination": "/api/feed"
     },
     {
+      "source": "/logo.svg",
+      "destination": "/api/logo?n=logo.svg"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/api/logo?n=favicon.ico"
+    },
+    {
+      "source": "/icons/([a-z0-9.-]+)",
+      "destination": "/api/logo?n=$1"
+    },
+    {
       "source": "/img/shop/([A-Za-z0-9_-]+)\\.jpg",
       "destination": "/api/img?id=$1"
     },
     {
-      "source": "/((?!assets/|api/|img/|index\\.html|robots\\.txt|opensearch\\.xml|manifest\\.webmanifest|favicon|\\.well-known/).*)",
+      "source": "/((?!assets/|api/|img/|icons/|logo\\.svg|index\\.html|robots\\.txt|opensearch\\.xml|manifest\\.webmanifest|favicon|\\.well-known/).*)",
       "destination": "/api/page?p=/$1"
     }
   ],
@@ -120,7 +132,7 @@
       ]
     },
     {
-      "source": "/assets/img/(.*)",
+      "source": "/(logo\\.svg|favicon\\.ico|icons/.*)",
       "headers": [
         {
           "key": "Cache-Control",

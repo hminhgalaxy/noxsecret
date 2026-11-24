@@ -9,14 +9,14 @@ function meta(sel, attr, val) {
   const el = document.head.querySelector(sel); if (!el) return;
   el.setAttribute(attr, val);
 }
-export const LOGO = SITE + "/assets/img/icon-512.png";
+export const LOGO = SITE + "/icons/icon-512.png";
 /* Dữ liệu có cấu trúc riêng cho từng trang: loại trang, đường dẫn breadcrumb, logo/nhà xuất bản. Trang riêng tư thì không có. */
 function structured(o, url, full, d) {
   let el = document.getElementById("ld-page");
   if (o.noindex || !o.title) { if (el) el.remove(); return; }
   if (!el) { el = document.createElement("script"); el.id = "ld-page"; el.type = "application/ld+json"; document.head.appendChild(el); }
   const trail = [{ name: NAME, item: SITE + "/" }].concat((o.crumbs || []).map(c => ({ name: t(c.label), item: c.href ? SITE + c.href : null })), [{ name: t(o.title), item: url }]);
-  const g = [{ "@type": o.ld || "WebPage", "@id": url + "#page", url, name: full, description: d, inLanguage: getLang() === "vi" ? "vi" : "en", isPartOf: { "@id": SITE + "/#site" }, publisher: { "@id": SITE + "/#org" }, primaryImageOfPage: { "@type": "ImageObject", url: SITE + "/assets/img/og.png", width: 1200, height: 630 } },
+  const g = [{ "@type": o.ld || "WebPage", "@id": url + "#page", url, name: full, description: d, inLanguage: getLang() === "vi" ? "vi" : "en", isPartOf: { "@id": SITE + "/#site" }, publisher: { "@id": SITE + "/#org" }, primaryImageOfPage: { "@type": "ImageObject", url: SITE + "/icons/og.png", width: 1200, height: 630 } },
     { "@type": "BreadcrumbList", itemListElement: trail.map((c, i) => Object.assign({ "@type": "ListItem", position: i + 1, name: c.name }, c.item ? { item: c.item } : {})) }];
   if (o.faq && o.faq.length) g.push({ "@type": "FAQPage", "@id": url + "#faq", mainEntity: o.faq.map(f => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) });
   if (o.extra) g.push(o.extra);

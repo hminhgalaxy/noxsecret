@@ -19,6 +19,7 @@ export function debounce(fn, ms) { let t; const w = (...a) => { clearTimeout(t);
 /* Từ ngữ kỹ thuật chỉ hiện với tài khoản dev: người dùng thường thấy câu thân thiện thay thế */
 let devProbe = () => false;
 export const setDevProbe = f => { devProbe = f; };
+export const isDevNow = () => { try { return !!devProbe(); } catch (_) { return false; } };
 const TECH_RX = /Firebase|Realtime|Database|\bUID\b|\brules?\b|listener|\bSync\b|\bAPI\b|\bnode\b|\[DEV\]|DEV ONLY|permission|PERMISSION|nox_|undefined|\[object|\bJSON\b|\btoken\b|\bendpoint\b|\bHTTP\b|\bstack\b|TypeError|ReferenceError|SyntaxError|\bCORS\b|\bfetch\b|Admin SDK|\bserver error\b/;
 export const plain = (msg, fb = "Có lỗi xảy ra. Vui lòng thử lại.") => (devProbe() || !TECH_RX.test(String(msg == null ? "" : msg))) ? msg : fb;
 export function toast(msg, kind) {

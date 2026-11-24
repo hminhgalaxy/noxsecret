@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import { answer, detectLang, norm, KB_SIZE } from "../assets/js/lib/skias-brain.js";
 import { KB, JOKES, DICT } from "../assets/js/lib/skias-kb.js";
+import { md, mdPartial } from "../assets/js/lib/skias-md.js";
 let pass = 0, fail = 0; const t = (n, a, e = true) => { const ok = JSON.stringify(a) === JSON.stringify(e); ok ? pass++ : (fail++, console.log("✗", n, "→", JSON.stringify(a), "(cần", JSON.stringify(e) + ")")); };
 const A = (q, o = {}) => answer(q, { ui: "en", now: new Date(2026, 10, 21, 9, 5), rnd: () => 0, ...o });
 const id = q => { const r = A(q); return r ? (r.id || r.kind) : null; };
@@ -39,4 +40,18 @@ t("mọi chủ đề đều được tìm ra bằng chính từ khóa dài nhấ
 const top = fs.readFileSync(new URL("../assets/js/lib/topup.js", import.meta.url), "utf8");
 t("sự thật: hạn mức nạp trong lời Skias khớp mã nạp tiền (10.000 – 50.000.000)", [/info \? info\.min : 10000/.test(top), /info \? info\.max : 50000000/.test(top), /10\.000/.test(A("làm sao nạp tiền").text), /50\.000\.000/.test(A("làm sao nạp tiền").text)], [true, true, true, true]);
 t("kho: không còn nhắc Script/APK/iOS cũ và không có từ kỹ thuật", KB.filter(e => /\b(apk|ios|script|scripts|vault|firebase|realtime|database|api|node|json)\b/i.test(e.vi + " " + e.en)).map(e => e.id), []);
+
+/* ── Markdown của khung chat (an toàn + đúng) ── */
+t("md: **đậm**, *nghiêng*, `mã`", md("**Xin** *chào* `x`"), "<p><strong>Xin</strong> <em>chào</em> <code>x</code></p>");
+t("md: phép nhân 3*4 và 5*6 không bị nghiêng nhầm", md("3*4 và 5*6"), "<p>3*4 và 5*6</p>");
+t("md: danh sách gạch đầu dòng và đánh số", [md("- a\n- b"), md("1. x\n2) y")], ["<ul><li>a</li><li>b</li></ul>", "<ol><li>x</li><li>y</li></ol>"]);
+t("md: khối mã giữ nguyên ký tự, không đổi **", md("```\n**a** <b>\n```"), "<pre><code>**a** &lt;b&gt;</code></pre>");
+t("md: tiêu đề, trích dẫn, đường kẻ", [md("# Tên"), md("> hi"), md("---")], ['<p class="sk-h">Tên</p>', "<blockquote>hi</blockquote>", "<hr>"]);
+t("md: chống chèn HTML / sự kiện", [/<(img|script)|<[^>]* on\w+=/i.test(md('<img src=x onerror="a()"><script>alert(1)</script>')), md("<b>x</b>")], [false, "<p>&lt;b&gt;x&lt;/b&gt;</p>"]);
+t("md: liên kết chỉ cho http(s) và đường dẫn nội bộ", [md("[a](javascript:alert(1))").includes("<a "), md("[a](data:text/html,x)").includes("<a "), md("[a](https://x.com/p?q=1&r=2)").includes('href="https://x.com/p?q=1&amp;r=2"'), md("[a](/shop)").includes('href="/shop"'), /rel="noopener noreferrer"/.test(md("[a](https://x.com)"))], [false, false, true, true, true]);
+t("md: dấu \" không thoát được khỏi thuộc tính href", /href="[^"]*"\s+onmouseover/.test(md('[a](https://x.com/"onmouseover="y)')), false);
+t("md: rỗng / null / quá dài không làm sập", [md(""), md(null), md("a".repeat(20000)).length < 8100], ["", "", true]);
+t("mdPartial: đang gõ dở **đậm, `mã, ``` đều tự đóng tạm", [mdPartial("Đây là **đậm dở"), mdPartial("x `co"), mdPartial("```\nabc"), mdPartial("abc **")], ["<p>Đây là <strong>đậm dở</strong></p>", "<p>x <code>co</code></p>", "<pre><code>abc</code></pre>", "<p>abc </p>"]);
+t("kho: câu về Skias AI nói rõ ai cũng dùng được (không còn 'chỉ dev')", [/ai cũng dùng được/.test(KB.find(e => e.id === "skias-ai").vi), /open to everyone/.test(KB.find(e => e.id === "skias-ai").en), /chỉ dành cho tài khoản dev/.test(KB.find(e => e.id === "skias-ai").vi)], [true, true, false]);
+
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

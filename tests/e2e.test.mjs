@@ -428,7 +428,9 @@ test("SEO: tiêu đề, mô tả, canonical, robots theo từng trang", async ({
 });
 test("SEO: robots.txt, sitemap, manifest, ảnh chia sẻ truy cập được", async ({ page }) => {
   for (const [u, re] of [["/robots.txt", /Sitemap:/], ["/manifest.webmanifest", /Skibidi Web/]]) { const r = await page.request.get(BASE + u); eq(r.status(), 200, u); ok(re.test(await r.text()), u); }
-  for (const u of ["/assets/img/og.png", "/assets/img/icon-192.png", "/assets/img/icon-512.png", "/assets/img/apple-touch-icon.png", "/assets/img/logo.svg"]) eq((await page.request.get(BASE + u)).status(), 200, u);
+  for (const u of ["/icons/og.png", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/apple-touch-icon.png", "/logo.svg", "/favicon.ico"]) eq((await page.request.get(BASE + u)).status(), 200, u);
+  ok(!hits.some(h => /^\/assets\/img\//.test(h)), "không có yêu cầu nào tới /assets/img/ (không còn tệp logo)");
+  for (const [u, ty] of [["/icons/icon-192.png", "image/png"], ["/logo.svg", "image/svg+xml"], ["/favicon.ico", "image/x-icon"], ["/icons/og.png", "image/png"]]) ok(((await page.request.get(BASE + u)).headers()["content-type"] || "").startsWith(ty), u + " đúng loại " + ty);
 });
 test("hiệu năng: mọi file tải trước (modulepreload) đều tồn tại", async ({ page }) => {
   await page.goto(BASE + "/"); const hrefs = await page.$$eval('link[rel=modulepreload]', l => l.map(x => x.getAttribute("href"))); ok(hrefs.length > 10, "có danh sách preload");
@@ -474,7 +476,7 @@ test("giao diện: chuyển sáng/tối trong Cài đặt và ghi nhớ", async 
 });
 test("cài đặt: kính mờ bật/tắt — tắt: khung màu đặc, bật: khung trong suốt chỉ còn viền; ghi nhớ", async ({ page }) => {
   await go(page, "/settings"); const bgOf = () => page.evaluate(() => { const e = document.querySelector(".set-card"); const cs = getComputedStyle(e); return { g: document.documentElement.dataset.glass || "off", bg: (document.documentElement.dataset.glass === "on" ? (() => { const p = document.createElement("i"); p.style.background = "var(--surface)"; document.body.appendChild(p); const c = getComputedStyle(p).backgroundColor; p.remove(); return c; })() : cs.backgroundColor), bd: cs.borderTopColor, bgi: cs.backgroundImage, bf: cs.backdropFilter || cs.webkitBackdropFilter || "none" }; });
-  const alpha = c => { const m = c.match(/rgba?\(([^)]+)\)/); const p = m[1].split(",").map(x => parseFloat(x)); return p.length > 3 ? p[3] : 1; };
+  const alpha = c => { const cm = c.match(/\/\s*([\d.]+%?)\s*\)/); if (cm) return cm[1].endsWith("%") ? parseFloat(cm[1]) / 100 : parseFloat(cm[1]); const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return 1; const p = m[1].split(",").map(x => parseFloat(x)); return p.length > 3 ? p[3] : 1; };
   const off = await bgOf(); eq(off.g, "off"); eq(alpha(off.bg), 1, "tắt: màu đặc"); ok(/none/.test(off.bf), "tắt: không làm mờ");
   await page.click("label.sw:has(#glass)"); await page.waitForFunction(() => document.documentElement.dataset.glass === "on");
   const on = await bgOf(); ok(alpha(on.bg) < 0.6, "bật: trong suốt " + on.bg); ok(alpha(on.bd) > 0 || /gradient/.test(on.bgi), "bật: còn viền kính (viền màu hoặc viền chuyển sắc) " + on.bd + " | " + on.bgi.slice(0, 60));
@@ -708,7 +710,7 @@ test("kiểm tra IP ngầm: IP quen vào thẳng; IP/vị trí lạ phải nhậ
   eq(Object.keys((await db(page)).nox_security.uUSER.known).length, 1, "lưu dấu vân tay IP đầu tiên (không phải IP thật)"); ok(!JSON.stringify(await db(page)).includes("10.1.1"), "không lưu IP thật");
   await page.click('[data-act="signout"]'); await yes(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); eq(st.sent.filter(m => /new location/.test(m.subject)).length, 0, "cùng dải IP: không hỏi mã");
   await page.click('[data-act="signout"]'); await yes(page); st.ip = "203.0.113.9"; await login(page, USERPW); await page.waitForURL(/\/two-step/);
-  await until(() => mailTo(st, USERPW[0], /new location/)); ok(/Hanoi, VN/.test(mailTo(st, USERPW[0], /new location/).html), "thư ghi vị trí"); ok(/vị trí|location/i.test(await page.textContent(".auth-card")), "trang giải thích vì sao cần mã");
+  await until(() => mailTo(st, USERPW[0], /new location/)); ok(/Hanoi, VN/.test(mailTo(st, USERPW[0], /new location/).html), "thư ghi vị trí"); ok(/vị trí|location|thiết bị|nơi mới|new device|new place/i.test(await page.textContent(".auth-card")), "trang giải thích vì sao cần mã");
   await go(page, "/settings"); eq(path(page).split("?")[0], "/two-step", "chưa nhập mã thì mọi trang đều bị đưa về bước nhập mã");
   await page.fill("#code", "000000"); await page.click("button[type=submit]"); await page.waitForFunction(() => document.querySelector("#err").textContent.length > 3);
   await page.fill("#code", "123456"); await page.click("button[type=submit]"); await page.waitForURL(u => !/two-step/.test(u.toString())); await authed(page);
@@ -1382,7 +1384,7 @@ test("Đợt Shop 4 — Skias: chào khi vào web (song ngữ), tự ẩn; mở 
   await page.click("#sk .sk-fig"); await page.waitForSelector("#sk .sk-panel.on");
   ask: for (const [q, re] of [["làm sao nạp tiền", /10\.000/], ["how do i top up", /Top up: press/], ["2+3*4", /14/], ["15% của 200", /30/], ["ví trong tiếng anh là gì", /wallet/], ["how do you say password in vietnamese", /mật khẩu/], ["bạn là ai", /Skias/], ["asdfgh", /tricky|khó/], ["skias ai là gì", /Skias AI/]]) {
     const n = await page.locator("#sk .sk-m-row.bot").count(); await page.fill("#sk .sk-in", q); await page.keyboard.press("Enter");
-    await page.waitForFunction(n => document.querySelectorAll("#sk .sk-m-row.bot").length > n && !document.querySelector("#sk .sk-dots"), n, { timeout: 6000 });
+    await page.waitForFunction(n => document.querySelectorAll("#sk .sk-m-row.bot").length > n && !document.querySelector("#sk .sk-dots") && !document.querySelector("#sk .sk-send.stop"), n, { timeout: 8000 });
     const last = await page.locator("#sk .sk-m-row.bot .sk-msg").last().textContent(); ok(re.test(last), `"${q}" → ${last.slice(0, 50)}`); continue ask;
   }
   await page.fill("#sk .sk-in", "web có an toàn không"); await page.keyboard.press("Enter"); await page.waitForSelector('#sk .sk-go a[href="/security"]'); ok(true, "câu trả lời có nút dẫn tới trang liên quan");
@@ -1452,7 +1454,7 @@ test("English: cửa hàng, ví, giỏ hàng, nạp tiền, lịch sử, chat n�
 }, { lang: "en", timeout: 150000 });
 
 /* ───────── Đợt Shop 4: Skias (đầu to, chớp mắt, khung mờ, không gợi ý, Skias AI chỉ dev), UI, từ kỹ thuật ───────── */
-test("Đợt Shop 4 — Skias: chỉ còn cái đầu to, chớp mắt, khung nói mờ đặc, không có gợi ý, nút Skias AI bị khóa với người thường", async ({ page }) => {
+test("Đợt Shop 4 — Skias: chỉ còn cái đầu to, chớp mắt, khung nói mờ đặc, không có gợi ý, nút Skias AI dùng được với người thường", async ({ page }) => {
   await page.addInitScript(() => { try { localStorage.setItem("ssw_gfx", "mid"); } catch (_) {} });
   await installApi(page); await go(page, "/"); await skiasOn(page); await page.waitForSelector("#sk .sk-bubble.on", { timeout: 9000 });
   const r = await page.evaluate(() => { const f = document.querySelector("#sk .sk-fig").getBoundingClientRect(), b = getComputedStyle(document.querySelector("#sk .sk-bubble")), eye = document.querySelector("#sk .sk-eye");
@@ -1465,17 +1467,18 @@ test("Đợt Shop 4 — Skias: chỉ còn cái đầu to, chớp mắt, khung n�
   const p = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#sk .sk-panel")); const m = c.backgroundColor.match(/\/\s*([\d.]+)\)/) || c.backgroundColor.match(/rgba\([^)]*,\s*([\d.]+)\)/); return { a: m ? +m[1] : 1, chips: document.querySelectorAll("#sk .sk-chip").length, hidden: document.querySelector("#sk .sk-chips").hidden }; });
   ok(p.a >= 0.85, "khung chat đủ đục: " + p.a); eq(p.chips, 0, "không còn nút câu hỏi gợi ý"); ok(p.hidden, "khu gợi ý ẩn");
   await page.fill("#sk .sk-in", "xin chào"); await page.keyboard.press("Enter"); await page.waitForSelector("#sk .sk-m-row.bot:has-text('Skias') >> nth=1", { timeout: 5000 }); eq(await page.locator("#sk .sk-chip").count(), 0, "trả lời xong cũng không có gợi ý");
-  eq(await page.locator("#sk .sk-ai.locked").count(), 1, "Skias AI bị khóa"); eq(await page.getAttribute("#sk .sk-ai", "aria-disabled"), "true");
-  await page.click("#sk .sk-ai", { force: true }); await page.waitForSelector("#sk .sk-m-row.bot:has-text('🔒')"); eq(await page.locator("#sk .sk-ai.on").count(), 0, "bấm vào vẫn không bật được");
-  await page.fill("#sk .sk-in", "hello ai"); await page.keyboard.press("Enter"); await page.waitForTimeout(900); eq(await page.evaluate(() => window.__puterCalls || 0), 0, "không gọi puter khi là người thường");
-  eq(await page.evaluate(() => !!document.querySelector('script[src*="puter.com"]')), false, "không tải puter.js với người thường");
+  eq(await page.locator("#sk .sk-ai.locked").count(), 0, "Skias AI không còn bị khóa với người thường"); ok(!(await page.getAttribute("#sk .sk-ai", "aria-disabled")), "nút AI không bị vô hiệu");
+  eq(await page.evaluate(() => !!document.querySelector('script[src*="puter.com"]')), false, "chưa bấm AI thì chưa tải puter.js (nhẹ cho người không dùng)");
+  await page.click("#sk .sk-ai"); await page.waitForSelector("#sk .sk-ai.on"); eq(await page.locator("#sk .sk-m-row.bot:has-text('🔒')").count(), 0, "không còn thông báo khóa");
+  await page.fill("#sk .sk-in", "hello ai"); await page.keyboard.press("Enter"); await page.waitForSelector("#sk .sk-msg:has-text('AI mock: hello ai')", { timeout: 8000 }); eq(await page.evaluate(() => window.__puterCalls || 0), 1, "người dùng thường gọi được Puter AI");
+  ok(await page.evaluate(() => /Skibidi Web/.test(window.__puterMsgs[0].content) && /no technical jargon|do not use technical jargon/i.test(window.__puterMsgs[0].content)), "lời dặn hệ thống: nói dễ hiểu, không dùng từ kỹ thuật");
   eq(await cleanBox(page), [], "Skias không đè nút cố định nào");
   if (process.env.SHOT) await page.screenshot({ path: process.env.SHOT + "/skias-panel.png" });
 });
-test("Đợt Shop 4 — Skias AI: tài khoản dev dùng được (puter.js), bật/tắt chế độ, lịch sử gửi kèm; lỗi tải puter báo gọn", async ({ page }) => {
+test("Đợt Shop 4 — Skias AI: dùng được (puter.js), bật/tắt chế độ, lịch sử gửi kèm; lỗi tải puter báo gọn", async ({ page }) => {
   await installApi(page); await loginDev(page); await skiasOn(page); await authed(page);
   await page.click("#sk .sk-fig"); await page.waitForSelector("#sk .sk-panel.on");
-  eq(await page.locator("#sk .sk-ai.locked").count(), 0, "dev: không còn khóa");
+  eq(await page.locator("#sk .sk-ai.locked").count(), 0, "không còn khóa");
   await page.click("#sk .sk-ai"); await page.waitForSelector("#sk .sk-ai.on");
   await page.fill("#sk .sk-in", "hello ai"); await page.keyboard.press("Enter"); await page.waitForSelector("#sk .sk-msg:has-text('AI mock: hello ai')", { timeout: 8000 });
   eq(await page.evaluate(() => window.__puterCalls), 1, "gọi puter 1 lần"); ok(await page.evaluate(() => window.__puterMsgs[0].role === "system" && /Skibidi Web/.test(window.__puterMsgs[0].content)), "có lời dặn hệ thống về web");
@@ -1505,6 +1508,111 @@ test("Đợt Shop 4 — UI điện thoại: nút Ngôn ngữ/Giao diện nằm h
   eq(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "không cuộn ngang");
   if (process.env.SHOT) { await page.waitForTimeout(1800); await page.screenshot({ path: process.env.SHOT + "/settings-phone.png" }); await page.evaluate(() => scrollTo(0, 700)); await page.waitForTimeout(500); await page.screenshot({ path: process.env.SHOT + "/settings-phone2.png" }); }
 });
+
+/* ───────── Đợt Shop 5: Skias quả cầu vàng, khung chat mới (Markdown, dừng, chat mới), logo vẽ bằng code ───────── */
+const lum = c => { const m = c.match(/[\d.]+/g).map(Number), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(m[0]) + .7152 * f(m[1]) + .0722 * f(m[2]); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+const devAI = async page => { await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await skiasOn(page); await authed(page); await page.evaluate(() => new Promise((res, rej) => { const e = document.createElement("script"); e.src = "https://js.puter.com/v2/"; e.onload = res; e.onerror = rej; document.head.appendChild(e); })); await page.click("#sk .sk-fig"); await page.waitForSelector("#sk .sk-panel.on"); await page.click("#sk .sk-ai"); await page.waitForSelector("#sk .sk-ai.on"); };
+const aiSay = async (page, text) => { await page.fill("#sk .sk-in", text); await page.keyboard.press("Enter"); };
+const idleChat = page => page.waitForFunction(() => !document.querySelector("#sk .sk-send.stop"), null, { timeout: 8000 });
+test("Đợt Shop 5 — Skias là quả cầu vàng mặt cười: mắt bầu dục đen, nụ cười rộng, chớp mắt, ảnh đại diện cùng kiểu (không dùng tệp ảnh)", async ({ page }) => {
+  await installApi(page); await go(page, "/"); await skiasOn(page); await page.waitForSelector("#sk .sk-fig svg");
+  const r = await page.evaluate(() => { const q = s => document.querySelector("#sk " + s), face = q(".sk-face"), balls = [...document.querySelectorAll("#sk .sk-ball")].map(e => ({ rx: +e.getAttribute("rx"), ry: +e.getAttribute("ry"), f: getComputedStyle(e).fill })), grad = document.querySelector("#skgB"), stops = [...grad.querySelectorAll("stop")].map(x => x.getAttribute("stop-color"));
+    return { fill: face.getAttribute("fill"), balls, stops, smile: !!q(".sk-mSmile"), eyes: document.querySelectorAll("#sk .sk-eye").length, blink: getComputedStyle(q(".sk-eye")).animationName, imgs: document.querySelectorAll("#sk img, #sk image").length, r: +face.getAttribute("r"), figW: q(".sk-fig").getBoundingClientRect().width }; });
+  eq(r.fill, "url(#skgB)", "thân quả cầu tô bằng dải màu"); ok(r.stops.every(c => { const n = parseInt(c.slice(1), 16), R = n >> 16, G = (n >> 8) & 255, B = n & 255; return R >= 220 && G >= 130 && B <= 180; }), "dải màu vàng: " + r.stops.join(","));
+  eq(r.eyes, 2, "hai mắt"); ok(r.balls.every(b => b.ry > b.rx * 1.4 && /rgb\(26, 18, 8\)|rgb\(0, 0, 0\)/.test(b.f)), "mắt là hình bầu dục dọc màu đen"); ok(r.smile, "có nụ cười"); ok(/skBlink/.test(r.blink), "chớp mắt"); eq(r.imgs, 0, "không dùng thẻ ảnh"); ok(r.figW >= 80, "to rõ: " + r.figW);
+  await page.click("#sk .sk-fig"); await page.waitForSelector("#sk .sk-panel.on"); const a = await page.evaluate(() => { const e = document.querySelector("#sk .sk-hd .sk-mav"), c = getComputedStyle(e), b = getComputedStyle(e, "::before"); return { bg: c.backgroundImage, w: e.getBoundingClientRect().width, blink: b.animationName }; });
+  ok(/radial-gradient/.test(a.bg) && a.w >= 40 && /skBlinkAv/.test(a.blink), "ảnh đại diện là mặt cười vẽ bằng CSS, có chớp mắt: " + JSON.stringify(a));
+  if (process.env.SHOT) await page.screenshot({ path: process.env.SHOT + "/skias5-panel.png" });
+});
+test("Đợt Shop 5 — khung chat mới: tin người dùng là MỘT khung (không bị bọc đôi), chữ đủ tương phản, nút Tự động/Skias AI trượt, ô nhập + nút gửi", async ({ page }) => {
+  await page.addInitScript(() => { try { localStorage.setItem("ssw_gfx", "mid"); } catch (_) {} });
+  await installApi(page); await go(page, "/"); await skiasOn(page); await page.click("#sk .sk-fig"); await page.waitForSelector("#sk .sk-panel.on");
+  await page.fill("#sk .sk-in", "xin chào"); await page.keyboard.press("Enter"); await page.waitForSelector("#sk .sk-m-row.usr"); await idleChat(page);
+  const r = await page.evaluate(() => { const row = document.querySelector("#sk .sk-m-row.usr"), col = row.querySelector(".sk-col"), msg = row.querySelector(".sk-msg"), cs = e => getComputedStyle(e);
+    const boxed = e => cs(e).backgroundColor !== "rgba(0, 0, 0, 0)" || parseFloat(cs(e).borderTopWidth) > 0 || cs(e).boxShadow !== "none";
+    const pill = cs(document.querySelector("#sk .sk-pill")), on = cs(document.querySelector("#sk .sk-mode.on")), send = cs(document.querySelector("#sk .sk-send"));
+    return { rowBox: boxed(row), colBox: boxed(col), msgBg: cs(msg).backgroundColor, msgFg: cs(msg).color, pillBg: pill.backgroundColor, onFg: on.color, sendBg: send.backgroundColor, sendFg: send.color, time: !!row.querySelector(".sk-t"), pillX: document.querySelector("#sk .sk-modes").dataset.m, align: cs(row).justifyContent, bot: !!document.querySelector("#sk .sk-m-row.bot .sk-mav"), inH: document.querySelector("#sk .sk-in").getBoundingClientRect().height }; });
+  ok(!r.rowBox && !r.colBox, "bao ngoài tin người dùng không có nền/viền (không còn khung đôi): " + JSON.stringify(r)); ok(ratio(r.msgBg, r.msgFg) >= 4.5, "chữ tin người dùng tương phản: " + r.msgBg + " / " + r.msgFg + " = " + ratio(r.msgBg, r.msgFg).toFixed(1));
+  ok(ratio(r.pillBg, r.onFg) >= 4.5, "nút chế độ đang chọn tương phản"); ok(ratio(r.sendBg, r.sendFg) >= 4.5, "nút gửi tương phản"); ok(r.time, "có giờ gửi"); eq(r.align, "flex-end", "tin người dùng nằm bên phải"); ok(r.bot, "tin của Skias có ảnh đại diện"); ok(r.inH >= 44, "ô nhập đủ cao để bấm: " + r.inH);
+  const botFg = await page.evaluate(() => { const m = document.querySelector("#sk .sk-m-row.bot .sk-msg"), c = getComputedStyle(m); return [c.backgroundColor, c.color]; }); ok(ratio(...botFg) >= 4.5, "chữ tin của Skias tương phản " + botFg.join(" / "));
+  await page.click("#sk .sk-ai"); eq(await page.getAttribute("#sk .sk-modes", "data-m"), "ai", "bấm Skias AI → thanh trượt chạy sang AI (không bị khóa)");
+});
+test("Đợt Shop 5 — Skias AI hiển thị Markdown đúng (đậm, danh sách, mã), an toàn trước chèn HTML/liên kết độc, và chế độ AI không bị tự nhảy về Tự động", async ({ page }) => {
+  await devAI(page);
+  await page.evaluate(() => { window.puter.ai.chat = async () => ({ message: { content: "**Xin chào** bạn!\n\n- Mục một\n- Mục hai\n\nDùng `nạp tiền` nhé. <img src=x onerror=\"window.__xss=1\"> [bẫy](javascript:window.__xss=2) [Trang chủ](https://example.com/a?b=1)" } }); });
+  await aiSay(page, "markdown"); await page.waitForSelector("#sk .sk-msg strong"); await idleChat(page);
+  const r = await page.evaluate(() => { const m = [...document.querySelectorAll("#sk .sk-m-row.bot .sk-msg")].pop(); return { text: m.textContent, strong: m.querySelector("strong")?.textContent, li: m.querySelectorAll("li").length, code: m.querySelector("code")?.textContent, img: m.querySelectorAll("img").length, xss: window.__xss || 0, links: [...m.querySelectorAll("a")].map(a => a.getAttribute("href") + "|" + a.rel), tag: !!m.querySelector(".sk-tag") }; });
+  eq(r.strong, "Xin chào", "chữ đậm"); eq(r.li, 2, "danh sách 2 mục"); eq(r.code, "nạp tiền", "mã"); ok(!/\*\*|`/.test(r.text), "không còn ký tự ** hay ` thô: " + r.text.slice(0, 60)); eq(r.img, 0, "thẻ <img> bị vô hiệu"); eq(r.xss, 0, "không chạy mã"); eq(r.links, ["https://example.com/a?b=1|noopener noreferrer"], "chỉ giữ liên kết an toàn"); ok(r.tag, "có nhãn Skias AI");
+  /* chế độ AI không tự về Tự động dù quyền dev chớp tắt một lúc (lỗi trong ảnh chụp của bạn) */
+  await page.evaluate(async () => { const m = await import("/assets/js/lib/auth.js"); window.__dev = m.session.isDev; m.session.isDev = false; });
+  await page.click("#sk .sk-min"); await page.waitForSelector("#sk .sk-panel", { state: "hidden" }); await page.click("#sk .sk-fig"); await page.waitForSelector("#sk .sk-panel.on");
+  eq(await page.locator("#sk .sk-ai.on").count(), 1, "AI vẫn đang được chọn dù quyền chớp tắt"); eq(await page.locator("#sk .sk-auto.on").count(), 0, "Tự động không sáng sai"); eq(await page.getAttribute("#sk .sk-modes", "data-m"), "ai", "thanh trượt đứng ở AI");
+  await page.evaluate(async () => { const m = await import("/assets/js/lib/auth.js"); m.session.isDev = window.__dev; });
+  /* trả lời dài → cuộn, có nút "xuống tin mới nhất" */
+  await page.evaluate(() => { window.puter.ai.chat = async () => ({ message: { content: Array.from({ length: 40 }, (_, i) => "Dòng số " + (i + 1)).join("\n\n") } }); });
+  await aiSay(page, "dài"); await page.waitForSelector("#sk .sk-caret, #sk .sk-msg:has-text('Dòng số 40')"); await idleChat(page);
+  const sc = () => page.evaluate(() => { const l = document.querySelector("#sk .sk-log"); return { bottom: l.scrollHeight - l.scrollTop - l.clientHeight, can: l.scrollHeight > l.clientHeight + 100 }; });
+  ok((await sc()).can, "nội dung dài hơn khung"); await page.waitForFunction(() => { const l = document.querySelector("#sk .sk-log"); return l.scrollHeight - l.scrollTop - l.clientHeight < 8; }, null, { timeout: 4000 });
+  await page.evaluate(() => { const l = document.querySelector("#sk .sk-log"); l.style.scrollBehavior = "auto"; l.scrollTop = 0; }); await page.waitForSelector("#sk .sk-down:not([hidden])"); await page.click("#sk .sk-down"); await page.waitForFunction(() => document.querySelector("#sk .sk-down").hidden, null, { timeout: 4000 }); ok(true, "nút xuống tin mới nhất hoạt động");
+});
+test("Đợt Shop 5 — NGẮT chat AI: nút Gửi đổi thành Dừng, bấm Dừng/Esc là ngưng ngay, kết quả đến muộn bị bỏ, gõ dở thì dừng giữa chừng, chuyển Tự động cũng ngắt", async ({ page }) => {
+  await page.addInitScript(() => { try { localStorage.setItem("ssw_gfx", "high"); } catch (_) {} });
+  await devAI(page);
+  /* 1) AI treo → Dừng bằng nút */
+  await page.evaluate(() => { window.__pend = []; window.puter.ai.chat = () => new Promise(r => window.__pend.push(r)); });
+  await aiSay(page, "câu treo"); await page.waitForSelector("#sk .sk-send.stop"); ok(await page.locator("#sk .sk-dots").count() === 1, "đang hiện dấu ba chấm chờ AI"); eq(await page.getAttribute("#sk .sk-send", "aria-label"), "Dừng", "nút có nhãn Dừng");
+  await page.click("#sk .sk-send"); await page.waitForFunction(() => !document.querySelector("#sk .sk-send.stop") && !document.querySelector("#sk .sk-dots")); await page.waitForSelector("#sk .sk-note:has-text('Đã dừng')"); ok(true, "bấm Dừng → ngưng, có ghi chú");
+  await page.evaluate(() => window.__pend.forEach(r => r({ message: { content: "KẾT QUẢ MUỘN" } }))); await page.waitForTimeout(500); eq(await page.locator("#sk .sk-msg:has-text('KẾT QUẢ MUỘN')").count(), 0, "kết quả đến muộn không hiện ra");
+  /* 2) dùng lại ngay được; Esc cũng dừng */
+  await page.evaluate(() => { window.__pend = []; }); await aiSay(page, "treo lần hai"); await page.waitForSelector("#sk .sk-send.stop"); await page.keyboard.press("Escape"); await page.waitForFunction(() => !document.querySelector("#sk .sk-send.stop")); ok(await page.locator("#sk .sk-panel.on").count() === 1, "Esc lần đầu chỉ dừng, chưa đóng khung");
+  await page.evaluate(() => { window.puter.ai.chat = async () => ({ message: { content: "Đây là câu trả lời thật dài để thử gõ dở. ".repeat(14) } }); });
+  /* 3) đang gõ chữ → Dừng giữa chừng */
+  await aiSay(page, "trả lời dài"); await page.waitForSelector("#sk .sk-caret"); await page.click("#sk .sk-send"); await page.waitForSelector("#sk .sk-cut");
+  const len = await page.evaluate(() => [...document.querySelectorAll("#sk .sk-m-row.bot .sk-msg")].pop().textContent.length); ok(len > 0 && len < 14 * 40, "văn bản dừng giữa chừng: " + len + " ký tự"); eq(await page.locator("#sk .sk-send.stop").count(), 0, "đã nhả nút Dừng");
+  /* 4) chuyển sang Tự động khi đang chờ → ngắt luôn */
+  await page.evaluate(() => { window.puter.ai.chat = () => new Promise(() => {}); }); await aiSay(page, "treo ba"); await page.waitForSelector("#sk .sk-send.stop"); await page.click("#sk .sk-auto"); await page.waitForFunction(() => !document.querySelector("#sk .sk-send.stop")); eq(await page.getAttribute("#sk .sk-modes", "data-m"), "auto", "đã về Tự động");
+  await page.keyboard.press("Escape"); await page.waitForSelector("#sk .sk-panel", { state: "hidden" }); ok(true, "Esc khi rảnh thì đóng khung");
+});
+test("Đợt Shop 5 — cuộc trò chuyện mới xoá khung chat + lịch sử AI và về chế độ Tự động; ghi chú đổi chế độ; Skias nép khi cuộn trang", async ({ page }) => {
+  await devAI(page); await page.waitForSelector("#sk .sk-note:has-text('Skias AI')"); await aiSay(page, "một"); await page.waitForSelector("#sk .sk-msg:has-text('AI mock: một')"); await idleChat(page);
+  await aiSay(page, "hai"); await page.waitForSelector("#sk .sk-msg:has-text('AI mock: hai')"); await idleChat(page); ok(await page.evaluate(() => window.__puterMsgs.length) >= 4, "lịch sử đã tích luỹ");
+  await page.click("#sk .sk-new"); await page.waitForFunction(() => document.querySelectorAll("#sk .sk-m-row").length === 1);
+  eq(await page.locator("#sk .sk-m-row.usr").count(), 0, "không còn tin người dùng"); eq(await page.locator("#sk .sk-auto.on").count(), 1, "về Tự động");
+  await page.click("#sk .sk-ai"); await aiSay(page, "ba"); await page.waitForSelector("#sk .sk-msg:has-text('AI mock: ba')"); eq(await page.evaluate(() => window.__puterMsgs.length), 2, "lịch sử AI đã xoá (chỉ còn lời dặn + câu mới)");
+  await page.click("#sk .sk-min"); await page.waitForSelector("#sk .sk-panel", { state: "hidden" });
+  await page.evaluate(() => { document.body.style.minHeight = "4000px"; scrollTo(0, 600); }); await page.waitForSelector("#sk.peek", { timeout: 3000 }); ok(true, "cuộn trang → Skias nép sang bên");
+  await page.waitForSelector("#sk:not(.peek)", { timeout: 5000 }); ok(true, "đứng yên → ló ra lại");
+});
+
+test("Đợt Shop 5 — Kính lỏng: thanh trên, thanh bên, thanh dưới là khung NỔI bo góc (không còn ô vuông), thanh trượt không có nền vuông, menu điện thoại bo góc và che nút chat nổi", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.addInitScript(() => { try { localStorage.setItem("ssw_glass", "1"); localStorage.setItem("ssw_gfx", "high"); } catch (_) {} });
+  await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await go(page, "/settings"); await page.waitForSelector("input.rng");
+  const r = await page.evaluate(() => { const cs = s => getComputedStyle(document.querySelector(s)), rad = s => parseFloat(cs(s).borderTopLeftRadius), box = s => document.querySelector(s).getBoundingClientRect(), rng = cs("input.rng");
+    return { hdr: rad("#hdr"), hdrL: box("#hdr").left, hdrT: box("#hdr").top, side: rad("#side"), sideL: box("#side").left, card: rad(".set-card"), rngBg: rng.backgroundColor, rngImg: rng.backgroundImage, rngR: rng.borderTopLeftRadius, rngBorder: rng.borderTopWidth, btn: rad("#btnMenu"), glass: document.documentElement.dataset.glass, sideBot: box("#side").bottom, vh: innerHeight }; });
+  eq(r.glass, "on", "kính mờ đang bật"); ok(r.hdr >= 20 && r.hdrL >= 8 && r.hdrT >= 6, "thanh trên nổi, bo góc: " + JSON.stringify([r.hdr, r.hdrL, r.hdrT])); ok(r.side >= 20 && r.sideL >= 8 && r.sideBot <= r.vh - 6, "thanh bên nổi, bo góc: " + JSON.stringify([r.side, r.sideL, r.sideBot])); ok(r.card >= 14, "khung thường bo góc");
+  ok(/rgba\(0, 0, 0, 0\)|transparent/.test(r.rngBg) && r.rngImg === "none" && r.rngBorder === "0px", "thanh trượt không còn nền/viền vuông: " + r.rngBg + " " + r.rngImg); ok(r.btn >= 20, "nút menu tròn: " + r.btn);
+  /* khung kính không còn lớp gradient tràn dưới nền (nguyên nhân vệt trắng chéo như ô vuông): chỉ có 1 lớp nền radial + màu */
+  const bi = await page.evaluate(() => getComputedStyle(document.querySelector(".set-card")).backgroundImage); ok(!/linear-gradient\(135deg/.test(bi) && (bi.match(/gradient/g) || []).length <= 1, "khung không còn gradient viền tràn: " + bi.slice(0, 120));
+  await page.setViewportSize({ width: 390, height: 800 }); await go(page, "/"); await page.click("#btnMenu"); await page.waitForTimeout(700);
+  const m = await page.evaluate(() => { const b = document.querySelector("#side").getBoundingClientRect(), f = document.querySelector("#cwFab"); return { rad: parseFloat(getComputedStyle(document.querySelector("#side")).borderTopLeftRadius), l: b.left, t: b.top, fab: f ? getComputedStyle(f).visibility : "none" }; });
+  ok(m.rad >= 24 && m.l >= 6 && m.t >= 6, "ngăn kéo menu nổi, bo góc: " + JSON.stringify(m)); ok(m.fab !== "visible", "nút chat nổi được ẩn khi menu mở");
+});
+const TECHRX = /Firebase|Realtime|\bAPI\b|\bJSON\b|\btoken\b|\bIP\b|\bhash(?:ed)?\b|\bbăm\b|máy chủ|\bserver\b|\bSDK\b|webhook|\bssw_|\bnox_|cấu hình/i;
+test("Đợt Shop 5 — người dùng thường KHÔNG thấy từ ngữ kỹ thuật ở bất cứ trang nào (tiếng Việt và English); dev thì vẫn thấy chi tiết", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 }); await installApi(page);
+  const bad = []; const scan = async (n, u) => { await go(page, u); await page.waitForTimeout(500); const t = await page.evaluate(() => document.body.innerText), m = t.match(TECHRX); if (m) bad.push(n + " " + u + " → …" + t.slice(Math.max(0, m.index - 30), m.index + m[0].length + 30).replace(/\n/g, " ") + "…"); };
+  const GUEST = ["/", "/library", "/categories", "/search?q=a", "/c/mod", "/c/mod/-s1", "/about", "/guide", "/security", "/privacy", "/terms", "/login", "/register", "/forgot-password", "/help"], USER = ["/", "/wallet", "/orders", "/profile", "/notifications", "/favorites", "/inbox", "/settings", "/help/submit"];
+  for (const lang of ["vi", "en"]) {
+    await go(page, "/"); await page.evaluate(l => import("/assets/js/lib/i18n.js").then(m => m.setLang(l)), lang);
+    for (const u of GUEST) await scan("khách/" + lang, u);
+  }
+  await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
+  for (const lang of ["vi", "en"]) { await page.evaluate(l => import("/assets/js/lib/i18n.js").then(m => m.setLang(l)), lang); for (const u of USER) await scan("thành viên/" + lang, u); }
+  eq(bad, [], "còn từ ngữ kỹ thuật hiện ra cho người dùng thường");
+  const off = await fresh(); await installApi(off.page, { off: true }); await login(off.page, USERPW); await off.page.waitForURL(BASE + "/"); await authed(off.page); await go(off.page, "/wallet"); await off.page.waitForFunction(() => /thiết lập|set up|setting up/i.test(document.querySelector("#view").innerText), null, { timeout: 8000 }).catch(async () => { throw new Error("assert: ví chưa bật → câu thân thiện; thấy: " + (await off.page.innerText("#view")).slice(0, 300)); }); ok(!TECHRX.test(await off.page.innerText("#view")), "câu thân thiện, không từ kỹ thuật"); await off.ctx.close();
+  const dev = await fresh(); await installApi(dev.page, { off: true }); await loginDev(dev.page); await go(dev.page, "/wallet"); await dev.page.waitForFunction(() => /Firebase Admin/.test(document.querySelector("#view").innerText), null, { timeout: 8000 }); ok(true, "dev vẫn thấy chi tiết kỹ thuật"); await dev.ctx.close();
+}, { timeout: 240000 });
 let pass = 0, fail = 0; const only = process.argv[2];
 for (const [name, fn, o] of T) {
   if (only && !name.includes(only)) continue; const { ctx, page } = await fresh(o); const t0 = Date.now();

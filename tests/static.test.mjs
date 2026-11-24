@@ -15,18 +15,35 @@ const feed0 = await run("../api/feed.js", () => null); t("feed: rỗng vẫn h�
 
 const sm = await run("../api/sitemap.js", u => u.includes("shallow") ? { k1: true } : {});
 for (const p of ["/skibidiscript", "/about", "/privacy", "/guide", "/security", "/terms"]) t("sitemap có " + p, sm.b.includes("<loc>https://skibidiscript.vercel.app" + p + "</loc>"), true);
-t("sitemap: ảnh logo + schema ảnh", /image:loc>https:\/\/skibidiscript.vercel.app\/assets\/img\/icon-512.png/.test(sm.b) && /xmlns:image=/.test(sm.b), true);
+t("sitemap: ảnh logo + schema ảnh", /image:loc>https:\/\/skibidiscript.vercel.app\/icons\/icon-512.png/.test(sm.b) && /xmlns:image=/.test(sm.b), true);
 
 const os = txt("opensearch.xml"); t("OpenSearch: mẫu tìm kiếm", /template="https:\/\/skibidiscript\.vercel\.app\/search\?q=\{searchTerms\}"/.test(os) && /<ShortName>Skibidi Web<\/ShortName>/.test(os), true);
 const vj = JSON.parse(txt("vercel.json")), rw = vj.rewrites;
 t("vercel: /feed.xml → /api/feed (trước catch-all)", rw.findIndex(r => r.source === "/feed.xml" && r.destination === "/api/feed") < rw.length - 1 && rw.findIndex(r => r.source === "/feed.xml") >= 0, true);
 const catchAll = new RegExp("^" + rw[rw.length - 1].source + "$");
-for (const [p, shouldServe] of [["/opensearch.xml", false], ["/robots.txt", false], ["/favicon.ico", false], ["/.well-known/security.txt", false], ["/skibidiscript", true], ["/about", true], ["/scripts/abc", true]]) t("vercel catch-all: " + p, catchAll.test(p), shouldServe);
+for (const [p, shouldServe] of [["/opensearch.xml", false], ["/robots.txt", false], ["/favicon.ico", false], ["/logo.svg", false], ["/icons/icon-192.png", false], ["/.well-known/security.txt", false], ["/skibidiscript", true], ["/about", true], ["/scripts/abc", true]]) t("vercel catch-all: " + p, catchAll.test(p), shouldServe);
 const robots = txt("robots.txt"); t("robots: sitemap + chặn trang riêng tư, không chặn /help", [/Sitemap: https:\/\/skibidiscript.vercel.app\/sitemap.xml/.test(robots), /Disallow: \/help\/\n/.test(robots), /Disallow: \/help\n/.test(robots), /Disallow: \/two-step/.test(robots)], [true, true, false, true]);
 const mf = JSON.parse(txt("manifest.webmanifest")); t("manifest: id + shortcuts hợp lệ", [mf.id, mf.shortcuts.length >= 3, mf.shortcuts.every(s => s.url.startsWith("/") && s.name)], ["/", true, true]);
-t("manifest: icon tồn tại", mf.icons.every(i => fs.existsSync(R(i.src.slice(1)))), true);
+const LG = require("../api/logo.js");
+t("manifest: mọi icon do api/logo.js vẽ ra (không có tệp ảnh)", mf.icons.every(i => /^\/icons\/[a-z0-9.-]+$/.test(i.src) && LG.names.includes(i.src.slice(7))), true);
 const sec = txt(".well-known/security.txt"); t("security.txt: Contact + Expires tương lai", [/^Contact: https:\/\//m.test(sec), new Date((sec.match(/^Expires: (.+)$/m) || [])[1]) > new Date()], [true, true]);
-t("favicon.ico là ICO", fs.readFileSync(R("favicon.ico")).subarray(0, 4).toString("hex"), "00000100");
+/* ── Logo vẽ bằng code: không còn tệp ảnh nào, mọi đường dẫn logo đi qua api/logo.js ── */
+const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.name === "node_modules" || e.name === ".git" ? [] : e.isDirectory() ? walk(d + "/" + e.name) : [d + "/" + e.name]);
+const imgs = walk(new URL("..", import.meta.url).pathname).filter(f => /\.(png|jpe?g|gif|webp|ico|bmp|avif)$/i.test(f) && !/\/tests\//.test(f));
+t("repo: không còn tệp logo/ảnh nào (png, jpg, ico, …)", imgs, []);
+t("repo: không còn thư mục assets/img", fs.existsSync(R("assets/img")), false);
+const srcAll = walk(new URL("..", import.meta.url).pathname).filter(f => /\.(js|html|css|json|xml|webmanifest|md)$/.test(f) && !/\/tests\//.test(f) && !/HUONG-DAN/.test(f));
+t("mã nguồn: không còn đường dẫn /assets/img/ hay logo.png", srcAll.filter(f => /assets\/img\/|logo\.png/.test(fs.readFileSync(f, "utf8"))), []);
+const lres = n => { const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end(b) { this.b = b; } }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); LG({ query: { n }, url: "/api/logo?n=" + n }, res); return res; };
+const pngInfo = b => ({ sig: b.subarray(0, 8).toString("hex"), w: b.readUInt32BE(16), h: b.readUInt32BE(20) });
+for (const [n, w, h] of [["icon-48.png", 48, 48], ["icon-96.png", 96, 96], ["icon-192.png", 192, 192], ["icon-512.png", 512, 512], ["icon-maskable-512.png", 512, 512], ["apple-touch-icon.png", 180, 180], ["og.png", 1200, 630]]) { const r = lres(n); t("logo " + n + ": PNG " + w + "×" + h + ", 200, cache dài", [r.statusCode, r.h["Content-Type"], pngInfo(r.b), /s-maxage=\d{6,}/.test(r.h["Cache-Control"])], [200, "image/png", { sig: "89504e470d0a1a0a", w, h }, true]); }
+{ const r = lres("favicon.ico"); t("favicon.ico là ICO (3 kích thước, PNG bên trong)", [r.b.subarray(0, 4).toString("hex"), r.b.readUInt16LE(4), r.b.subarray(r.b.readUInt32LE(18), r.b.readUInt32LE(18) + 4).toString("hex"), r.h["Content-Type"]], ["00000100", 3, "89504e47", "image/x-icon"]); }
+{ const r = lres("logo.svg"); t("logo.svg: SVG có chữ S, không có <script>", [r.h["Content-Type"].startsWith("image/svg+xml"), /<svg[^>]+viewBox="0 0 100 100"/.test(String(r.b)), /<path d="M67 34/.test(String(r.b)), /script|onload/i.test(String(r.b))], [true, true, true, false]); }
+t("logo: tên lạ / thử thoát thư mục → 404", ["nope.png", "../package.json", "x/../../etc/passwd", ""].map(n => lres(n).statusCode), [404, 404, 404, 404]);
+{ const zlib = require("zlib"), b = lres("icon-512.png").b; let o = 8, idat = []; while (o < b.length) { const L = b.readUInt32BE(o), ty = b.subarray(o + 4, o + 8).toString(); if (ty === "IDAT") idat.push(b.subarray(o + 8, o + 8 + L)); o += 12 + L; }
+  const raw = zlib.inflateSync(Buffer.concat(idat)), row = 512 * 4 + 1, px = (x, y) => [...raw.subarray(y * row + 1 + x * 4, y * row + 1 + x * 4 + 4)];
+  t("logo 512: góc trong suốt (bo góc), tâm tối (nét chữ S), nền ô sáng", [px(0, 0)[3], px(256, 256).slice(0, 3), px(100, 100).slice(0, 3)], [0, [10, 10, 10], [250, 250, 250]]); }
+t("vercel: /logo.svg, /favicon.ico, /icons/* → /api/logo, đặt trước catch-all", ["/logo.svg", "/favicon.ico", "/icons/:x"].map(s => { const i = rw.findIndex(r => r.destination.startsWith("/api/logo") && (r.source === s || (s === "/icons/:x" && /^\/icons\//.test(r.source)))); return i >= 0 && i < rw.length - 1; }), [true, true, true]);
 
 /* ── Cửa hàng: trang sản phẩm có SEO riêng, ví/đơn hàng không lập chỉ mục ── */
 const pageRun = async (p, db) => { const old = globalThis.fetch; globalThis.fetch = async u => ({ ok: true, json: async () => db(String(u)) }); const res = { h: {}, setHeader(k, v) { this.h[k] = v; }, end(b) { this.b = b; } }; Object.defineProperty(res, "statusCode", { value: 0, writable: true }); try { await require("../api/page.js")({ query: { p }, url: "/api/page?p=" + p, headers: {} }, res); } finally { globalThis.fetch = old; } return res; };

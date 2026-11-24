@@ -19,7 +19,7 @@ export function mount(ctx) {
       <button class="btn primary lg block" type="submit">Xác minh</button>
     </form>
     <div class="tf-links"><button class="linkbtn" type="button" id="resend">Gửi lại mã</button>${hasRec ? `<button class="linkbtn" type="button" id="alt">Dùng email khôi phục</button>` : ""}</div>
-    ${newIp ? `<p class="sub-note">Bạn đang đăng nhập từ một vị trí hoặc địa chỉ IP mới nên cần thêm mã xác nhận.</p>` : ""}<p class="sub-note">Mã có hiệu lực trong 10 phút. Kiểm tra cả mục thư rác.</p>
+    ${newIp ? `<p class="sub-note">Bạn đang đăng nhập từ một thiết bị hoặc nơi mới nên cần thêm mã xác nhận.</p>` : ""}<p class="sub-note">Mã có hiệu lực trong 10 phút. Kiểm tra cả mục thư rác.</p>
     <p class="auth-foot"><button class="linkbtn" type="button" id="out">Đăng xuất</button></p>`);
   const $ = s => ctx.el.querySelector(s), f = $("#f"), err = $("#err"), ok = $("#ok"), codeErr = $("#codeErr"), btn = f.querySelector("button[type=submit]"), resend = $("#resend"), alt = $("#alt"), subEl = ctx.el.querySelector(".auth-sub");
   const cool = () => { let left = 30; resend.disabled = true; clearInterval(timer); resend.textContent = "Gửi lại sau " + left + "s"; timer = setInterval(() => { left--; if (left <= 0) { clearInterval(timer); resend.disabled = false; resend.textContent = "Gửi lại mã"; } else resend.textContent = "Gửi lại sau " + left + "s"; }, 1000); };

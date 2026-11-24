@@ -93,12 +93,13 @@ export function clearCart(ids) { (ids || Object.keys(cart)).forEach(id => { dele
 addEventListener("storage", e => { if (e.key === CK) { try { cart = JSON.parse(e.newValue) || {}; } catch (_) { cart = {}; } emit("cart"); } });
 
 /* ───── Gọi máy chủ ───── */
-const err = (r, extra) => Object.assign(new Error((extra && extra[r.code]) || SHOP_MSG[r.code] || apiMessage(r)), { code: "api/" + r.code, res: r });
+const DEV_MSG = { not_configured: "Cửa hàng chưa được bật trên máy chủ. Quản trị viên cần cấu hình Firebase Admin.", bad_bank: "Thông tin ngân hàng chưa hợp lệ. Kiểm tra lại mã BIN, số tài khoản và tên chủ tài khoản." }; /* chữ kỹ thuật chỉ dành cho dev */
+const err = (r, extra) => Object.assign(new Error((extra && extra[r.code]) || (session.isDev && DEV_MSG[r.code]) || SHOP_MSG[r.code] || apiMessage(r)), { code: "api/" + r.code, res: r });
 const SHOP_MSG = {
   bad_amount: "Số tiền từ 10.000 đến 50.000.000 ₫, làm tròn đến nghìn đồng.", insufficient: "Số dư không đủ. Hãy nạp thêm tiền vào ví.", out_of_stock: "Rất tiếc, có món đã hết hàng hoặc không đủ số lượng.",
   gone: "Có món trong giỏ không còn bán nữa.", bad_cart: "Giỏ hàng không hợp lệ. Hãy kiểm tra lại số lượng.", banned: "Tài khoản này đang bị khóa.", conflict: "Hệ thống đang bận, hãy thử lại.",
   bad_file: "Tệp này không được hỗ trợ. Hãy gửi ảnh, video, PDF, ZIP hoặc tệp văn bản.", too_big: "Tệp quá lớn.", too_many_files: "Cuộc trò chuyện này đã đạt giới hạn số tệp.", closed: "Cuộc trò chuyện này đã đóng.", muted: "Bạn đang bị tắt tiếng nên chưa gửi được tệp.",
-  bad_bank: "Thông tin ngân hàng chưa hợp lệ. Kiểm tra lại mã BIN, số tài khoản và tên chủ tài khoản.", unverified: "Hãy xác minh email trước khi dùng ví và mua hàng.", not_configured: "Cửa hàng chưa được bật trên máy chủ. Quản trị viên cần cấu hình Firebase Admin."
+  bad_bank: "Thông tin ngân hàng chưa hợp lệ. Hãy kiểm tra lại.", unverified: "Hãy xác minh email trước khi dùng ví và mua hàng.", not_configured: "Cửa hàng đang được thiết lập. Bạn quay lại sau ít phút nhé."
 };
 async function call(action, body) { const r = await api(action, body); if (!r.ok) throw err(r); return r; }
 export async function loadWalletInfo(force) { if (shop.info && !force) return shop.info; const r = await call("wallet-info"); shop.info = r; emit("info"); return r; }

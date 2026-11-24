@@ -35,7 +35,7 @@ async function html() {
 }
 const setTag = (h, re, rep) => re.test(h) ? h.replace(re, rep) : h;
 function head(h, m) {
-  const t = esc(m.title), d = esc(m.desc), u = esc(m.url), img = esc(m.image || SITE + "/assets/img/og.png");
+  const t = esc(m.title), d = esc(m.desc), u = esc(m.url), img = esc(m.image || SITE + "/icons/og.png");
   h = setTag(h, /<title>[\s\S]*?<\/title>/, `<title>${t}</title>`);
   h = setTag(h, /<meta name="description" content="[^"]*">/, `<meta name="description" content="${d}">`);
   h = setTag(h, /<meta name="robots" content="[^"]*">/, `<meta name="robots" content="${m.noindex ? "noindex,nofollow" : "index,follow,max-image-preview:large"}">`);

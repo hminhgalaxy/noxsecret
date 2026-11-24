@@ -3,7 +3,7 @@
 const SITE = (process.env.SITE_URL || "https://skibidiscript.vercel.app").replace(/\/+$/, "");
 const HOST = SITE.replace(/^https?:\/\//, "");
 const BRAND = "Skibidi Web";
-const LOGO = SITE + "/assets/img/icon-192.png";
+const LOGO = SITE + "/icons/icon-192.png";
 const PERM = 4102444800000; /* khớp PERM_UNTIL ở phía trình duyệt: coi như "vĩnh viễn" */
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

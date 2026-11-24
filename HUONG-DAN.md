@@ -254,3 +254,27 @@ Website chạy Node trên Vercel (đã dùng `FIREBASE_SERVICE_ACCOUNT` + `fireb
 - **Khóa Skias AI là khóa ở giao diện** (nút bị khóa với tài khoản thường, mã không tải puter.js cho họ). Vì puter.js chạy trong trình duyệt nên không thể coi là bảo mật tuyệt đối — một người am hiểu vẫn có thể tự nạp puter.js trên máy mình (khi đó họ dùng tài khoản Puter của chính họ, không đụng tới dữ liệu/ví của web).
 - Chưa chạy với Vercel/Firebase/ngân hàng thật; chưa thử Safari/Firefox thật; ảnh giao diện chỉ xem trên Chromium (máy tính + điện thoại giả lập).
 - Đang giữ nguyên captcha (`turnstile.js`, `verify-captcha.js`) như bạn dặn.
+
+## Đợt Shop 5 — Skias quả cầu vàng, khung chat mới, logo vẽ bằng code, Kính lỏng bo góc, Skias AI cho mọi người
+
+### Bạn cần làm (theo thứ tự)
+1. **`database.rules.json` KHÔNG đổi** (không cần dán lại).
+2. Giải nén zip, đẩy lên GitHub, để Vercel deploy. **Các tệp ảnh logo đã bị xóa hoàn toàn** (`assets/img/*`, `favicon.ico`); logo giờ do `api/logo.js` vẽ ra khi có người truy cập (`/logo.svg`, `/favicon.ico`, `/icons/icon-192.png`…). Vercel cần deploy lại thì mới có các đường dẫn này.
+3. Sau khi deploy, mở thử `https://skibidiscript.vercel.app/favicon.ico` và `/icons/og.png` để chắc chắn logo hiện ra; rồi gửi lại `sitemap.xml` trong Google Search Console (Google cần vài ngày để đổi biểu tượng).
+4. Bật **Kính mờ** trong Cài đặt để xem Kính lỏng mới (thanh trên, thanh bên, thanh dưới là khung nổi bo góc).
+
+### Mới
+- **Logo vẽ bằng code, không còn tệp ảnh**: SVG + PNG (48/96/192/512, maskable, apple-touch, ảnh chia sẻ 1200×630) + ICO đều do `api/logo.js` tạo (tô bằng bộ vẽ riêng, nén zlib). Logo trên thanh trên vốn đã là SVG nhúng trong `index.html`. Có bài test kiểm tra: repo không còn png/jpg/ico nào, mọi đường dẫn đều trả về ảnh hợp lệ.
+- **Skias là quả cầu vàng mặt cười** (theo ảnh bạn gửi): mắt bầu dục đen, nụ cười rộng, bóng đổ dưới đất; chớp mắt (có chớp đôi), nhìn quanh, nói (miệng mở), suy nghĩ (mây ba chấm), vui (mắt cười). Ảnh đại diện trong khung chat cũng là mặt cười vẽ bằng CSS có chớp mắt. Khi cuộn trang Skias nép sang bên cho khỏi che chữ, đứng yên 2 giây thì ló ra lại.
+- **Khung chat làm lại**: tin của bạn là một khung (đã sửa lỗi bị bọc đôi và chữ tối trên nền đỏ), chữ luôn đủ tương phản; ảnh đại diện + giờ gửi; hiệu ứng tin nhắn nảy lên, **gõ chữ dần**, ba chấm chờ; thanh trượt **Tự động / Skias AI**; nút **cuộc trò chuyện mới**; nút **xuống tin mới nhất**; **hiển thị Markdown** (đậm, danh sách, mã, liên kết an toàn — hết cảnh thấy `**` thô).
+- **Ngắt chat AI**: khi Skias đang nghĩ hoặc đang gõ, nút Gửi biến thành **Dừng** (hoặc bấm Esc, hoặc chuyển sang Tự động) → ngưng ngay; kết quả đến muộn bị bỏ.
+- **Sửa lỗi trong ảnh bạn gửi**: nút Auto sáng sai khi đang ở chế độ AI (nay chế độ AI không tự nhảy về Tự động).
+- **Skias AI mở cho mọi người dùng** (kể cả khách): bấm ✨ Skias AI trong khung chat. Puter có thể hiện cửa sổ nhỏ để đăng nhập Puter lần đầu. puter.js chỉ được tải khi có người bấm dùng AI. Lời dặn hệ thống yêu cầu AI nói dễ hiểu, không dùng từ kỹ thuật.
+- **Kính lỏng làm lại**: bỏ các "ô vuông" bao phủ — thanh trên, thanh bên, thanh dưới là **khung nổi bo góc**; nút và biểu tượng là viên thuốc/hình tròn; thanh trượt Mức đồ họa hết nền vuông; cạnh kính vẽ theo đúng đường bo (trước đây một lớp gradient tràn dưới nền gây vệt trắng chéo trông như ô vuông). Trên điện thoại menu kéo ra cũng bo góc và ẩn nút chat nổi/Skias để không đè lên.
+- **Xóa từ ngữ kỹ thuật ngoài web**: người dùng thường không còn thấy Firebase, máy chủ, băm, IP, tên khóa cookie `ssw_…`, "link https://"… (trang Bảo mật, Quyền riêng tư, Cài đặt, Ví, Gửi bài, Xác minh 2 bước, thư lỗi). Dev vẫn thấy chi tiết ở các thông báo dành cho dev. Có bài test quét 24 trang (khách + thành viên, Việt + English).
+
+### Chưa kiểm chứng được (nói thật)
+- **Skias AI chưa thử với Puter thật** (ở đây không gọi được ra ngoài): test bằng bản giả lập `puter.ai.chat`. Puter có thể yêu cầu đăng nhập Puter hoặc giới hạn dùng; đó là chính sách của Puter, không phải của web.
+- Logo PNG/ICO chưa xem được trên Vercel thật (chỉ chạy thử bằng máy chủ giả lập); chưa thử Safari/Firefox thật; ảnh giao diện chỉ xem trên Chromium.
+- Danh sách "từ kỹ thuật" quét bằng một bộ từ khóa cố định (Firebase, API, token, IP, băm, máy chủ, SDK, webhook…). Nếu bạn thấy từ nào khác còn sót, gửi ảnh để mình xử lý tiếp.
+- Đang giữ nguyên captcha (`turnstile.js`, `verify-captcha.js`) như bạn dặn.

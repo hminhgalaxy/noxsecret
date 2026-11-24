@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
     for (const n of customs) { urls.push("/c/" + n); (await keys("nox_data/" + n)).forEach(k => urls.push("/c/" + n + "/" + encodeURIComponent(k))); }
   } catch (_) {}
   const today = new Date().toISOString().slice(0, 10);
-  const IMG = "<image:image><image:loc>" + SITE + "/assets/img/icon-512.png</image:loc><image:title>Skibidi Web</image:title></image:image>";
+  const IMG = "<image:image><image:loc>" + SITE + "/icons/icon-512.png</image:loc><image:title>Skibidi Web</image:title></image:image>";
   const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
     urls.slice(0, 5000).map(u => `  <url><loc>${esc(SITE + u)}</loc><lastmod>${today}</lastmod><priority>${u === "/" ? "1.0" : STATIC.includes(u) ? "0.8" : "0.6"}</priority>${u === "/" ? IMG : imgOf[u] ? `<image:image><image:loc>${esc(imgOf[u][0])}</image:loc><image:title>${esc(String(imgOf[u][1]).slice(0, 100))}</image:title></image:image>` : ""}</url>`).join("\n") + "\n</urlset>\n";
   res.setHeader("Content-Type", "application/xml; charset=utf-8");

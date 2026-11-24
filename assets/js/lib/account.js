@@ -2,18 +2,20 @@
    Nếu máy chủ chưa cấu hình (thiếu Brevo / khoá Firebase Admin) thì mọi hàm báo "không khả dụng"
    và website tự dùng thư mặc định của Firebase — đăng nhập/đăng ký/quên mật khẩu vẫn chạy bình thường. */
 import { auth } from "./firebase.js";
+import { isDevNow } from "./util.js";
 
 const MSG = {
   too_fast: "Vui lòng đợi vài giây rồi hãy yêu cầu mã mới.", rate_limited: "Bạn thử quá nhiều lần. Vui lòng đợi một lúc rồi thử lại.",
   wrong_code: "Mã chưa đúng. Hãy kiểm tra lại rồi thử lại.", code_expired: "Mã đã hết hạn. Hãy yêu cầu mã mới.", too_many_tries: "Bạn nhập sai quá nhiều lần. Hãy yêu cầu mã mới.",
   recent_login: "Vì lý do an toàn, hãy đăng nhập lại rồi thử lại.", email_taken: "Email này đã được dùng bởi tài khoản khác.", same_email: "Hãy nhập một email khác.",
   invalid_email: "Email không hợp lệ.", twofa_required: "Hãy nhập mã xác minh 2 bước trước.", no_recovery: "Bạn chưa thêm email khôi phục.", unverified: "Hãy xác minh email của bạn trước.",
-  not_configured: "Tính năng này chưa được bật trên website.", mail_failed: "Chưa gửi được thư lúc này. Quản trị viên cần kiểm tra cấu hình gửi thư (Dev → Gửi thư → Kiểm tra gửi thư).", not_password: "Tài khoản này đăng nhập bằng Google nên không dùng được tính năng này.",
+  not_configured: "Tính năng này chưa được bật trên website.", mail_failed: "Chưa gửi được thư lúc này. Bạn thử lại sau ít phút nhé.", not_password: "Tài khoản này đăng nhập bằng Google nên không dùng được tính năng này.",
   already_on: "Xác minh 2 bước đã được bật.", not_on: "Xác minh 2 bước chưa được bật.", forbidden: "Bạn không có quyền thực hiện thao tác này.", guest: "Tài khoản khách không dùng được tính năng này.",
   no_twofa: "Bạn chưa bật xác minh 2 bước. Hãy bật nó trước hoặc chọn cách khác.", no_recovery: "Bạn chưa có email khôi phục đã xác minh. Hãy thêm email khôi phục trước hoặc chọn cách khác.",
   wrong_password: "Mật khẩu hiện tại không đúng.", weak_password: "Mật khẩu cần ít nhất 8 ký tự, gồm cả chữ và số.", same_password: "Hãy chọn mật khẩu khác với mật khẩu hiện tại.", unauthenticated: "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại.", network: "Lỗi kết nối mạng. Vui lòng thử lại.", not_found: "Không tìm thấy mục này.", bad_request: "Yêu cầu không hợp lệ."
 };
-export const apiMessage = r => MSG[r && r.code] || "Có lỗi xảy ra. Vui lòng thử lại.";
+const DEV_MSG = { mail_failed: "Chưa gửi được thư lúc này. Quản trị viên cần kiểm tra cấu hình gửi thư (Dev → Gửi thư → Kiểm tra gửi thư)." }; /* chữ kỹ thuật chỉ dành cho dev */
+export const apiMessage = r => (isDevNow() && DEV_MSG[r && r.code]) || MSG[r && r.code] || "Có lỗi xảy ra. Vui lòng thử lại.";
 
 let down = 0; /* thời điểm máy chủ báo chưa cấu hình / không có API → tạm không gọi lại */
 export async function api(action, body = {}, { token = true } = {}) {

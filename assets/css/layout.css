@@ -216,3 +216,6 @@ a.me:hover{border-color:var(--line-strong);background:var(--surface-2)}
   .brand{gap:7px}.brand .mark{width:28px;height:28px}
   .brand .word b{font-size:13.5px;letter-spacing:.04em}.brand .word span{font-size:10.5px;letter-spacing:.1em}
 }
+
+/* Khi ngăn kéo menu mở trên điện thoại: ẩn nút chat nổi và Skias để không đè lên menu */
+@media(max-width:1023.98px){body:has(#side.open) :is(#cwFab,#sk){visibility:hidden}}

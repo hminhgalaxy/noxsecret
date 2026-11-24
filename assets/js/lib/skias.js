@@ -1,10 +1,12 @@
-/* Skias — cái đầu biết nói của website. Chào mỗi lần vào web, trả lời câu hỏi (Việt/Anh) từ kho câu trả lời có sẵn, có hiệu ứng
-   "đang suy nghĩ", chớp mắt, và khi bạn nhờ (hoặc khi bạn đồng ý sau khi Skias phát hiện lỗi) Skias xem xét tình trạng rồi gửi thẳng
-   cho dev qua khung chat. Có thêm chế độ "Skias AI" (dùng puter.js) CHỈ dành cho tài khoản dev. Không có gợi ý/mẹo tự bật ra.
+/* Skias — quả cầu vàng mặt cười biết nói của website (vẽ hoàn toàn bằng code, không dùng tệp ảnh). Chào mỗi lần vào web, trả lời
+   câu hỏi (Việt/Anh) từ kho câu trả lời có sẵn, có hiệu ứng "đang suy nghĩ", chớp mắt, gõ chữ; bấm "Dừng" để ngắt bất cứ lúc nào.
+   Khi bạn nhờ (hoặc đồng ý sau khi Skias phát hiện lỗi) Skias xem xét tình trạng rồi gửi thẳng cho dev qua khung chat.
+   Có chế độ "Skias AI" (dùng puter.js) cho mọi người dùng — Puter có thể mở cửa sổ nhỏ để đăng nhập Puter lần đầu. Không có gợi ý/mẹo tự bật ra.
    Toàn bộ nội dung đánh dấu translate="no" vì tự mình có cả hai ngôn ngữ. Tắt/bật trong Cài đặt. */
 import { getLang, onLangChange } from "./i18n.js";
 import { session, onAuth } from "./auth.js";
 import { answer, detectLang } from "./skias-brain.js";
+import { md, mdPartial } from "./skias-md.js";
 import { isSkiasOn, setSkiasOn } from "./prefs.js";
 import { logs, onLog } from "./log.js";
 import { RM, esc, toast } from "./util.js";
@@ -14,34 +16,40 @@ import * as H from "./help.js";
 
 const L = (vi, en) => (getLang() === "vi" ? vi : en);
 const real = () => !!(session.user && !session.isGuest && !session.user.isAnonymous);
-let root, fig, bubble, panel, logEl, form, input, chips, stEl, btnAuto, btnAI;
-let wired = false, open = false, state = "idle", stT = 0, hideT = 0, busy = false, mode = "", ai = false, sends = 0, lastSend = 0, offered = 0, greeted = false, opened = false;
-const hist = [], seenErr = new Set(), wait = ms => new Promise(r => setTimeout(r, RM() ? Math.min(ms, 80) : ms));
+let root, fig, bubble, panel, logEl, form, input, chips, subEl, btnAuto, btnAI, btnSend, modesEl, downEl;
+let wired = false, open = false, state = "idle", stT = 0, hideT = 0, peekT = 0, busy = false, job = null, mode = "", ai = false, stick = true;
+let sends = 0, lastSend = 0, offered = 0, greeted = false, opened = false;
+const hist = [], seenErr = new Set(), wait = ms => new Promise(r => setTimeout(r, RM() ? Math.min(ms, 80) : ms)), sleep = ms => new Promise(r => setTimeout(r, ms));
 
-/* ───── Chỉ còn cái đầu (to hơn), có chớp mắt đầy đủ ───── */
+/* ───── Quả cầu vàng mặt cười (SVG vẽ bằng code): mắt bầu dục đen, nụ cười rộng, chớp mắt, nhìn quanh ───── */
 const FIG = `<svg class="sk-svg" viewBox="0 0 120 124" width="100%" height="100%" aria-hidden="true" focusable="false">
-  <ellipse class="sk-shadow" cx="60" cy="118" rx="30" ry="3.6"/>
+  <defs><radialGradient id="skgB" cx="36%" cy="26%" r="86%"><stop offset="0" stop-color="#fff7b0"/><stop offset=".34" stop-color="#ffdc34"/><stop offset=".78" stop-color="#f7ae08"/><stop offset="1" stop-color="#e08a00"/></radialGradient></defs>
+  <ellipse class="sk-shadow" cx="60" cy="117" rx="32" ry="4.6"/>
   <g class="sk-all"><g class="sk-head">
-    <path class="sk-ant" d="M60 17 V6"/><circle class="sk-bulb" cx="60" cy="5" r="4.6"/>
-    <circle class="sk-ear" cx="9" cy="66" r="7"/><circle class="sk-ear" cx="111" cy="66" r="7"/>
-    <rect class="sk-face" x="12" y="16" width="96" height="94" rx="42"/>
-    <ellipse class="sk-blush" cx="29" cy="82" rx="8" ry="5"/><ellipse class="sk-blush" cx="91" cy="82" rx="8" ry="5"/>
-    <g class="sk-brows"><path class="sk-brow" d="M30 38 Q41 31 52 37"/><path class="sk-brow" d="M68 37 Q79 31 90 38"/></g>
+    <circle class="sk-face" cx="60" cy="60" r="52" fill="url(#skgB)"/>
+    <ellipse class="sk-shine" cx="39" cy="28" rx="17" ry="9" transform="rotate(-32 39 28)"/>
+    <ellipse class="sk-blush" cx="26" cy="76" rx="8.5" ry="5"/><ellipse class="sk-blush" cx="94" cy="76" rx="8.5" ry="5"/>
     <g class="sk-eyes">
-      <g class="sk-eye"><ellipse class="sk-sclera" cx="41" cy="60" rx="11.5" ry="14"/><g class="sk-pup"><circle class="sk-iris" cx="41" cy="61" r="7"/><circle class="sk-glint" cx="38.4" cy="57.6" r="2.3"/></g></g>
-      <g class="sk-eye"><ellipse class="sk-sclera" cx="79" cy="60" rx="11.5" ry="14"/><g class="sk-pup"><circle class="sk-iris" cx="79" cy="61" r="7"/><circle class="sk-glint" cx="76.4" cy="57.6" r="2.3"/></g></g>
-      <path class="sk-joy" d="M29 63 Q41 47 53 63"/><path class="sk-joy" d="M67 63 Q79 47 91 63"/>
+      <g class="sk-eye"><ellipse class="sk-ball" cx="42" cy="47" rx="7" ry="12.5"/><circle class="sk-glint" cx="40" cy="41.5" r="2.3"/></g>
+      <g class="sk-eye"><ellipse class="sk-ball" cx="78" cy="47" rx="7" ry="12.5"/><circle class="sk-glint" cx="76" cy="41.5" r="2.3"/></g>
+      <path class="sk-joy" d="M32 52 Q42 37 52 52"/><path class="sk-joy" d="M68 52 Q78 37 88 52"/>
     </g>
-    <path class="sk-m sk-mSmile" d="M45 86 Q60 99 75 86"/><path class="sk-m sk-mFlat" d="M49 91 H71"/><ellipse class="sk-m sk-mOpen" cx="60" cy="91" rx="8.5" ry="6.5"/>
+    <path class="sk-m sk-mSmile" d="M28 71 Q60 103 92 71"/><path class="sk-m sk-mFlat" d="M42 84 Q58 79 78 85"/><path class="sk-m sk-mOpen" d="M33 71 Q60 109 87 71 Q60 78 33 71Z"/>
   </g></g></svg>`;
 const CLOUD = `<span class="sk-cloud" aria-hidden="true"><i class="sk-c1"></i><i class="sk-c2"></i><span class="sk-c3"><b></b><b></b><b></b></span></span>`;
-const AVATAR = `<svg viewBox="0 0 120 124" aria-hidden="true" focusable="false"><rect class="sk-face" x="12" y="16" width="96" height="94" rx="42"/><ellipse class="sk-sclera" cx="41" cy="60" rx="11.5" ry="14"/><ellipse class="sk-sclera" cx="79" cy="60" rx="11.5" ry="14"/><circle class="sk-iris" cx="41" cy="61" r="7"/><circle class="sk-iris" cx="79" cy="61" r="7"/><path class="sk-m" d="M45 88 Q60 99 75 88"/></svg>`;
+const ICON = {
+  neu: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
+  off: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.7 10.7 0 0 1 12 19.5C6 19.5 2 12 2 12a18.7 18.7 0 0 1 4.1-5.1M9.9 4.6A9.7 9.7 0 0 1 12 4.5c6 0 10 7.5 10 7.5a18.6 18.6 0 0 1-2.2 3.2M1 1l22 22"/></svg>',
+  min: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  send: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="3"/></svg>',
+  down: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>'
+};
 
 function setState(s, ms = 0) {
   clearTimeout(stT); state = s; if (root) root.dataset.st = s;
   if (ms) stT = setTimeout(() => { if (!busy) setState("idle"); }, ms);
 }
-const act = () => {};
 
 /* ───── Bong bóng nói (khung mờ, không lộ chữ phía sau) ───── */
 function bub(html, { ms = 9000, st = "talk", actions = null } = {}) {
@@ -64,20 +72,55 @@ function greet() {
 }
 
 /* ───── Khung trò chuyện ───── */
+const clock = () => { try { return new Date().toLocaleTimeString(getLang() === "vi" ? "vi-VN" : "en-US", { hour: "2-digit", minute: "2-digit" }); } catch (_) { return ""; } };
+const follow = (force = false) => { if (!logEl) return; if (force) stick = true; if (stick) logEl.scrollTop = logEl.scrollHeight; paintDown(); };
+function paintDown() { if (!downEl || !logEl) return; const far = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight > 90; downEl.hidden = !far; }
+/* who: "bot" (Skias) hoặc "usr" (người dùng). Lưu ý: KHÔNG dùng tên lớp "me"/"sk" vì trùng với CSS của các phần khác của web. */
 function addMsg(who, html, extra = "") {
-  const d = document.createElement("div"); d.className = "sk-m-row " + who; d.innerHTML = `<div class="sk-msg">${html}</div>${extra}`;
-  logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight; return d;
+  const d = document.createElement("div"); d.className = "sk-m-row " + who;
+  d.innerHTML = (who === "bot" ? `<span class="sk-mav" aria-hidden="true"></span>` : "") + `<div class="sk-col"><div class="sk-msg">${html}</div>${extra}<time class="sk-t">${esc(clock())}</time></div>`;
+  logEl.appendChild(d); follow(who === "usr"); return d;
 }
-const linksHTML = go => go && go.length ? `<div class="sk-go">${go.map(g => `<a href="${esc(g.href)}" data-sk-go>${esc(g.label)}</a>`).join("")}</div>` : "";
+/* Dòng ghi chú nhỏ ở giữa (đổi chế độ, đã dừng…) */
+function note(text) { const d = document.createElement("div"); d.className = "sk-m-row sys"; d.innerHTML = `<span class="sk-note">${esc(text)}</span>`; logEl.appendChild(d); follow(); return d; }
+const linksHTML = go => go && go.length ? `<div class="sk-go">${go.map(g => `<a href="${esc(g.href)}" data-sk-go>${esc(g.label)}<span aria-hidden="true"> →</span></a>`).join("")}</div>` : "";
 /* Chỉ còn nút HÀNH ĐỘNG (Gửi dev / Hủy), không còn nút câu hỏi gợi ý */
 function setChips(list) {
   chips.innerHTML = (list || []).map(c => `<button type="button" class="sk-chip${c.pri ? " pri" : ""}" data-k="${esc(c.k)}">${esc(c.label)}</button>`).join(""); chips.hidden = !list || !list.length;
   chips.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { const c = list.find(x => x.k === b.dataset.k); if (c) c.run(); }));
 }
 const devChip = (text = "") => ({ k: "dev", pri: true, label: L("Gửi dev", "Send to dev"), run: () => startReport(text) });
-const typing = () => addMsg("bot", `<span class="sk-dots"><i></i><i></i><i></i></span>`);
+const typing = () => addMsg("bot", `<span class="sk-dots" role="img" aria-label="${esc(L("Skias đang soạn tin", "Skias is typing"))}"><i></i><i></i><i></i></span>`);
 
-/* ───── Chế độ Skias AI (puter.js) — chỉ tài khoản dev ───── */
+/* ───── Một "công việc" đang chạy (suy nghĩ, gọi AI, gõ chữ, xem xét lỗi): có thể NGẮT bất cứ lúc nào ───── */
+const alive = j => job === j && !j.dead;
+function begin(sub) { const j = { dead: false, lock: false, onStop: null, stopNote: "" }; job = j; busy = true; setBusy(true, sub); return j; }
+function end(j) { if (job === j) { job = null; busy = false; setBusy(false); } }
+function setBusy(on, sub) {
+  if (!btnSend) return; root.dataset.busy = on ? "1" : ""; btnSend.classList.toggle("stop", on); btnSend.innerHTML = on ? ICON.stop : ICON.send;
+  btnSend.setAttribute("aria-label", on ? L("Dừng", "Stop") : L("Gửi", "Send")); btnSend.title = on ? L("Dừng (Esc)", "Stop (Esc)") : L("Gửi", "Send"); paintSub(on ? sub : "");
+}
+function stop() {
+  const j = job; if (!j || j.lock) return false;
+  j.dead = true; try { j.onStop && j.onStop(); } catch (_) {}
+  end(j); setState("idle"); note(j.stopNote || L("Đã dừng.", "Stopped.")); input && input.focus({ preventScroll: true }); return true;
+}
+/* Hiện câu trả lời dần dần (như đang gõ), hiểu Markdown; có thể dừng giữa chừng. Trả về true nếu hiện đủ. */
+async function reveal(j, { text, extra = "", tag = "" }) {
+  const full = String(text || "").slice(0, 4000), row = addMsg("bot", ""), box = row.querySelector(".sk-msg"), col = row.querySelector(".sk-col"), fin = () => { box.innerHTML = md(full) + tag; };
+  setState("talk"); paintSub(L("Đang trả lời…", "Answering…"));
+  if (!RM() && full.length > 3) {
+    const step = Math.max(2, Math.ceil(full.length / 70));
+    for (let n = step; n < full.length; n += step) {
+      if (!alive(j)) { box.innerHTML = md(full.slice(0, n)) + `<span class="sk-cut">…</span>`; return false; }
+      box.innerHTML = mdPartial(full.slice(0, n)) + `<i class="sk-caret"></i>`; follow(); await sleep(16);
+    }
+    if (!alive(j)) { box.innerHTML = md(full.slice(0, Math.ceil(full.length / 2))) + `<span class="sk-cut">…</span>`; return false; }
+  }
+  fin(); if (extra) col.querySelector(".sk-msg").insertAdjacentHTML("afterend", extra); follow(); return true;
+}
+
+/* ───── Chế độ Skias AI (puter.js) — dành cho mọi người dùng ───── */
 let puterP = null;
 function loadPuter() {
   if (window.puter && window.puter.ai) return Promise.resolve(window.puter);
@@ -92,53 +135,63 @@ function loadPuter() {
   });
   return puterP;
 }
-const SYS = "You are Skias, the friendly assistant of the website Skibidi Web (also called Skibidi Shop): a digital shop where users top up a wallet by bank transfer (VietQR) and buy products delivered instantly in their order, plus a free content library. Answer briefly and kindly in the same language as the user (Vietnamese or English). Never ask for passwords or one-time codes.";
+const SYS = "You are Skias, the friendly assistant of the website Skibidi Web (also called Skibidi Shop): a digital shop where users top up a wallet by bank transfer (VietQR) and buy products delivered instantly in their order, plus a free content library. Answer briefly and kindly in the same language as the user (Vietnamese or English). You may use simple Markdown (bold, short lists). Speak plainly: do not use technical jargon (no talk of databases, servers, APIs, tokens, code or developer tools). Never ask for passwords or one-time codes, and never reveal or guess other people's information.";
 const textOf = r => { if (r == null) return ""; if (typeof r === "string") return r; const c = r.message ? r.message.content : r.content != null ? r.content : r.text; if (typeof c === "string") return c; if (Array.isArray(c)) return c.map(x => (typeof x === "string" ? x : x && x.text) || "").join(""); return typeof r.toString === "function" && r.toString !== Object.prototype.toString ? String(r) : ""; };
 async function askAI(text) {
-  const ty = typing(); busy = true; setState("think");
+  const j = begin(L("Skias AI đang nghĩ…", "Skias AI is thinking…")), ty = typing(); j.onStop = () => ty.remove(); setState("think");
+  let out = "";
   try {
     const p = await loadPuter();
+    if (!alive(j)) return;
     const msgs = [{ role: "system", content: SYS }].concat(hist.slice(-8), [{ role: "user", content: text }]);
-    const out = textOf(await Promise.race([p.ai.chat(msgs), new Promise((_, rj) => setTimeout(() => rj(new Error("timeout")), 60000))])).trim();
+    out = textOf(await Promise.race([p.ai.chat(msgs), new Promise((_, rj) => setTimeout(() => rj(new Error("timeout")), 60000))])).trim();
     if (!out) throw new Error("empty");
-    hist.push({ role: "user", content: text }, { role: "assistant", content: out });
-    ty.remove(); busy = false; setState("talk", 1800);
-    addMsg("bot", esc(out.slice(0, 4000)).replace(/\n/g, "<br>") + `<br><small>✨ Skias AI</small>`);
   } catch (e) {
-    ty.remove(); busy = false; setState("idle");
+    if (!alive(j)) return;
+    ty.remove(); end(j); setState("idle");
     addMsg("bot", `⚠️ ${esc(L("Skias AI chưa trả lời được. Có thể Puter cần bạn đăng nhập Puter (cửa sổ nhỏ hiện ra) hoặc đang bị chặn/mất mạng. Bạn thử lại hoặc chuyển về chế độ Tự động.", "Skias AI couldn't answer. Puter may need you to sign in to Puter (a small window opens), or it is blocked/offline. Try again or switch back to Auto mode."))}`);
+    return;
   }
+  if (!alive(j)) return;
+  ty.remove(); hist.push({ role: "user", content: text }, { role: "assistant", content: out });
+  const done = await reveal(j, { text: out, tag: `<div class="sk-tag">✨ Skias AI</div>` });
+  end(j); setState("talk", done ? 1800 : 0);
 }
+function paintSub(s) { if (!subEl) return; subEl.querySelector(".sk-subt").textContent = s || (ai ? L("Đang dùng Skias AI", "Using Skias AI") : L("Trợ lý của Skibidi Web", "Skibidi Web assistant")); subEl.classList.toggle("busy", !!s); }
 function paintModes() {
   if (!btnAuto) return;
-  const dev = !!session.isDev; if (ai && !dev) ai = false;
+    modesEl.dataset.m = ai ? "ai" : "auto";
   btnAuto.classList.toggle("on", !ai); btnAuto.setAttribute("aria-pressed", String(!ai));
-  btnAI.classList.toggle("on", ai); btnAI.setAttribute("aria-pressed", String(ai)); btnAI.classList.toggle("locked", !dev); btnAI.setAttribute("aria-disabled", String(!dev));
-  btnAI.innerHTML = `<span aria-hidden="true">${dev ? "✨" : "🔒"}</span> Skias AI`;
-  btnAI.title = dev ? L("Trò chuyện với trí tuệ nhân tạo", "Chat with the AI") : L("Chỉ tài khoản dev mới dùng được Skias AI", "Skias AI is only available to dev accounts");
-  stEl.textContent = ai ? L("Đang dùng Skias AI", "Using Skias AI") : L("Trợ lý của Skibidi Web", "Skibidi Web assistant");
+  btnAI.classList.toggle("on", ai); btnAI.setAttribute("aria-pressed", String(ai)); btnAI.classList.remove("locked"); btnAI.removeAttribute("aria-disabled");
+  btnAuto.innerHTML = `<span aria-hidden="true">💬</span> ${esc(L("Tự động", "Auto"))}`;
+  btnAI.innerHTML = `<span aria-hidden="true">✨</span> Skias AI`;
+  btnAI.title = L("Trò chuyện với trí tuệ nhân tạo", "Chat with the AI");
+  root.classList.toggle("ai", ai); paintSub(busy && job ? subEl.querySelector(".sk-subt").textContent : "");
   input.placeholder = ai ? L("Hỏi Skias AI bất cứ điều gì…", "Ask Skias AI anything…") : L("Hỏi Skias điều gì đó…", "Ask Skias something…");
 }
 function pickMode(wantAI) {
-  if (wantAI && !session.isDev) { addMsg("bot", `🔒 ${esc(L("Skias AI đang bị khóa với tài khoản thường — chỉ tài khoản dev mới dùng được. Chế độ Tự động vẫn trả lời mọi câu hỏi về web nhé!", "Skias AI is locked for regular accounts — only dev accounts can use it. Auto mode still answers every question about the site!"))}`); setState("talk", 1500); return; }
-  if (busy) return; ai = !!wantAI; paintModes();
-  addMsg("bot", esc(ai ? L("Đã bật Skias AI ✨ Hỏi mình bất cứ điều gì.", "Skias AI is on ✨ Ask me anything.") : L("Đã về chế độ Tự động.", "Back to Auto mode.")));
+  if (!!wantAI === ai) return;
+  if (busy && !stop()) return;
+  ai = !!wantAI; paintModes();
+  note(ai ? L("✨ Đã bật Skias AI — hỏi mình bất cứ điều gì.", "✨ Skias AI is on — ask me anything.") : L("💬 Đã về chế độ Tự động.", "💬 Back to Auto mode."));
   input.focus({ preventScroll: true });
 }
 
 async function ask(text) {
   text = String(text || "").trim(); if (!text || busy) return;
-  addMsg("me", esc(text)); setChips([]);
+  addMsg("usr", esc(text)); setChips([]);
   if (mode === "report") { mode = ""; return sendReport(text); }
-  if (ai && session.isDev) return askAI(text);
+  if (ai) return askAI(text);
   const r = answer(text, { ui: getLang() });
-  busy = true; setState("think"); const ty = typing();
+  const j = begin(L("Skias đang nghĩ…", "Skias is thinking…")), ty = typing(); j.onStop = () => ty.remove(); setState("think");
   await wait(Math.min(1500, 450 + text.length * 14));
-  ty.remove(); busy = false; setState("talk", 1800);
-  if (!r) return;
-  if (r.kind === "report") { return startReport(text.length >= 25 ? text : ""); }
-  addMsg("bot", esc(r.text).replace(/\n/g, "<br>") + linksHTML(r.go));
-  setChips(r.report ? [{ ...devChip(r.kind === "unknown" ? text : ""), label: r.lang === "vi" ? "Gửi dev" : "Send to dev" }] : []);
+  if (!alive(j)) return;
+  ty.remove();
+  if (!r) { end(j); setState("idle"); return; }
+  if (r.kind === "report") { end(j); setState("idle"); return startReport(text.length >= 25 ? text : ""); }
+  const done = await reveal(j, { text: r.text, extra: linksHTML(r.go) });
+  end(j); setState("talk", done ? 1800 : 0);
+  if (done) setChips(r.report ? [{ ...devChip(r.kind === "unknown" ? text : ""), label: r.lang === "vi" ? "Gửi dev" : "Send to dev" }] : []);
 }
 
 /* ───── Xem xét lỗi + gửi dev ───── */
@@ -171,20 +224,22 @@ function startReport(desc) {
   sendReport(desc);
 }
 async function sendReport(desc, { err = null } = {}) {
-  if (busy) return; busy = true; setChips([]); setState("think");
-  if (Date.now() - lastSend < 30000 || sends >= 5) { busy = false; setState("idle"); addMsg("bot", esc(L("Mình vừa gửi cho dev rồi — chờ một chút (hoặc nhắn thêm trong khung chat nổi) nhé.", "I just sent one to the dev — please wait a moment (or add details in the floating chat)."))); return; }
+  if (busy) return; setChips([]);
+  if (Date.now() - lastSend < 30000 || sends >= 5) { setState("idle"); addMsg("bot", esc(L("Mình vừa gửi cho dev rồi — chờ một chút (hoặc nhắn thêm trong khung chat nổi) nhé.", "I just sent one to the dev — please wait a moment (or add details in the floating chat)."))); return; }
+  const j = begin(L("Đang xem xét…", "Looking into it…")); j.stopNote = L("Đã dừng — chưa gửi gì cho dev.", "Stopped — nothing was sent to the dev."); setState("think");
   const steps = [L("Đọc các lỗi gần đây…", "Reading recent errors…"), L("Kiểm tra kết nối và máy chủ…", "Checking connection and server…"), L("Soạn tin nhắn cho dev…", "Writing the message for the dev…")];
   const box = addMsg("bot", `<ol class="sk-steps">${steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>`), lis = [...box.querySelectorAll("li")];
-  const job = collect(desc, err); let res;
-  for (let i = 0; i < lis.length; i++) { lis[i].className = "on"; logEl.scrollTop = logEl.scrollHeight; await wait(i === 1 ? 900 : 650); if (i === 1) res = await job; lis[i].className = "ok"; }
+  const gather = collect(desc, err); let res;
+  for (let i = 0; i < lis.length; i++) { lis[i].className = "on"; follow(); await wait(i === 1 ? 900 : 650); if (!alive(j)) return; if (i === 1) { res = await gather; if (!alive(j)) return; } lis[i].className = "ok"; }
+  j.lock = true; /* từ đây đang ghi tin gửi dev — không ngắt giữa chừng để tránh gửi nửa vời */
   try {
     const uid = session.user.uid, has = db ? (await db.ref("nox_threads/" + uid + "/chat").once("value")).exists() : false;
     if (has) await H.sendMsg(uid, "chat", res.msg); else await H.createThread({ type: "chat", subject: "Nhắn tin với dev", text: res.msg, id: "chat" });
-    sends++; lastSend = Date.now(); busy = false; setState("happy", 2600);
+    sends++; lastSend = Date.now(); end(j); setState("happy", 2600);
     /* Người dùng thường chỉ thấy lời xác nhận đơn giản; phần nhận định kỹ thuật đã nằm trong tin gửi dev */
-    addMsg("bot", `✅ ${esc(L("Đã gửi cho dev!", "Sent to the dev!"))}` + (session.isDev && res.hints.length ? `<br><small>${esc(res.hints.join(" "))}</small>` : "") + `<br><small>${esc(L("Dev sẽ trả lời trong khung chat nổi và Hộp thư.", "The dev will reply in the floating chat and your Inbox."))}</small>`, `<div class="sk-go"><a href="/inbox/chat" data-sk-go>${esc(L("Mở cuộc trò chuyện", "Open the conversation"))}</a></div>`);
+    addMsg("bot", `✅ ${esc(L("Đã gửi cho dev!", "Sent to the dev!"))}` + (session.isDev && res.hints.length ? `<br><small>${esc(res.hints.join(" "))}</small>` : "") + `<br><small>${esc(L("Dev sẽ trả lời trong khung chat nổi và Hộp thư.", "The dev will reply in the floating chat and your Inbox."))}</small>`, `<div class="sk-go"><a href="/inbox/chat" data-sk-go>${esc(L("Mở cuộc trò chuyện", "Open the conversation"))}<span aria-hidden="true"> →</span></a></div>`);
   } catch (x) {
-    busy = false; setState("idle");
+    end(j); setState("idle");
     addMsg("bot", `⚠️ ${esc(L("Mình chưa gửi được, bạn thử lại sau một chút nhé.", "I couldn't send it — please try again in a moment."))}`);
   }
 }
@@ -200,49 +255,63 @@ function onErr() {
   }, 1400);
 }
 
-/* ───── Mở / đóng khung ───── */
+/* ───── Mở / đóng khung, cuộc trò chuyện mới ───── */
+const welcome = () => addMsg("bot", `<p>${esc(L("Chào bạn! Mình là Skias 👋 Hỏi mình về nạp tiền, đơn hàng, tài khoản, cài đặt… hoặc nhờ mình gửi vấn đề cho dev.", "Hi! I'm Skias 👋 Ask me about top-ups, orders, your account, settings… or have me send a problem to the dev."))}</p><p><small>${esc(L("Mình hiểu cả tiếng Việt lẫn English.", "I understand both English and Vietnamese."))}</small></p>`);
 function openPanel() {
-  if (open) return; open = true; hideBub(); panel.hidden = false; requestAnimationFrame(() => panel.classList.add("on")); root.classList.add("open"); fig.setAttribute("aria-expanded", "true"); paintModes();
-  if (!opened) { opened = true; addMsg("bot", esc(L("Chào bạn! Mình là Skias 👋 Hỏi mình về nạp tiền, đơn hàng, tài khoản, cài đặt… hoặc nhờ mình gửi vấn đề cho dev.", "Hi! I'm Skias 👋 Ask me about top-ups, orders, your account, settings… or have me send a problem to the dev.")) + `<br><small>${esc(L("Mình hiểu cả tiếng Việt lẫn English.", "I understand both English and Vietnamese."))}</small>`); }
-  setState("wave", 1800); setTimeout(() => input && input.focus({ preventScroll: true }), 80);
+  if (open) return; open = true; hideBub(); panel.hidden = false; requestAnimationFrame(() => panel.classList.add("on")); root.classList.add("open"); root.classList.remove("peek"); fig.setAttribute("aria-expanded", "true"); paintModes();
+  if (!opened) { opened = true; welcome(); }
+  requestAnimationFrame(() => follow(true)); setState("wave", 1800); setTimeout(() => input && input.focus({ preventScroll: true }), 80);
 }
 function closePanel(refocus = true) {
   if (!open) return; open = false; mode = ""; panel.classList.remove("on"); root.classList.remove("open"); fig.setAttribute("aria-expanded", "false"); setTimeout(() => { if (!open) panel.hidden = true; }, 220); setState("idle"); if (refocus) fig.focus({ preventScroll: true });
 }
-function apply() { if (!root) return; const on = isSkiasOn(); root.hidden = !on; document.body.classList.toggle("has-skias", on); if (!on) { closePanel(false); hideBub(); } }
+function newChat() {
+  if (job && job.lock) return; if (job) { job.dead = true; try { job.onStop && job.onStop(); } catch (_) {} end(job); }
+  hist.length = 0; mode = ""; ai = false; logEl.innerHTML = ""; setChips([]); stick = true; paintModes(); welcome(); setState("wave", 1500); input.value = ""; input.focus({ preventScroll: true });
+}
+function apply() { if (!root) return; const on = isSkiasOn(); root.hidden = !on; document.body.classList.toggle("has-skias", on); if (!on) { stop(); closePanel(false); hideBub(); } }
 
 export function initSkias() {
   if (wired) return; wired = true;
   root = document.createElement("div"); root.id = "sk"; root.setAttribute("translate", "no"); root.dataset.st = "idle"; root.hidden = true;
   root.innerHTML = `<section class="sk-panel" role="dialog" aria-label="Skias" hidden>
-      <header class="sk-head2"><span class="sk-av" aria-hidden="true">${AVATAR}</span><div><b>Skias</b><small class="sk-sub"></small></div>
-        <button class="sk-hx sk-off" type="button"></button><button class="sk-hx sk-min" type="button">×</button></header>
-      <div class="sk-modes" role="group"><button type="button" class="sk-mode sk-auto on"></button><button type="button" class="sk-mode sk-ai locked"></button></div>
-      <div class="sk-log" role="log" aria-live="polite"></div><div class="sk-chips" hidden></div>
-      <form class="sk-form" novalidate><input class="sk-in" type="text" maxlength="300" autocomplete="off" enterkeyhint="send"><button class="sk-send" type="button">➤</button></form>
+      <header class="sk-hd"><span class="sk-mav big" aria-hidden="true"></span><div class="sk-who"><b>Skias</b><small class="sk-sub"><i class="sk-dot"></i><span class="sk-subt"></span></small></div>
+        <button class="sk-ic sk-new" type="button">${ICON.neu}</button><button class="sk-ic sk-off" type="button">${ICON.off}</button><button class="sk-ic sk-min" type="button">${ICON.min}</button></header>
+      <div class="sk-modes" role="group" data-m="auto"><i class="sk-pill" aria-hidden="true"></i><button type="button" class="sk-mode sk-auto on"></button><button type="button" class="sk-mode sk-ai locked"></button></div>
+      <div class="sk-logwrap"><div class="sk-log" role="log" aria-live="polite"></div><button class="sk-down" type="button" hidden>${ICON.down}</button></div>
+      <div class="sk-chips" hidden></div>
+      <form class="sk-form" novalidate><input class="sk-in" type="text" maxlength="300" autocomplete="off" enterkeyhint="send"><button class="sk-send" type="button"></button></form>
     </section>
     <div class="sk-bubble" role="status" hidden></div>
     <button class="sk-fig" type="button" aria-haspopup="dialog" aria-expanded="false">${FIG}${CLOUD}</button>`;
   document.body.appendChild(root);
-  fig = root.querySelector(".sk-fig"); bubble = root.querySelector(".sk-bubble"); panel = root.querySelector(".sk-panel"); logEl = root.querySelector(".sk-log"); chips = root.querySelector(".sk-chips"); form = root.querySelector(".sk-form"); input = root.querySelector(".sk-in"); stEl = root.querySelector(".sk-sub"); btnAuto = root.querySelector(".sk-auto"); btnAI = root.querySelector(".sk-ai");
+  const q = s => root.querySelector(s);
+  fig = q(".sk-fig"); bubble = q(".sk-bubble"); panel = q(".sk-panel"); logEl = q(".sk-log"); chips = q(".sk-chips"); form = q(".sk-form"); input = q(".sk-in"); subEl = q(".sk-sub"); btnAuto = q(".sk-auto"); btnAI = q(".sk-ai"); btnSend = q(".sk-send"); modesEl = q(".sk-modes"); downEl = q(".sk-down");
   const labels = () => {
     fig.setAttribute("aria-label", L("Trò chuyện với Skias", "Chat with Skias")); input.setAttribute("aria-label", L("Câu hỏi cho Skias", "Question for Skias"));
-    const o = root.querySelector(".sk-off"), m = root.querySelector(".sk-min"); btnAuto.textContent = L("💬 Tự động", "💬 Auto");
-    o.textContent = L("Ẩn Skias", "Hide Skias"); o.title = L("Ẩn Skias (bật lại trong Cài đặt)", "Hide Skias (turn back on in Settings)"); m.setAttribute("aria-label", L("Thu nhỏ", "Minimize")); paintModes();
+    const set = (sel, t) => { const b = q(sel); b.title = t; b.setAttribute("aria-label", t); };
+    set(".sk-new", L("Cuộc trò chuyện mới", "New conversation")); set(".sk-off", L("Ẩn Skias (bật lại trong Cài đặt)", "Hide Skias (turn back on in Settings)")); set(".sk-min", L("Thu nhỏ", "Minimize")); set(".sk-down", L("Xuống tin mới nhất", "Jump to latest"));
+    setBusy(busy, job ? q(".sk-subt").textContent : ""); paintModes();
   };
-  labels(); onLangChange(() => labels()); onAuth(() => paintModes());
+  labels(); onLangChange(() => labels());
+  onAuth(() => paintModes());
   fig.addEventListener("click", () => { open ? closePanel() : openPanel(); });
   fig.addEventListener("mouseenter", () => { if (!open && state === "idle") setState("wave", 1500); });
   bubble.addEventListener("click", e => { if (e.target.closest("button,a")) return; hideBub(); openPanel(); });
   btnAuto.addEventListener("click", () => pickMode(false)); btnAI.addEventListener("click", () => pickMode(!ai));
-  root.querySelector(".sk-min").addEventListener("click", () => closePanel());
-  root.querySelector(".sk-off").addEventListener("click", () => { setSkiasOn(false); toast(L("Đã ẩn Skias. Bật lại trong Cài đặt.", "Skias is hidden. Turn it back on in Settings."), "ok"); });
-  const sendIt = () => { const v = input.value; input.value = ""; ask(v); };
+  q(".sk-min").addEventListener("click", () => closePanel());
+  q(".sk-new").addEventListener("click", newChat);
+  q(".sk-off").addEventListener("click", () => { setSkiasOn(false); toast(L("Đã ẩn Skias. Bật lại trong Cài đặt.", "Skias is hidden. Turn it back on in Settings."), "ok"); });
+  const sendIt = () => { if (busy) { stop(); return; } const v = input.value; input.value = ""; ask(v); };
   form.addEventListener("submit", e => { e.preventDefault(); sendIt(); });
-  input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); sendIt(); } });
-  root.querySelector(".sk-send").addEventListener("click", sendIt);
+  input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); if (!busy) sendIt(); } });
+  btnSend.addEventListener("click", sendIt);
+  logEl.addEventListener("scroll", () => { stick = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 80; paintDown(); }, { passive: true });
+  downEl.addEventListener("click", () => { follow(true); input.focus({ preventScroll: true }); });
   logEl.addEventListener("click", e => { const a = e.target.closest("[data-sk-go]"); if (!a) return; e.preventDefault(); const h = a.getAttribute("href"); if (h === "/inbox/chat") { import("./chatwidget.js").then(m => m.openChat()); } else { closePanel(false); navigate(h); } });
-  addEventListener("keydown", e => { if (e.key === "Escape" && open && !document.querySelector(".pop-root .pop")) closePanel(); });
+  addEventListener("keydown", e => { if (e.key === "Escape" && open && !document.querySelector(".pop-root .pop")) { if (busy && stop()) return; closePanel(); } });
+  /* Khi cuộn trang: Skias nép sang trái một chút để không che chữ đang đọc, đứng yên 2 giây thì ló ra lại */
+  addEventListener("scroll", () => { if (open || !root) return; root.classList.add("peek"); clearTimeout(peekT); peekT = setTimeout(() => root.classList.remove("peek"), 2200); }, { passive: true, capture: true });
   document.addEventListener("prefs-change", apply);
   onLog(onErr);
   apply();
