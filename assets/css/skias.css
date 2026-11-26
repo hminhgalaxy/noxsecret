@@ -14,7 +14,7 @@
 @media(min-width:1024px){.sk-fig{width:112px;height:117px}}
 .sk-fig:focus-visible{outline:3px solid var(--sk-acc);outline-offset:3px;border-radius:50%}
 /* khi đang cuộn trang: nép sang trái một chút cho khỏi che chữ; đứng yên 2 giây thì ló ra lại */
-#sk.peek:not(.open)[data-st=idle] .sk-fig{transform:translateX(-36%) scale(.86);opacity:.82}
+#sk.peek:not(.open)[data-st=idle] .sk-fig{opacity:.6}
 #sk.peek .sk-fig:hover,#sk.peek .sk-fig:focus-visible{transform:none;opacity:1}
 .sk-svg{overflow:visible}
 .sk-svg .sk-face{stroke:rgba(150,85,0,.38);stroke-width:1.6}
@@ -87,7 +87,7 @@
 @keyframes skBlinkAv{0%,88%,100%{transform:scaleY(1)}90%{transform:scaleY(.08)}93%{transform:scaleY(1)}}
 
 /* ── Khung chat ── */
-.sk-panel{position:absolute;left:0;bottom:calc(100% + 8px);width:min(384px,calc(100vw - 16px));height:max(320px,min(580px,calc(100dvh - var(--head-h) - var(--bar-h) - var(--safe-b) - 130px)));display:flex;flex-direction:column;border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset;overflow:hidden;opacity:0;transform:translateY(14px) scale(.96);transform-origin:0 100%;transition:opacity .22s,transform .34s var(--ez)}
+.sk-panel{position:absolute;left:var(--sk-shift,0px);bottom:calc(100% + 8px);width:min(384px,calc(100vw - 16px));height:var(--sk-ph,max(320px,min(580px,calc(100dvh - var(--head-h) - var(--bar-h) - var(--safe-b) - 130px))));max-height:calc(100dvh - 24px);display:flex;flex-direction:column;border-radius:24px;box-shadow:0 24px 70px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset;overflow:hidden;opacity:0;transform:translateY(14px) scale(.96);transform-origin:0 100%;transition:opacity .22s,transform .34s var(--ez)}
 .sk-panel.on{opacity:1;transform:none}
 .sk-panel[hidden]{display:none}
 .sk-hd{display:flex;align-items:center;gap:11px;padding:12px 10px 10px 14px;border-bottom:1px solid var(--line)}
@@ -162,3 +162,26 @@
 /* giảm chuyển động */
 html[data-motion=reduced] #sk *{animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){#sk *{animation:none!important;transition:none!important}}
+
+/* ── Kéo thả / thu nhỏ / lật khung theo vị trí (skias-move.js) ── */
+#sk.moved,#sk.drag{transition:none!important}
+#sk.drag .sk-fig{cursor:grabbing;transform:scale(1.08) rotate(-4deg);filter:drop-shadow(0 14px 18px rgba(0,0,0,.4))}
+.sk-fig{cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+#sk.below .sk-panel{bottom:auto;top:calc(100% + 8px);transform-origin:0 0}
+#sk.below .sk-bubble{bottom:auto;top:54px;transform-origin:0 0;border-radius:5px 18px 18px 18px}
+#sk.right .sk-bubble{left:auto;right:74px;transform-origin:100% 100%;border-radius:18px 18px 5px 18px}
+#sk.right.below .sk-bubble{transform-origin:100% 0;border-radius:18px 5px 18px 18px}
+@media(min-width:1024px){#sk.right .sk-bubble{right:96px}#sk.below .sk-bubble{top:68px}}
+#sk.mini .sk-fig{width:46px;height:48px;opacity:.9}
+@media(min-width:1024px){#sk.mini .sk-fig{width:52px;height:54px}}
+#sk.mini .sk-bubble,#sk.mini .sk-cloud{display:none!important}
+#sk.mini .sk-fig::after{content:"";position:absolute;inset:-6px;border-radius:50%}
+#sk.mini .sk-all{animation-duration:5s}
+
+/* Điện thoại: khung chat là một tờ cố định giữa thanh trên và thanh tab → không bao giờ bị cắt, dù quả cầu đang nằm ở đâu */
+@media(max-width:700px){
+  #sk .sk-panel{position:fixed;left:8px!important;right:8px;top:calc(var(--head-h) + 8px)!important;bottom:calc(var(--bar-h) + var(--safe-b) + 12px)!important;width:auto;height:auto;max-height:none;transform-origin:50% 100%}
+  #sk.below .sk-panel{top:calc(var(--head-h) + 8px);bottom:calc(var(--bar-h) + var(--safe-b) + 12px)}
+  #sk.open .sk-fig,#sk:has(.sk-panel.on) .sk-fig{opacity:0;pointer-events:none}
+}
+@media(max-width:700px){body:has(#sk .sk-panel.on) #cwFab{opacity:0;pointer-events:none}}

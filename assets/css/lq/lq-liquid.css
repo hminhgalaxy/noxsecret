@@ -1,0 +1,110 @@
+/* ═══ CHẤT LIỆU GIỌT NƯỚC 3D — lớp này ghi đè lên khung kính phẳng ═══
+   Mỗi thành phần là một khối chất lỏng ĐẶC có độ dày: viền sáng ở mép trên, ánh sáng gom lại (caustic) ở đáy,
+   bóng màu nằm sâu bên trong, vệt phản chiếu trắng cong, bóng đổ nhuốm màu bên dưới. Không quá đục, không quá trong. */
+html[data-ui="liquid"][data-skin]{
+  --lq-dsh-s:inset 0 2px 1px rgba(255,255,255,.95),inset 0 -2px 3px rgba(255,255,255,.35),inset 2px 3px 8px rgba(255,255,255,.28),
+    inset -3px -7px 14px color-mix(in srgb,var(--lq-a) 38%,transparent),inset 0 -10px 14px -8px rgba(255,255,255,.6),
+    0 14px 24px -10px color-mix(in srgb,var(--lq-a) 60%,rgba(0,0,0,.55)),0 3px 6px -2px rgba(0,0,0,.28);
+  --lq-dsh-l:inset 0 2.5px 2px rgba(255,255,255,.85),inset 0 -3px 4px rgba(255,255,255,.2),inset 3px 4px 16px rgba(255,255,255,.14),
+    inset -8px -18px 38px color-mix(in srgb,var(--lq-a) 34%,transparent),inset 0 -30px 40px -26px rgba(255,255,255,.62),
+    0 32px 60px -28px color-mix(in srgb,var(--lq-a) 55%,rgba(0,0,0,.6)),0 8px 16px -8px rgba(0,0,0,.28);
+  --lq-body:linear-gradient(172deg,rgba(255,255,255,.27) 0%,rgba(255,255,255,.09) 34%,color-mix(in srgb,var(--lq-b) 9%,transparent) 66%,color-mix(in srgb,var(--lq-a) 20%,rgba(255,255,255,.1)) 100%);
+  --lq-caustic:radial-gradient(130% 62% at 50% 118%,color-mix(in srgb,var(--lq-c) 58%,rgba(255,255,255,.5)) 0,transparent 66%);
+}
+html[data-ui="liquid"][data-skin][data-theme="light"]{
+  --lq-dsh-s:inset 0 2px 1px #fff,inset 0 -2px 3px rgba(255,255,255,.7),inset 2px 3px 8px rgba(255,255,255,.7),
+    inset -3px -7px 14px color-mix(in srgb,var(--lq-a) 30%,transparent),inset 0 -10px 14px -8px #fff,
+    0 14px 24px -10px color-mix(in srgb,var(--lq-a) 70%,rgba(40,60,140,.5)),0 3px 6px -2px rgba(60,80,150,.3);
+  --lq-dsh-l:inset 0 2.5px 2px #fff,inset 0 -3px 4px rgba(255,255,255,.6),inset 3px 4px 16px rgba(255,255,255,.7),
+    inset -6px -14px 34px color-mix(in srgb,var(--lq-a) 20%,transparent),inset 0 -26px 36px -26px #fff,
+    0 32px 60px -28px color-mix(in srgb,var(--lq-a) 60%,rgba(40,60,140,.5)),0 8px 16px -8px rgba(60,80,150,.26);
+  --lq-body:linear-gradient(172deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.55) 38%,color-mix(in srgb,var(--lq-b) 10%,rgba(255,255,255,.4)) 70%,color-mix(in srgb,var(--lq-a) 22%,rgba(255,255,255,.4)) 100%);
+}
+
+/* Khối lớn (thẻ, ô, thanh nổi): tấm chất lỏng dày */
+html[data-ui="liquid"] :is(.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.statebox,.pcard,.od,.act-row,.inv,.dv-card,.tx,.oi,.todo,.mbx,.lp-tile,.stat,.cart-row,.ord,.help-card,.cat-card,.prod,.kv,.lq-card){
+  background:radial-gradient(120% 70% at var(--px,10%) var(--py,0%),rgba(255,255,255,.34),transparent 46%),var(--lq-caustic),var(--lq-body);
+  -webkit-backdrop-filter:blur(18px) saturate(2.1) brightness(1.12);backdrop-filter:blur(18px) saturate(2.1) brightness(1.12);
+  box-shadow:var(--lq-dsh-l);border-color:color-mix(in srgb,#fff 28%,transparent)}
+html[data-ui="liquid"] :is(#hdr,#tabbar){background:radial-gradient(180px 70px at 14% 0%,rgba(255,255,255,.42),transparent 70%),var(--lq-caustic),var(--lq-body);box-shadow:var(--lq-dsh-s),0 24px 50px -24px color-mix(in srgb,var(--lq-a) 50%,rgba(0,0,0,.5))}
+html[data-ui="liquid"] #side{background:radial-gradient(150% 60% at 20% 0%,rgba(255,255,255,.3),transparent 50%),var(--lq-caustic),var(--lq-body);box-shadow:var(--lq-dsh-l)}
+html[data-ui="liquid"] .pop-root>.pop,html[data-ui="liquid"] .cw-panel{box-shadow:var(--lq-dsh-l)}
+
+/* Viên chất lỏng (nút, chip, nút tròn): giọt nước nhỏ có vệt phản chiếu cong + ánh sáng gom ở đáy */
+html[data-ui="liquid"] .btn,html[data-ui="liquid"] :is(#btnMenu,.bell,.hdr-btn,.walletbtn,.chip,.nav-btn,.me,.side-close,.cartbtn,.lq-try,.sk-ic,.sk-chip,.lqc-it,.lqc-b,.cw-fab){
+  background:radial-gradient(54px 34px at var(--px,50%) var(--py,0%),rgba(255,255,255,.62),transparent 72%),var(--lq-caustic),
+    linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.08) 55%,color-mix(in srgb,var(--lq-a) 18%,rgba(255,255,255,.1)));
+  box-shadow:var(--lq-dsh-s)}
+html[data-ui="liquid"][data-skin] .btn.btn::before{content:"";position:absolute;z-index:-1;left:12%;right:12%;bottom:2px;top:auto;height:34%;border-radius:99px;transform:none;
+  background:radial-gradient(ellipse at 50% 100%,rgba(255,255,255,.7),transparent 70%);opacity:.7;transition:none;animation:none;pointer-events:none}
+html[data-ui="liquid"] .btn::after{left:12%;right:12%;top:3px;height:38%;background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.05));opacity:.7;border-radius:99px 99px 60% 60%/99px 99px 100% 100%}
+/* nút chính: chất lỏng có màu, sáng và đậm hơn */
+html[data-ui="liquid"] .btn.primary,html[data-ui="liquid"] .cw-fab{
+  background:radial-gradient(70px 40px at var(--px,50%) var(--py,0%),rgba(255,255,255,.95),transparent 72%),
+    radial-gradient(130% 70% at 50% 120%,color-mix(in srgb,var(--lq-d) 70%,#fff) 0,transparent 66%),
+    linear-gradient(175deg,color-mix(in srgb,var(--lq-a) 30%,#fff),color-mix(in srgb,var(--lq-b) 55%,#fff) 90%);
+  box-shadow:inset 0 2.5px 1px #fff,inset 0 -3px 5px rgba(255,255,255,.55),inset -4px -9px 16px color-mix(in srgb,var(--lq-b) 55%,transparent),inset 3px 4px 10px rgba(255,255,255,.5),
+    0 18px 30px -10px color-mix(in srgb,var(--lq-a) 85%,transparent),0 4px 8px -2px rgba(0,0,0,.25)}
+html[data-ui="liquid"] .btn.danger{background:radial-gradient(54px 34px at var(--px,50%) var(--py,0%),rgba(255,255,255,.55),transparent 72%),linear-gradient(180deg,rgba(255,120,130,.3),rgba(255,90,110,.12))}
+html[data-ui="liquid"] .btn:hover{transform:translateY(-3px) scale(1.045,1.03)}
+html[data-ui="liquid"] .btn:active,html[data-ui="liquid"] .btn.lq-down{transform:scale(.9,.82) translateY(1px)}
+@keyframes lqJelly{0%{transform:scale(.9,.82)}22%{transform:scale(1.12,.9)}44%{transform:scale(.95,1.1)}64%{transform:scale(1.03,.97)}82%{transform:scale(.99,1.01)}100%{transform:none}}
+
+/* Núm công tắc / thanh trượt: một HẠT NƯỚC thật (phản chiếu trên, ánh sáng gom ở đáy) */
+html[data-ui="liquid"] .sw i::after,html[data-ui="liquid"] input[type=range].rng::-webkit-slider-thumb{
+  background:radial-gradient(60% 40% at 34% 18%,#fff 0,rgba(255,255,255,.7) 40%,transparent 100%),radial-gradient(100% 60% at 50% 118%,color-mix(in srgb,var(--lq-c) 60%,#fff) 0,transparent 64%),
+    linear-gradient(170deg,rgba(255,255,255,.96),color-mix(in srgb,var(--lq-a) 22%,#fff));
+  box-shadow:inset 0 2px 1px #fff,inset -2px -5px 8px color-mix(in srgb,var(--lq-a) 45%,transparent),inset 0 -5px 7px -3px rgba(255,255,255,.9),0 8px 14px -4px rgba(6,10,30,.55),0 2px 3px rgba(6,10,30,.3)}
+html[data-ui="liquid"] .sw i{background:linear-gradient(180deg,rgba(6,10,30,.35),rgba(255,255,255,.1));box-shadow:inset 0 3px 8px rgba(6,10,30,.5),inset 0 -2px 3px rgba(255,255,255,.3),0 1px 0 rgba(255,255,255,.25)}
+html[data-ui="liquid"] .sw input:checked+i{background:linear-gradient(180deg,color-mix(in srgb,var(--lq-c) 90%,#000 6%),color-mix(in srgb,var(--lq-a) 85%,#000 6%));box-shadow:inset 0 3px 8px rgba(6,10,30,.3),inset 0 -3px 5px rgba(255,255,255,.4),0 0 26px -2px color-mix(in srgb,var(--lq-c) 80%,transparent),0 1px 0 rgba(255,255,255,.35)}
+html[data-ui="liquid"] .sw:active i::after{width:44px;height:32px;top:2px;border-radius:99px;opacity:.96}
+/* Thanh trượt: ống chất lỏng có màu */
+html[data-ui="liquid"] input[type=range].rng::-webkit-slider-runnable-track{height:12px;background:linear-gradient(180deg,rgba(255,255,255,.55),transparent 60%) 0/var(--p,50%) 100% no-repeat,linear-gradient(90deg,var(--lq-c),var(--lq-a)) 0/var(--p,50%) 100% no-repeat,rgba(6,10,30,.28);box-shadow:inset 0 3px 6px rgba(6,10,30,.45),inset 0 -1px 0 rgba(255,255,255,.25),0 1px 0 rgba(255,255,255,.2)}
+
+/* Thấu kính trượt (tab, nhóm chọn): giọt chất lỏng có màu, sáng viền, trong ở giữa */
+.lq-ind{background:radial-gradient(60% 40% at 30% 14%,rgba(255,255,255,.95),rgba(255,255,255,.2) 55%,transparent),radial-gradient(120% 70% at 50% 120%,color-mix(in srgb,var(--lq-c) 55%,rgba(255,255,255,.5)),transparent 64%),
+  linear-gradient(175deg,rgba(255,255,255,.55),rgba(255,255,255,.2) 60%,color-mix(in srgb,var(--lq-a) 30%,rgba(255,255,255,.2)));
+  border:1px solid rgba(255,255,255,.7);box-shadow:inset 0 2px 1px #fff,inset 0 -3px 4px rgba(255,255,255,.4),inset -3px -6px 12px color-mix(in srgb,var(--lq-a) 40%,transparent),0 12px 22px -8px color-mix(in srgb,var(--lq-a) 70%,rgba(0,0,0,.5))}
+html[data-ui="liquid"] .nav-link.on{background:radial-gradient(60% 50% at 30% 10%,rgba(255,255,255,.55),transparent),var(--lq-caustic),linear-gradient(180deg,rgba(255,255,255,.3),color-mix(in srgb,var(--lq-a) 22%,rgba(255,255,255,.1)));box-shadow:var(--lq-dsh-s)}
+
+/* ═══ Chuyển động chất lỏng: nổi lơ lửng, đổi hình khi chạm, nghiêng 3D ═══ */
+@keyframes lqFloat{0%,100%{translate:0 0}50%{translate:0 -5px}}
+@keyframes lqFloat2{0%,100%{translate:0 0;rotate:0deg}33%{translate:2px -4px;rotate:.6deg}66%{translate:-2px -2px;rotate:-.5deg}}
+html[data-ui="liquid"] :is(.lq-orb,.os-art,.lq-try i,.cw-fab,#lqCats[data-m="mini"],.sk-fig,.os-hero .os-state){animation:lqFloat 5.5s ease-in-out infinite}
+html[data-ui="liquid"] .lp-grid>*:nth-child(odd) .lp-tile,html[data-ui="liquid"] .lp-grid>li:nth-child(odd){animation:lqFloat2 7s ease-in-out infinite}
+html[data-ui="liquid"] .lp-grid>li:nth-child(even){animation:lqFloat2 8.5s ease-in-out -2s infinite}
+html[data-ui="liquid"] .lp-grid>li{animation-fill-mode:backwards}
+html[data-motion="reduced"][data-ui="liquid"] *{animation:none!important}
+/* đổi hình như giọt: khi rê/chạm, bo góc "thở" bất đối xứng */
+@keyframes lqMorph{0%,100%{border-radius:36px 36px 36px 36px/36px 36px 36px 36px}25%{border-radius:42px 30px 40px 32px/32px 40px 30px 42px}50%{border-radius:32px 42px 30px 40px/40px 30px 42px 32px}75%{border-radius:38px 34px 42px 30px/34px 42px 32px 40px}}
+html[data-ui="liquid"] :is(.lp-tile,.tile,.os-hero,.lq-promo):hover{animation:lqMorph 3.4s ease-in-out infinite}
+/* nghiêng 3D theo con trỏ (tilt.js đặt --rx --ry) */
+html[data-ui="liquid"] :is(.lp-tile,.tile,.pcard,.cat-card,.prod,.skin,.os-hero){transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transform-style:preserve-3d}
+html[data-ui="liquid"] :is(.lp-tile,.tile,.pcard,.cat-card,.prod):is(:hover,:focus-visible){transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(14px) scale(1.02)}
+html[data-ui="liquid"] .lq-tilting{transition:transform .08s linear,box-shadow .3s!important}
+/* bóp/giãn theo vận tốc khi kéo (cửa sổ Danh mục) */
+#lqCats{transform:scale(var(--sqx,1),var(--sqy,1)) rotate(var(--sqr,0deg))}
+/* popup: từ một giọt nhỏ nở ra, có nảy */
+@keyframes lqPopIn{0%{transform:translate(-50%,-50%) scale(.55,.35);border-radius:90px;opacity:0}45%{transform:translate(-50%,-50%) scale(1.06,.96);opacity:1}70%{transform:translate(-50%,-50%) scale(.98,1.02)}100%{transform:translate(-50%,-50%)}}
+@keyframes lqMenuIn{0%{transform:scale(.5,.3);border-radius:80px;opacity:0}50%{transform:scale(1.04,.97);opacity:1}100%{transform:none}}
+html[data-ui="liquid"] .pop-root.on>.pop-sheet{animation:lqPopIn .75s var(--lq-ez) both}
+html[data-ui="liquid"] .pop-root.on>.pop-menu{animation:lqMenuIn .6s var(--lq-ez) both}
+
+/* ═══ Giọt chất lỏng lơ lửng ở nền (hòa vào nhau như metaball) + giọt đi theo con trỏ ═══ */
+#lqBg .lqdrops{position:absolute;inset:0;filter:url(#lq-goo);opacity:.56}
+html.lite #lqBg .lqdrops,html[data-motion="reduced"] #lqBg .lqdrops{filter:none}
+#lqBg .lqd{position:absolute;border-radius:50%;will-change:transform;
+  background:radial-gradient(38% 30% at 32% 22%,rgba(255,255,255,.95),rgba(255,255,255,0) 100%),radial-gradient(60% 50% at 68% 86%,rgba(255,255,255,.55),transparent 100%),radial-gradient(circle at 40% 38%,var(--dc),color-mix(in srgb,var(--dc) 55%,#000 0%) 100%);
+  box-shadow:inset -10px -16px 36px rgba(255,255,255,.3),inset 8px 10px 26px rgba(255,255,255,.22)}
+#lqBg .d1{--dc:var(--lq-a);width:190px;height:190px;left:8%;top:16%;animation:lqD1 19s ease-in-out infinite alternate}
+#lqBg .d2{--dc:var(--lq-b);width:170px;height:170px;left:70%;top:12%;animation:lqD2 23s ease-in-out infinite alternate}
+#lqBg .d3{--dc:var(--lq-c);width:170px;height:170px;left:62%;top:62%;animation:lqD3 21s ease-in-out infinite alternate}
+#lqBg .d4{--dc:var(--lq-d);width:140px;height:140px;left:18%;top:70%;animation:lqD2 17s ease-in-out infinite alternate-reverse}
+#lqBg .d5{--dc:var(--lq-a);width:96px;height:96px;left:44%;top:40%;animation:lqD3 15s ease-in-out infinite alternate-reverse}
+#lqBg .d6{--dc:var(--lq-d);width:70px;height:70px;left:86%;top:48%;animation:lqD1 13s ease-in-out infinite alternate}
+#lqBg .ptr{--dc:color-mix(in srgb,var(--lq-c) 70%,var(--lq-a));width:84px;height:84px;left:0;top:0;animation:none;opacity:0;transition:opacity .5s}
+#lqBg .ptr.on{opacity:1}
+@keyframes lqD1{from{transform:translate(0,0) scale(1)}to{transform:translate(8vw,10vh) scale(1.12,.92)}}
+@keyframes lqD2{from{transform:translate(0,0) scale(.95,1.05)}to{transform:translate(-9vw,8vh) scale(1.1,.94)}}
+@keyframes lqD3{from{transform:translate(0,0)}to{transform:translate(6vw,-12vh) scale(.92,1.1)}}
+html[data-ui="liquid"][data-theme="light"] #lqBg .lqd{opacity:.8}

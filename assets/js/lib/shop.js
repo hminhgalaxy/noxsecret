@@ -69,7 +69,7 @@ function syncUser() {
   offUser.forEach(f => f()); offUser = []; if (offDevQ) { offDevQ(); offDevQ = null; } shop.devq = null;
   shop.wallet = null; shop.orders = null; shop.txs = null; shop.invs = null; shop.info = null; emit("wallet");
   if (!uid) return;
-  if (session.isDev) { startDevInv(); if (canUseWallet()) loadWalletInfo().catch(() => {}); } /* ví dev được cấp số dư khởi đầu ở lần gọi đầu tiên */
+  if (session.isDev) { startDevInv(); if (canUseWallet()) loadWalletInfo().catch(e => { shop.walletErr = e && e.message || "?"; emit("info"); toast("Ví dev chưa được cấp số dư. Mở Dev › Kết nối máy chủ để kiểm tra.", "warn"); }); } /* ví dev được cấp số dư khởi đầu ở lần gọi đầu tiên */
   offUser = [
     live("nox_wallet/" + uid, v => { shop.wallet = { balance: v ? Math.floor(v.balance || 0) : 0 }; emit("wallet"); }),
     live("nox_orders/" + uid, v => { shop.orders = rows(v).sort((a, b) => (b.ts || 0) - (a.ts || 0)); emit("orders"); }),

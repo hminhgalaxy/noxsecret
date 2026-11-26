@@ -306,6 +306,34 @@ Website chạy Node trên Vercel (đã dùng `FIREBASE_SERVICE_ACCOUNT` + `fireb
 - Đã **bỏ nút xóa cookie** trong Cài đặt.
 
 ### Chưa làm / chưa kiểm chứng (nói thật)
-- **Skliquid Glass (kính lỏng thật) + Skib OS 1.00.1 (cập nhật kiểu điện thoại) + nhạc nền kính lỏng + kéo giãn bố cục: CHƯA làm ở đợt này** — sẽ làm riêng ở đợt kế tiếp.
+- Skliquid Glass, Skib OS, nhạc/nền riêng và kéo giãn bố cục đã được làm ở **Đợt Shop 7** (bên dưới).
 - Luồng nạp tiền được kiểm thử đầy đủ bằng bản giả lập Firebase (unit + giao diện), **chưa chạy với Firebase/Vercel thật**; hãy tự thử một hóa đơn nhỏ (2.000 ₫) bằng hai tài khoản.
 
+## Đợt Shop 7 — sửa lỗi điện thoại + Skliquid Glass (giọt nước 3D) + Skib OS
+
+### Bạn cần làm (theo thứ tự)
+1. **Dán `database.rules.json` mới** vào Firebase → Realtime Database → Rules → Publish (thêm `nox_theme/lqBgType`, `nox_theme/lqBgData` và cờ `lq` cho `nox_tracks`).
+2. Deploy lại.
+3. **Nếu ví dev vẫn hiện 0 ₫**: máy chủ chưa nhận khóa quản trị. Vào **Dev › Kết nối máy chủ**, dán khóa, kiểm tra, rồi dán các giá trị vào Vercel và deploy lại. Từ đợt này web hiện thông báo vàng nêu rõ nguyên nhân (trước đây im lặng và chỉ hiện 0 ₫).
+4. Captcha **không bị đụng tới**.
+
+### Đã sửa
+- Thanh tab dưới điện thoại: 6 nút chia đều, không tràn; nội dung chừa chỗ đủ để không bị che.
+- Skias: kéo thả được, thu nhỏ thành chấm, luôn nằm trong vùng an toàn; khung chat trên điện thoại là một tờ cố định giữa thanh trên và thanh tab (không còn bị cắt).
+
+### Skliquid Glass — nút bật ở đâu?
+- **Trang chủ** (nút tròn "Dùng Skliquid Glass" dưới 4 ô), **Menu bên** (mục Skliquid Glass), **Cài đặt** (thẻ đầu tiên). Bật/tắt bằng cùng một nút; lựa chọn lưu trong cookie `ssw_ui`.
+- Chất liệu: giọt nước 3D — viền sáng ở mép trên, ánh sáng gom ở đáy, bóng màu bên trong, vệt phản chiếu cong; giọt chất lỏng trôi ở nền và hòa vào nhau, có một giọt đi theo con trỏ.
+- Chuyển động: nút nhún như thạch, công tắc/thanh trượt có "hạt nước" phình ra khi bấm giữ, thấu kính trượt dưới tab và nhóm chọn, ô nghiêng 3D theo con trỏ, popup nở từ một giọt, nổi lơ lửng nhẹ.
+- Khúc xạ thật (SVG) chỉ chạy trên trình duyệt nhân Chromium (Chrome/Edge/Opera/Android); Safari/Firefox tự dùng làm mờ + tăng sắc độ.
+- Khi bật: ẩn mục "Tối ưu" 3 mức đồ họa; nền hình/video chung được thay bằng nền Skliquid.
+- **Danh mục nổi**: cửa sổ kính kéo được, nút gập / thu nhỏ thành chấm / ẩn; trạng thái được nhớ. Trên điện thoại mở bằng tab Danh mục.
+- **Tùy chỉnh bố cục**: mở từ menu/cài đặt; mỗi phần có thanh trắng (cạnh phải, cạnh dưới, góc) bấm giữ kéo để kéo dài/thu ngắn; "Đặt lại trang" đưa về như cũ; lưu theo từng trang trong cookie.
+- **Skias kiểu Skliquid**: thanh tiêu đề, khung trò chuyện và ô nhập là ba viên kính riêng, thêm nút phóng to.
+- **Skib OS** (`/skibos`, chỉ khi bật Skliquid): Phiên bản 1.00.1, "Cập nhật này có gì?", ảnh vẽ bằng code, "Mô tả:", "Cập nhật ngay" (tiến trình giả lập; lưu phiên bản đã cài trong cookie `ssw_os_ver`).
+- **Dev › Skliquid** (`/dev/liquid`): đặt nền (ảnh/video) và nhạc riêng cho Skliquid. Nhạc riêng thay nhạc chung khi bật Skliquid; chưa có thì nhạc chung vẫn chạy.
+
+### Chưa kiểm chứng (nói thật)
+- Hiệu ứng được kiểm bằng Chromium tự động (ảnh chụp + test hành vi); **chưa thử trên Safari/Firefox/máy thật** — đó là nơi khúc xạ tự rơi về làm mờ.
+- Skib OS chỉ mô phỏng tiến trình cập nhật (không tải gì thật).
+- Nhiều giọt nền + khúc xạ có thể nặng ở máy yếu; tắt Skliquid ở Cài đặt nếu thấy giật.

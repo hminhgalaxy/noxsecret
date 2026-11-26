@@ -19,7 +19,7 @@ export const ADMIN_NODE = "nox_admin"; // MỚI (additive): bài đăng "Cập n
 export const SEC_NODE = "nox_security"; // MỚI: cờ xác minh 2 bước + email khôi phục (chỉ máy chủ ghi, chủ tài khoản đọc)
 export const USERS_NODE = "nox_users"; // MỚI (additive): hồ sơ đăng nhập, phục vụ /dev/users
 export const MAX_DATA_LEN = 9 * 1024 * 1024;
-export const THEME_PUBLIC_KEYS = ["bgType", "bgData", "audioName"];
+export const THEME_PUBLIC_KEYS = ["bgType", "bgData", "audioName", "lqBgType", "lqBgData"];
 export const TRACKS_NODE = "nox_tracks", TRACKDATA_NODE = "nox_trackdata";
 export const MAX_TRACKS = 30;
 export const LIKES_NODE = "nox_likes", SAVED_NODE = "nox_saved", MAINTNOTES_NODE = "nox_maintnotes";

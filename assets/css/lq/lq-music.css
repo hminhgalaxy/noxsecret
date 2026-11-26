@@ -1,0 +1,14 @@
+/* Nhạc nền riêng của Skliquid (do dev tải lên) */
+#lqMusic{position:fixed;z-index:60;right:14px;top:calc(var(--head-h) + 14px);display:none;align-items:center;gap:4px;height:46px;max-width:calc(100vw - 28px);padding:0 5px;border-radius:999px;border:1px solid var(--line);
+  background:linear-gradient(150deg,var(--lq-fill-a),var(--lq-fill-b));-webkit-backdrop-filter:blur(22px) saturate(1.9);backdrop-filter:blur(22px) saturate(1.9);box-shadow:inset 0 1.5px 0 var(--lq-rim-hi),var(--shadow-1);transition:width .5s var(--lq-jelly)}
+html[data-ui="liquid"] #lqMusic.has{display:flex}
+#lqMusic button{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--text);flex:none;transition:transform .4s var(--lq-jelly),background .25s}
+#lqMusic button:hover{background:rgba(255,255,255,.18);transform:scale(1.1)}#lqMusic button:active{transform:scale(.85)}
+#lqMusic svg{width:17px;height:17px}
+#lqMusic .lqm-name{max-width:0;overflow:hidden;white-space:nowrap;font-size:12.5px;font-weight:600;opacity:0;transition:max-width .5s var(--lq-ez),opacity .3s,margin .3s}
+#lqMusic.open .lqm-name{max-width:150px;opacity:1;margin:0 6px}
+#lqMusic .lqm-x{display:none}#lqMusic.open .lqm-x{display:grid}
+#lqMusic .lqm-eq{display:flex;gap:2px;align-items:flex-end;height:14px}#lqMusic .lqm-eq i{width:3px;border-radius:2px;background:currentColor;height:4px}
+#lqMusic.play .lqm-eq i{animation:lqEq 0.9s ease-in-out infinite alternate}#lqMusic.play .lqm-eq i:nth-child(2){animation-delay:.2s}#lqMusic.play .lqm-eq i:nth-child(3){animation-delay:.4s}
+@keyframes lqEq{from{height:3px}to{height:14px}}
+@media(min-width:1024px){#lqMusic{right:20px}}

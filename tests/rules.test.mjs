@@ -73,6 +73,11 @@ t("DEV sửa thông báo", U("nox_notice", { title: "ok", body: "b", enabled: tr
 t("DEV update nox_theme (nhiều khóa con)", U("nox_theme", { bgType: "image", bgData: "data:image/jpeg;base64,AAA", updatedAt: 1 }, DEV), true);
 t("user KHÔNG đổi nền", U("nox_theme", { bgType: "image", bgData: "x" }, USER), false);
 t("bgType sai giá trị bị từ chối", U("nox_theme", { bgType: "evil" }, DEV), false);
+t("khách đọc nền Skliquid (lqBgType, lqBgData)", ["lqBgType", "lqBgData"].every(k => R("nox_theme/" + k, null)), true);
+t("DEV đặt nền riêng cho Skliquid", U("nox_theme", { lqBgType: "image", lqBgData: "data:image/jpeg;base64,AAA", updatedAt: 2 }, DEV), true);
+t("user KHÔNG đổi nền Skliquid", U("nox_theme", { lqBgType: "image", lqBgData: "x" }, USER), false);
+t("lqBgType sai giá trị bị từ chối", U("nox_theme", { lqBgType: "evil" }, DEV), false);
+t("DEV xóa nền Skliquid (none)", U("nox_theme", { lqBgType: "none", lqBgData: "" }, DEV), true);
 t("user KHÔNG ghi API key", W("nox_theme/api", { endpoint: "https://x.io", key: "k" }, USER), false);
 t("DEV ghi API key", W("nox_theme/api", { endpoint: "https://x.io", key: "k" }, DEV), true);
 
@@ -241,6 +246,9 @@ console.log("ĐỢT C: danh mục do DEV quản lý, bài chờ duyệt, hỗ tr
   t("DEV thêm bài (danh sách)", T("nox_tracks/a", ok1, DEV), true);
   t("DEV thêm bài (dữ liệu)", T("nox_trackdata/a", A, DEV), true);
   t("DEV thêm cả hai bằng một lệnh", eng.write([{ segs: split("nox_tracks/b"), value: ok1 }, { segs: split("nox_trackdata/b"), value: A }], DEV, rr).ok, true);
+  t("DEV thêm bài riêng cho Skliquid (lq:true)", T("nox_tracks/lq1", { ...ok1, lq: true }, DEV), true);
+  t("lq phải là boolean", T("nox_tracks/lq2", { ...ok1, lq: "yes" }, DEV), false);
+  t("người dùng không thêm được bài Skliquid", T("nox_tracks/lq3", { ...ok1, lq: true }, USER), false);
   t("người dùng không thêm được bài", T("nox_tracks/c", ok1, USER), false);
   t("người dùng không ghi được dữ liệu", T("nox_trackdata/c", A, USER), false);
   t("khách không thêm được bài", T("nox_tracks/c", ok1, GUEST), false);

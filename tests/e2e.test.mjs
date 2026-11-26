@@ -18,7 +18,7 @@ const PUTER_STUB = `window.puter={ai:{chat:async m=>{window.__puterCalls=(window
 const TECH = /Firebase|Realtime|Database|\bUID\b|\bRules?\b|listener|\bSync\b|\bAPI\b|\bnode\b|\[DEV\]|DEV ONLY|permission|PERMISSION|nox_|undefined|\[object/;
 
 async function fresh(o = {}) {
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, ...(o.device || {}) });
+  const ctx = await browser.newContext({ viewport: o.viewport || { width: 1280, height: 800 }, ...(o.viewport ? { isMobile: o.viewport.width < 600, hasTouch: o.viewport.width < 600 } : {}), ...(o.device || {}) });
   await ctx.addInitScript(opt => { try { if (!sessionStorage.getItem("__keepSkias")) localStorage.setItem("ssw_skias", "0"); } catch (_) {} try { if (!window.__keepCookieBar && !sessionStorage.getItem("__nock")) localStorage.setItem("ssw_ck", "1"); } catch (_) {} try { if (!window.__keepSplash) { sessionStorage.setItem("ssw_splash", "1"); sessionStorage.setItem("ssw_notice_seen", "1700000500000"); } } catch (_) {} if (opt.captcha) window.__captcha = opt.captcha; if (opt.lang !== "default") try { localStorage.setItem("ssw_lang", opt.lang || "vi"); } catch (_) {} }, { captcha: o.captcha, lang: o.lang });
   await ctx.route("**/*", route => {
     const u = route.request().url();
@@ -263,7 +263,7 @@ test("menu: nút Danh mục mở ra từ từ, có hiệu ứng, ghi nhớ và �
 test("menu: Dev Panel có nút riêng, chỉ DEV mới thấy", async ({ page }) => {
   await go(page, "/"); eq(await page.locator('.disc[data-g="dev"]').count(), 0, "khách không thấy");
   await loginDev(page); await page.waitForSelector('.disc[data-g="dev"]'); await page.locator('.disc[data-g="dev"] .nav-btn').click(); await page.waitForTimeout(700);
-  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 12, "12 mục quản trị (có Nạp tiền, Gửi thư, Duyệt bài)"); eq(await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/inbox"]').count(), 0, "Hộp thư không còn nằm trong Dev Panel");
+  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 13, "13 mục quản trị (có Nạp tiền, Gửi thư, Duyệt bài, Skliquid Glass)"); eq(await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/inbox"]').count(), 0, "Hộp thư không còn nằm trong Dev Panel");
   await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/system"]').click(); await page.waitForURL(BASE + "/dev/system"); await page.waitForSelector("#mBtn");
 });
 test("menu: tài khoản thường không thấy Dev Panel và bị chặn khi vào /dev", async ({ page }) => {
@@ -1343,6 +1343,133 @@ test("ảnh chụp trang mới (xem bằng mắt; luôn đạt nếu trang dựn
     await signOut(page); await asUser(page); await go(page, "/topup"); await page.waitForSelector(".tp-card.tp-ready .tp-qr img"); await page.waitForTimeout(600); await page.screenshot({ path: SHOTS + `/new-${nm}-ready.png`, fullPage: true }); if (process.env.DBGSTYLE) console.log(await page.evaluate(() => [".tp-head", ".tp-head > div", ".tp-amt", ".tp-head small"].map(q => { const e = document.querySelector(q), c = getComputedStyle(e); return q + " border:" + c.border + " outline:" + c.outline + " bg:" + c.backgroundColor + " shadow:" + c.boxShadow + " pad:" + c.padding; }).join("\n")));
     await c.ctx.close();
   }
+});
+test("điện thoại: thanh tab 6 nút đều nhau + Skias không lệch, kéo được, thu nhỏ được", async () => {
+  const c = await fresh({ viewport: { width: 360, height: 740 } }); const page = c.page; await installApi(page);
+  await asUser(page); await skiasOn(page, "/"); await page.waitForSelector(".sk-fig", { timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(900); await page.screenshot({ path: SHOTS + "/fix-m-home.png" });
+  const tb = await page.evaluate(() => { const t = document.getElementById("tabbar"); if (!t) return null; const r = t.getBoundingClientRect(); const kids = [...t.children].map(k => k.getBoundingClientRect()); return { w: r.width, right: r.right, n: kids.length, over: kids.some(k => k.right > innerWidth + 1 || k.left < -1), minW: Math.min(...kids.map(k => k.width)) }; });
+  ok(tb && !tb.over && tb.right <= 361, "thanh tab nằm trọn trong màn hình: " + JSON.stringify(tb)); ok(tb.minW >= 40, "mỗi nút tab đủ rộng: " + tb.minW + " " + JSON.stringify(await page.evaluate(() => [innerWidth, getComputedStyle(document.getElementById("tabbar")).display, document.documentElement.className, location.pathname])) + " " + JSON.stringify(await page.evaluate(() => [...document.getElementById("tabbar").children].map(k => [k.id || k.dataset.tab, Math.round(k.getBoundingClientRect().width), getComputedStyle(k).display]))));
+  const fig = page.locator(".sk-fig").first(); ok(await fig.count() === 1, "có quả cầu Skias");
+  const inside = () => page.evaluate(() => { const r = document.querySelector(".sk-fig").getBoundingClientRect(), h = document.getElementById("hdr").getBoundingClientRect(), t = document.getElementById("tabbar").getBoundingClientRect(); return { l: r.left >= 0, r: r.right <= innerWidth, top: r.top >= h.bottom - 1, bot: r.bottom <= t.top + 1, x: r.left, y: r.top }; });
+  const a = await inside(); ok(a.l && a.r && a.top && a.bot, "Skias nằm trong vùng an toàn: " + JSON.stringify(a));
+  const b0 = await fig.boundingBox(); await page.mouse.move(b0.x + b0.width / 2, b0.y + b0.height / 2); await page.mouse.down(); await page.mouse.move(b0.x - 120, b0.y - 200, { steps: 8 }); await page.mouse.up();
+  const b1 = await inside(); ok(Math.abs(b1.x - a.x) > 40 || Math.abs(b1.y - a.y) > 40, "kéo thả làm Skias đổi chỗ"); ok(b1.l && b1.r && b1.top && b1.bot, "sau khi kéo vẫn trong vùng an toàn: " + JSON.stringify(b1));
+  ok(await page.locator(".sk-panel").isHidden(), "kéo xong KHÔNG tự mở khung chat");
+  await page.screenshot({ path: SHOTS + "/fix-m-moved.png" });
+  await fig.click(); await page.waitForSelector(".sk-panel:not([hidden])"); await page.waitForTimeout(700);
+  const pb = await page.evaluate(() => { const r = document.querySelector(".sk-panel").getBoundingClientRect(); return { ok: r.left >= 0 && r.right <= innerWidth + 1 && r.top >= 0 && r.bottom <= innerHeight + 1, r: [r.left, r.top, r.right, r.bottom].map(Math.round) }; }); ok(pb.ok, "khung chat không bị cắt: " + JSON.stringify(pb.r));
+  await page.screenshot({ path: SHOTS + "/fix-m-open.png" });
+  await page.click(".sk-dock"); await page.waitForTimeout(500); ok(await page.evaluate(() => document.getElementById("sk").classList.contains("mini")), "thu nhỏ thành chấm"); await page.screenshot({ path: SHOTS + "/fix-m-mini.png" });
+  await page.locator(".sk-fig").first().click(); await page.waitForTimeout(400); ok(await page.evaluate(() => !document.getElementById("sk").classList.contains("mini")), "bấm chấm để phóng to lại");
+  await go(page, "/shop"); await page.waitForTimeout(900); await page.screenshot({ path: SHOTS + "/fix-m-shop.png", fullPage: true });
+  await c.ctx.close();
+});
+const stillLq = page => page.addInitScript(() => { try { document.cookie = "ssw_ui=liquid; Path=/"; localStorage.setItem("ssw_ui", "liquid"); } catch (_) {} const f = () => { const st = document.createElement("style"); st.textContent = "html[data-ui=liquid] *{animation-name:none!important}"; (document.head || document.documentElement).appendChild(st); }; if (document.head) f(); else document.addEventListener("DOMContentLoaded", f); });
+test("skliquid: nút bật có ở trang chủ/menu/cài đặt, bật được và nhớ lại", async () => {
+  const c = await fresh({ viewport: { width: 1280, height: 800 } }); const page = c.page; await installApi(page);
+  await go(page, "/"); await page.waitForSelector(".lq-try"); ok(await page.locator('[data-lq="toggle"]').count() >= 2, "có nút Dùng Skliquid Glass ở trang chủ và menu");
+  ok(await page.evaluate(() => document.documentElement.dataset.ui) === undefined, "mặc định là giao diện chuẩn");
+  await page.screenshot({ path: SHOTS + "/lq-0-off.png" });
+  await page.click(".lq-try"); await page.waitForFunction(() => document.documentElement.dataset.ui === "liquid", null, { timeout: 8000 }); await page.waitForTimeout(1200);
+  ok(await page.evaluate(() => getComputedStyle(document.getElementById("hdr")).borderRadius).then(r => parseFloat(r) > 30), "thanh trên bo tròn kiểu kính");
+  ok(await page.evaluate(() => !!document.getElementById("lqBg") && !!document.getElementById("lqCats")), "có nền aurora và cửa sổ Danh mục nổi");
+  ok(await page.evaluate(() => (document.cookie.match(/ssw_ui=liquid/) || []).length === 1), "lựa chọn được nhớ trong cookie");
+  const cr = await page.evaluate(() => { const e = document.getElementById("lqCats"), r = e.getBoundingClientRect(); return { m: e.dataset.m, r: [r.left, r.top, r.width, r.height].map(Math.round), d: getComputedStyle(e).display, o: getComputedStyle(e).opacity }; });
+  if (process.env.DBGLQ) console.log(JSON.stringify(await page.evaluate(() => { const e = document.getElementById("lqCats"), cs = getComputedStyle(e); return { vis: cs.visibility, op: cs.opacity, z: cs.zIndex, pos: cs.position, bg: cs.backgroundImage.slice(0, 60), bf: cs.backdropFilter, tr: cs.transform, hit: (document.elementFromPoint(e.getBoundingClientRect().left + 30, e.getBoundingClientRect().top + 30) || {}).id, inert: e.inert, style: e.getAttribute("style"), cls: e.className }; })));
+  ok(cr.m === "mini" && cr.r[0] > 0 && cr.r[0] + cr.r[2] <= 1280 && cr.r[2] === 60, "Danh mục nổi hiện ở góc dưới dạng chấm tròn: " + JSON.stringify(cr));
+  await page.screenshot({ path: SHOTS + "/lq-1-home.png" });
+  await go(page, "/settings"); await page.waitForTimeout(900); ok(await page.locator(".gfx-card").isHidden(), "ẩn mục Tối ưu / 3 mức đồ họa khi dùng Skliquid");
+  await page.screenshot({ path: SHOTS + "/lq-2-settings.png", fullPage: true });
+  await go(page, "/skibos"); await page.waitForSelector(".os-art"); await page.click(".os-what"); await page.waitForTimeout(700); await page.screenshot({ path: SHOTS + "/lq-3-os.png", fullPage: true });
+  await page.reload(); await page.waitForSelector("#lqBg", { timeout: 8000 }).catch(() => {}); ok(await page.locator("#lqBg").count() === 1, "tải lại vẫn giữ Skliquid");
+  ok(await page.locator('link[href="/assets/css/lq/lq-glass.css"]').count() === 1, "CSS Skliquid được nạp khi tải lại, không bị nạp đôi");
+  await c.ctx.close();
+});
+test("skliquid: Danh mục nổi (gập/thu nhỏ/ẩn/kéo) + tùy chỉnh bố cục kéo thanh trắng + trang nhớ", async () => {
+  const c = await fresh({ viewport: { width: 1280, height: 800 } }); const page = c.page; await installApi(page);
+  await stillLq(page);
+  await go(page, "/settings"); await page.waitForSelector("#lqCats"); await page.waitForTimeout(900);
+  const mode = () => page.evaluate(() => document.getElementById("lqCats").dataset.m);
+  ok(await mode() === "mini", "mặc định thu nhỏ thành chấm trên máy tính");
+  await page.click("#lqCats"); await page.waitForTimeout(700); ok(await mode() === "open", "bấm chấm thì mở cửa sổ"); ok(await page.locator("#lqCats .lqc-it").count() >= 2, "có danh sách danh mục");
+  await page.screenshot({ path: SHOTS + "/lq-4-cats.png" });
+  await page.click('#lqCats [data-a="fold"]'); await page.waitForTimeout(900); ok(await mode() === "fold", "gập lại"); await page.waitForFunction(() => document.getElementById("lqCats").getBoundingClientRect().height < 80, null, { timeout: 4000 }).catch(() => {}); ok(await page.evaluate(() => document.getElementById("lqCats").getBoundingClientRect().height) < 80, "gập còn thanh tiêu đề");
+  await page.click('#lqCats [data-a="fold"]'); await page.waitForTimeout(500); ok(await mode() === "open", "mở rộng lại");
+  const b0 = await page.locator("#lqCats .lqc-hd").boundingBox(); await page.mouse.move(b0.x + 30, b0.y + 20); await page.mouse.down(); await page.mouse.move(b0.x - 250, b0.y + 160, { steps: 8 }); await page.mouse.up();
+  const b1 = await page.locator("#lqCats").boundingBox(); ok(Math.abs(b1.x - b0.x) > 100, "kéo tiêu đề để dời cửa sổ");
+  await page.click('#lqCats [data-a="mini"]'); await page.waitForTimeout(500); ok(await mode() === "mini", "thu nhỏ thành chấm");
+  await page.click("#lqCats"); await page.waitForTimeout(400); await page.click('#lqCats [data-a="hide"]'); await page.waitForTimeout(500); ok(await mode() === "hidden", "ẩn đi");
+  await page.reload(); await page.waitForSelector("#lqCats"); await page.waitForTimeout(500); ok(await mode() === "hidden", "trạng thái ẩn được nhớ sau khi tải lại");
+  await page.evaluate(() => document.querySelector('[data-lq="cats"]').click()); await page.waitForTimeout(500); ok(await mode() === "open", "nút Danh mục nổi trong menu mở lại");
+  await page.click('#lqCats [data-a="hide"]');
+  /* tùy chỉnh bố cục */
+  await page.evaluate(() => document.querySelector('[data-lq="edit"]').click()); await page.waitForSelector(".lq-grip", { timeout: 5000 }); await page.waitForTimeout(400);
+  ok(await page.locator("body.lq-editing").count() === 1 && await page.locator("#lqEditBar").isVisible(), "chế độ tùy chỉnh có thanh công cụ");
+  if (process.env.DBGLQ) console.log("SECS", await page.evaluate(() => [...document.querySelectorAll(".lq-sec")].map(e => e.tagName + "." + e.className.slice(0, 30) + "@" + Math.round(e.getBoundingClientRect().height) + " in#view=" + !!e.closest("#view")).join(" | ")), await page.evaluate(() => document.getElementById("view").children.length));
+  const sec = page.locator("#view .lq-sec").nth(2); const sb = await sec.boundingBox(); const gr = sec.locator(".lq-gr-b"); const gb = await gr.boundingBox();
+  await page.screenshot({ path: SHOTS + "/lq-5-edit.png" });
+  await page.mouse.move(gb.x + gb.width / 2, gb.y + gb.height / 2); await page.mouse.down(); await page.mouse.move(gb.x + gb.width / 2, gb.y + 120, { steps: 6 }); await page.mouse.up();
+  const sb2 = await sec.boundingBox(); ok(Math.abs(sb2.height - sb.height) > 60, "kéo thanh trắng dưới làm phần đó dài ra: " + Math.round(sb.height) + " → " + Math.round(sb2.height));
+  const gr2 = sec.locator(".lq-gr-r"), gb2 = await gr2.boundingBox(); await page.mouse.move(gb2.x + 4, gb2.y + 20); await page.mouse.down(); await page.mouse.move(gb2.x - 160, gb2.y + 20, { steps: 6 }); await page.mouse.up();
+  const sb3 = await sec.boundingBox(); ok(sb3.width < sb2.width - 60, "kéo thanh trắng phải làm phần đó thu hẹp: " + Math.round(sb2.width) + " → " + Math.round(sb3.width));
+  await page.click('#lqEditBar [data-e="done"]'); await page.waitForTimeout(300); ok(await page.locator(".lq-grip").count() === 0, "xong thì thanh trắng biến mất");
+  await page.reload(); await page.waitForSelector("#view .set-card"); await page.waitForTimeout(900);
+  const sb4 = await page.locator("#view .set-card, #view .set-grid > *").nth(2).boundingBox(); ok(await page.evaluate(() => /ssw_lq_layout/.test(document.cookie)), "kích thước lưu trong cookie");
+  await page.evaluate(() => document.querySelector('[data-lq="edit"]').click()); await page.waitForSelector(".lq-grip"); await page.click('#lqEditBar [data-e="reset"]'); await page.waitForTimeout(400);
+  const sb5 = await page.locator("#view .lq-sec").nth(2).boundingBox(); ok(Math.abs(sb5.height - sb.height) < 6, "Đặt lại trang đưa về cỡ ban đầu: " + Math.round(sb5.height) + " vs " + Math.round(sb.height));
+  await c.ctx.close();
+});
+test("skliquid: điện thoại — thanh tab nổi, danh mục mở bằng tab, popup làm mờ nền, Skias", async () => {
+  const c = await fresh({ viewport: { width: 390, height: 780 } }); const page = c.page; await installApi(page);
+  await stillLq(page);
+  await asUser(page); await skiasOn(page, "/"); await page.waitForSelector("#lqCats", { state: "attached" }); await page.waitForTimeout(1000);
+  await page.screenshot({ path: SHOTS + "/lq-m-home.png" });
+  const tb = await page.evaluate(() => { const t = document.getElementById("tabbar"), r = t.getBoundingClientRect(); return { l: r.left, r: r.right, b: innerHeight - r.bottom, br: getComputedStyle(t).borderRadius, pos: getComputedStyle(t).position }; });
+  ok(tb.pos === "fixed" && tb.l >= 8 && tb.b >= 8 && parseFloat(tb.br) > 30, "thanh tab nổi bo tròn, cách mép: " + JSON.stringify(tb));
+  ok(await page.evaluate(() => getComputedStyle(document.getElementById("hdr")).position) === "fixed", "thanh trên vẫn dính (fixed)");
+  await page.click("#tabCats"); await page.waitForTimeout(800); ok(await page.evaluate(() => document.getElementById("lqCats").dataset.m) === "open", "tab Danh mục mở cửa sổ nổi thay vì menu");
+  ok(await page.evaluate(() => !document.getElementById("side").classList.contains("open")), "menu bên không mở");
+  const cr = await page.evaluate(() => { const r = document.getElementById("lqCats").getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight; }); ok(cr, "cửa sổ Danh mục nằm trọn trong màn hình");
+  await page.screenshot({ path: SHOTS + "/lq-m-cats.png" });
+  await page.click('#lqCats [data-a="hide"]'); await page.waitForTimeout(400);
+  await page.click("#btnMenu"); await page.waitForTimeout(800); await page.screenshot({ path: SHOTS + "/lq-m-side.png" }); await page.click("#sideClose"); await page.waitForTimeout(500);
+  await page.click(".sk-fig"); await page.waitForSelector(".sk-panel:not([hidden])"); await page.waitForTimeout(900); await page.screenshot({ path: SHOTS + "/lq-m-skias.png" });
+  const pb = await page.evaluate(() => { const r = document.querySelector(".sk-panel").getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth + 1 && r.top >= 0 && r.bottom <= innerHeight + 1; }); ok(pb, "khung Skias liquid không bị cắt");
+  ok(await page.locator(".sk-size").count() === 1, "có nút phóng to Skias trong Skliquid");
+  await c.ctx.close();
+});
+test("English: Skliquid (nút bật, Skib OS, Danh mục nổi, thanh tùy chỉnh, Dev › Skliquid) — không còn tiếng Việt", async () => {
+  const c = await fresh({ lang: "en" }); const page = c.page; const bad = [];
+  await stillLq(page);
+  const chk = async n => { await page.waitForTimeout(350); const v = await viContent(page); if (v.length) bad.push(n + " → " + v.slice(0, 12).join(" | ")); };
+  await installApi(page); await go(page, "/settings"); await page.waitForSelector("#lqCats", { state: "attached" }); await chk("cài đặt có thẻ Skliquid");
+  await page.evaluate(() => document.querySelector('[data-lq="toggle"]').scrollIntoView());
+  await page.click("#lqCats"); await page.waitForTimeout(600); await chk("cửa sổ Danh mục nổi"); await page.click('#lqCats [data-a="hide"]');
+  await page.evaluate(() => document.querySelector('[data-lq="edit"]').click()); await page.waitForSelector("#lqEditBar.x, .lq-grip", { state: "attached" }); await chk("thanh tùy chỉnh bố cục"); await page.click('#lqEditBar [data-e="done"]');
+  await go(page, "/skibos"); await page.waitForSelector(".os-art"); await page.click(".os-what"); await chk("Skib OS"); await page.click(".os-go"); await page.waitForTimeout(1500); await chk("Skib OS đang cập nhật");
+  await signOut(page).catch(() => {}); await asDev(page); await go(page, "/dev/liquid"); await page.waitForSelector("#lqF", { state: "attached" }); await chk("Dev › Skliquid"); await go(page, "/dev"); await page.waitForTimeout(500); await chk("Dev trang chính");
+  await c.ctx.close(); ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
+}, { });
+test("skliquid: dev đặt nền + nhạc riêng → người dùng Skliquid thấy, nhạc chung không lẫn", async () => {
+  const c = await fresh({ viewport: { width: 1280, height: 800 } }); const page = c.page; await installApi(page); await stillLq(page);
+  await asDev(page); await go(page, "/dev/liquid"); await page.waitForSelector("#lqF", { state: "attached" });
+  await page.setInputFiles("#lqF", { name: "n.png", mimeType: "image/png", buffer: PNG1 }); await page.waitForFunction(() => !document.querySelector("#lqA").disabled); await page.click("#lqA");
+  await until(async () => (await db(page)).nox_theme && (await db(page)).nox_theme.lqBgType === "image"); ok(true, "đã lưu nền Skliquid");
+  await page.setInputFiles("#lmF", { name: "nhac-lq.mp3", mimeType: "audio/mpeg", buffer: Buffer.from("ID3\u0003\u0000\u0000\u0000\u0000\u0000\u0000fakeaudio") });
+  await until(async () => Object.values((await db(page)).nox_tracks || {}).some(t => t.lq === true)); ok(await page.locator("#lmL li").count() === 1, "danh sách nhạc Skliquid có 1 bài");
+  const d = await db(page); ok(d.nox_theme.bgType !== "image" || !d.nox_theme.bgData, "nền chung không bị đổi (nền Skliquid tách riêng)");
+  await signOut(page); await go(page, "/"); await page.waitForSelector("#lqBg"); await page.waitForTimeout(800);
+  ok(await page.locator("#lqBg .lqmedia").count() === 1, "người dùng Skliquid thấy nền dev đặt");
+  ok(await page.evaluate(() => document.getElementById("lqMusic").classList.contains("has") && window.__lqMusic === true), "trình nhạc Skliquid hiện và nhạc chung nhường chỗ");
+  const logo0 = await page.evaluate(() => document.querySelector("symbol#logo").innerHTML.length);
+  await page.click(".lq-try"); await page.waitForFunction(() => document.documentElement.dataset.ui === undefined, null, { timeout: 8000 }); await page.waitForTimeout(500);
+  ok(await page.evaluate(() => !document.getElementById("lqBg") && !document.getElementById("lqCats") && !document.getElementById("lqMusic") && !document.getElementById("lqAudio")), "tắt Skliquid dọn sạch nền, cửa sổ, trình nhạc");
+  ok(await page.evaluate(() => window.__lqMusic !== true), "nhạc chung được trả lại");
+  ok(await page.evaluate(() => document.querySelector("symbol#logo").innerHTML.length) !== logo0, "logo trở về bản chuẩn");
+  ok(await page.evaluate(() => getComputedStyle(document.getElementById("hdr")).borderTopLeftRadius) !== "999px", "thanh trên về dạng chuẩn");
+  ok(await page.evaluate(() => !/ssw_ui=liquid/.test(document.cookie)), "cookie đã được xóa");
+  await c.ctx.close();
 });
 test("shop: dev thêm hàng, ảnh, số lượng, mục lục, điều chỉnh ví", async ({ page }) => {
   await installApi(page); await loginDev(page); await go(page, "/dev/shop"); await page.waitForSelector(".dv-tabs");

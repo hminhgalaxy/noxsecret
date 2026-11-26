@@ -1,0 +1,42 @@
+/* ═══ Nút kính lỏng: viên thuốc sáng, viền specular, vệt sáng theo con trỏ, nhún dẻo khi bấm ═══ */
+html[data-ui="liquid"] .btn{--px:50%;--py:0%;height:46px;padding:0 22px;border-radius:999px;border:1px solid var(--line);color:var(--text);font-weight:650;letter-spacing:.005em;overflow:hidden;isolation:isolate;
+  background:radial-gradient(90px 60px at var(--px) var(--py),rgba(255,255,255,.4),transparent 70%),linear-gradient(180deg,var(--lq-fill-a),var(--lq-fill-b));
+  -webkit-backdrop-filter:blur(14px) saturate(1.8);backdrop-filter:blur(14px) saturate(1.8);
+  box-shadow:inset 0 1.5px 0 var(--lq-rim-hi),inset 0 -1.5px 0 var(--lq-rim-lo),inset 0 0 14px rgba(255,255,255,.08),0 10px 24px -12px var(--lq-drop);
+  transition:transform .5s var(--lq-jelly),box-shadow .3s,background-color .3s,filter .3s}
+html[data-ui="liquid"] .btn::after{content:"";position:absolute;left:10%;right:10%;top:2px;height:42%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0));opacity:.55;pointer-events:none;z-index:-1}
+html[data-ui="liquid"] .btn:hover{transform:translateY(-2px) scale(1.035);filter:brightness(1.08)}
+html[data-ui="liquid"] .btn:active,html[data-ui="liquid"] .btn.lq-down{transform:scale(.93,.9);transition-duration:.12s}
+html[data-ui="liquid"] .btn.lq-jelly{animation:lqJelly .62s var(--lq-ez)}
+@keyframes lqJelly{0%{transform:scale(.93,.9)}30%{transform:scale(1.08,.94)}55%{transform:scale(.97,1.05)}78%{transform:scale(1.015,.99)}100%{transform:none}}
+html[data-ui="liquid"] .btn.primary{border-color:rgba(255,255,255,.55);color:var(--on-strong);
+  background:radial-gradient(110px 70px at var(--px) var(--py),rgba(255,255,255,.95),transparent 70%),linear-gradient(180deg,color-mix(in srgb,var(--lq-a) 40%,#fff),color-mix(in srgb,var(--lq-a) 22%,#fff 78%));
+  box-shadow:inset 0 2px 0 #fff,inset 0 -2px 6px color-mix(in srgb,var(--lq-a) 40%,transparent),0 14px 30px -12px color-mix(in srgb,var(--lq-a) 80%,transparent)}
+html[data-ui="liquid"] .btn.primary::after{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,0));opacity:.7}
+html[data-ui="liquid"][data-theme="light"] .btn.primary{color:#0e1533}
+html[data-ui="liquid"] .btn.primary:hover{background:radial-gradient(110px 70px at var(--px) var(--py),#fff,transparent 70%),linear-gradient(180deg,color-mix(in srgb,var(--lq-a) 30%,#fff),color-mix(in srgb,var(--lq-a) 12%,#fff 88%))}
+html[data-ui="liquid"] .btn.ghost{background:radial-gradient(90px 60px at var(--px) var(--py),rgba(255,255,255,.3),transparent 70%),linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03))}
+html[data-ui="liquid"] .btn.danger{color:#ffb4b4;border-color:rgba(255,140,140,.45)}
+html[data-ui="liquid"][data-theme="light"] .btn.danger{color:#b02a2a}
+html[data-ui="liquid"] .btn.sm{height:38px;padding:0 17px}
+html[data-ui="liquid"] .btn.lg{height:54px;padding:0 30px}
+html[data-ui="liquid"] .btn.icon{width:46px;padding:0}
+html[data-ui="liquid"] .btn.icon.sm{width:38px}
+
+/* Nút tròn trên thanh trên, chip, nút hành động nổi */
+html[data-ui="liquid"] :is(#btnMenu,.bell,.hdr-btn,.walletbtn,.cw-fab,.chip,.nav-btn,.me,.side-close,.cartbtn){
+  border:1px solid var(--line);isolation:isolate;
+  background:radial-gradient(60px 40px at var(--px,50%) var(--py,0%),rgba(255,255,255,.38),transparent 70%),linear-gradient(180deg,var(--lq-fill-a),var(--lq-fill-b));
+  -webkit-backdrop-filter:blur(12px) saturate(1.8);backdrop-filter:blur(12px) saturate(1.8);
+  box-shadow:inset 0 1.5px 0 var(--lq-rim-hi),inset 0 -1.5px 0 var(--lq-rim-lo),0 8px 18px -10px var(--lq-drop);
+  transition:transform .5s var(--lq-jelly),box-shadow .3s,filter .3s}
+html[data-ui="liquid"] :is(#btnMenu,.bell,.hdr-btn,.cw-fab,.side-close,.cartbtn){border-radius:50%;width:46px;height:46px}
+html[data-ui="liquid"] :is(.walletbtn,.chip){border-radius:999px}
+html[data-ui="liquid"] .cw-fab{width:58px;height:58px;background:radial-gradient(60px 40px at var(--px,50%) var(--py,0%),rgba(255,255,255,.85),transparent 70%),linear-gradient(180deg,color-mix(in srgb,var(--lq-a) 55%,#fff),color-mix(in srgb,var(--lq-b) 45%,#fff));color:#101733}
+html[data-ui="liquid"] :is(#btnMenu,.bell,.hdr-btn,.walletbtn,.chip,.cw-fab,.cartbtn):hover{transform:translateY(-2px) scale(1.08);filter:brightness(1.1)}
+html[data-ui="liquid"] :is(#btnMenu,.bell,.hdr-btn,.walletbtn,.chip,.cw-fab,.cartbtn):active{transform:scale(.88,.84);transition-duration:.1s}
+html[data-ui="liquid"] #btnMenu .bar{background:var(--text)}
+html[data-ui="liquid"] #btnMenu[aria-expanded="true"]{background:linear-gradient(180deg,#fff,#dfe8ff)}
+html[data-ui="liquid"] #btnMenu[aria-expanded="true"] .bar{background:#101733}
+html[data-ui="liquid"] .me{border-radius:var(--r-lg)}
+html[data-ui="liquid"] .bell-badge,html[data-ui="liquid"] .bell .dot{box-shadow:0 0 0 3px color-mix(in srgb,var(--bg) 60%,transparent)}

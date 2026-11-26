@@ -1,5 +1,6 @@
 /* Ví của tôi: số dư, nạp tiền (hóa đơn thủ công), lịch sử giao dịch. */
 import { esc, fmtTime } from "../../lib/util.js";
+import { session } from "../../lib/auth.js";
 import { ICO } from "../../lib/icons.js";
 import { shop, subscribeShop, balance, loadWalletInfo, money, signedMoney, canUseWallet, startShop, INV_ST, invState, invOpen } from "../../lib/shop.js";
 import { openTopup, topupUrl } from "../../lib/topup.js";
@@ -32,7 +33,7 @@ export function mount(ctx) {
   };
   drawBal(); drawInv(); drawList();
   if (!canUseWallet()) $("#wlM").textContent = "Hãy xác minh email để dùng ví.";
-  else loadWalletInfo().catch(e => { const m = $("#wlM"); if (m && e && e.message) m.textContent = e.message; });
+  else loadWalletInfo().catch(e => { const m = $("#wlM"); if (m && e && e.message) m.innerHTML = session.isDev ? esc(e.message) + ` <a href="/dev/connect" data-link>Mở Kết nối máy chủ</a>` : esc(e.message); });
   const off = subscribeShop(t => { if (t === "wallet") drawBal(); else if (t === "txs") drawList(); else if (t === "invs") drawInv(); });
   return () => off();
 }

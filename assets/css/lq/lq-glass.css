@@ -1,0 +1,27 @@
+/* ═══ Khung kính: nền mờ trong, vệt sáng (specular) ở góc trên-trái, viền sáng bo theo góc, bóng đổ mềm ═══ */
+html[data-ui="liquid"] :is(.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.notice-card,.profile-head,.statebox,.pcard,.od,.act-row,.inv,.dv-card,.skin,.tx,.oi,.todo,.mbx,.lp-tile,.stat,.cart-row,.ord,.set-card.wide,.help-card,.cat-card,.prod,.kv){
+  position:relative;border-radius:var(--r-lg);
+  border:1px solid var(--line);
+  background:radial-gradient(120% 85% at 8% 0%,var(--lq-sheen),transparent 42%),linear-gradient(145deg,var(--lq-fill-a),var(--lq-fill-b));
+  -webkit-backdrop-filter:blur(var(--lq-blur)) saturate(var(--lq-sat)) brightness(var(--lq-bright));backdrop-filter:blur(var(--lq-blur)) saturate(var(--lq-sat)) brightness(var(--lq-bright));
+  box-shadow:inset 0 1.5px 0 var(--lq-rim-hi),inset 1.5px 0 0 var(--lq-rim-side),inset 0 -1.5px 0 var(--lq-rim-lo),inset -1.5px 0 0 var(--lq-rim-lo),
+    inset 0 26px 34px -28px rgba(255,255,255,.35),var(--shadow-1);
+  transition:transform .45s var(--lq-jelly),box-shadow .35s,border-color .3s}
+html[data-ui="liquid"] :is(.tile,.pcard,.cat-card,.prod,.lp-tile):is(:hover,:focus-visible){transform:translateY(-3px) scale(1.012)}
+html[data-ui="liquid"] .pcard.lq-big,html[data-ui="liquid"] .tile.lq-big{border-radius:var(--r-xl)}
+html[data-ui="liquid"] :is(.pill,.tag,.badge,.chip-s){border-radius:999px}
+
+/* Khung nổi quan trọng: viền chéo sáng (gradient border) + vệt sáng chạy theo con trỏ */
+html[data-ui="liquid"] :is(#hdr,#tabbar,#side,section.pop,.cw-panel,.sk-panel,#lqCats,.lq-card)::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,255,255,.12) 32%,rgba(255,255,255,.04) 58%,rgba(255,255,255,.6));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.9}
+html[data-ui="liquid"][data-theme="light"] :is(#hdr,#tabbar,#side,section.pop,.cw-panel,.sk-panel,#lqCats,.lq-card)::after{background:linear-gradient(135deg,#fff,rgba(255,255,255,.35) 34%,rgba(120,140,210,.18) 60%,rgba(255,255,255,.95))}
+/* Vệt sáng đi theo con trỏ */
+html[data-ui="liquid"] :is(.btn,.tile,.pcard,.lq-card,.set-card,.lp-tile,.tab,.bell,.chip){--px:50%;--py:0%}
+html[data-ui="liquid"] :is(.btn,.lq-card,.tab):is(:hover)::before{opacity:1}
+
+/* Khúc xạ thật: filter được gắn bằng JS (liquid/filters.js) lên vài khung nổi, chỉ trên Chromium */
+html[data-ui="liquid"].lite :is(.card,.tile,.row,.panel,.set-card,.auth-card,.formcard,.pcard){-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface-2)}
+
+/* Gooey: các khối kính hòa vào nhau */
+html[data-ui="liquid"] .lq-goo{filter:url(#lq-goo)}

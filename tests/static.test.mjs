@@ -104,6 +104,20 @@ t("sitemap: dùng chỉ mục nhẹ — có sản phẩm đang bán + mục lụ
 t("vercel.json: /shop là trang cửa hàng (không còn chuyển hướng về /) và /img/ không bị rewrite vào page", [!JSON.parse(txt("vercel.json")).redirects.some(r => r.source === "/shop"), JSON.parse(txt("vercel.json")).rewrites.some(r => r.source.includes("img/shop") && r.destination.startsWith("/api/img")), /img\\\//.test(JSON.parse(txt("vercel.json")).rewrites.at(-1).source) || /img\//.test(JSON.parse(txt("vercel.json")).rewrites.at(-1).source)], [true, true, true]);
 t("robots: cho phép /img/ và sitemap", [/Allow: \/img\//.test(robots), /Sitemap: https:\/\/skibidiscript.vercel.app\/sitemap.xml/.test(robots)], [true, true]);
 
+
+/* ── Skliquid Glass: danh sách CSS khớp ở hai nơi, mọi luật bị khóa sau data-ui, mọi module nạp được ── */
+const lqCss = (await import("../assets/js/lib/liquid/css.js")).LQ_CSS;
+const lqHtml = (txt("index.html").match(/\["lq-tokens"[^\]]*\]/) || [""])[0].match(/lq-[a-z]+/g) || [];
+t("skliquid: danh sách CSS trong index.html khớp lib/liquid/css.js", lqHtml.map(n => "/assets/css/lq/" + n + ".css"), lqCss);
+t("skliquid: mọi file CSS tồn tại và không rỗng", lqCss.every(u => fs.existsSync(R(u.slice(1))) && txt(u.slice(1)).length > 100), true);
+const lqUnscoped = [];
+for (const u of lqCss) { const css = txt(u.slice(1)).replace(/\/\*[\s\S]*?\*\//g, ""); let depth = 0, cur = ""; for (const ch of css) { if (ch === "{") { if (depth === 0 && cur.trim() && !cur.trim().startsWith("@")) { const sel = cur.trim(); for (const part of sel.split(/,(?![^(]*\))/)) { const q = part.trim(); if (!/data-ui="liquid"/.test(q) && !/^(#lq[A-Za-z]*|body\.lq-|\.nav-lq-toggle|html\[data-motion="reduced"\] #lqBg|html\.lite #lqBg|html\.lite\[data-ui|\.lq-|\.os\b|\.os-|\.lqm|\.lqc|\.lq-)/.test(q) && !/^(from|to|\d+%|[\d%., ]+)$/.test(q)) lqUnscoped.push(u.split("/").pop() + ": " + q.slice(0, 70)); } } depth++; cur = ""; } else if (ch === "}") { depth--; cur = ""; } else if (depth === 0) cur += ch; } }
+t("skliquid: mọi luật CSS chỉ có hiệu lực khi bật Skliquid (nếu không sẽ làm hỏng giao diện chuẩn)", lqUnscoped, []);
+for (const f of fs.readdirSync(R("assets/js/lib/liquid/"))) { const src = txt("assets/js/lib/liquid/" + f); for (const m of src.matchAll(/from "(\.[^"]+)"/g)) if (!fs.existsSync(new URL(m[1], R("assets/js/lib/liquid/" + f)))) t("skliquid: " + f + " import tồn tại " + m[1], false, true); }
+t("skliquid: route /skibos và /dev/liquid có mặt", [/define\("\/skibos"/.test(txt("assets/js/routes.js")), /define\("\/dev\/liquid"/.test(txt("assets/js/routes.js"))], [true, true]);
+t("skliquid: không đụng tới file captcha", /turnstile|captcha/i.test(Object.keys(lqCss).join("")) || lqCss.some(u => /captcha|turnstile/i.test(txt(u.slice(1)))), false);
+t("skliquid: tắt hiệu ứng khi người dùng chọn giảm chuyển động", /data-motion="reduced"\]\[data-ui="liquid"\] \*\{animation:none!important\}/.test(txt("assets/css/lq/lq-liquid.css")), true);
+
 const en = (await import("../assets/js/lib/i18n-en.js")).default;
 t("i18n: mẫu có nhóm bắt phải chèn lại $n trong bản dịch (không mất số tiền/tên)", en.P.filter(([rx, rep]) => { const n = (rx.source.match(/\((?!\?)/g) || []).length - (rx.source.match(/\\\(/g) || []).length; return n > 0 && !/\$\d/.test(rep); }).map(x => x[0].source), []);
 console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

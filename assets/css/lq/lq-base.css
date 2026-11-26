@@ -1,0 +1,48 @@
+/* Nền, chữ, bo tròn toàn bộ, ô nhập, đường cuộn */
+html[data-ui="liquid"] #bg,html[data-ui="liquid"] #themeLayer{display:none}
+#lqBg{display:none}
+html[data-ui="liquid"] #lqBg{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:radial-gradient(120% 90% at 20% 0%,color-mix(in srgb,var(--lq-a) 26%,var(--bg)),var(--bg) 70%)}
+#lqBg .lqb{position:absolute;width:56vmax;height:56vmax;border-radius:50%;filter:blur(70px);opacity:.62;will-change:transform;mix-blend-mode:screen}
+html[data-ui="liquid"][data-theme="light"] #lqBg .lqb{mix-blend-mode:multiply;opacity:.5}
+#lqBg .b1{left:-14vmax;top:-18vmax;background:radial-gradient(circle at 40% 40%,var(--lq-a),transparent 66%);animation:lqf1 26s ease-in-out infinite alternate}
+#lqBg .b2{right:-18vmax;top:6vmax;background:radial-gradient(circle at 50% 50%,var(--lq-b),transparent 66%);animation:lqf2 31s ease-in-out infinite alternate}
+#lqBg .b3{left:8vmax;bottom:-26vmax;background:radial-gradient(circle at 50% 50%,var(--lq-c),transparent 66%);animation:lqf3 28s ease-in-out infinite alternate}
+#lqBg .b4{right:-6vmax;bottom:-22vmax;width:44vmax;height:44vmax;background:radial-gradient(circle at 50% 50%,var(--lq-d),transparent 66%);animation:lqf1 34s ease-in-out infinite alternate-reverse}
+#lqBg .lqmedia{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9}
+#lqBg .lqshade{position:absolute;inset:0;background:var(--bg);opacity:.42}
+@keyframes lqf1{from{transform:translate(0,0) scale(1)}to{transform:translate(9vmax,7vmax) scale(1.18)}}
+@keyframes lqf2{from{transform:translate(0,0) scale(1.05)}to{transform:translate(-10vmax,9vmax) scale(.92)}}
+@keyframes lqf3{from{transform:translate(0,0) scale(.95)}to{transform:translate(8vmax,-8vmax) scale(1.14)}}
+html[data-motion="reduced"] #lqBg .lqb{animation:none}
+html.lite[data-ui="liquid"] #lqBg .lqb{filter:blur(46px);animation:none}
+
+html[data-ui="liquid"] body{color:var(--text)}
+html[data-ui="liquid"] #main,html[data-ui="liquid"] #footer{position:relative;z-index:1}
+html[data-ui="liquid"] ::selection{background:color-mix(in srgb,var(--lq-a) 55%,transparent);color:var(--text)}
+html[data-ui="liquid"] *{scrollbar-color:rgba(255,255,255,.32) transparent}
+html[data-ui="liquid"] #footer{border-top-color:var(--line)}
+
+/* Ô nhập: tròn, kính chìm */
+html[data-ui="liquid"] :is(input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea,.field input,.field select,.field textarea){
+  border-radius:var(--r-md);background:var(--field);border:1px solid var(--line);color:var(--text);
+  box-shadow:inset 0 2px 8px rgba(6,10,30,.22),inset 0 1px 0 rgba(255,255,255,.08);
+  transition:border-color .25s,box-shadow .35s var(--lq-ez),background .25s}
+html[data-ui="liquid"] :is(input[type=text],input[type=email],input[type=password],input[type=search],input[type=number],input[type=tel],input[type=url],select){min-height:46px;padding-inline:18px;border-radius:999px}
+html[data-ui="liquid"] textarea{border-radius:var(--r-lg);padding:14px 18px}
+html[data-ui="liquid"] :is(input,select,textarea):focus{outline:none;border-color:color-mix(in srgb,var(--lq-a) 70%,#fff);
+  box-shadow:inset 0 2px 8px rgba(6,10,30,.18),0 0 0 4px color-mix(in srgb,var(--lq-a) 28%,transparent),0 10px 30px -12px color-mix(in srgb,var(--lq-a) 60%,transparent)}
+html[data-ui="liquid"] ::placeholder{color:var(--text-3);opacity:.9}
+html[data-ui="liquid"] .hero-search input{border-radius:999px}
+html[data-ui="liquid"] :focus-visible{outline:2px solid color-mix(in srgb,var(--lq-a) 80%,#fff);outline-offset:3px;border-radius:inherit}
+
+/* Chữ tiêu đề: sáng, có chút bóng để không bị chìm trên kính */
+html[data-ui="liquid"] :is(h1,h2,h3){text-shadow:0 1px 14px color-mix(in srgb,var(--bg) 40%,transparent)}
+html[data-ui="liquid"][data-theme="light"] :is(h1,h2,h3){text-shadow:0 1px 0 rgba(255,255,255,.7)}
+html[data-ui="liquid"] .muted,html[data-ui="liquid"] .sub-note{color:var(--text-2)}
+html[data-ui="liquid"] code,html[data-ui="liquid"] pre{border-radius:var(--r-md)}
+html[data-ui="liquid"] img:not(.no-round):not(#themeLayer img){border-radius:var(--r-md)}
+html[data-ui="liquid"] .avatar{border-radius:50%}
+html[data-ui="liquid"] hr{border-color:var(--line)}
+/* Màn mở đầu */
+html[data-ui="liquid"] #splash{background:radial-gradient(90% 70% at 50% 30%,color-mix(in srgb,var(--lq-a) 40%,var(--bg)),var(--bg))}

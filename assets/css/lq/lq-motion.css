@@ -1,0 +1,15 @@
+/* Chuyển động dẻo: trang vào như nước, danh sách trồi lên lần lượt */
+html[data-ui="liquid"] #view>*{animation:lqRise .7s var(--lq-ez) backwards}
+html[data-ui="liquid"] #view>*:nth-child(2){animation-delay:.05s}html[data-ui="liquid"] #view>*:nth-child(3){animation-delay:.1s}html[data-ui="liquid"] #view>*:nth-child(4){animation-delay:.15s}html[data-ui="liquid"] #view>*:nth-child(n+5){animation-delay:.2s}
+@keyframes lqRise{from{opacity:0;transform:translateY(22px) scale(.97);filter:blur(6px)}}
+html[data-ui="liquid"] .lp-grid>*,html[data-ui="liquid"] .set-grid>*{animation:lqRise .8s var(--lq-ez) backwards}
+html[data-ui="liquid"] .lp-grid>*:nth-child(2),html[data-ui="liquid"] .set-grid>*:nth-child(2){animation-delay:.06s}
+html[data-ui="liquid"] .lp-grid>*:nth-child(3),html[data-ui="liquid"] .set-grid>*:nth-child(3){animation-delay:.12s}
+html[data-ui="liquid"] .lp-grid>*:nth-child(4),html[data-ui="liquid"] .set-grid>*:nth-child(4){animation-delay:.18s}
+html[data-ui="liquid"] .lp-grid>*:nth-child(n+5),html[data-ui="liquid"] .set-grid>*:nth-child(n+5){animation-delay:.24s}
+html[data-motion="reduced"][data-ui="liquid"] *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+/* Vòng tải kính */
+html[data-ui="liquid"] #pageload i{border-radius:50%;border-color:rgba(255,255,255,.25);border-top-color:#fff;box-shadow:0 0 24px color-mix(in srgb,var(--lq-a) 60%,transparent)}
+html[data-ui="liquid"] #loadbar{background:linear-gradient(90deg,var(--lq-c),var(--lq-a),var(--lq-b))}
+/* Ẩn mục "Tối ưu / 3 mức đồ họa" khi dùng Skliquid (luôn ở chất lượng cao) */
+html[data-ui="liquid"] .gfx-card{display:none!important}

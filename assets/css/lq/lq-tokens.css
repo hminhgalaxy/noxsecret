@@ -1,0 +1,49 @@
+/* ═══ SKLIQUID GLASS — bảng màu & thông số ═══
+   Mọi luật của Skliquid chỉ có hiệu lực khi <html data-ui="liquid">. Tắt Skliquid là mọi thứ về nguyên trạng.
+   Kính sáng, trong, có viền sáng (specular) — nền phía sau là các vệt màu mềm (aurora) để kính có cái mà khúc xạ. */
+html[data-ui="liquid"][data-skin]{
+  --lq-a:#6f9bff;--lq-b:#b983ff;--lq-c:#4fe3d3;--lq-d:#ff8fc4;
+  --bg:#0a1024;--bg-soft:#0e1530;
+  --surface:rgba(255,255,255,.085);--surface-2:rgba(255,255,255,.135);--surface-3:rgba(255,255,255,.2);
+  --line:rgba(255,255,255,.17);--line-strong:rgba(255,255,255,.36);
+  --glass:rgba(24,30,62,.5);
+  --text:#fbfcff;--text-2:#d3d9ee;--text-3:#b2bad6;
+  --field:rgba(255,255,255,.07);
+  --strong:#ffffff;--on-strong:#0b1126;--strong-hover:#eaf0ff;
+  --acc:var(--lq-a);--acc-2:var(--lq-c);--acc-3:var(--lq-d);
+  --r-xs:12px;--r-sm:16px;--r-md:22px;--r-lg:28px;--r-xl:36px;
+  --lq-rim-hi:rgba(255,255,255,.78);--lq-rim-lo:rgba(255,255,255,.14);--lq-rim-side:rgba(255,255,255,.34);
+  --lq-fill-a:rgba(255,255,255,.17);--lq-fill-b:rgba(255,255,255,.045);
+  --lq-sheen:rgba(255,255,255,.3);--lq-drop:rgba(6,10,30,.55);
+  --lq-blur:22px;--lq-sat:1.85;--lq-bright:1.1;
+  --lq-ez:cubic-bezier(.2,.9,.25,1.05);--lq-jelly:cubic-bezier(.34,1.7,.5,1);
+  --shadow-1:0 18px 44px -22px var(--lq-drop);--shadow-2:0 34px 90px -30px var(--lq-drop);
+  --head-h:76px;--bar-h:84px;--side-w:288px;
+  color-scheme:dark}
+html[data-ui="liquid"][data-skin][data-theme="light"]{
+  --bg:#dfe8ff;--bg-soft:#e8eeff;
+  --surface:rgba(255,255,255,.5);--surface-2:rgba(255,255,255,.68);--surface-3:rgba(255,255,255,.85);
+  --line:rgba(255,255,255,.75);--line-strong:rgba(40,55,110,.3);
+  --glass:rgba(255,255,255,.55);
+  --text:#101733;--text-2:#34406b;--text-3:#4c5885;
+  --field:rgba(255,255,255,.6);
+  --strong:#111936;--on-strong:#ffffff;--strong-hover:#222c55;
+  --lq-rim-hi:rgba(255,255,255,1);--lq-rim-lo:rgba(80,100,170,.18);--lq-rim-side:rgba(255,255,255,.85);
+  --lq-fill-a:rgba(255,255,255,.78);--lq-fill-b:rgba(255,255,255,.32);
+  --lq-sheen:rgba(255,255,255,.95);--lq-drop:rgba(60,80,150,.32);
+  --lq-sat:1.6;--lq-bright:1.04;
+  color-scheme:light}
+/* Mỗi chủ đề màu cho aurora một sắc riêng */
+html[data-ui="liquid"][data-skin="aurora"]{--lq-a:#a98bff;--lq-b:#ff8ad8;--lq-c:#7fb4ff;--lq-d:#ffb2e8}
+html[data-ui="liquid"][data-skin="ocean"]{--lq-a:#4fc9ff;--lq-b:#5f8bff;--lq-c:#4fe8c8;--lq-d:#9be7ff}
+html[data-ui="liquid"][data-skin="emerald"]{--lq-a:#4fe39a;--lq-b:#4fc7d6;--lq-c:#b5f06a;--lq-d:#7be6c9}
+html[data-ui="liquid"][data-skin="sunset"]{--lq-a:#ff9d6a;--lq-b:#ff6f9a;--lq-c:#ffd36a;--lq-d:#ff8fe0}
+html[data-ui="liquid"][data-skin="rose"]{--lq-a:#ff8fb6;--lq-b:#d98bff;--lq-c:#ffb48f;--lq-d:#ff7aa0}
+html[data-ui="liquid"][data-skin="classic"]{--lq-a:#cfd6e8;--lq-b:#9aa3bb;--lq-c:#e8ecf7;--lq-d:#b8c0d6}
+html[data-ui="liquid"]{background:var(--bg)!important}
+html[data-ui="liquid"] body{background:transparent}
+/* Chỉ hiện khi bật Skliquid */
+.lq-only{display:none!important}
+html[data-ui="liquid"] .lq-only{display:flex!important}
+html[data-ui="liquid"] a.lq-only,html[data-ui="liquid"] button.lq-only{display:flex!important}
+html[data-ui="liquid"] .lq-off{display:none!important}

@@ -1,0 +1,29 @@
+/* Các trang cụ thể: trang chủ, cửa hàng, đăng nhập, cài đặt… bo tròn & kính */
+html[data-ui="liquid"] .auth-card,html[data-ui="liquid"] .formcard{border-radius:var(--r-xl);padding:clamp(22px,4vw,34px)}
+html[data-ui="liquid"] .auth-card :is(.btn,input,select){border-radius:999px}
+html[data-ui="liquid"] .auth-card .field input{min-height:50px}
+html[data-ui="liquid"] .lp-tile,html[data-ui="liquid"] .tile{border-radius:var(--r-xl)}
+html[data-ui="liquid"] .lp-tile h3{font-size:clamp(26px,5vw,34px)}
+html[data-ui="liquid"] .lp-chip,html[data-ui="liquid"] .coming{border-radius:999px;background:rgba(255,255,255,.14);border:1px dashed var(--line-strong)}
+html[data-ui="liquid"] .set-card{border-radius:var(--r-xl);padding:22px}
+html[data-ui="liquid"] .set-card h3 svg{filter:drop-shadow(0 4px 8px color-mix(in srgb,var(--lq-a) 60%,transparent))}
+html[data-ui="liquid"] .crumbs a,html[data-ui="liquid"] .crumbs span{border-radius:999px}
+html[data-ui="liquid"] .dv-tabs,html[data-ui="liquid"] .tabs{border-radius:999px}
+html[data-ui="liquid"] table{border-radius:var(--r-md);overflow:hidden}
+html[data-ui="liquid"] .statebox{border-radius:var(--r-xl)}
+html[data-ui="liquid"] .skeleton,html[data-ui="liquid"] .sk-line{border-radius:var(--r-md);background:linear-gradient(100deg,rgba(255,255,255,.08) 30%,rgba(255,255,255,.22) 50%,rgba(255,255,255,.08) 70%);background-size:200% 100%}
+html[data-ui="liquid"] .cookie-bar,html[data-ui="liquid"] #cookieBar{border-radius:30px;-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8)}
+html[data-ui="liquid"] #footer .brand .mark{width:30px;height:30px}
+/* Thẻ giới thiệu Skliquid trong Cài đặt và trang chủ */
+.lq-promo{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.lq-promo .lq-orb{width:64px;height:64px;flex:none;border-radius:50%;background:radial-gradient(circle at 30% 22%,#fff 0,rgba(255,255,255,.85) 14%,transparent 40%),conic-gradient(from 210deg,#6f9bff,#b983ff,#ff8fc4,#4fe3d3,#6f9bff);box-shadow:inset 0 -8px 16px rgba(0,0,0,.18),0 14px 30px -10px #6f9bff;animation:lqOrb 6s ease-in-out infinite}
+@keyframes lqOrb{50%{transform:translateY(-4px) scale(1.06) rotate(12deg)}}
+.lq-promo .lq-pt{flex:1;min-width:200px}
+.lq-promo .lq-pt b{display:block;font-size:17px}
+.lq-promo .lq-pt span{font-size:13.5px;color:var(--text-2);line-height:1.5}
+.lq-try{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 18px;border-radius:999px;border:1px solid var(--line-strong);font-weight:700;font-size:13.5px;color:var(--text);cursor:pointer;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 22%,transparent),color-mix(in srgb,var(--acc-3) 18%,transparent));transition:transform .4s var(--spring,ease)}
+.lq-try:hover{transform:translateY(-2px) scale(1.04)}.lq-try:active{transform:scale(.94)}
+.lq-try i{width:16px;height:16px;border-radius:50%;background:conic-gradient(#6f9bff,#b983ff,#ff8fc4,#4fe3d3,#6f9bff)}
+.lq-try-wrap{display:flex;justify-content:center;margin:14px 0 0}
+.lq-oneline{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}

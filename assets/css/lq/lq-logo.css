@@ -1,0 +1,7 @@
+/* Logo kính lỏng: vẽ bằng code (SVG), nhún dẻo khi chạm */
+html[data-ui="liquid"] .brand .mark{filter:drop-shadow(0 6px 14px color-mix(in srgb,var(--lq-a) 55%,transparent));transition:transform .6s var(--lq-jelly),filter .3s;overflow:visible}
+html[data-ui="liquid"] .brand:hover .mark{transform:rotate(-6deg) scale(1.1)}
+html[data-ui="liquid"] .brand:active .mark{transform:scale(.86,.8);transition-duration:.1s}
+html[data-ui="liquid"] .brand .word b{background:linear-gradient(180deg,var(--text),color-mix(in srgb,var(--text) 55%,var(--lq-a)));-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-ui="liquid"] .mark.lq-wob{animation:lqJelly .7s var(--lq-ez)}
+html[data-ui="liquid"] .lq-logo-big{width:120px;height:120px;filter:drop-shadow(0 22px 40px color-mix(in srgb,var(--lq-a) 60%,transparent))}

@@ -27,7 +27,7 @@ export const setMuted = m => set(K_MUTE, m ? "1" : null);
 /* ── Số đo lưu trình duyệt ── */
 const num = (k, d, lo, hi) => { const v = parseFloat(get(k)); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 const emit = () => document.dispatchEvent(new CustomEvent("prefs-change"));
-export const K_ALL = ["ssw_skin", "ssw_gfx", "ssw_theme", "ssw_muted", "ssw_glass", "ssw_gl_blur", "ssw_gl_clear", "ssw_bg", "ssw_bg_bright", "ssw_vol", "ssw_rm", "ssw_hc", "ssw_dens", "ssw_nosplash", "ssw_side", "ssw_crisp", "ssw_skias", "ssw_scott"];
+export const K_ALL = ["ssw_ui", "ssw_lq_layout", "ssw_lq_cats", "ssw_lq_skbig", "ssw_skin", "ssw_gfx", "ssw_theme", "ssw_muted", "ssw_glass", "ssw_gl_blur", "ssw_gl_clear", "ssw_bg", "ssw_bg_bright", "ssw_vol", "ssw_rm", "ssw_hc", "ssw_dens", "ssw_nosplash", "ssw_side", "ssw_crisp", "ssw_skias", "ssw_scott", "ssw_sk_pos", "ssw_sk_mini"];
 
 /* Kính mờ: tắt (mặc định) = khung đặc theo giao diện; bật = khung trong suốt, chỉ còn viền.
    Hai thanh chỉnh: Độ mờ (làm mờ phần phía sau khung) và Độ trong (khung trong tới mức nào). */
@@ -40,7 +40,7 @@ export function setGlassBlur(v) { set("ssw_gl_blur", Math.round(v)); applyGlass(
 export function setGlassClear(v) { set("ssw_gl_clear", Math.round(v)); applyGlass(); }
 export function applyGlass() {
   const d = document.documentElement, st = d.style;
-  if (!isGlass()) { delete d.dataset.glass; ["--surface", "--surface-2", "--surface-3", "--gl-blur", "--text-2", "--text-3"].forEach(p => st.removeProperty(p)); return; }
+  if (!isGlass() || isLiquid()) { delete d.dataset.glass; ["--surface", "--surface-2", "--surface-3", "--gl-blur", "--text-2", "--text-3"].forEach(p => st.removeProperty(p)); return; }
   d.dataset.glass = "on";
   const c = getGlassClear() / 100, light = d.dataset.theme === "light", f = x => x.toFixed(3);
   /* c = 0 → khung gần như đặc; c = 1 → khung gần như trong hoàn toàn */
@@ -58,7 +58,7 @@ export function applyGlass() {
    mid: animation hiện tại + nền ô vuông chuyển động nhẹ, có âm thanh, KHÔNG hiện nền website.
    high: hiện nền website + âm thanh + animation nâng cao. */
 export const GFX = ["low", "mid", "high"];
-export const getGfx = () => { const v = get("ssw_gfx"); return v === "mid" || v === "high" ? v : "low"; };
+export const getGfx = () => { if (isLiquid()) return "high"; const v = get("ssw_gfx"); return v === "mid" || v === "high" ? v : "low"; };
 export function setGfx(v) { set("ssw_gfx", v === "mid" || v === "high" ? v : null); applyBgPrefs(); applyComfort(); emit(); }
 /* Nền website: ẩn hẳn, hoặc chỉnh độ sáng (30%–150%). Chỉ hiện ở mức đồ họa Cao. */
 export const isBgHidden = () => get("ssw_bg") === "0";
@@ -93,3 +93,9 @@ export function applyComfort() {
 /* Đưa mọi tuỳ chỉnh hiển thị về mặc định (không đổi ngôn ngữ) */
 export function resetPrefs() { K_ALL.forEach(k => set(k, null)); applyThemePref(); applyGlass(); applyBgPrefs(); applyComfort(); emit(); }
 export function applyAllPrefs() { applyGlass(); applyBgPrefs(); applyComfort(); }
+
+/* ── Giao diện Skliquid Glass (kính lỏng): "liquid" = bật, mặc định = giao diện chuẩn ──
+   Chỉ ghi lựa chọn; phần nạp CSS + khởi động nằm ở lib/lq-boot.js và lib/liquid/ (nạp theo nhu cầu). */
+export const isLiquid = () => get("ssw_ui") === "liquid";
+export function applyUi() { const d = document.documentElement; isLiquid() ? d.dataset.ui = "liquid" : delete d.dataset.ui; applyGlass(); applyBgPrefs(); applyComfort(); }
+export function setLiquid(on) { set("ssw_ui", on ? "liquid" : null); emit(); }

@@ -15,6 +15,7 @@ const SHORTCUTS = [
   { href: "/dev/review", t: "Duyệt bài", d: "Duyệt hoặc từ chối mục và danh mục do người dùng gửi.", i: "check" },
   { href: "/dev/users", t: "Người dùng", d: "Những tài khoản đã đăng nhập vào website.", i: "users" },
   { href: "/dev/theme", t: "Giao diện", d: "Hình nền, video nền và nhạc nền.", i: "paint" },
+  { href: "/dev/liquid", t: "Skliquid Glass", d: "Nền và nhạc riêng cho giao diện kính lỏng.", i: "sparkles" },
   { href: "/dev/updates", t: "Cập nhật", d: "Đăng tin \"Cập nhật này có gì?\" và làm sáng chuông thông báo.", i: "bell" },
   { href: "/dev/connect", t: "Kết nối máy chủ", d: "Dán khóa quản trị máy chủ, kiểm tra và lấy giá trị để dán vào Vercel; xem máy chủ đã nhận chưa.", i: "server" },
   { href: "/dev/mail", t: "Gửi thư", d: "Trả lời người dùng bằng văn mẫu tiếng Anh và xem trước các thư tự động.", i: "mail" },

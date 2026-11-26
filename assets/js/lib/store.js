@@ -182,7 +182,7 @@ export function start() {
   THEME_PUBLIC_KEYS.forEach(k => db.ref(THEME_NODE + "/" + k).on("value", s => { store.theme = Object.assign({}, store.theme, { [k]: s.val() }); themeSeen(k); emit("theme"); }, () => themeSeen(k)));
   db.ref(TRACKS_NODE).on("value", s => {
     const v = s.val() || {};
-    store.tracks = Object.keys(v).map(k => ({ id: k, name: String((v[k] && v[k].name) || "Nhạc nền"), ts: Number(v[k] && v[k].ts) || 0 })).sort((a, b) => a.ts - b.ts);
+    store.tracks = Object.keys(v).map(k => ({ id: k, name: String((v[k] && v[k].name) || "Nhạc nền"), ts: Number(v[k] && v[k].ts) || 0, lq: !!(v[k] && v[k].lq) })).sort((a, b) => a.ts - b.ts);
     emit("tracks");
   }, () => { store.tracks = []; emit("tracks"); });
   db.ref(MAINTNOTES_NODE).on("value", s => {
@@ -308,11 +308,11 @@ export function loadTrackData(id) {
   const path = id === "legacy" ? THEME_NODE + "/audioData" : TRACKDATA_NODE + "/" + id;
   return db.ref(path).once("value").then(s => String(s.val() || ""));
 }
-export function addTrack(name, data) {
-  guardDev(); name = String(name || "").replace(/\.[a-z0-9]{2,5}$/i, "").trim().slice(0, 80) || "Nhạc nền";
+export function addTrack(name, data, opt) {
+  guardDev(); const lq = !!(opt && opt.lq); name = String(name || "").replace(/\.[a-z0-9]{2,5}$/i, "").trim().slice(0, 80) || "Nhạc nền";
   if (!/^data:audio\//.test(String(data))) return Promise.reject(new Error("Tệp này không phải âm thanh."));
-  if ((store.tracks || []).length >= MAX_TRACKS) return Promise.reject(new Error("Danh sách nhạc đã đầy (tối đa " + MAX_TRACKS + " bài)."));
-  const id = db.ref(TRACKS_NODE).push().key, up = {}; up[TRACKS_NODE + "/" + id] = { name, ts: TS(), size: String(data).length }; up[TRACKDATA_NODE + "/" + id] = data;
+  if ((store.tracks || []).filter(t => !!t.lq === lq).length >= MAX_TRACKS) return Promise.reject(new Error("Danh sách nhạc đã đầy (tối đa " + MAX_TRACKS + " bài)."));
+  const id = db.ref(TRACKS_NODE).push().key, up = {}; up[TRACKS_NODE + "/" + id] = Object.assign({ name, ts: TS(), size: String(data).length }, lq ? { lq: true } : {}); up[TRACKDATA_NODE + "/" + id] = data;
   return wrap(db.ref().update(up)).then(() => id);
 }
 export function removeTrack(id) {

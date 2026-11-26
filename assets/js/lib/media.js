@@ -9,7 +9,7 @@ let armed = false, curId = "", token = 0, failed = 0;
 export const playlist = () => {
   const l = [], t = store.theme || {};
   if (t.audioName) l.push({ id: "legacy", name: String(t.audioName) });
-  return l.concat((store.tracks || []).map(x => ({ id: x.id, name: x.name })));
+  return l.concat((store.tracks || []).filter(x => !x.lq).map(x => ({ id: x.id, name: x.name })));
 };
 export const hasMusic = () => playlist().length > 0;
 export const currentTrack = () => playlist().find(x => x.id === curId) || null;
@@ -27,7 +27,7 @@ function arm() {
 }
 function tryPlay() {
   const a = bgm(); if (!a) return;
-  if (isMuted() || !hasMusic()) { a.pause(); renderSound(); return; }
+  if (isMuted() || !hasMusic() || window.__lqMusic) { a.pause(); renderSound(); return; }
   if (!curId) { loadTrack(playlist()[0].id); return; }
   if (!a.src) return;
   const p = a.play(); if (p && p.catch) p.catch(() => { arm(); renderSound(); });

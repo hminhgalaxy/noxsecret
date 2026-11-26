@@ -22,7 +22,7 @@ const LINKS = {
   allCats: { href: "/categories", label: "Tất cả danh mục", icon: "grid", exact: true },
   dev: [{ href: "/dev", label: "Tổng quan", icon: "dash", exact: true }, { href: "/dev/data", label: "Dữ liệu", icon: "box" },
         { href: "/dev/shop", label: "Cửa hàng", icon: "bag" }, { href: "/dev/topup", label: "Nạp tiền", icon: "wallet" }, { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
-        { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" }, { href: "/dev/review", label: "Duyệt bài", icon: "check" }, { href: "/dev/mail", label: "Gửi thư", icon: "mail" },
+        { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/liquid", label: "Skliquid Glass", icon: "sparkles" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" }, { href: "/dev/review", label: "Duyệt bài", icon: "check" }, { href: "/dev/mail", label: "Gửi thư", icon: "mail" },
         { href: "/dev/system", label: "Bảo trì & thông báo", icon: "wrench" }, { href: "/dev/test", label: "Kiểm tra hệ thống", icon: "check" }]
 };
 const link = (l, cls = "", i = null) => `<a class="nav-link ${cls}" href="${l.href}" data-exact="${l.exact ? 1 : 0}"${i != null ? ` style="--i:${i}"` : ""}>${ICO[l.icon] || ICO.box}<span class="nl">${esc(l.label)}</span>${l.dot ? `<span class="dot" data-dot="${l.dot}" hidden></span>` : ""}${l.cnt != null ? `<span class="cnt" data-cnt="${esc(l.cid)}"${l.cnt ? "" : " hidden"}>${l.cnt || ""}</span>` : ""}</a>`;
@@ -70,6 +70,11 @@ export function renderNav(force) {
     ${group("cats", { title: "Danh mục", icon: "grid", count: cats.length }, catItems)}
     <span class="nav-sec">Của bạn</span>
     ${session.user ? link(LINKS.profile) : ""}${link(LINKS.settings)}
+    <span class="nav-sec">Skliquid Glass</span>
+    <button class="nav-btn nav-lq-toggle" type="button" data-lq="toggle" aria-pressed="false"><span class="ni lqt-ico">${ICO.sparkles || ICO.star}</span><span class="nb-label lq-t">Dùng Skliquid Glass</span></button>
+    <button class="nav-link lq-only" type="button" data-lq="cats">${ICO.grid}<span class="nl">Danh mục nổi</span></button>
+    <button class="nav-link lq-only" type="button" data-lq="edit">${ICO.pencil || ICO.gear}<span class="nl">Tùy chỉnh bố cục</span></button>
+    <a class="nav-link lq-only" href="/skibos" data-exact="1">${ICO.cpu || ICO.bolt}<span class="nl">Skib OS</span></a>
     ${session.isDev ? `<span class="nav-sec">Quản trị</span>${group("dev", { title: "Dev Panel", icon: "shield", cls: "dev" }, devItems)}` : ""}`;
   renderNotifDot(); markActive(false); renderAccount(); applyBadges();
 }
@@ -170,7 +175,7 @@ export function initNav() {
   $("#tabCats").addEventListener("click", () => isDrawerOpen() ? closeDrawer() : openDrawer({ expand: "cats" }));
   $("#sideNav").addEventListener("click", e => {
     const h = e.target.closest(".nav-btn"); if (!h) return;
-    const g = h.closest(".disc"); setGroup(g.dataset.g, !g.classList.contains("open"));
+    const g = h.closest(".disc"); if (!g) return; setGroup(g.dataset.g, !g.classList.contains("open"));
   });
   matchMedia("(min-width:1024px)").addEventListener("change", () => { closeDrawer(); document.body.classList.remove("locked"); side().toggleAttribute("inert", desktop() && sideOff()); syncMenuBtn(); });
   side().toggleAttribute("inert", desktop() && sideOff()); syncMenuBtn();

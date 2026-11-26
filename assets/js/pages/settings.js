@@ -10,6 +10,7 @@ import { confirmDialog } from "../lib/confirm.js";
 import { getLang, setLang } from "../lib/i18n.js";
 import { hasMusic, toggleSound, playlist, currentTrack, nextTrack } from "../lib/media.js";
 import { friendly } from "../lib/messages.js";
+import { lqCardHTML, paintButtons } from "../lib/lq-boot.js";
 
 const GFX_INFO = {
   low: { n: "Tối ưu", l: ["Nền ô vuông đứng yên", "Bố cục gọn, không có hiệu ứng chuyển động", "Vẫn có âm thanh", "Nhẹ nhất, mượt cả trên máy yếu"] },
@@ -26,6 +27,7 @@ export function mount(ctx) {
     const pref = getThemePref(), u = session.user;
     const gfx = getGfx(), gi = GFX.indexOf(gfx), onHigh = gfx === "high";
     ctx.el.innerHTML = `<div class="set-grid">
+      <section class="set-card wide lq-card-set" id="lqSet"><h3>${ICO.sparkles || ICO.star}Giao diện Skliquid Glass</h3>${lqCardHTML()}</section>
       <section class="set-card wide gfx-card"><h3>${ICO.grid}Mức đồ họa</h3><p class="muted">Mặc định là Tối ưu để web luôn mượt. Kéo thanh để đổi mức; bạn có thể đổi lại bất cứ lúc nào.</p>
         <div class="gfx-top"><span class="gfx-name" id="gfxName">${GFX_INFO[gfx].n}</span><span class="sub-note" id="gfxStep" translate="no">${gi + 1} / 3</span></div>
         <div class="gfx-scale"><input class="rng" type="range" id="gfx" min="0" max="2" step="1" value="${gi}" style="--p:${gi * 50}%" aria-label="Mức đồ họa" aria-valuetext="${GFX_INFO[gfx].n}"></div>
@@ -33,13 +35,13 @@ export function mount(ctx) {
         <ul class="gfx-list" id="gfxList">${GFX_INFO[gfx].l.map(x => `<li>${x}</li>`).join("")}</ul></section>
       <section class="set-card"><h3>${ICO.paint}Giao diện</h3><p class="muted">Chọn chế độ hiển thị. Lựa chọn được lưu trên thiết bị này.</p>
         <div class="seg" role="radiogroup" aria-label="Giao diện">${[["dark", "Tối"], ["light", "Sáng"], ["system", "Theo thiết bị"]].map(([v, l]) => `<button type="button" role="radio" aria-checked="${pref === v}" data-theme="${v}" class="${pref === v ? "on" : ""}">${l}</button>`).join("")}</div></section>
-      <section class="set-card"><h3>${ICO.sparkles || ICO.star}Sắc nét</h3><p class="muted">Khi bật, chữ và viền rõ hơn, các nút trở nên bóng như bong bóng và đẹp hơn. Tắt hiệu ứng làm mờ để hình sắc nét.</p>
+      <section class="set-card lq-off"><h3>${ICO.sparkles || ICO.star}Sắc nét</h3><p class="muted">Khi bật, chữ và viền rõ hơn, các nút trở nên bóng như bong bóng và đẹp hơn. Tắt hiệu ứng làm mờ để hình sắc nét.</p>
         ${sw("crisp", "Bật chế độ Sắc nét", isCrisp())}</section>
-      <section class="set-card"><h3>${ICO.grid}Kính mờ</h3><p class="muted">Khi bật, các khung trở nên trong suốt, chỉ còn viền và làm mờ phần phía sau. Khi tắt, khung dùng màu đặc theo giao diện (đen hoặc trắng).</p>
+      <section class="set-card lq-off"><h3>${ICO.grid}Kính mờ</h3><p class="muted">Khi bật, các khung trở nên trong suốt, chỉ còn viền và làm mờ phần phía sau. Khi tắt, khung dùng màu đặc theo giao diện (đen hoặc trắng).</p>
         ${sw("glass", "Bật kính mờ", isGlass())}
         <div class="set-fields" id="glassFields" aria-disabled="${!isGlass()}">${rng("glBlur", "Độ mờ", 0, 40, getGlassBlur(), "px", !isGlass())}${rng("glClear", "Độ trong", 0, 100, getGlassClear(), "%", !isGlass())}
           <div class="acts"><button class="btn ghost sm" id="glReset" type="button" ${!isGlass() ? "disabled" : ""}>Về mặc định</button></div></div></section>
-      <section class="set-card"><h3>${ICO.paint}Hình nền</h3><p class="muted">${!onHigh ? "Hình nền website chỉ hiện ở mức đồ họa Cao. Hãy chọn mức Cao ở trên để dùng." : S.store.theme && S.store.theme.bgData && S.store.theme.bgType !== "none" ? "Website có hình nền. Bạn có thể ẩn hoặc chỉnh độ sáng." : "Hiện website chưa có hình nền, nhưng cài đặt này sẽ áp dụng khi có."}</p>
+      <section class="set-card lq-off"><h3>${ICO.paint}Hình nền</h3><p class="muted">${!onHigh ? "Hình nền website chỉ hiện ở mức đồ họa Cao. Hãy chọn mức Cao ở trên để dùng." : S.store.theme && S.store.theme.bgData && S.store.theme.bgType !== "none" ? "Website có hình nền. Bạn có thể ẩn hoặc chỉnh độ sáng." : "Hiện website chưa có hình nền, nhưng cài đặt này sẽ áp dụng khi có."}</p>
         ${sw("bgShow", "Hiện hình nền", !isBgHidden(), onHigh ? "" : "disabled")}
         <div class="set-fields" id="bgFields" aria-disabled="${isBgHidden()}">${rng("bgBright", "Độ sáng hình nền", 30, 150, getBgBright(), "%", isBgHidden() || !onHigh)}</div></section>
       <section class="set-card"><h3>${ICO.link}Ngôn ngữ</h3><p class="muted">Chọn ngôn ngữ hiển thị của website.</p>
@@ -65,6 +67,7 @@ export function mount(ctx) {
     ctx.el.querySelectorAll("[data-skin]").forEach(b => b.addEventListener("click", () => { setSkin(b.dataset.skin); draw(); const e = ctx.el.querySelector(`[data-skin="${b.dataset.skin}"]`); if (e) e.focus(); }));
     ctx.el.querySelectorAll("[data-theme]").forEach(b => b.addEventListener("click", () => { setThemePref(b.dataset.theme); draw(); }));
     ctx.el.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", async () => { await setLang(b.dataset.lang); ctx.el.querySelectorAll("[data-lang]").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-checked", on); }); }));
+    paintButtons();
     const $q = x => ctx.el.querySelector(x), redraw = id => { draw(); const e = $q("#" + id); if (e) e.focus(); };
     const bindRng = (id, fn) => { const r = $q("#" + id); if (!r) return; r.addEventListener("input", () => { const v = +r.value; r.style.setProperty("--p", (v - +r.min) / (+r.max - +r.min) * 100 + "%"); $q("#" + id + "V").textContent = v + r.dataset.unit; fn(v); }); };
     const gr = $q("#gfx"), applyG = async i => {

@@ -13,10 +13,11 @@ import { RM, esc, toast } from "./util.js";
 import { navigate } from "./router.js";
 import { db } from "./firebase.js";
 import * as H from "./help.js";
+import { initSkiasMove } from "./skias-move.js";
 
 const L = (vi, en) => (getLang() === "vi" ? vi : en);
 const real = () => !!(session.user && !session.isGuest && !session.user.isAnonymous);
-let root, fig, bubble, panel, logEl, form, input, chips, subEl, btnAuto, btnAI, btnSend, modesEl, downEl;
+let move, root, fig, bubble, panel, logEl, form, input, chips, subEl, btnAuto, btnAI, btnSend, modesEl, downEl;
 let wired = false, open = false, state = "idle", stT = 0, hideT = 0, peekT = 0, busy = false, job = null, mode = "", ai = false, stick = true;
 let sends = 0, lastSend = 0, offered = 0, greeted = false, opened = false;
 const hist = [], seenErr = new Set(), wait = ms => new Promise(r => setTimeout(r, RM() ? Math.min(ms, 80) : ms)), sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -40,6 +41,7 @@ const CLOUD = `<span class="sk-cloud" aria-hidden="true"><i class="sk-c1"></i><i
 const ICON = {
   neu: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
   off: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.7 10.7 0 0 1 12 19.5C6 19.5 2 12 2 12a18.7 18.7 0 0 1 4.1-5.1M9.9 4.6A9.7 9.7 0 0 1 12 4.5c6 0 10 7.5 10 7.5a18.6 18.6 0 0 1-2.2 3.2M1 1l22 22"/></svg>',
+  dock: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   min: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   send: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
   stop: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="3"/></svg>',
@@ -268,14 +270,14 @@ function newChat() {
   if (job && job.lock) return; if (job) { job.dead = true; try { job.onStop && job.onStop(); } catch (_) {} end(job); }
   hist.length = 0; mode = ""; ai = false; logEl.innerHTML = ""; setChips([]); stick = true; paintModes(); welcome(); setState("wave", 1500); input.value = ""; input.focus({ preventScroll: true });
 }
-function apply() { if (!root) return; const on = isSkiasOn(); root.hidden = !on; document.body.classList.toggle("has-skias", on); if (!on) { stop(); closePanel(false); hideBub(); } }
+function apply() { if (!root) return; if (move) move.sync(); const on = isSkiasOn(); root.hidden = !on; document.body.classList.toggle("has-skias", on); if (!on) { stop(); closePanel(false); hideBub(); } }
 
 export function initSkias() {
   if (wired) return; wired = true;
   root = document.createElement("div"); root.id = "sk"; root.setAttribute("translate", "no"); root.dataset.st = "idle"; root.hidden = true;
   root.innerHTML = `<section class="sk-panel" role="dialog" aria-label="Skias" hidden>
       <header class="sk-hd"><span class="sk-mav big" aria-hidden="true"></span><div class="sk-who"><b>Skias</b><small class="sk-sub"><i class="sk-dot"></i><span class="sk-subt"></span></small></div>
-        <button class="sk-ic sk-new" type="button">${ICON.neu}</button><button class="sk-ic sk-off" type="button">${ICON.off}</button><button class="sk-ic sk-min" type="button">${ICON.min}</button></header>
+        <button class="sk-ic sk-new" type="button">${ICON.neu}</button><button class="sk-ic sk-off" type="button">${ICON.off}</button><button class="sk-ic sk-dock" type="button">${ICON.dock}</button><button class="sk-ic sk-min" type="button">${ICON.min}</button></header>
       <div class="sk-modes" role="group" data-m="auto"><i class="sk-pill" aria-hidden="true"></i><button type="button" class="sk-mode sk-auto on"></button><button type="button" class="sk-mode sk-ai locked"></button></div>
       <div class="sk-logwrap"><div class="sk-log" role="log" aria-live="polite"></div><button class="sk-down" type="button" hidden>${ICON.down}</button></div>
       <div class="sk-chips" hidden></div>
@@ -287,11 +289,12 @@ export function initSkias() {
   const q = s => root.querySelector(s);
   fig = q(".sk-fig"); bubble = q(".sk-bubble"); panel = q(".sk-panel"); logEl = q(".sk-log"); chips = q(".sk-chips"); form = q(".sk-form"); input = q(".sk-in"); subEl = q(".sk-sub"); btnAuto = q(".sk-auto"); btnAI = q(".sk-ai"); btnSend = q(".sk-send"); modesEl = q(".sk-modes"); downEl = q(".sk-down");
   const labels = () => {
-    fig.setAttribute("aria-label", L("Trò chuyện với Skias", "Chat with Skias")); input.setAttribute("aria-label", L("Câu hỏi cho Skias", "Question for Skias"));
+    fig.dataset.label = L("Trò chuyện với Skias", "Chat with Skias"); if (!root.classList.contains("mini")) fig.setAttribute("aria-label", fig.dataset.label); input.setAttribute("aria-label", L("Câu hỏi cho Skias", "Question for Skias"));
     const set = (sel, t) => { const b = q(sel); b.title = t; b.setAttribute("aria-label", t); };
-    set(".sk-new", L("Cuộc trò chuyện mới", "New conversation")); set(".sk-off", L("Ẩn Skias (bật lại trong Cài đặt)", "Hide Skias (turn back on in Settings)")); set(".sk-min", L("Thu nhỏ", "Minimize")); set(".sk-down", L("Xuống tin mới nhất", "Jump to latest"));
+    set(".sk-new", L("Cuộc trò chuyện mới", "New conversation")); set(".sk-off", L("Ẩn Skias (bật lại trong Cài đặt)", "Hide Skias (turn back on in Settings)")); set(".sk-min", L("Đóng khung chat", "Close chat")); set(".sk-dock", L("Thu nhỏ thành chấm (kéo Skias để đổi chỗ)", "Shrink to a dot (drag Skias to move it)")); set(".sk-down", L("Xuống tin mới nhất", "Jump to latest"));
     setBusy(busy, job ? q(".sk-subt").textContent : ""); paintModes();
   };
+  move = initSkiasMove(root, fig, { onDragStart: () => hideBub() });
   labels(); onLangChange(() => labels());
   onAuth(() => paintModes());
   fig.addEventListener("click", () => { open ? closePanel() : openPanel(); });
@@ -299,6 +302,7 @@ export function initSkias() {
   bubble.addEventListener("click", e => { if (e.target.closest("button,a")) return; hideBub(); openPanel(); });
   btnAuto.addEventListener("click", () => pickMode(false)); btnAI.addEventListener("click", () => pickMode(!ai));
   q(".sk-min").addEventListener("click", () => closePanel());
+  q(".sk-dock").addEventListener("click", () => { closePanel(false); hideBub(); move.setMini(true); });
   q(".sk-new").addEventListener("click", newChat);
   q(".sk-off").addEventListener("click", () => { setSkiasOn(false); toast(L("Đã ẩn Skias. Bật lại trong Cài đặt.", "Skias is hidden. Turn it back on in Settings."), "ok"); });
   const sendIt = () => { if (busy) { stop(); return; } const v = input.value; input.value = ""; ask(v); };
@@ -310,7 +314,7 @@ export function initSkias() {
   logEl.addEventListener("click", e => { const a = e.target.closest("[data-sk-go]"); if (!a) return; e.preventDefault(); const h = a.getAttribute("href"); if (h === "/inbox/chat") { import("./chatwidget.js").then(m => m.openChat()); } else { closePanel(false); navigate(h); } });
   addEventListener("keydown", e => { if (e.key === "Escape" && open && !document.querySelector(".pop-root .pop")) { if (busy && stop()) return; closePanel(); } });
   /* Khi cuộn trang: Skias nép sang trái một chút để không che chữ đang đọc, đứng yên 2 giây thì ló ra lại */
-  addEventListener("scroll", () => { if (open || !root) return; root.classList.add("peek"); clearTimeout(peekT); peekT = setTimeout(() => root.classList.remove("peek"), 2200); }, { passive: true, capture: true });
+  addEventListener("scroll", () => { if (open || !root) return; root.classList.add("peek"); clearTimeout(peekT); peekT = setTimeout(() => root.classList.remove("peek"), 1600); }, { passive: true, capture: true });
   document.addEventListener("prefs-change", apply);
   onLog(onErr);
   apply();

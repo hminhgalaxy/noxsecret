@@ -44,6 +44,7 @@ export function registerRoutes() {
   define("/inbox/:tid", { load: L("inbox"), guard: "real", title: "Hộp thư", noindex: true, needs: () => (session.isDev ? ["users"] : []) });
   define("/help/messages/:tid", { load: L("redirect"), guard: "real", to: "/inbox/:tid", title: "Hộp thư", needs: [] });
   define("/help/submit", { load: L("help/submit"), guard: "real", title: "Đăng nội dung", needs: ["cats"] });
+  define("/skibos", { load: L("skibos"), guard: "public", title: "Skib OS", noindex: true, needs: [] });
   define("/settings", { load: L("settings"), guard: "public", title: "Cài đặt", noindex: true, needs: ["theme"] });
   define("/404", notFoundDef);
 
@@ -68,6 +69,7 @@ export function registerRoutes() {
   define("/dev/review", { load: L("dev/review"), guard: "dev", title: "Duyệt bài", needs: ["cats", "users"] });
   define("/dev/users", { load: L("dev/users"), guard: "dev", title: "Người dùng", needs: ["users"] });
   define("/dev/mail", { load: L("dev/mail"), guard: "dev", title: "Gửi thư", needs: ["users"] });
+  define("/dev/liquid", { load: L("dev/liquid"), guard: "dev", title: "Skliquid Glass", needs: ["theme"] });
   define("/dev/theme", { load: L("dev/theme"), guard: "dev", title: "Giao diện", needs: ["theme"] });
   define("/dev/updates", { load: L("dev/updates"), guard: "dev", title: "Cập nhật", needs: ["updates"] });
   define("/dev/test", { load: L("dev/test"), guard: "dev", title: "Kiểm tra hệ thống", needs: [] });
