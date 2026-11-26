@@ -22,7 +22,7 @@ export function openMailPanel(anchor) {
     let body;
     if (tab === "msg") {
       const L = (threads || []).slice(0, 12);
-      body = threads === null ? `<div class="statebox sm"><p>Đang tải…</p></div>` : L.length ? `<ul class="mp-list">${L.map(t => { const key = dev ? t.uid + "." + t.tid : t.key, name = dev ? ((S_users(t.uid)) || "Người dùng") : (t.key === "chat" ? "Dev" : (t.subject || H.TYPE_LABEL[t.type] || "Tin nhắn")), u = unreadFor(t, dev);
+      body = threads === null ? `<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>` : L.length ? `<ul class="mp-list">${L.map(t => { const key = dev ? t.uid + "." + t.tid : t.key, name = dev ? ((S_users(t.uid)) || "Người dùng") : (t.key === "chat" ? "Dev" : (t.subject || H.TYPE_LABEL[t.type] || "Tin nhắn")), u = unreadFor(t, dev);
         return `<li><button type="button" class="mp-row${u ? " unread" : ""}" data-k="${esc(key)}" data-chat="${!dev && t.key === "chat" ? 1 : 0}">${dev ? avatarChip(name) : `<span class="cv-av ${t.key === "chat" ? "dev" : ""}">${t.key === "chat" ? "D" : ICO.mail}</span>`}<span class="mp-m"><span class="mp-l1"><b translate="no">${esc(name)}</b><time>${esc(ago(t.updatedAt))}</time></span><span class="mp-l2" translate="no">${t.last === "dev" && !dev ? "Dev: " : t.last === "user" && !dev ? "Bạn: " : ""}${esc(t.preview || "")}</span></span>${u ? `<i class="mbx-dot" aria-label="Chưa đọc"></i>` : ""}</button></li>`; }).join("")}</ul>`
         : `<div class="statebox sm">${ICO.chat}<p>${dev ? "Chưa có tin nhắn nào." : "Chưa có tin nhắn. Bấm “Nhắn với dev” để bắt đầu."}</p></div>`;
     } else body = `<div class="mp-act">${activityHTML(buildActivity().slice(0, 12), "Bạn chưa có hoạt động nào.")}</div>`;
@@ -36,7 +36,7 @@ export function openMailPanel(anchor) {
     b.querySelectorAll("a[data-link]").forEach(a => a.addEventListener("click", () => h.close(true)));
   };
   offs.push(dev ? H.listenAllThreads(v => { threads = v; draw(); }) : H.listenMyThreads(v => { threads = v.map(t => ({ ...t, tid: t.key, uid: session.user.uid })); draw(); }));
-  offs.push(subscribeShop(t => { if (tab === "act" && (t === "orders" || t === "topups" || t === "txs")) draw(); }));
+  offs.push(subscribeShop(t => { if (tab === "act" && (t === "orders" || t === "invs" || t === "txs")) draw(); }));
   draw(); return h;
 }
 const S_users = uid => { const u = (store.users || []).find(x => x.uid === uid); return u ? (u.name || u.email || "") : ""; };

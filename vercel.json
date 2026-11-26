@@ -4,11 +4,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/shop",
-      "destination": "/",
-      "permanent": true
-    },
-    {
       "source": "/scripts/:path*",
       "destination": "/",
       "permanent": true

@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
   try { out = await getApi()({ action: body.action, body, token, ip, geo }); }
   catch (e) {
     console.error("account init", e && e.message);
-    if (body.action === "status") { let problems = []; try { problems = require("./_lib/runtime").diagnose().map(x => x.msg); } catch (_) {} const e2 = process.env; return res.status(200).json({ ok: true, mail: false, twofa: false, admin: false, shop: false, hook: !!(e2.SEPAY_API_KEY || e2.SEPAY_SECRET || e2.CASSO_SECURE_TOKEN), siteUrl: !!e2.SITE_URL, problems }); }
+    if (body.action === "status") { let problems = []; try { problems = require("./_lib/runtime").diagnose().map(x => x.msg); } catch (_) {} const e2 = process.env; return res.status(200).json({ ok: true, mail: false, twofa: false, admin: false, shop: false, siteUrl: !!e2.SITE_URL, problems }); }
     out = { status: 501, body: { ok: false, code: "not_configured", message: "The email service isn't set up yet." } }; }
   return res.status(out.status).json(out.body);
 };

@@ -2,7 +2,7 @@
 const SITE = "https://skibidiscript.vercel.app";
 const DB = "https://noxgalaxy-2cd71-default-rtdb.asia-southeast1.firebasedatabase.app";
 const BASE = []; // danh mục gốc cũ (Script/APK/iOS/Link) đã bị xóa
-const STATIC = ["/", "/library", "/skibidiscript", "/categories", "/about", "/guide", "/security", "/terms", "/privacy"];
+const STATIC = ["/", "/shop", "/library", "/skibidiscript", "/categories", "/about", "/guide", "/security", "/terms", "/privacy"];
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 async function keys(path) {
   try { const r = await fetch(DB + "/" + path + ".json?shallow=true"); if (!r.ok) return []; const j = await r.json(); return j && typeof j === "object" ? Object.keys(j) : []; } catch (_) { return []; }

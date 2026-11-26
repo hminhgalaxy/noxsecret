@@ -7,12 +7,12 @@ import { productCardHTML, bindProductGrid } from "./home.js";
 
 export function mount(ctx) {
   const id = ctx.params.id; let qty = 1, shown = 0;
-  ctx.setPage({ title: "Sản phẩm", crumbs: [{ label: "Cửa hàng", href: "/" }] });
+  ctx.setPage({ title: "Sản phẩm", crumbs: [{ label: "Cửa hàng", href: "/shop" }] });
   const draw = () => {
-    if (shop.items === null) { ctx.el.innerHTML = `<div class="statebox"><p>Đang tải…</p></div>`; return; }
+    if (shop.items === null) { ctx.el.innerHTML = `<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>`; return; }
     const p = productById(id);
-    if (!p || !p.active) { ctx.setPage({ title: "Không tìm thấy sản phẩm", noindex: true, crumbs: [{ label: "Cửa hàng", href: "/" }] }); ctx.el.innerHTML = `<div class="statebox">${ICO.bag}<p>Sản phẩm này không tồn tại hoặc đã ngừng bán.</p><a class="btn primary" href="/">Về cửa hàng</a></div>`; return; }
-    ctx.setPage({ title: p.name, desc: (p.desc || p.name).slice(0, 155), crumbs: [{ label: "Cửa hàng", href: "/" }].concat(p.cat && catName(p.cat) ? [] : []) });
+    if (!p || !p.active) { ctx.setPage({ title: "Không tìm thấy sản phẩm", noindex: true, crumbs: [{ label: "Cửa hàng", href: "/shop" }] }); ctx.el.innerHTML = `<div class="statebox">${ICO.bag}<p>Sản phẩm này không tồn tại hoặc đã ngừng bán.</p><a class="btn primary" href="/">Về cửa hàng</a></div>`; return; }
+    ctx.setPage({ title: p.name, desc: (p.desc || p.name).slice(0, 155), crumbs: [{ label: "Cửa hàng", href: "/shop" }].concat(p.cat && catName(p.cat) ? [] : []) });
     const out = soldOut(p), max = p.stock === null ? 99 : Math.max(1, Math.min(99, p.stock)); qty = Math.max(1, Math.min(qty, max)); if (shown >= p.gallery.length) shown = 0;
     const rel = visibleProducts().filter(x => x.id !== p.id && x.cat === p.cat).slice(0, 4);
     ctx.el.innerHTML = `<article class="pd" aria-labelledby="pdN">

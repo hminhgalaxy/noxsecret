@@ -36,7 +36,7 @@ export function mount(ctx) {
     if (!known) { if (shop.items !== null) ctx.setPage({ hero: true, title: "Mục lục không tồn tại", noindex: true }); return; }
     const n = visibleProducts().filter(p => p.cat === routeCat).length;
     ctx.setPage({ hero: true, title: known.name + " — Cửa hàng", desc: "Mua " + known.name + " tại Skibidi Web (Skibidi Shop)" + (n ? ": " + n + " sản phẩm" : "") + ". Thanh toán bằng số dư ví, nhận hàng ngay sau khi mua.", noindex: false,
-      crumbs: [{ label: "Cửa hàng", href: "/" }, { label: known.name }] });
+      crumbs: [{ label: "Cửa hàng", href: "/shop" }, { label: known.name }] });
   };
   ctx.el.innerHTML = `<section class="sh-hero" aria-labelledby="shH">
       <div class="sh-hero-txt"><span class="eyebrow"><i></i>Cửa hàng chính thức</span><h1 id="shH">Mua nhanh. <span>Nhận hàng ngay.</span></h1>
@@ -72,7 +72,7 @@ export function mount(ctx) {
     const r = $("#shReset"); if (r) r.addEventListener("click", () => { q = ""; cat = ""; $("#shQ").value = ""; drawCats(); drawGrid(); });
   };
   bindProductGrid(grid);
-  $("#shCats").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (!b) return; cat = b.dataset.c; if (routeCat || cat) { navigate(cat ? "/shop/c/" + encodeURIComponent(cat) : "/"); return; } drawCats(); drawGrid(); });
+  $("#shCats").addEventListener("click", e => { const b = e.target.closest("[data-c]"); if (!b) return; cat = b.dataset.c; if (routeCat || cat) { navigate(cat ? "/shop/c/" + encodeURIComponent(cat) : "/shop"); return; } drawCats(); drawGrid(); });
   $("#shSort").addEventListener("change", e => { sort = e.target.value; drawGrid(); });
   $("#shQ").addEventListener("input", e => { q = e.target.value; drawGrid(); });
   $("#shSearch").addEventListener("submit", e => e.preventDefault());

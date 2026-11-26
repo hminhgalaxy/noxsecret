@@ -3,16 +3,14 @@ import { esc, toast, fmtTime, copyText } from "../../lib/util.js";
 import { ICO } from "../../lib/icons.js";
 import * as S from "../../lib/store.js";
 import { db } from "../../lib/firebase.js";
-import { shop, subscribeShop, startShop, money, signedMoney, MODES, normProduct, catList, catName, devAdjust, devAssign, devRefund, devDeliver, devShopStatus, devSeoSync } from "../../lib/shop.js";
+import { shop, subscribeShop, startShop, money, signedMoney, MODES, normProduct, catList, catName, devRefund, devDeliver, devSeoSync } from "../../lib/shop.js";
 import { fileToItemImage } from "../../lib/avatar.js";
 import { openPopup } from "../../lib/popup.js";
 import { popConfirm, popForm } from "../../lib/shoppop.js";
-import { openBankLink, resetBank, openDevQr } from "../../lib/bankpop.js";
 import { friendly } from "../../lib/messages.js";
 import { locked, devCrumb } from "./shared.js";
 
-const TABS = [["items", "Sản phẩm"], ["cats", "Mục lục"], ["orders", "Đơn hàng"], ["money", "Nạp tiền & ví"]];
-const HOOK_ST = { credited: ["Đã cộng", "ok"], unmatched: ["Chưa khớp", "warn"], processing: ["Đang xử lý", "warn"], ignored: ["Bỏ qua", ""] };
+const TABS = [["items", "Sản phẩm"], ["cats", "Mục lục"], ["orders", "Đơn hàng"]];
 const MAXIMG = 4;
 const ref = p => db.ref(p);
 const userOf = uid => (S.store.users || []).find(u => u.uid === uid);
@@ -21,8 +19,8 @@ const userLabel = uid => { const u = userOf(uid); return u ? (u.email || u.name 
 export function mount(ctx) {
   if (locked(ctx)) return;
   startShop();
-  ctx.setPage({ title: "Cửa hàng", sub: "Thêm hàng, ảnh, số lượng, giá; quản lý mục lục, đơn hàng và tiền nạp.", crumbs: devCrumb, noindex: true });
-  let tab = "items", orders = null, hooks = null, status = null;
+  ctx.setPage({ title: "Cửa hàng", sub: "Thêm hàng, ảnh, số lượng, giá; quản lý mục lục và đơn hàng. Tiền nạp xem ở mục Nạp tiền.", crumbs: devCrumb, noindex: true });
+  let tab = "items", orders = null;
   ctx.el.innerHTML = `<div class="chips dv-tabs" id="dvT" role="tablist">${TABS.map(([v, l]) => `<button type="button" role="tab" data-t="${v}" class="${v === tab ? "on" : ""}" aria-selected="${v === tab}">${l}</button>`).join("")}</div><div id="dvB"></div>`;
   const body = ctx.el.querySelector("#dvB");
   const offs = [];
@@ -30,14 +28,12 @@ export function mount(ctx) {
   ref("nox_shopseo").once("value").then(sn => { if (!sn.exists()) seoSync(); }).catch(() => {}); /* lần đầu: dựng chỉ mục SEO nếu chưa có */
   const listen = (path, cb) => { const r = ref(path), h = r.on("value", s => cb(s.val()), () => cb({})); offs.push(() => r.off("value", h)); };
   listen("nox_orders", v => { orders = []; Object.keys(v || {}).forEach(u => Object.keys(v[u] || {}).forEach(o => orders.push({ uid: u, id: o, ...v[u][o] }))); orders.sort((a, b) => (b.ts || 0) - (a.ts || 0)); if (tab === "orders") draw(); });
-  listen("nox_bankhook", v => { hooks = Object.keys(v || {}).map(k => ({ key: k, ...v[k] })).sort((a, b) => (b.ts || 0) - (a.ts || 0)); if (tab === "money") draw(); });
-  devShopStatus().then(r => { status = r; if (tab === "money") draw(); }).catch(e => { status = { err: e.message }; if (tab === "money") draw(); });
 
   /* ───── Sản phẩm ───── */
   const drawItems = () => {
     const L = shop.items;
     body.innerHTML = `<div class="dv-bar"><span class="dsec">${L ? L.length : 0} sản phẩm</span><button class="btn primary sm" id="addP" type="button">${ICO.plus}Thêm sản phẩm</button></div>
-      <div class="dlist" id="pl">${L === null ? '<p class="sub-note">Đang tải…</p>' : L.length ? L.map(p => `<div class="drow dv-p${p.active ? "" : " off"}" data-id="${esc(p.id)}"><span class="dv-th">${p.img ? `<img src="${esc(p.img)}" alt="">` : ICO.bag}</span>
+      <div class="dlist" id="pl">${L === null ? '<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>' : L.length ? L.map(p => `<div class="drow dv-p${p.active ? "" : " off"}" data-id="${esc(p.id)}"><span class="dv-th">${p.img ? `<img src="${esc(p.img)}" alt="">` : ICO.bag}</span>
         <span class="nm"><span translate="no">${esc(p.name)}</span> ${p.active ? "" : '<span class="badge">Đang ẩn</span>'}<small>${money(p.price)} · ${p.stock === null ? "Không giới hạn" : "Kho " + p.stock} · Đã bán ${p.sold}${p.cat && catName(p.cat) ? " · " + esc(catName(p.cat)) : ""}</small></span>
         <button class="ib" type="button" data-vis aria-label="${p.active ? "Ẩn sản phẩm" : "Hiện sản phẩm"}">${p.active ? ICO.eye : ICO.eyeOff}</button><button class="ib" type="button" data-ed aria-label="Sửa sản phẩm">${ICO.pencil}</button><button class="ib del" type="button" data-del aria-label="Xóa sản phẩm">${ICO.trash}</button></div>`).join("") : `<div class="statebox sm">${ICO.bag}<p>Chưa có sản phẩm. Bấm “Thêm sản phẩm” để bắt đầu.</p></div>`}</div>`;
     body.querySelector("#addP").addEventListener("click", () => productForm(null));
@@ -129,7 +125,7 @@ export function mount(ctx) {
 
   /* ───── Đơn hàng ───── */
   const drawOrders = () => {
-    if (orders === null) { body.innerHTML = '<p class="sub-note">Đang tải…</p>'; return; }
+    if (orders === null) { body.innerHTML = '<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>'; return; }
     const pend = orders.filter(o => o.status === "pending" && Date.now() - (o.ts || 0) > 5 * 60000).length, man = orders.filter(o => o.status === "paid" && o.manual && !o.delivered).length;
     body.innerHTML = `<div class="dv-bar"><span class="dsec">${orders.length} đơn</span>${man ? `<span class="badge strong">${man} đơn giao tay</span>` : ""}${pend ? `<span class="badge">${pend} đơn kẹt cần kiểm tra</span>` : ""}</div>
       <div class="dlist">${orders.length ? orders.slice(0, 200).map(o => `<div class="drow dv-o" data-uid="${esc(o.uid)}" data-id="${esc(o.id)}"><span class="nm"><span translate="no">#${esc(o.id.slice(-8).toUpperCase())} · ${esc(userLabel(o.uid))}</span><small translate="no">${esc((o.items || []).map(i => i.name + " ×" + i.qty).join(", "))} · ${esc(fmtTime(o.ts))}</small></span>
@@ -141,35 +137,7 @@ export function mount(ctx) {
       b.disabled = true; devRefund(o.uid, o.id).then(() => toast("Đã hoàn tiền.")).catch(x => { b.disabled = false; toast(x.message, "err"); }); });
   };
 
-  /* ───── Nạp tiền & ví ───── */
-  const drawMoney = () => {
-    const url = location.origin + "/api/bank-webhook", on = status && !status.err && (status.hook.sepayKey || status.hook.sepaySecret || status.hook.casso);
-    const bk = status && !status.err ? status.bank : null;
-    body.innerHTML = `<section class="dv-card dv-bank"><h3>Ngân hàng nhận tiền</h3>${!bk ? '<p class="sub-note">Đang tải…</p>' : `<div class="bk"><span class="bk-ico">${ICO.bank}</span><div class="bk-m"><b translate="no">${esc(bk.bank)}</b><span translate="no">${esc(bk.account)} · ${esc(bk.name)}</span><span class="od-st ${status.linked ? "ok" : "warn"}">${status.linked ? "Đã liên kết bởi dev" : "Đang dùng mặc định của máy chủ"}</span></div></div>
-        <p class="sub-note">Mã QR nạp tiền của mọi người dùng được tạo từ tài khoản này, kèm số tiền và mã riêng của từng tài khoản.</p>
-        <div class="dv-bar"><button class="btn primary sm" id="bkLink" type="button">${ICO.bank}${status.linked ? "Đổi ngân hàng" : "Liên kết ngân hàng"}</button><button class="btn soft sm" id="bkQr" type="button">${ICO.qr}Tạo mã QR</button>${status.linked ? `<button class="btn ghost sm" id="bkReset" type="button">Gỡ liên kết</button>` : ""}</div>`}</section>
-      <section class="dv-card"><h3>Nhận tiền tự động</h3>
-      ${!status ? '<p class="sub-note">Đang kiểm tra…</p>' : status.err ? `<p class="form-error">${esc(status.err)}</p>` : `<p class="dv-st ${on ? "ok" : "bad"}">${on ? ICO.checkCircle : ICO.warn}<span>${on ? "Máy chủ đã có khoá bảo mật cho webhook." : "Chưa đặt khoá webhook trên Vercel — tiền chuyển vào sẽ KHÔNG tự cộng."}</span></p>
-        <dl class="dv-dl"><div><dt>Địa chỉ webhook</dt><dd><code translate="no">${esc(url)}</code> <button class="btn soft sm" id="cpU" type="button">${ICO.copy}<span>Sao chép</span></button></dd></div></dl>`}</section>
-      <section class="dv-card"><h3>Cộng / trừ tiền thủ công</h3><form class="pf pf-line" id="adj" novalidate><div class="field"><label for="adE">Email tài khoản</label><input id="adE" type="email" autocomplete="off" placeholder="khach@gmail.com"></div><div class="field"><label for="adA">Số tiền (₫, số âm để trừ)</label><input id="adA" inputmode="numeric" autocomplete="off" placeholder="50000"></div><div class="field"><label for="adN">Ghi chú</label><input id="adN" maxlength="120" autocomplete="off" placeholder="Bù tiền / sửa lỗi…"></div><button class="btn primary" type="submit">Áp dụng</button></form><p class="form-error" id="adErr" role="alert"></p></section>
-      <section class="dv-card"><h3>Giao dịch ngân hàng nhận được</h3><div class="dlist">${hooks === null ? '<p class="sub-note">Đang tải…</p>' : hooks.length ? hooks.slice(0, 100).map(x => { const [lab, tone] = HOOK_ST[x.status] || [x.status, ""]; return `<div class="drow" data-k="${esc(x.key)}"><span class="nm"><span translate="no">${esc(x.content || "(không nội dung)")}</span><small>${esc(fmtTime(x.ts))}${x.uid ? " · " + esc(userLabel(x.uid)) : ""}</small></span><span class="od-st ${tone}">${lab}</span><b>${money(x.amount)}</b>${x.status === "unmatched" ? '<button class="btn ghost sm" data-as type="button">Gán cho tài khoản</button>' : ""}</div>`; }).join("") : `<div class="statebox sm">${ICO.bank}<p>Chưa nhận giao dịch nào.</p></div>`}</div></section>`;
-    const refresh = () => devShopStatus().then(r => { status = r; if (tab === "money") draw(); }).catch(() => {});
-    const bl = body.querySelector("#bkLink"); if (bl) bl.addEventListener("click", () => openBankLink(bk, refresh));
-    const bq = body.querySelector("#bkQr"); if (bq) bq.addEventListener("click", () => openDevQr());
-    const br = body.querySelector("#bkReset"); if (br) br.addEventListener("click", () => resetBank(refresh));
-    const cp = body.querySelector("#cpU"); if (cp) cp.addEventListener("click", () => copyText(url).then(() => toast("Đã sao chép.")));
-    body.querySelector("#adj").addEventListener("submit", async e => { e.preventDefault(); const err = body.querySelector("#adErr"); err.textContent = "";
-      const email = body.querySelector("#adE").value.trim().toLowerCase(), amt = Number(body.querySelector("#adA").value.replace(/[^\d-]/g, "")), u = (S.store.users || []).find(x => String(x.email || "").toLowerCase() === email);
-      if (!u) { err.textContent = "Không tìm thấy tài khoản có email này."; return; } if (!amt) { err.textContent = "Nhập số tiền khác 0."; return; }
-      if (!(await popConfirm({ tone: amt > 0 ? "ok" : "warn", icon: amt > 0 ? "plus" : "minus", title: "Điều chỉnh số dư?", message: "Thao tác được ghi vào lịch sử giao dịch của khách.", details: [["Tài khoản", u.email], [amt > 0 ? "Cộng" : "Trừ", money(Math.abs(amt)), "strong"]], ok: "Áp dụng" }))) return;
-      devAdjust(u.uid, amt, body.querySelector("#adN").value.trim()).then(r => { toast("Số dư mới: " + money(r.balance)); e.target.reset(); }).catch(x => { err.textContent = x.message; }); });
-    body.querySelector(".dlist")?.addEventListener("click", async e => { const b = e.target.closest("[data-as]"); if (!b) return; const key = b.closest("[data-k]").dataset.k;
-      const v = await popForm({ title: "Gán giao dịch cho tài khoản", headIcon: "users", icon: "info", tone: "warn", message: "Chỉ dùng khi khách chuyển sai nội dung. Tiền sẽ được cộng vào ví tài khoản này.", ok: "Gán & cộng tiền", fields: [{ id: "email", label: "Email tài khoản", type: "email", max: 120, required: true }], check: x => (!String(x.email).trim() ? "Hãy nhập email tài khoản." : "") }); if (!v) return;
-      const u = (S.store.users || []).find(x => String(x.email || "").toLowerCase() === String(v.email).trim().toLowerCase()); if (!u) { toast("Không tìm thấy tài khoản có email này.", "err"); return; }
-      devAssign(key, u.uid).then(() => toast("Đã cộng tiền cho " + u.email + ".")).catch(x => toast(x.message, "err")); });
-  };
-
-  const draw = () => { ({ items: drawItems, cats: drawCats, orders: drawOrders, money: drawMoney })[tab](); };
+  const draw = () => { ({ items: drawItems, cats: drawCats, orders: drawOrders })[tab](); };
   ctx.el.querySelector("#dvT").addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (!b) return; tab = b.dataset.t; ctx.el.querySelectorAll("#dvT [data-t]").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-selected", x === b); }); draw(); });
   draw();
   const off = subscribeShop(t => { if ((t === "items" && (tab === "items" || tab === "cats")) || (t === "cats" && (tab === "cats" || tab === "items"))) draw(); });

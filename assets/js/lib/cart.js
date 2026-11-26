@@ -26,7 +26,7 @@ export function openCart() {
   const render = (err = "") => {
     if (busy) return;
     const L = cartLines(), total = cartTotal(), bal = balance(), real = session.user && !session.isGuest, enough = bal >= total;
-    if (!L.length) { h.setBody(`<div class="statebox">${ICO.cart}<p>Giỏ hàng đang trống.</p><a class="btn primary" href="/" data-close>Xem cửa hàng</a></div>`); h.body.querySelector("[data-close]").addEventListener("click", () => h.close(true)); return; }
+    if (!L.length) { h.setBody(`<div class="statebox">${ICO.cart}<p>Giỏ hàng đang trống.</p><a class="btn primary" href="/shop" data-close>Xem cửa hàng</a></div>`); h.body.querySelector("[data-close]").addEventListener("click", () => h.close(true)); return; }
     h.setBody(`<ul class="ct-list">${L.map(l => `<li class="ct-row" data-id="${esc(l.id)}">
         <span class="ct-th">${thumb(l.p)}</span>
         <span class="ct-main"><a class="ct-name" href="/shop/${esc(l.id)}" data-nav>${esc(l.p.name)}</a><span class="ct-price">${money(l.p.price)}${soldOut(l.p) ? ' <em class="ct-out">Hết hàng</em>' : ""}</span></span>

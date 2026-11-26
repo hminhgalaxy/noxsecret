@@ -9,6 +9,7 @@ import { api } from "../../lib/account.js";
 
 const SHORTCUTS = [
   { href: "/dev/data", t: "Dữ liệu", d: "Thêm, sửa, xóa nội dung trong từng danh mục.", i: "box" },
+  { href: "/dev/topup", t: "Nạp tiền", d: "Nhận yêu cầu nạp của khách, gửi mã QR và nhập tiền khi khách gửi bill.", i: "wallet" },
   { href: "/dev/categories", t: "Danh mục", d: "Thêm, sửa, xóa danh mục nội dung và gán cảnh báo rủi ro.", i: "grid" },
   { href: "/inbox", t: "Hộp thư", d: "Hộp thư chung của website: tin nhắn, báo cáo và hỗ trợ (mở từ biểu tượng thư trên đầu trang).", i: "chat" },
   { href: "/dev/review", t: "Duyệt bài", d: "Duyệt hoặc từ chối mục và danh mục do người dùng gửi.", i: "check" },
@@ -43,7 +44,7 @@ export function mount(ctx) {
       <div class="stat"><small>Kết nối</small><b class="${S.store.connected ? "okc" : "warn"}">${S.store.connected ? "Ổn định" : "Đang chờ"}</b></div></div>
       <div class="tiles">${SHORTCUTS.map(d => `<a class="tile" href="${d.href}"><span class="tile-ico">${ICO[d.i]}</span><b>${esc(d.t)}</b><small>${esc(d.d)}</small><span class="tile-go">${ICO.arrow}</span></a>`).join("")}</div>`;
   };
-  const bannerHtml = `<div class="statebox"><p><b>Máy chủ chưa nhận Firebase Admin</b>, nên ví, cửa hàng và nạp tiền tự động chưa chạy.</p><a class="btn primary" href="/dev/connect">Kết nối ngay</a></div>`;
+  const bannerHtml = `<div class="statebox"><p><b>Máy chủ chưa nhận Firebase Admin</b>, nên ví, cửa hàng và nạp tiền chưa chạy.</p><a class="btn primary" href="/dev/connect">Kết nối ngay</a></div>`;
   const banner = async () => { const r = await api("status", {}, { token: false }); if (dead || !r.ok || r.admin) return; noAdmin = true; const el = ctx.el.querySelector("#cnBanner"); if (el) el.innerHTML = bannerHtml; };
   draw(); paintDoctor(); run(); banner();
   const off = S.subscribe(t => { if (["data", "cats", "users", "maint", "conn"].includes(t)) { draw(); paintDoctor(); } });

@@ -10,8 +10,9 @@ import { icoOf, avatarHTML } from "./ui.js";
 import { unreadCount } from "./updates.js";
 
 const LINKS = {
-  home: { href: "/", label: "Cửa hàng", icon: "bag", exact: true },
-  library: { href: "/library", label: "Kho nội dung", icon: "layers", exact: true },
+  home: { href: "/", label: "Trang chủ", icon: "home", exact: true },
+  shop: { href: "/shop", label: "Cửa hàng", icon: "bag", exact: false },
+  library: { href: "/library", label: "Share", icon: "layers", exact: true },
   wallet: { href: "/wallet", label: "Ví của tôi", icon: "wallet", exact: true },
   inbox: { href: "/inbox", label: "Hộp thư", icon: "mail", exact: false },
   orders: { href: "/orders", label: "Lịch sử mua hàng", icon: "receipt", exact: true },
@@ -20,7 +21,7 @@ const LINKS = {
   settings: { href: "/settings", label: "Cài đặt", icon: "gear" },
   allCats: { href: "/categories", label: "Tất cả danh mục", icon: "grid", exact: true },
   dev: [{ href: "/dev", label: "Tổng quan", icon: "dash", exact: true }, { href: "/dev/data", label: "Dữ liệu", icon: "box" },
-        { href: "/dev/shop", label: "Cửa hàng", icon: "bag" }, { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
+        { href: "/dev/shop", label: "Cửa hàng", icon: "bag" }, { href: "/dev/topup", label: "Nạp tiền", icon: "wallet" }, { href: "/dev/categories", label: "Danh mục", icon: "grid" }, { href: "/dev/users", label: "Người dùng", icon: "users" },
         { href: "/dev/theme", label: "Giao diện", icon: "paint" }, { href: "/dev/updates", label: "Cập nhật", icon: "bell" }, { href: "/dev/review", label: "Duyệt bài", icon: "check" }, { href: "/dev/mail", label: "Gửi thư", icon: "mail" },
         { href: "/dev/system", label: "Bảo trì & thông báo", icon: "wrench" }, { href: "/dev/test", label: "Kiểm tra hệ thống", icon: "check" }]
 };
@@ -58,8 +59,10 @@ export function renderNav(force) {
   const catItems = [link(LINKS.allCats, "disc-item", 0)].concat(cats.map((c, i) => link(c, "disc-item", i + 1))).join("");
   const devItems = LINKS.dev.map((l, i) => link(l, "disc-item", i)).join("");
   const real = session.user && !session.isGuest;
-  side.innerHTML = `<span class="nav-sec">Mua sắm</span>
+  side.innerHTML = `<span class="nav-sec">Trang chủ</span>
     ${link(LINKS.home)}
+    <span class="nav-sec">Mua sắm</span>
+    ${link(LINKS.shop)}
     ${real ? link(LINKS.wallet) + link(LINKS.orders) : ""}
     <span class="nav-sec">Khám phá</span>
     ${link(LINKS.library)}
@@ -106,7 +109,7 @@ const CAT_PATHS = () => ["/categories", "/favorites"].concat(store.cats.map(c =>
 function markTabs(path) {
   const t = p => path === p || path.startsWith(p + "/");
   let which = null;
-  if (path === "/" || t("/shop")) which = "home"; else if (t("/wallet") || t("/orders")) which = "wallet"; else if (t("/library")) which = "cats";
+  if (path === "/") which = "home"; else if (t("/shop")) which = "shop"; else if (t("/wallet") || t("/orders")) which = "wallet"; else if (t("/library")) which = "cats";
   else if (["/profile", "/login", "/register", "/forgot-password", "/settings"].some(t)) which = "me";
   else if (CAT_PATHS().some(t)) which = "cats";
   $$("#tabbar .tab").forEach(a => { const on = a.dataset.tab === which; a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });

@@ -23,6 +23,9 @@ export function fieldsFor(cat) {
   if (need === "code") f.push({ k: "code", label: "Code", req: true, area: true, rows: 12, mono: true });
   else if (need === "url") f.push({ k: "url", label: "Link", req: true, type: "url", ph: "https://…" });
   else { f.push({ k: "url", label: "Link", type: "url", ph: "https://…" }); f.push({ k: "code", label: "Code", area: true, rows: 10, mono: true }); }
-  f.push({ k: "img", label: "Ảnh minh họa (chọn từ máy, không bắt buộc)", image: true });
+  f.push({ k: "img", label: "Ảnh minh họa chính (chọn từ máy, không bắt buộc)", image: true });
+  f.push({ k: "img2", label: "Ảnh minh họa 2 (không bắt buộc)", image: true });
+  f.push({ k: "img3", label: "Ảnh minh họa 3 (không bắt buộc)", image: true });
+  f.push({ k: "video", label: "Video (link YouTube hoặc file .mp4/.webm, không bắt buộc)", type: "url", ph: "https://youtu.be/…" });
   return f;
 }

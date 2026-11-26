@@ -5,6 +5,7 @@ import * as S from "../../lib/store.js";
 import { session, onAuth } from "../../lib/auth.js";
 import { skeletonHTML, emptyHTML, errorHTML, cardHTML, fresh } from "../../lib/ui.js";
 import { riskGate } from "../../lib/risk.js";
+import { rowsHTML, bindRows } from "../../lib/rows.js";
 import { resolveCat, notFound, crumbsFor } from "./shared.js";
 
 export async function mount(ctx) {
@@ -27,7 +28,10 @@ export async function mount(ctx) {
     if (S.store.status[cat.id] === "error" && arr == null) { grid.innerHTML = errorHTML(cat.id); return; }
     if (arr == null) { grid.innerHTML = skeletonHTML(); return; }
     const f = vi(q.trim()), res = f ? arr.filter(it => vi(it.name).includes(f) || vi(it.desc).includes(f) || vi(it.code).includes(f)) : arr;
-    grid.innerHTML = res.length ? sorted(res).map((it, i) => cardHTML(it, cat.id, i, false)).join("") : emptyHTML(f ? "Không có mục nào khớp với bộ lọc." : "Chưa có nội dung trong " + cat.label + ".");
+    const rows = !f && sort === "new" ? rowsHTML(arr, cat.id) : "";
+    grid.classList.toggle("has-rows", !!rows);
+    grid.innerHTML = res.length ? rows + (rows ? `<h2 class="rows-h all">Tất cả <small>${res.length}</small></h2><div class="grid rows-all">` : "") + sorted(res).map((it, i) => cardHTML(it, cat.id, i, false)).join("") + (rows ? "</div>" : "") : emptyHTML(f ? "Không có mục nào khớp với bộ lọc." : "Chưa có nội dung trong " + cat.label + ".");
+    if (rows) bindRows(grid);
     if (first && arr) { first = false; fresh(grid); }
   };
   ctx.el.querySelector("#catFilter").addEventListener("input", e => { q = e.target.value; draw(); });

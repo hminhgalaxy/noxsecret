@@ -26,10 +26,9 @@ export const SEED = {
     }
   },
   nox_shopsecret: { "-p1": { lines: { l1: "KEY-AAAA-0001", l2: "KEY-AAAA-0002", l3: "KEY-AAAA-0003", l4: "KEY-AAAA-0004", l5: "KEY-AAAA-0005" } }, "-p2": { text: "https://example.com/script-pro" } },
-  nox_wallet: { uUSER: { balance: 125000, code: "SKN20481937" } },
-  nox_topcodes: { SKN20481937: "uUSER" },
+  nox_wallet: { uUSER: { balance: 125000 } },
   nox_orders: { uUSER: { "-o1": { status: "paid", total: 59000, ts: 1700000700000, items: [{ id: "-p1", name: "Key VIP 30 ngày", price: 59000, qty: 1 }], delivery: [{ id: "-p1", name: "Key VIP 30 ngày", qty: 1, lines: ["KEY-AAAA-1111"] }] } } },
-  nox_txs: { uUSER: { "-t1": { type: "topup", amount: 200000, ts: 1700000600000, note: "Nạp qua ngân hàng" }, "-t2": { type: "purchase", amount: -59000, ts: 1700000700000, note: "Key VIP 30 ngày" } } },
+  nox_txs: { uUSER: { "-t1": { type: "topup", amount: 200000, ts: 1700000600000, note: "Nạp tiền" }, "-t2": { type: "purchase", amount: -59000, ts: 1700000700000, note: "Key VIP 30 ngày" } } },
   nox_maintenance: { enabled: false },
   nox_notice: { title: "Chào mừng", body: "Đây là thông báo thử nghiệm.", enabled: true, updatedAt: 1700000500000 },
   nox_theme: { bgType: "none", bgData: "", audioData: "", audioName: "", api: { endpoint: "https://baconbypass.xyz", key: "SECRET-KEY-123" } }

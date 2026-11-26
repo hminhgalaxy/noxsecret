@@ -37,8 +37,8 @@ t("kho: nhãn nút có cả vi và en", KB.every(e => (e.go || []).every(g => g.
 t("dữ liệu phụ: chuyện cười song ngữ, từ điển ≥ 60 cặp không trùng", [JOKES.every(j => j.vi && j.en), DICT.length >= 60, new Set(DICT.map(d => norm(d[0]))).size === DICT.length], [true, true, true]);
 t("mọi chủ đề đều được tìm ra bằng chính từ khóa dài nhất của nó (không bị chủ đề khác 'cướp')", KB.filter(e => { const k = [...e.k].sort((a, b) => b.length - a.length)[0], r = A(k); return !(r && (r.id === e.id || ["report", "translate", "joke", "greet", "thanks", "bye", "math", "time", "date"].includes(r.kind))); }).map(e => e.id), []);
 /* chống sai sự thật: các con số được nói ra phải khớp mã thật */
-const top = fs.readFileSync(new URL("../assets/js/lib/topup.js", import.meta.url), "utf8");
-t("sự thật: hạn mức nạp trong lời Skias khớp mã nạp tiền (10.000 – 50.000.000)", [/info \? info\.min : 10000/.test(top), /info \? info\.max : 50000000/.test(top), /10\.000/.test(A("làm sao nạp tiền").text), /50\.000\.000/.test(A("làm sao nạp tiền").text)], [true, true, true, true]);
+const top = fs.readFileSync(new URL("../assets/js/lib/shop.js", import.meta.url), "utf8"), srv = fs.readFileSync(new URL("../api/_lib/shop.js", import.meta.url), "utf8");
+t("sự thật: hạn mức nạp trong lời Skias khớp mã nạp tiền (2.000 – 50.000.000)", [/MIN_TOPUP = 2000, MAX_TOPUP = 50000000/.test(top), /MIN_TOPUP = 2000, MAX_TOPUP = 50000000/.test(srv), /2[.,]000/.test(A("làm sao nạp tiền").text), /50[.,]000[.,]000/.test(A("han muc nap").text)], [true, true, true, true]);
 t("kho: không còn nhắc Script/APK/iOS cũ và không có từ kỹ thuật", KB.filter(e => /\b(apk|ios|script|scripts|vault|firebase|realtime|database|api|node|json)\b/i.test(e.vi + " " + e.en)).map(e => e.id), []);
 
 /* ── Markdown của khung chat (an toàn + đúng) ── */

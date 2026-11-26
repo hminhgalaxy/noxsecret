@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import { startServer } from "./server.mjs";
 import { fakeFirebaseSource, GIS_STUB, DEV_EMAIL } from "./fake-firebase.mjs";
@@ -50,7 +51,7 @@ async function installApi(page, st = {}) {
     db: { get: p => ev(p => window.__fb.admin.db.get(p), p), set: (p, v) => ev(([p, v]) => window.__fb.admin.db.set(p, v), [p, v]), update: (p, o) => ev(([p, o]) => window.__fb.admin.db.update(p, o), [p, o]), remove: p => ev(p => window.__fb.admin.db.remove(p), p),
       tx: async (p, fn) => { const cur = await ev(p => window.__fb.admin.db.get(p), p); const nv = fn(cur === null ? null : JSON.parse(JSON.stringify(cur))); if (nv === undefined) return { committed: false, value: cur }; await ev(([p, v]) => window.__fb.admin.db.set(p, v), [p, nv]); return { committed: true, value: nv }; } },
     sendMail: async m => { st.sent.push(m); }, verifyPassword: (e, p) => ev(([e, p]) => window.__fb.admin.passwordOk(e, p), [e, p]),
-    env: { DEV_EMAIL, SEPAY_API_KEY: "key-123" }, randomInt: () => 123456, diagnose: () => (st.problems || []).map(msg => ({ msg })), liveCheck: async () => st.live || [{ ok: true, msg: "Khoá API hợp lệ." }]
+    env: { DEV_EMAIL }, randomInt: (a, b) => (b === 1e6 ? 123456 : crypto.randomInt(a, b)), diagnose: () => (st.problems || []).map(msg => ({ msg })), liveCheck: async () => st.live || [{ ok: true, msg: "Khoá API hợp lệ." }]
   };
   const handle = createApi(deps); st.handle = handle;
   await page.route(BASE + "/api/account", async route => {
@@ -262,7 +263,7 @@ test("menu: nút Danh mục mở ra từ từ, có hiệu ứng, ghi nhớ và �
 test("menu: Dev Panel có nút riêng, chỉ DEV mới thấy", async ({ page }) => {
   await go(page, "/"); eq(await page.locator('.disc[data-g="dev"]').count(), 0, "khách không thấy");
   await loginDev(page); await page.waitForSelector('.disc[data-g="dev"]'); await page.locator('.disc[data-g="dev"] .nav-btn').click(); await page.waitForTimeout(700);
-  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 11, "11 mục quản trị (có Gửi thư, Duyệt bài)"); eq(await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/inbox"]').count(), 0, "Hộp thư không còn nằm trong Dev Panel");
+  eq(await page.locator('.disc[data-g="dev"] .disc-item').count(), 12, "12 mục quản trị (có Nạp tiền, Gửi thư, Duyệt bài)"); eq(await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/inbox"]').count(), 0, "Hộp thư không còn nằm trong Dev Panel");
   await page.locator('.disc[data-g="dev"] .disc-item[href="/dev/system"]').click(); await page.waitForURL(BASE + "/dev/system"); await page.waitForSelector("#mBtn");
 });
 test("menu: tài khoản thường không thấy Dev Panel và bị chặn khi vào /dev", async ({ page }) => {
@@ -843,12 +844,12 @@ test("đồ họa: mức Tối Ưu không hiện màn hình mở đầu, không 
 test("ảnh mục: chọn từ máy (nén, lưu, hiện); link ảnh cũ không còn hiển thị; đã bỏ ô dán link ảnh", async ({ page }) => {
   const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
   await loginDev(page); await go(page, "/c/mod/create"); eq(await page.locator('#itemForm input[type=url][name=img]').count(), 0, "không còn ô dán link ảnh"); await page.fill("#itemForm [name=name]", "Có ảnh"); await page.fill("#itemForm [name=url]", "https://example.com/a");
-  await page.setInputFiles("#imgPick", { name: "a.png", mimeType: "image/png", buffer: PNG }); await page.waitForSelector("#imgPrev img"); ok(await page.locator("#imgDel").isVisible(), "có nút Xóa ảnh");
+  await page.setInputFiles("#imgPick_img", { name: "a.png", mimeType: "image/png", buffer: PNG }); await page.waitForSelector("[data-img=img] .imgf-prev img"); ok(await page.locator("[data-img=img] [data-del]").isVisible(), "có nút Xóa ảnh");
   await page.click("#saveBtn"); await page.waitForFunction(() => /^\/c\/mod$/.test(location.pathname)); const d = await db(page); const it = Object.entries(d.nox_data.mod).find(([, v]) => v.name === "Có ảnh");
   ok(it && /^data:image\/jpeg;base64,/.test(it[1].img) && it[1].img.length < 36000, "ảnh đã lưu dạng data: nhẹ");
-  await go(page, "/c/mod/" + it[0]); ok(await page.locator(".detail-img").count() === 1, "chi tiết hiện ảnh");
-  await go(page, "/c/mod/" + it[0] + "/edit"); await page.click("#imgDel"); await page.click("#saveBtn"); await page.waitForFunction(() => /^\/c\/mod$/.test(location.pathname)); ok(!(await db(page)).nox_data.mod[it[0]].img, "xoá ảnh được");
-  await page.evaluate(() => firebase.database().ref("nox_data/mod/leg").set({ name: "Cũ", url: "https://a.b", img: "https://evil.example/t.png", createdAt: 1 })); await go(page, "/c/mod/leg"); eq(await page.locator(".detail-img").count(), 0, "ảnh từ link ngoài không được tải");
+  await go(page, "/c/mod/" + it[0]); ok(await page.locator(".md-main img").count() === 1, "chi tiết hiện ảnh");
+  await go(page, "/c/mod/" + it[0] + "/edit"); await page.click("[data-img=img] [data-del]"); await page.click("#saveBtn"); await page.waitForFunction(() => /^\/c\/mod$/.test(location.pathname)); ok(!(await db(page)).nox_data.mod[it[0]].img, "xoá ảnh được");
+  await page.evaluate(() => firebase.database().ref("nox_data/mod/leg").set({ name: "Cũ", url: "https://a.b", img: "https://evil.example/t.png", createdAt: 1 })); await go(page, "/c/mod/leg"); eq(await page.locator(".md-main img").count(), 0, "ảnh từ link ngoài không được tải");
   await go(page, "/c/mod"); eq(await page.locator('img[src^="http"]:not(.avatar img)').evaluateAll(l => l.filter(i => /evil\.example/.test(i.src)).length), 0);
 });
 test("đoạn dài: mô tả dài được thu gọn, có nút Hiển thị tất cả / Thu gọn; đoạn ngắn thì không có nút", async ({ page }) => {
@@ -1157,20 +1158,19 @@ test("Dev Panel: thẻ chẩn đoán quyền — bình thường báo xanh; thi�
 });
 
 /* ═══ CỬA HÀNG, VÍ, NẠP TIỀN, LỊCH SỬ MUA, CHAT NỔI ═══ */
-const sePayHook = (st, id, amount, content) => st.handle.webhook({ headers: { authorization: "Apikey key-123" }, raw: JSON.stringify({ id, gateway: "Techcombank", transactionDate: "2026-11-12 16:00:00", accountNumber: "19077584659010", content, transferType: "in", transferAmount: amount, referenceCode: "FT" + id }), ip: "9.9.9.9" });
 const cleanBox = async page => { /* không phần tử cố định nào được đè lên nhau */
   return page.evaluate(() => { const els = [...document.querySelectorAll("#hdr .hd-r > *, #cw .cw-fab, #backTop, #tabbar")].filter(e => e.offsetParent !== null || getComputedStyle(e).position === "fixed"); const rs = els.map(e => [e.id || e.className, e.getBoundingClientRect()]).filter(([, r]) => r.width > 0 && r.height > 0); const bad = [];
     for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) { const a = rs[i][1], b = rs[j][1]; if (rs[i][0].includes("tabbar") || rs[j][0].includes("tabbar")) { if (!(rs[i][0].includes("hd") ) && false) continue; } const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left), oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top); if (ox > 2 && oy > 2) bad.push(rs[i][0] + " × " + rs[j][0]); } return bad; });
 };
 test("shop: khách xem cửa hàng, lọc mục lục, tìm kiếm, giỏ hàng", async ({ page }) => {
-  await go(page, "/");
+  await go(page, "/shop");
   await page.waitForSelector("#shGrid .pcard:not(.sk-card)");
   eq(await page.locator("#shGrid .pcard").count(), 4, "4 sản phẩm"); eq(await page.locator("#shCats button").count(), 3, "Tất cả + 2 mục lục");
   await page.click('#shCats button:has-text("Script VIP")'); await page.waitForURL(/\/shop\/c\//); await page.waitForFunction(() => document.querySelectorAll("#shGrid .pcard:not(.sk-card)").length === 1); eq(await page.locator("#shGrid .pcard").count(), 1, "lọc theo mục lục (mỗi mục là một địa chỉ riêng)");
   ok(/Script VIP/.test(await page.title()) && await page.locator('meta[name="robots"]').getAttribute("content") === "index,follow,max-image-preview:large" && /\/shop\/c\//.test(await page.locator('link[rel="canonical"]').getAttribute("href")), "trang mục lục: tiêu đề riêng, canonical riêng, cho lập chỉ mục");
   await page.reload(); await page.waitForFunction(() => document.querySelectorAll("#shGrid .pcard:not(.sk-card)").length === 1); eq(await page.locator('#shCats button.on').textContent(), "Script VIP", "tải lại đúng địa chỉ mục lục vẫn chọn đúng mục");
   await go(page, "/shop/c/khong-co"); await page.waitForSelector("#shGrid"); await page.waitForFunction(() => /noindex/.test(document.querySelector('meta[name="robots"]').content)); ok(true, "mục lục không tồn tại → noindex");
-  await go(page, "/"); await page.waitForSelector("#shGrid .pcard:not(.sk-card)");
+  await go(page, "/shop"); await page.waitForSelector("#shGrid .pcard:not(.sk-card)");
   await page.fill("#shQ", "farm"); await page.waitForFunction(() => document.querySelectorAll("#shGrid .pcard").length === 1);
   ok(/Auto Farm/.test(await page.textContent("#shGrid")), "tìm 'farm' ra Auto Farm"); await page.fill("#shQ", "khongco"); await page.waitForSelector("#shReset");
   await page.fill("#shQ", "");
@@ -1191,27 +1191,16 @@ test("shop: không có phần tử nào đè lên nhau (máy tính + điện tho
     const ov = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth); ok(ov <= 1, "không cuộn ngang ở " + w + "px (" + ov + ")");
   }
 });
-test("shop: nạp tiền bằng QR → webhook cộng tiền → mua hàng → lịch sử", async ({ page }) => {
-  const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
+test("shop: mua hàng bằng số dư → giao 2 key → lịch sử đơn", async ({ page }) => {
+  await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
   await page.waitForFunction(() => /125/.test(document.querySelector("#walletAmt")?.textContent || "")); ok(true, "thanh đầu hiện số dư 125k");
   await go(page, "/wallet"); await page.waitForFunction(() => /125\.000/.test(document.querySelector("#wlB")?.textContent || ""), null, { timeout: 8000 });
-  await page.waitForSelector("#wlC code"); ok(/SKN\d{8}/.test(await page.textContent("#wlC")), "có mã chuyển khoản riêng");
-  await page.click("#wlTop"); await page.waitForSelector(".tp-amt"); await page.click('.tp-amt[data-v="50000"]'); await page.click("#tpGo");
-  await page.waitForSelector(".tp-qr svg"); const code = (await page.textContent(".tp-dl .hot code")).trim(); ok(/^SKN\d{8}$/.test(code), "nội dung CK = mã tài khoản: " + code);
-  ok(/50\.000/.test(await page.textContent(".tp-amount")), "hiện đúng số tiền"); ok(/19077584659010/.test(await page.textContent(".tp-dl")), "hiện số tài khoản");
-  const qr = (await page.evaluate(() => document.querySelector(".tp-qr svg").getAttribute("aria-label"))); ok(/50\.000/.test(qr), "QR gắn số tiền");
   const before = (await db(page)).nox_wallet.uUSER.balance;
-  const r1 = await sePayHook(st, 9001, 50000, "NGUYEN VAN A chuyen tien " + code + " FT123"); eq(r1.status, 200, "webhook 200");
-  await page.waitForSelector(".tp-ok", { timeout: 10000 }); ok(/50\.000/.test(await page.textContent(".tp-got")), "popup báo +50.000");
-  eq((await db(page)).nox_wallet.uUSER.balance, before + 50000, "số dư +50.000");
-  await sePayHook(st, 9001, 50000, code); eq((await db(page)).nox_wallet.uUSER.balance, before + 50000, "webhook gửi lại không cộng hai lần");
-  await page.click("#tpOk"); await page.waitForFunction(() => /175\.000/.test(document.querySelector("#wlB")?.textContent || ""));
-  ok(/Nạp tiền|Top up/.test(await page.textContent("#wlL")), "lịch sử giao dịch có dòng nạp");
   /* mua 2 key */
   await go(page, "/shop/-p1"); await page.waitForSelector("#pdBuy"); await page.click('.qty [data-q="1"]'); await page.click("#pdAdd");
   await page.click("#btnCart"); await page.waitForSelector("#ctPay"); ok(/118\.000/.test(await page.textContent(".ct-sum")), "tạm tính 2 × 59.000"); await page.click("#ctPay");
   await page.waitForSelector("#ctOk", { timeout: 10000 }); const got = await page.textContent(".pop"); ok(/KEY-AAAA-0001/.test(got) && /KEY-AAAA-0002/.test(got), "giao 2 key đầu tiên");
-  eq((await db(page)).nox_wallet.uUSER.balance, before + 50000 - 118000, "trừ đúng tiền"); eq((await db(page)).nox_shop.items["-p1"].stock, 3, "tồn kho giảm còn 3");
+  eq((await db(page)).nox_wallet.uUSER.balance, before - 118000, "trừ đúng tiền"); eq((await db(page)).nox_shop.items["-p1"].stock, 3, "tồn kho giảm còn 3");
   await page.click("#ctOk"); eq(await page.evaluate(() => document.querySelector("#cartBadge").hidden), true, "giỏ đã trống");
   await go(page, "/orders"); await page.waitForSelector(".od"); eq(await page.locator(".od").count() >= 2, true, "lịch sử mua có đơn mới");
   const od = page.locator(".od").first(); ok(/^#[A-Z0-9]{8}$/.test((await od.locator(".od-id b").textContent()).trim()), "có mã đơn hàng"); ok(await od.locator(".od-st").count() === 1, "có trạng thái"); ok(/\d{1,2}[:\/.]\d{2}|\d{4}/.test(await od.locator(".od-id small").textContent()), "có thời gian mua"); ok(/118\.000/.test(await od.locator(".od-total").textContent()), "có tổng tiền");
@@ -1220,17 +1209,140 @@ test("shop: nạp tiền bằng QR → webhook cộng tiền → mua hàng → l
   const [dl] = await Promise.all([page.waitForEvent("download", { timeout: 6000 }), od.locator("[data-dl]").first().click()]); ok(/\.txt$/.test(dl.suggestedFilename()), "tải file về: " + dl.suggestedFilename());
   await od.locator("[data-detail]").click(); await page.waitForSelector(".pop, .sp-root.on"); ok(/118\.000|59\.000/.test(await page.locator(".pop, .sp-root.on").last().textContent()), "popup chi tiết đơn"); await page.keyboard.press("Escape");
 });
-test("shop: không đủ tiền → nút nạp thêm, mở QR đúng số tiền thiếu", async ({ page }) => {
-  await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await page.waitForFunction(() => /125/.test(document.querySelector("#walletAmt")?.textContent || ""));
-  await go(page, "/shop/-p2"); await page.waitForSelector("#pdBuy"); await page.click("#pdAdd"); await page.click("#btnCart"); await page.waitForSelector("#ctPay"); await page.keyboard.press("Escape");
-  await page.click('#btnCart'); await page.waitForSelector("#ctPay"); await page.click('.pop .qty [data-q="1"]'); await page.waitForSelector("#ctTop"); ok(/115\.000/.test(await page.textContent("#ctTop")), "thiếu 115.000 (240.000 − 125.000)");
-  await page.click("#ctTop"); await page.waitForSelector(".tp-amt"); eq(await page.locator(".tp-amt.on").count() + (await page.inputValue("#tpA") ? 1 : 0) >= 1, true, "điền sẵn số tiền thiếu"); await page.click("#tpGo"); await page.waitForSelector(".tp-qr svg");
-  ok(/115\.000/.test(await page.textContent(".tp-amount")), "QR theo số tiền thiếu");
-});
 test("shop: tiền không bao giờ ghi được từ trình duyệt (Rules khóa)", async ({ page }) => {
   await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
-  const r = await page.evaluate(async () => { const out = {}; for (const [k, v] of [["nox_wallet/uUSER/balance", 99999999], ["nox_txs/uUSER/x", { amount: 1, ts: 1 }], ["nox_orders/uUSER/x", { status: "paid", total: 0 }], ["nox_shop/items/-p1/price", 1], ["nox_topcodes/SKN11111111", "uUSER"]]) { try { await firebase.database().ref(k).set(v); out[k] = "ghi được!"; } catch (e) { out[k] = "chặn"; } } return out; });
+  const r = await page.evaluate(async () => { const out = {}; for (const [k, v] of [["nox_wallet/uUSER/balance", 99999999], ["nox_txs/uUSER/x", { amount: 1, ts: 1 }], ["nox_orders/uUSER/x", { status: "paid", total: 0 }], ["nox_shop/items/-p1/price", 1], ["nox_inv/uUSER/-x", { status: "done", amount: 1 }]]) { try { await firebase.database().ref(k).set(v); out[k] = "ghi được!"; } catch (e) { out[k] = "chặn"; } } return out; });
   eq(Object.values(r), ["chặn", "chặn", "chặn", "chặn", "chặn"], "mọi ghi tiền/hàng bị chặn: " + JSON.stringify(r));
+});
+/* ═══ NẠP TIỀN THỦ CÔNG: hóa đơn → QR → bill → dev "Nhập tiền" ═══ */
+const PNG1 = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+const signOut = async page => { await page.evaluate(() => firebase.auth().signOut()); await page.waitForFunction(() => document.querySelector("#hdrAcc")?.dataset.state !== "in"); };
+const invs = async (page, uid = "uUSER") => Object.entries(((await db(page)).nox_inv || {})[uid] || {}).map(([id, v]) => ({ id, ...v }));
+const asUser = async page => { await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); };
+const asDev = async page => { await login(page, DEVPW); await page.waitForURL(BASE + "/"); await authed(page); };
+const userCreateInvoice = async (page, amount) => { await go(page, "/wallet"); await page.waitForSelector("#wlTop"); await page.click("#wlTop"); await page.waitForSelector("#tpA"); await page.fill("#tpA", String(amount)); await page.click("#tpGo"); await page.waitForURL(/\/topup\?i=/); await page.waitForSelector(".tp-card"); };
+const apiCall = (page, body) => page.evaluate(async b => { const tk = await firebase.auth().currentUser.getIdToken(); const x = await fetch("/api/account", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tk }, body: JSON.stringify(b) }); return { status: x.status, body: await x.json() }; }, body);
+test("nạp tiền: bấm Nạp tiền → tối thiểu 2.000 → trang hóa đơn 'đang được tạo'; chỉ một hóa đơn mở; hủy được", async ({ page }) => {
+  await installApi(page); await asUser(page);
+  await go(page, "/wallet"); await page.waitForSelector("#wlB"); await page.click("#wlTop"); await page.waitForSelector("#tpA");
+  ok(/2\.000/.test(await page.textContent(".tpf-lead")), "popup nêu rõ số tiền tối thiểu 2.000");
+  await page.fill("#tpA", "1000"); await page.click("#tpGo"); ok(/2\.000/.test(await page.textContent("#tpE")), "dưới 2.000 → báo lỗi"); eq((await invs(page)).length, 0, "chưa tạo hóa đơn nào");
+  await page.fill("#tpA", "2500"); await page.click("#tpGo"); ok(/nghìn/.test(await page.textContent("#tpE")), "số lẻ → yêu cầu làm tròn nghìn");
+  await page.fill("#tpA", "99999999"); await page.click("#tpGo"); ok(/tối đa/.test(await page.textContent("#tpE")), "vượt mức tối đa → báo lỗi");
+  await page.click('.tpf-q [data-v="2000"]'); eq(await page.inputValue("#tpA"), "2.000", "chọn nhanh điền số tiền"); await page.click("#tpGo");
+  await page.waitForURL(/\/topup\?i=/); await page.waitForSelector(".tp-card.tp-creating");
+  ok(/đang được tạo/.test(await page.textContent(".tp-body")) && /quay lại sau ít tiếng/.test(await page.textContent(".tp-body")), "thông báo hóa đơn đang được tạo, quay lại sau ít tiếng");
+  ok(/2\.000/.test(await page.textContent(".tp-head")), "hiện đúng số tiền"); eq(await page.locator(".tp-steps li").count(), 4, "4 bước"); eq(await page.locator(".tp-steps li.now b").textContent(), "Tạo hóa đơn");
+  const L = await invs(page); eq(L.length, 1); eq(L[0].status, "creating"); eq(L[0].amount, 2000); ok(/^[A-Z0-9]{9,12}$/.test(L[0].code), "mã code ngẫu nhiên: " + L[0].code); ok(!("sec" in L[0]), "mã bảo mật không nằm trong hóa đơn của khách");
+  const peek = await page.evaluate(async id => { try { await firebase.database().ref("nox_invsec/" + id).once("value"); return "đọc được!"; } catch (e) { return "chặn"; } }, L[0].id); eq(peek, "chặn", "khách không đọc được nox_invsec");
+  /* chỉ một hóa đơn mở: bấm Nạp tiền lần nữa → quay lại đúng hóa đơn */
+  await go(page, "/wallet"); await page.waitForSelector("#wlTop"); await page.click("#wlTop"); await page.waitForURL(/\/topup\?i=/); eq((await invs(page)).length, 1, "không tạo thêm hóa đơn thứ hai");
+  const two = await apiCall(page, { action: "inv-create", amount: 5000 }); eq(two.status >= 400, true, "máy chủ cũng từ chối hóa đơn thứ hai: " + JSON.stringify(two.body));
+  /* hủy */
+  await page.waitForSelector("#tpCancel"); await page.click("#tpCancel"); await page.waitForSelector("[data-yes]"); await page.click("[data-yes]");
+  await page.waitForSelector(".tp-card.tp-cancelled #tpNew"); eq((await invs(page))[0].status, "cancelled", "hóa đơn đã hủy");
+  await page.click("#tpNew"); await page.waitForSelector("#tpA"); ok(true, "hủy xong tạo được hóa đơn mới");
+});
+test("nạp tiền: đủ vòng — khách tạo → dev gửi QR → khách gửi bill → dev Nhập tiền → ví khách + , ví dev −", async ({ page }) => {
+  await installApi(page); await asUser(page); await userCreateInvoice(page, 50000);
+  const inv0 = (await invs(page))[0], id = inv0.id; eq(inv0.status, "creating");
+  /* ── dev nhận yêu cầu, chấp nhận + gửi QR ── */
+  await signOut(page); await asDev(page);
+  await go(page, "/dev/topup"); await page.waitForSelector(".tpd-row"); ok(/50\.000/.test(await page.textContent(".tpd-row")), "dev thấy yêu cầu 50.000");
+  await page.waitForFunction(() => /130\.000\.000/.test(document.querySelector("#tdB")?.textContent || ""), null, { timeout: 8000 }); ok(true, "ví dev có sẵn 130.000.000");
+  await page.click(".tpd-row"); await page.waitForSelector("#tdQ", { state: "attached" }); ok(await page.locator("#tdG").isDisabled(), "chưa chọn QR thì chưa gửi được");
+  await page.setInputFiles("#tdQ", { name: "qr.png", mimeType: "image/png", buffer: PNG1 }); await page.waitForFunction(() => !document.querySelector("#tdG").disabled);
+  await page.fill("#tdNote", "Ghi đúng mã hóa đơn"); await page.click("#tdG");
+  await until(async () => (await invs(page))[0].status === "ready", 8000); ok(typeof (await db(page)).nox_invfile.uUSER[id].qr === "string", "QR lưu ở nox_invfile");
+  /* ── khách thấy QR, gửi bill ── */
+  await signOut(page); await asUser(page); await go(page, "/topup");
+  await page.waitForSelector(".tp-card.tp-ready .tp-qr img", { timeout: 8000 }); eq((await page.textContent(".tp-code code")).trim(), inv0.code, "hiện đúng mã hóa đơn"); ok(/Ghi đúng mã/.test(await page.textContent(".tp-note")), "hiện ghi chú của dev");
+  eq(await page.locator(".tp-steps li.now b").textContent(), "Chuyển tiền"); ok(/Chuyển tiền thành công\?/.test(await page.textContent(".tp-bill")), "hỏi 'Chuyển tiền thành công?' và xin ảnh bill");
+  ok(await page.locator("#tpSend").isDisabled(), "chưa chọn ảnh bill thì chưa gửi được");
+  await page.setInputFiles("#tpFile", { name: "bill.png", mimeType: "image/png", buffer: PNG1 }); await page.waitForFunction(() => !document.querySelector("#tpSend").disabled); await page.click("#tpSend");
+  await page.waitForSelector(".tp-card.tp-bill", { timeout: 8000 }); ok(/xử lý trong ít phút/.test(await page.textContent(".tp-body")), "thông báo: hóa đơn sẽ được xử lý trong ít phút");
+  eq((await invs(page))[0].status, "bill"); ok(typeof (await db(page)).nox_invfile.uUSER[id].bill === "string", "ảnh bill được lưu");
+  /* ── dev Nhập tiền ── */
+  await signOut(page); await asDev(page); await go(page, "/dev/topup?t=pay"); await page.waitForSelector("#tdF", { timeout: 8000 });
+  ok(await page.getAttribute("#tdId", "readonly") !== null && await page.getAttribute("#tdAm", "readonly") !== null, "ID và số tiền bị khóa (readonly)"); ok(/50\.000/.test(await page.inputValue("#tdAm")), "số tiền đúng 50.000"); eq(await page.inputValue("#tdId"), id, "ID đúng");
+  await page.waitForSelector("#tdH code"); const codes = await page.locator("#tdH code").allTextContents(); eq(codes[0].trim(), inv0.code, "dev thấy mã code"); const sec = codes[1].trim(); ok(sec.length >= 10, "dev thấy mã bảo mật");
+  const walletU = async () => (await db(page)).nox_wallet.uUSER.balance, walletD = async () => (await db(page)).nox_wallet.uDEV.balance;
+  const u0 = await walletU(), d0 = await walletD(); eq(d0, 130000000, "dev có 130tr");
+  /* dev không sửa được số tiền/ID khi gọi thẳng máy chủ */
+  const bad1 = await apiCall(page, { action: "inv-credit", id, amount: 999999, code: inv0.code, sec }); eq(bad1.status, 400, "số tiền khác hóa đơn bị từ chối: " + JSON.stringify(bad1.body)); eq(bad1.body.code, "mismatch");
+  const bad2 = await apiCall(page, { action: "inv-credit", id: "-khongco", amount: 50000, code: inv0.code, sec }); ok(bad2.status >= 400, "ID không có thật bị từ chối");
+  eq(await walletU(), u0, "ví khách không đổi sau các lần thử sai");
+  const wr = await page.evaluate(async () => { try { await firebase.database().ref("nox_wallet/uUSER/balance").set(1e9); return "ghi được!"; } catch (e) { return "chặn"; } }); eq(wr, "chặn", "dev cũng không ghi ví từ trình duyệt");
+  /* nhập sai mã trên giao diện */
+  await page.fill("#tdC", "SAIMA1234"); await page.fill("#tdS", "saibaomat12"); await page.click("#tdGo"); await page.waitForSelector("[data-yes]"); await page.click("[data-yes]");
+  await page.waitForFunction(() => (document.querySelector("#tdE")?.textContent || "").length > 3); ok(!/undefined|\[object/.test(await page.textContent("#tdE")), "mã sai → báo lỗi dễ hiểu: " + await page.textContent("#tdE")); eq(await walletU(), u0, "mã sai → không cộng tiền");
+  /* nhập đúng */
+  await page.fill("#tdC", inv0.code.toLowerCase()); await page.fill("#tdS", sec); await page.click("#tdGo"); await page.waitForSelector("[data-yes]"); await page.click("[data-yes]");
+  await page.waitForSelector(".tpd-ok", { timeout: 10000 }); ok(/50\.000/.test(await page.textContent(".tpd-ok")), "báo đã gửi tiền thành công");
+  eq(await walletU(), u0 + 50000, "ví khách +50.000"); eq(await walletD(), d0 - 50000, "ví dev −50.000"); const f = (await invs(page))[0]; eq(f.status, "done"); ok(!(await db(page)).nox_invfile.uUSER[id].qr, "QR được xóa sau khi xong");
+  const txs = (await db(page)).nox_txs; ok(Object.values(txs.uUSER).some(t => t.amount === 50000 && t.type === "topup"), "lịch sử khách có dòng nạp"); ok(Object.values(txs.uDEV).some(t => t.amount === -50000), "lịch sử dev có dòng trừ");
+  const again = await apiCall(page, { action: "inv-credit", id, amount: 50000, code: inv0.code, sec }); ok(again.body.already === true, "gọi lại cho hóa đơn đã xong: chỉ báo đã xong, không cộng thêm: " + JSON.stringify(again.body)); eq(await walletU(), u0 + 50000, "vẫn chỉ cộng một lần");
+  /* khách thấy kết quả */
+  await signOut(page); await asUser(page); await go(page, "/wallet"); await page.waitForFunction(() => /175\.000/.test(document.querySelector("#wlB")?.textContent || ""), null, { timeout: 8000 }); ok(true, "ví khách hiện 175.000");
+  await go(page, "/topup?i=" + id); await page.waitForSelector(".tp-card.tp-done", { timeout: 8000 }); ok(/thành công/.test(await page.textContent(".tp-body")), "trang hóa đơn: nạp tiền thành công");
+});
+test("nạp tiền: dev từ chối kèm lý do → khách thấy lý do và tạo lại được; khách không tự duyệt được", async ({ page }) => {
+  await installApi(page); await asUser(page); await userCreateInvoice(page, 10000); const id = (await invs(page))[0].id;
+  for (const a of ["inv-accept", "inv-reject", "inv-credit"]) { const r = await apiCall(page, { action: a, id, qr: "data:image/png;base64,AAAA", reason: "x", amount: 10000, code: "a", sec: "b" }); ok(r.status === 403 || r.status === 401, "khách gọi " + a + " bị từ chối: " + r.status); }
+  const w = await page.evaluate(async id => { try { await firebase.database().ref("nox_inv/uUSER/" + id + "/status").set("done"); return "ghi được!"; } catch (e) { return "chặn"; } }, id); eq(w, "chặn", "khách không tự sửa trạng thái hóa đơn");
+  await signOut(page); await asDev(page); await go(page, "/dev/topup"); await page.waitForSelector(".tpd-row"); await page.click(".tpd-row"); await page.waitForSelector("#tdR"); await page.click("#tdR");
+  await page.waitForSelector('.sp-form [data-f="reason"]'); await page.click('.sp-form button[type=submit]'); await page.waitForTimeout(200); ok(await page.locator(".sp-form").count() === 1, "không nhập lý do → chưa gửi");
+  await page.fill('.sp-form [data-f="reason"]', "Chưa nhận được tiền"); await page.click('.sp-form button[type=submit]'); await until(async () => (await invs(page))[0].status === "rejected", 8000);
+  await signOut(page); await asUser(page); await go(page, "/topup"); await page.waitForSelector(".tp-card.tp-rejected"); ok(/Chưa nhận được tiền/.test(await page.textContent(".tp-body")), "khách thấy lý do từ chối");
+  await page.click("#tpNew"); await page.waitForSelector("#tpA"); await page.fill("#tpA", "4000"); await page.click("#tpGo"); await page.waitForURL(/\/topup\?i=/); eq((await invs(page)).length, 2, "tạo được hóa đơn mới sau khi bị từ chối");
+});
+test("nạp tiền: thiếu tiền khi mua → nút Nạp thêm mở popup điền sẵn số tiền thiếu", async ({ page }) => {
+  await installApi(page); await asUser(page); await page.waitForFunction(() => /125/.test(document.querySelector("#walletAmt")?.textContent || ""));
+  await go(page, "/shop/-p2"); await page.waitForSelector("#pdBuy"); await page.click("#pdAdd"); await page.click("#btnCart"); await page.waitForSelector("#ctPay"); await page.keyboard.press("Escape");
+  await page.click("#btnCart"); await page.waitForSelector("#ctPay"); await page.click('.pop .qty [data-q="1"]'); await page.waitForSelector("#ctTop"); ok(/115\.000/.test(await page.textContent("#ctTop")), "thiếu 115.000 (240.000 − 125.000)");
+  await page.click("#ctTop"); await page.waitForSelector("#tpA"); eq(await page.inputValue("#tpA"), "115.000", "điền sẵn số tiền thiếu");
+});
+test("trang chủ: chỉ có World · Chat · Group (Coming Soon) và Share (mở được); cửa hàng nằm ở /shop", async ({ page }) => {
+  await go(page, "/"); await page.waitForSelector(".lp-tile"); eq(await page.locator(".lp-tile").count(), 4, "4 ô"); eq(await page.locator("#shGrid").count(), 0, "trang chủ không còn cửa hàng");
+  eq((await page.locator(".lp-w").allTextContents()).map(s => s.trim()), ["World", "Chat", "Group", "Share"]); eq(await page.locator(".lp-tile.soon .lp-soon").count(), 3, "3 ô Coming Soon"); ok(!await page.locator(".lp-tile.soon").first().evaluate(e => e.tagName === "A"), "ô Coming Soon không phải liên kết");
+  await page.click('.lp-tile.live[data-k="share"]'); await page.waitForURL(BASE + "/library"); ok(true, "Share → /library");
+  await go(page, "/shop"); await page.waitForSelector("#shGrid .pcard:not(.sk-card)"); ok(true, "cửa hàng ở /shop");
+  ok(await page.locator('#tabbar [data-tab="shop"]').count() === 1, "thanh dưới có tab Cửa hàng");
+});
+test("vòng tròn xoay thay cho trang trắng khi đang tải; cài đặt không còn nút xóa cookie", async ({ page }) => {
+  await page.route(BASE + "/assets/js/pages/landing.js", async r => { await new Promise(s => setTimeout(s, 900)); r.continue(); });
+  await page.goto(BASE + "/"); await page.waitForSelector(".ld-spin", { timeout: 3000 }); ok(true, "có vòng tròn xoay khi đang tải");
+  await page.waitForSelector(".lp-tile"); await go(page, "/settings"); await page.waitForSelector(".skins");
+  ok(!/Xóa cookie|Xóa tất cả cookie|Delete cookies|Clear cookies/i.test(await page.textContent("#view")), "đã bỏ nút xóa cookie");
+});
+test("English: trang chủ, luồng nạp tiền (khách + dev) ở mọi trạng thái — không còn tiếng Việt", async () => {
+  const c = await fresh({ lang: "en" }); const page = c.page; const bad = [];
+  const chk = async n => { await page.waitForTimeout(350); const v = await viContent(page); if (v.length) bad.push(n + " → " + v.slice(0, 12).join(" | ")); };
+  await installApi(page); await go(page, "/"); await page.waitForSelector(".lp-tile"); await chk("trang chủ (khách)");
+  await asUser(page); await chk("trang chủ (đã đăng nhập)"); await userCreateInvoice(page, 50000); await chk("hóa đơn: đang tạo");
+  await page.click("#tpCancel"); await page.waitForSelector("[data-yes]"); await chk("hộp xác nhận hủy"); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+  await signOut(page); await asDev(page); await go(page, "/dev/topup"); await page.waitForSelector(".tpd-row"); await chk("dev: danh sách yêu cầu"); await page.click(".tpd-row"); await page.waitForSelector("#tdQ", { state: "attached" }); await chk("dev: popup chấp nhận");
+  await page.setInputFiles("#tdQ", { name: "qr.png", mimeType: "image/png", buffer: PNG1 }); await page.waitForFunction(() => !document.querySelector("#tdG").disabled); await chk("dev: đã chọn QR"); await page.click("#tdG"); await until(async () => (await invs(page))[0].status === "ready", 8000);
+  await signOut(page); await asUser(page); await go(page, "/topup"); await page.waitForSelector(".tp-card.tp-ready .tp-qr img"); await chk("hóa đơn: chờ chuyển tiền");
+  await page.setInputFiles("#tpFile", { name: "bill.png", mimeType: "image/png", buffer: PNG1 }); await page.waitForFunction(() => !document.querySelector("#tpSend").disabled); await chk("hóa đơn: đã chọn bill"); await page.click("#tpSend"); await page.waitForSelector(".tp-card.tp-bill"); await chk("hóa đơn: đã gửi bill");
+  await go(page, "/wallet"); await page.waitForSelector(".tx, .wl-inv, #wlB"); await chk("ví có hóa đơn");
+  await signOut(page); await asDev(page); await go(page, "/dev/topup?t=pay"); await page.waitForSelector("#tdF"); await chk("dev: Nhập tiền");
+  await page.fill("#tdC", "SAIMA1234"); await page.fill("#tdS", "saibaomat12"); await page.click("#tdGo"); await page.waitForSelector("[data-yes]"); await chk("dev: xác nhận nhập tiền"); await page.click("[data-yes]"); await page.waitForFunction(() => (document.querySelector("#tdE")?.textContent || "").length > 3); await chk("dev: mã sai");
+  await go(page, "/dev/topup"); await page.waitForSelector(".tpd-row, .tpd-empty, .dv-card"); await page.locator(".tpd-row").first().click().catch(() => {}); await page.waitForTimeout(400); await chk("dev: xem hóa đơn");
+  await c.ctx.close(); ok(!bad.length, "còn tiếng Việt:\n   " + bad.join("\n   "));
+});
+test("ảnh chụp trang mới (xem bằng mắt; luôn đạt nếu trang dựng được)", async () => {
+  for (const [nm, vp] of [["m", { width: 390, height: 844 }], ["d", { width: 1280, height: 800 }]]) {
+    const c = await fresh({ viewport: vp }); const page = c.page; await installApi(page);
+    await go(page, "/"); await page.waitForSelector(".lp-tile"); await page.waitForTimeout(1200); await page.screenshot({ path: SHOTS + `/new-${nm}-landing.png` });
+    await asUser(page); await go(page, "/wallet"); await page.waitForSelector("#wlB"); await page.waitForTimeout(500); await page.screenshot({ path: SHOTS + `/new-${nm}-wallet.png` });
+    await page.click("#wlTop"); await page.waitForSelector("#tpA"); await page.waitForTimeout(500); await page.screenshot({ path: SHOTS + `/new-${nm}-popup.png` }); await page.fill("#tpA", "50000"); await page.click("#tpGo"); await page.waitForURL(/\/topup\?i=/); await page.waitForSelector(".tp-card"); await page.waitForTimeout(700); await page.screenshot({ path: SHOTS + `/new-${nm}-creating.png` });
+    await signOut(page); await asDev(page); await go(page, "/dev/topup"); await page.waitForSelector(".tpd-row"); await page.waitForTimeout(500); await page.screenshot({ path: SHOTS + `/new-${nm}-dev-list.png` });
+    await page.click(".tpd-row"); await page.waitForSelector("#tdQ", { state: "attached" }); await page.waitForTimeout(500); await page.screenshot({ path: SHOTS + `/new-${nm}-dev-accept.png` });
+    await page.setInputFiles("#tdQ", { name: "qr.png", mimeType: "image/png", buffer: PNG1 }); await page.click("#tdG"); await until(async () => (await invs(page))[0].status === "ready", 8000);
+    await signOut(page); await asUser(page); await go(page, "/topup"); await page.waitForSelector(".tp-card.tp-ready .tp-qr img"); await page.waitForTimeout(600); await page.screenshot({ path: SHOTS + `/new-${nm}-ready.png`, fullPage: true }); if (process.env.DBGSTYLE) console.log(await page.evaluate(() => [".tp-head", ".tp-head > div", ".tp-amt", ".tp-head small"].map(q => { const e = document.querySelector(q), c = getComputedStyle(e); return q + " border:" + c.border + " outline:" + c.outline + " bg:" + c.backgroundColor + " shadow:" + c.boxShadow + " pad:" + c.padding; }).join("\n")));
+    await c.ctx.close();
+  }
 });
 test("shop: dev thêm hàng, ảnh, số lượng, mục lục, điều chỉnh ví", async ({ page }) => {
   await installApi(page); await loginDev(page); await go(page, "/dev/shop"); await page.waitForSelector(".dv-tabs");
@@ -1264,46 +1376,11 @@ test("chat nổi: nhấn liên kết /help/chat mở khung thay vì chuyển tra
   await page.goto(BASE + "/help/chat"); await page.waitForSelector("#cwPanel.on", { timeout: 8000 });
   const dev = await fresh(); await loginDev(dev.page); ok(await dev.page.locator("#cw").isHidden(), "dev không thấy nút chat nổi"); await dev.ctx.close();
 });
-test("Đợt Shop 2 — ví: hóa đơn có đếm ngược 10 phút; quá hạn → Thất bại; tiền đến muộn vẫn được cộng", async ({ page }) => {
-  const st = await installApi(page); await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page);
-  await go(page, "/wallet"); await page.waitForSelector("#wlC code"); await page.click("#wlTop"); await page.waitForSelector(".tp-amt"); await page.fill("#tpA", "60000"); await page.click("#tpGo"); await page.waitForSelector(".tp-qr svg");
-  ok(await page.locator("#tpClock, .tp-timer").count() >= 1, "có đồng hồ đếm ngược"); ok(/\b(9|10):\d\d\b|0?9:\d\d|10:00/.test(await page.textContent(".tp2, .tp")), "đồng hồ ~10 phút");
-  let d = await db(page); const [tid, inv] = Object.entries(d.nox_topups.uUSER)[0]; eq(inv.status, "pending"); ok(inv.expiresAt - inv.ts === 10 * 60 * 1000, "hạn đúng 10 phút");
-  await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-  await page.waitForSelector("#wlInv .inv"); ok(/còn/.test(await page.textContent("#wlInv .inv")), "danh sách hóa đơn: đang chờ + còn bao lâu");
-  /* quá hạn */
-  await page.evaluate(([t]) => { const d = window.__fb.getDb(); d.nox_topups.uUSER[t].expiresAt = Date.now() - 1000; d.nox_topups.uUSER[t].ts = Date.now() - 11 * 60 * 1000; window.__fb.setDb(d); }, [tid]);
-  await page.reload(); await page.waitForSelector("#wlInv .inv"); await page.waitForFunction(() => /Thất bại|Failed/.test(document.querySelector("#wlInv")?.textContent || ""), null, { timeout: 8000 }); ok(true, "quá 10 phút → Thất bại");
-  await until(async () => (await db(page)).nox_topups.uUSER[tid].status === "failed"); ok(true, "máy chủ đánh dấu failed");
-  await page.locator("#wlInv .inv").first().click(); await page.waitForSelector(".tp-fail"); ok(/Hóa đơn thất bại|Invoice failed/.test(await page.textContent(".tp-fail")), "mở lại hóa đơn hỏng thấy lý do"); await page.keyboard.press("Escape");
-  /* tiền đến muộn */
-  const code = (await page.textContent("#wlC code")).trim(); const before = (await db(page)).nox_wallet.uUSER.balance;
-  eq((await sePayHook(st, 9300, 60000, code)).status, 200); await until(async () => (await db(page)).nox_wallet.uUSER.balance === before + 60000); ok(true, "tiền chuyển muộn vẫn được cộng, không mất");
-  eq((await db(page)).nox_topups.uUSER[tid].status, "done", "hóa đơn muộn → done"); ok((await db(page)).nox_topups.uUSER[tid].late === true, "đánh dấu late");
-  /* trình duyệt không tự sửa trạng thái được */
-  const bad = await page.evaluate(async t => { try { await firebase.database().ref("nox_topups/uUSER/" + t + "/status").set("done"); return "ghi được!"; } catch (e) { return "chặn"; } }, tid); eq(bad, "chặn");
-});
-test("Đợt Shop 2 — dev liên kết ngân hàng + tạo mã QR; người dùng thấy QR theo ngân hàng đó", async ({ page, ctx }) => {
-  await installApi(page); await loginDev(page); await go(page, "/dev/shop"); await page.waitForSelector("#dvT"); await page.click('#dvT [data-t="money"]'); await page.waitForSelector("#bkLink");
-  ok(/Techcombank|mặc định/i.test(await page.textContent(".dv-bank")), "ban đầu dùng mặc định");
-  await page.click("#bkLink"); await page.waitForSelector(".sp-form"); await page.fill('.sp-form [data-f="account"]', "12"); await page.click('.sp-form button[type=submit]'); await page.waitForTimeout(300); ok(await page.locator(".sp-form").count() === 1, "thông tin sai → không đóng, báo lỗi");
-  await page.selectOption('.sp-form [data-f="sel"]', "970422"); eq(await page.inputValue('.sp-form [data-f="bin"]'), "970422", "chọn ngân hàng tự điền BIN");
-  await page.fill('.sp-form [data-f="account"]', "0123456789"); await page.fill('.sp-form [data-f="name"]', "NGUYEN VAN A"); await page.click('.sp-form button[type=submit]');
-  await until(async () => (await db(page)).nox_shopcfg?.bank?.account === "0123456789"); ok(true, "lưu vào nox_shopcfg/bank bằng máy chủ"); await page.waitForFunction(() => /Đã liên kết/.test(document.querySelector(".dv-bank")?.textContent || ""));
-  await page.click("#bkQr"); await page.waitForSelector("#dqA"); await page.fill("#dqA", "150000"); await page.fill("#dqC", "TEST QR"); await page.click(".dq-f button[type=submit], .dq-f .btn.primary"); await page.waitForSelector(".dq-out svg, .dq .tp-qr svg", { timeout: 8000 }); ok(/150\.000/.test(await page.textContent(".dq")), "QR có số tiền"); ok(/0123456789/.test(await page.textContent(".dq")), "QR đúng tài khoản đã liên kết");
-  await page.keyboard.press("Escape");
-  /* tài khoản dev nạp tiền: QR phải dùng ngân hàng vừa liên kết */
-  await go(page, "/wallet"); await page.waitForSelector("#wlTop"); await page.click("#wlTop"); await page.waitForSelector(".tp-amt"); await page.fill("#tpA", "50000"); await page.click("#tpGo"); await page.waitForSelector(".tp-qr svg"); ok(/0123456789/.test(await page.textContent(".tp-dl")), "QR nạp tiền dùng ngân hàng dev đã liên kết"); await page.keyboard.press("Escape");
-  /* người dùng thường không đặt được ngân hàng */
-  const u = await fresh(); await installApi(u.page); await login(u.page, USERPW); await u.page.waitForURL(BASE + "/"); await authed(u.page);
-  const r = await u.page.evaluate(async () => { const tk = await firebase.auth().currentUser.getIdToken(); const x = await fetch("/api/account", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tk }, body: JSON.stringify({ action: "bank-set", bin: "970407", account: "999999999", name: "HACKER", bank: "X" }) }); return x.status; }); ok(r >= 400, "người dùng thường bị từ chối bank-set: " + r);
-  const w = await u.page.evaluate(async () => { try { await firebase.database().ref("nox_shopcfg/bank").set({ account: "1" }); return "ghi được!"; } catch (e) { return "chặn"; } }); eq(w, "chặn", "không ghi được nox_shopcfg từ trình duyệt"); await u.ctx.close();
-});
 test("Đợt Shop 2 — dev: cửa sổ nhỏ thay cho hộp thoại xấu (hoàn tiền, điều chỉnh ví, xóa)", async ({ page }) => {
   await installApi(page); await loginDev(page); await go(page, "/dev/shop"); await page.waitForSelector("#dvT");
   await page.locator(".dv-p").first().click(); await page.waitForTimeout(400); ok(await page.locator(".cf-root.on").count() === 0, "không còn hộp thoại cũ .cf");
   await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-  await page.click('#dvT [data-t="money"]'); await page.waitForSelector("#bkLink"); const adj = page.locator("button", { hasText: /Điều chỉnh/ }).first(); if (await adj.count()) { await adj.click(); await page.waitForSelector(".sp-form, .pop"); ok(await page.locator(".cf-root.on").count() === 0, "điều chỉnh ví dùng popup riêng"); await page.keyboard.press("Escape"); }
+  /* tab Tiền đã chuyển sang trang Dev › Nạp tiền */
   const t = await visibleText(page); ok(!TECH.test(t), "không chữ kỹ thuật");
 });
 test("Đợt Shop 2 — điện thoại: số dư hiện trên thanh đầu ở mọi cỡ (280–430px), không đè nhau, không tràn ngang", async ({ page }) => {
@@ -1382,7 +1459,7 @@ test("Đợt Shop 4 — Skias: chào khi vào web (song ngữ), tự ẩn; mở 
   await page.waitForFunction(() => !document.querySelector("#sk .sk-bubble.on"), null, { timeout: 12000 }); ok(true, "lời chào tự biến mất");
   eq(await cleanBox(page), [], "Skias không đè lên các nút cố định khác");
   await page.click("#sk .sk-fig"); await page.waitForSelector("#sk .sk-panel.on");
-  ask: for (const [q, re] of [["làm sao nạp tiền", /10\.000/], ["how do i top up", /Top up: press/], ["2+3*4", /14/], ["15% của 200", /30/], ["ví trong tiếng anh là gì", /wallet/], ["how do you say password in vietnamese", /mật khẩu/], ["bạn là ai", /Skias/], ["asdfgh", /tricky|khó/], ["skias ai là gì", /Skias AI/]]) {
+  ask: for (const [q, re] of [["làm sao nạp tiền", /2\.000/], ["how do i top up", /Top up: press/], ["2+3*4", /14/], ["15% của 200", /30/], ["ví trong tiếng anh là gì", /wallet/], ["how do you say password in vietnamese", /mật khẩu/], ["bạn là ai", /Skias/], ["asdfgh", /tricky|khó/], ["skias ai là gì", /Skias AI/]]) {
     const n = await page.locator("#sk .sk-m-row.bot").count(); await page.fill("#sk .sk-in", q); await page.keyboard.press("Enter");
     await page.waitForFunction(n => document.querySelectorAll("#sk .sk-m-row.bot").length > n && !document.querySelector("#sk .sk-dots") && !document.querySelector("#sk .sk-send.stop"), n, { timeout: 8000 });
     const last = await page.locator("#sk .sk-m-row.bot .sk-msg").last().textContent(); ok(re.test(last), `"${q}" → ${last.slice(0, 50)}`); continue ask;
@@ -1423,19 +1500,18 @@ test("Đợt Shop 4 — Skias trên điện thoại: không đè thanh dưới/c
 test("English: cửa hàng, ví, giỏ hàng, nạp tiền, lịch sử, chat nổi, Dev cửa hàng — không còn chữ tiếng Việt", async ({ page }) => {
   const bad = []; const chk = async n => { await page.waitForTimeout(300); const v = await viContent(page); if (v.length) bad.push(n + " → " + v.slice(0, 8).join(" | ")); };
   const st = await installApi(page);
-  await go(page, "/"); await page.waitForSelector("#shGrid .pcard:not(.sk-card)"); await chk("/ (khách)");
+  await go(page, "/shop"); await page.waitForSelector("#shGrid .pcard:not(.sk-card)"); await chk("/ (khách)");
   await page.click('#shCats button:has-text("Script VIP")'); await page.waitForURL(/\/shop\/c\//); await page.waitForSelector("#shGrid .pcard:not(.sk-card)"); await chk("/shop/c/<mục> (khách)");
   const md = await page.locator('meta[name="description"]').getAttribute("content"); ok(!/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(md) && /Buy Script VIP/.test(md), "mô tả mục lục bằng tiếng Anh: " + md.slice(0, 60));
-  await go(page, "/");
+  await go(page, "/shop");
   await page.waitForSelector("#shGrid .pcard:not(.sk-card)"); await page.click('#shGrid [data-add="-p1"]'); await page.click("#btnCart"); await page.waitForSelector(".pop .ct-row"); await chk("giỏ (khách)"); await page.keyboard.press("Escape");
   await page.fill("#shQ", "zzz"); await chk("không có kết quả"); await page.fill("#shQ", "");
   await go(page, "/shop/-p1"); await page.waitForSelector("#pdBuy"); await chk("/shop/-p1"); await go(page, "/shop/-p3"); await page.waitForSelector("#pdBuy, .pd"); await chk("/shop/-p3 (hết hàng)"); await go(page, "/shop/-p4"); await chk("/shop/-p4 (giao tay)"); await go(page, "/shop/zzz"); await chk("/shop/zzz");
   await page.click("#cwFab"); await page.waitForURL(/\/login/); await chk("chat nổi (khách → đăng nhập)");
   await login(page, USERPW); await page.waitForURL(BASE + "/"); await authed(page); await page.waitForFunction(() => /125/.test(document.querySelector("#walletAmt")?.textContent || "")); await chk("/ (đã đăng nhập)");
   await go(page, "/wallet"); await page.waitForSelector(".tx"); await chk("/wallet");
-  await page.click("#wlTop"); await page.waitForSelector(".tp-amt"); await chk("popup nạp tiền: chọn số tiền"); await page.fill("#tpA", "1000"); await page.click("#tpGo"); await chk("popup nạp tiền: lỗi số tiền");
-  await page.fill("#tpA", "75000"); await page.click("#tpGo"); await page.waitForSelector(".tp-qr svg"); await chk("popup nạp tiền: mã QR");
-  const code = (await page.textContent(".tp-dl .hot code")).trim(); await sePayHook(st, 9100, 75000, code); await page.waitForSelector(".tp-ok", { timeout: 10000 }); await chk("popup nạp tiền: thành công"); await page.click("#tpOk");
+  await page.click("#wlTop"); await page.waitForSelector("#tpA"); await chk("popup nạp tiền: chọn số tiền"); await page.fill("#tpA", "1000"); await page.click("#tpGo"); await chk("popup nạp tiền: lỗi số tiền");
+  await page.fill("#tpA", "75000"); await page.click("#tpGo"); await page.waitForSelector(".tp-card.tp-creating"); await chk("trang nạp tiền: đang tạo hóa đơn");
   await go(page, "/orders"); await page.waitForSelector(".od"); await chk("/orders"); await page.locator("[data-live]").first().click(); await page.waitForTimeout(400); await chk("xem trực tiếp"); await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.locator("[data-detail]").first().click(); await page.waitForTimeout(400); await chk("chi tiết đơn"); await page.keyboard.press("Escape"); await page.waitForTimeout(300);
   await go(page, "/shop/-p1"); await page.waitForSelector("#pdBuy"); await page.click("#pdBuy"); await page.waitForSelector("#ctOk", { timeout: 10000 }).catch(() => {}); await chk("mua ngay"); await page.keyboard.press("Escape");
   await go(page, "/shop/-p4"); await page.click("#pdBuy"); await page.waitForSelector("#ctOk, #ctPay", { timeout: 8000 }).catch(() => {}); if (await page.locator("#ctPay").count()) await page.click("#ctPay"); await page.waitForSelector("#ctOk", { timeout: 8000 }).catch(() => {}); await chk("mua hàng giao tay"); await page.keyboard.press("Escape");
@@ -1617,7 +1693,7 @@ let pass = 0, fail = 0; const only = process.argv[2];
 for (const [name, fn, o] of T) {
   if (only && !name.includes(only)) continue; const { ctx, page } = await fresh(o); const t0 = Date.now();
   try { await Promise.race([fn({ page, ctx }), new Promise((_, rj) => setTimeout(() => rj(new Error("quá thời gian (treo)")), (o.timeout || 45000)))]); const extra = page.errs.filter(e => !/net::ERR_FAILED/.test(e)); if (extra.length && !o.allowErrors) throw new Error("lỗi console: " + extra.join(" | ")); pass++; console.log(`  ✓ ${name} (${Date.now() - t0}ms)`); }
-  catch (e) { fail++; console.log(`  ✗ ${name}\n      ${String(e.message).split("\n").slice(0, 40).join("\n      ")}`); if (page.errs && page.errs.length) console.log("      [console] " + page.errs.slice(0, 4).join(" | ").slice(0, 600)); try { await page.screenshot({ path: SHOTS + "/FAIL-" + name.replace(/\W+/g, "_").slice(0, 40) + ".png" }); } catch (_) {} }
+  catch (e) { fail++; console.log(`  ✗ ${name}\n      ${(process.env.STACK ? String(e.stack) : String(e.message)).split("\n").slice(0, 40).join("\n      ")}`); if (page.errs && page.errs.length) console.log("      [console] " + page.errs.slice(0, 4).join(" | ").slice(0, 600)); try { await page.screenshot({ path: SHOTS + "/FAIL-" + name.replace(/\W+/g, "_").slice(0, 40) + ".png" }); } catch (_) {} }
   await ctx.close();
 }
 await browser.close(); srv.close(); console.log(`\n${pass} đạt, ${fail} lỗi`); process.exit(fail ? 1 : 0);

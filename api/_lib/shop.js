@@ -1,26 +1,29 @@
-/* Cửa hàng + ví + nạp tiền ngân hàng + tệp đính kèm chat (chạy trên máy chủ, ghi bằng quyền Admin).
-   NGUYÊN TẮC AN TOÀN TIỀN: trình duyệt KHÔNG BAO GIỜ ghi vào ví / đơn hàng / lịch sử giao dịch (Rules đóng hết);
+/* Cửa hàng + ví + nạp tiền THỦ CÔNG qua hóa đơn + tệp đính kèm chat (chạy trên máy chủ, ghi bằng quyền Admin).
+   NGUYÊN TẮC AN TOÀN TIỀN: trình duyệt KHÔNG BAO GIỜ ghi vào ví / đơn hàng / lịch sử giao dịch / hóa đơn (Rules đóng hết);
    mọi thay đổi số dư đi qua `walletApply` — một giao dịch (transaction) nguyên tử của Realtime Database:
-   (1) không cho âm tiền, (2) mỗi khoản có "khoá chống cộng trùng" (applied/<key>) nên webhook gửi lại nhiều lần cũng chỉ cộng một lần.
+   (1) không cho âm tiền, (2) mỗi khoản có "khoá chống cộng trùng" (applied/<key>) nên gọi lại nhiều lần cũng chỉ cộng một lần.
+   Luồng nạp tiền (không còn webhook / QR tự động):
+     khách tạo hóa đơn (creating) → DEV nhận + gửi mã QR (ready) → khách chuyển tiền rồi gửi ảnh bill (bill)
+     → DEV vào "Nhập tiền", nhập mã code + mã bảo mật (ngẫu nhiên, sinh ở máy chủ) → máy chủ đối chiếu rồi chuyển tiền từ ví DEV sang ví khách (done).
+     DEV không thể nhập số tiền khác hóa đơn hay đổi id: số tiền/ id lấy từ hóa đơn trên máy chủ, ô nhập chỉ để xác nhận.
    Dữ liệu (trong nox_*):
-     wallet/<uid>     { code, balance, applied{key:ts}, createdAt }
-     topcodes/<MÃ>    uid                          (tra ngược mã chuyển khoản → tài khoản)
-     topups/<uid>/<id>{ amount, code, status: pending|done|failed|cancelled, ts, expiresAt(+10 phút), late? }  (quá 10 phút chưa thấy tiền → failed)
-     shopcfg/bank     { bin, account, name, bank, short, by, ts }  (ngân hàng nhận tiền do DEV liên kết; thiếu thì dùng biến môi trường / mặc định)
-     txs/<uid>/<id>   { type: topup|purchase|refund|adjust, amount(+/-), balance, note, ref, ts }
+     wallet/<uid>     { balance, applied{key:ts}, createdAt, devGrant? }
+     inv/<uid>/<id>   { amount, code, status: creating|ready|bill|crediting|done|rejected|cancelled|expired, ts, upd, note?, reason?, hasQr?, hasBill? }
+     invq/<id>        { uid, amount, status, ts, upd }  (chỉ mục cho DEV)
+     invsec/<id>      { sec, tries, lockUntil }         (mã bảo mật: chỉ DEV đọc)
+     invfile/<uid>/<id>/{qr,bill}  (ảnh QR do DEV gửi, ảnh bill của khách)
+     invopen/<uid>    id hóa đơn đang mở (mỗi khách chỉ một hóa đơn mở)
+     txs/<uid>/<id>   { type: topup|purchase|refund|adjust|send, amount(+/-), balance, note, ref, ts }
      orders/<uid>/<id>{ status: pending|paid|refunded, items[], total, delivery[], ts }
-     bankhook/<khoá>  { status: processing|credited|unmatched|ignored, amount, content, uid, ts }
      shop/{cats,items}  (công khai, chỉ DEV ghi) · shopsecret/<id> (chỉ DEV: nội dung giao hàng)
      files/<uid>/<tid>/<fid> (tệp đính kèm chat, chỉ API ghi) · filemeta (bản nhỏ để Rules kiểm tra) · filecount/<uid>/<tid> */
 const crypto = require("crypto");
-const { vietqr } = require("./vietqr");
 
 const MIN = 60 * 1000, HOUR = 60 * MIN, DAY = 24 * HOUR;
-const TOPUP_TTL = 10 * MIN;
-const MIN_TOPUP = 10000, MAX_TOPUP = 50000000, MAX_ORDER = 1000000000;
+const MIN_TOPUP = 2000, MAX_TOPUP = 50000000, MAX_ORDER = 1000000000, DEV_GRANT = 130000000;
+const CREATING_TTL = 3 * DAY, READY_TTL = DAY, KEEP_TTL = 30 * DAY, WRONG_MAX = 5, LOCK_MS = 10 * MIN;
+const OPEN = ["creating", "ready", "bill", "crediting"];
 const ID_RE = /^[A-Za-z0-9_-]{1,60}$/;
-const CODE_PREFIX = "SKN";
-const BANK_DEFAULT = { bin: "970407", account: "19077584659010", name: "TANG HOANG MINH", bank: "Techcombank", short: "TCB" };
 const cleanTxt = (v, max) => String(v == null ? "" : v).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, c => (c === "đ" ? "d" : "D")).replace(/[^A-Za-z0-9 ]/g, "").replace(/\s+/g, " ").trim().slice(0, max);
 
 /* Tệp đính kèm chat: đuôi tệp → loại. Mọi thứ khác (đặc biệt tệp chạy được như .exe/.bat) đều bị từ chối. */
@@ -48,8 +51,7 @@ function sniff(buf, ext) { /* chữ ký đầu tệp phải khớp đuôi tệp 
 function createShop(deps) {
   const { db, who, limit, devOnly, ok, fail } = deps;
   const env = deps.env || {}, now = deps.now || (() => Date.now()), rnd = deps.rnd || ((a, b) => crypto.randomInt(a, b));
-  const envBank = { bin: String(env.BANK_BIN || BANK_DEFAULT.bin), account: String(env.BANK_ACCOUNT || BANK_DEFAULT.account), name: String(env.BANK_ACCOUNT_NAME || BANK_DEFAULT.name), bank: String(env.BANK_NAME || BANK_DEFAULT.bank), short: String(env.BANK_SHORT || BANK_DEFAULT.short) };
-  /* Ngân hàng nhận tiền: DEV liên kết trong trang quản trị (lưu nox_shopcfg/bank); chưa liên kết thì dùng biến môi trường / mặc định */
+  const DEV = String(env.DEV_EMAIL || "hminhgalaxy@gmail.com").trim().toLowerCase();
   /* Chỉ mục nhẹ cho SEO (nox_shopseo, ai cũng đọc, chỉ máy chủ ghi): tên, mô tả ngắn, giá, mục, tồn kho… KHÔNG có ảnh/nội dung bán,
      để trang chủ/danh mục dựng sẵn cho Google mà không phải tải ảnh base64 của mọi sản phẩm. */
   const seoOf = it => { it = it || {}; const o = { n: String(it.name || "").slice(0, 120), d: String(it.desc || "").replace(/\s+/g, " ").trim().slice(0, 200), p: Math.max(0, Math.floor(Number(it.price) || 0)), c: String(it.cat || "").slice(0, 40), t: Number(it.createdAt) || 0, h: Math.floor(Number(it.sold) || 0), a: it.active !== false };
@@ -61,11 +63,6 @@ function createShop(deps) {
   }
   async function seoTouch(ids) { /* sau khi bán: cập nhật tồn kho + số đã bán trong chỉ mục (không lỗi thì thôi) */
     for (const id of ids) { try { const b = "nox_shop/items/" + id, [stock, sold] = await Promise.all([db.get(b + "/stock"), db.get(b + "/sold")]); await db.update("nox_shopseo/" + id, { s: typeof stock === "number" ? Math.max(0, Math.floor(stock)) : null, h: Math.floor(Number(sold) || 0) }); } catch (_) {} }
-  }
-  async function getBank() {
-    let c = null; try { c = await db.get("nox_shopcfg/bank"); } catch (_) {}
-    if (c && typeof c === "object" && /^\d{6}$/.test(String(c.bin)) && /^\d{6,19}$/.test(String(c.account)) && c.name) return Object.assign({}, envBank, { bin: String(c.bin), account: String(c.account), name: String(c.name), bank: String(c.bank || envBank.bank), short: String(c.short || cleanTxt(c.bank, 10) || "BANK"), linked: true, by: c.by || "", linkedAt: c.ts || 0 });
-    return Object.assign({ linked: false }, envBank);
   }
   const newId = (p) => p + now().toString(36) + crypto.randomBytes(5).toString("hex");
   const int = (v) => (Number.isFinite(Number(v)) && Math.floor(Number(v)) === Number(v) ? Number(v) : NaN);
@@ -90,22 +87,22 @@ function createShop(deps) {
   }
   const logTx = (uid, id, o) => db.set("nox_txs/" + uid + "/" + id, Object.assign({ ts: now() }, o));
 
-  /* ───── Mã nạp riêng của từng tài khoản ───── */
-  async function ensureWallet(uid) {
-    let w = await db.get("nox_wallet/" + uid);
-    if (w && w.code) return w;
-    for (let i = 0; i < 12; i++) {
-      const code = CODE_PREFIX + String(rnd(0, 1e8)).padStart(8, "0");
-      const claim = await db.tx("nox_topcodes/" + code, (cur) => (cur === null ? uid : cur));
-      if (!claim.committed || claim.value !== uid) continue;
-      const set = await db.tx("nox_wallet/" + uid, (cur) => { if (cur && cur.code) return cur; return Object.assign({}, cur || {}, { code, balance: Math.floor((cur && cur.balance) || 0), createdAt: (cur && cur.createdAt) || now() }); });
-      w = set.value;
-      if (w && w.code !== code) await db.remove("nox_topcodes/" + code); /* có yêu cầu khác tạo trước → trả lại mã thừa */
+  /* ───── Ví: tạo lần đầu; tài khoản DEV được cấp sẵn 130.000.000₫ đúng MỘT lần (cờ devGrant nằm trong cùng giao dịch nên không thể cấp lại) ───── */
+  async function ensureWallet(uid, email) {
+    const isDev = !!email && String(email).trim().toLowerCase() === DEV;
+    let granted = false;
+    const r = await db.tx("nox_wallet/" + uid, (cur) => {
+      granted = false;
+      const w = cur && typeof cur === "object" ? cur : { balance: 0, createdAt: now() };
+      if (!w.createdAt) w.createdAt = now();
+      if (isDev && !w.devGrant) { w.balance = Math.floor(w.balance || 0) + DEV_GRANT; w.devGrant = now(); granted = true; }
+      else if (cur && typeof cur === "object") return cur;
       return w;
-    }
-    throw new Error("no code");
+    });
+    const w = r.value || { balance: 0 };
+    if (granted) { try { await logTx(uid, "devgrant", { type: "adjust", amount: DEV_GRANT, balance: Math.floor(w.balance || 0), note: "Starting balance for the website owner" }); } catch (_) {} }
+    return w;
   }
-  const bankInfo = (b) => ({ bin: b.bin, account: b.account, name: b.name, bank: b.bank });
   const verifiedUser = async (token) => {
     const r = await who(token, { needVerifiedSession: true }); if (r.err) return r;
     if (!r.u.verified) return { err: fail(403, "unverified", "Verify your email first.") };
@@ -114,40 +111,104 @@ function createShop(deps) {
     return r;
   };
 
-  async function sweepTopups(uid) {
-    const t = now(), all = (await db.get("nox_topups/" + uid)) || {}; let n = 0;
-    for (const k of Object.keys(all)) { const o = all[k] || {}; if (o.status === "pending" && t > (o.expiresAt || (o.ts || 0) + TOPUP_TTL)) { await db.update("nox_topups/" + uid + "/" + k, { status: "failed", failedAt: t }); n++; } }
-    return n;
+  /* ───── Hóa đơn nạp tiền ───── */
+  const ALNUM = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", MIXED = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  const randStr = (alpha, min, max) => { const n = rnd(min, max + 1); let o = ""; for (let i = 0; i < n; i++) o += alpha[rnd(0, alpha.length)]; return o; };
+  const normCode = (v) => String(v == null ? "" : v).toUpperCase().replace(/[\s-]/g, "");
+  const same = (a, b) => { const x = crypto.createHash("sha256").update(String(a)).digest(), y = crypto.createHash("sha256").update(String(b)).digest(); return crypto.timingSafeEqual(x, y); };
+  const IMG_RE = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/;
+  function readImage(data) { /* data URL ảnh png/jpeg/webp ≤ 300 KB, chữ ký đầu tệp phải khớp */
+    const m = IMG_RE.exec(String(data || "")); if (!m) return null;
+    const buf = Buffer.from(m[2], "base64"), ext = m[1] === "jpeg" ? "jpg" : m[1];
+    if (!buf.length || buf.length > LIMIT.image || !sniff(buf, ext)) return null;
+    return "data:image/" + m[1] + ";base64," + buf.toString("base64");
   }
+  const invPath = (uid, id) => "nox_inv/" + uid + "/" + id;
+  /* Chuyển trạng thái nguyên tử: chỉ chạy khi trạng thái hiện tại nằm trong `from`; trả hóa đơn mới hoặc null */
+  async function moveInv(uid, id, from, patch) {
+    let hit = null;
+    await db.tx(invPath(uid, id), (cur) => {
+      hit = null;
+      if (!cur || typeof cur !== "object" || !from.includes(cur.status)) return cur;
+      hit = Object.assign({}, cur, patch, { upd: now() }); return hit;
+    });
+    if (hit) { try { await db.update("nox_invq/" + id, { status: hit.status, upd: hit.upd }); } catch (_) {} }
+    return hit;
+  }
+  async function release(uid, id) { await db.tx("nox_invopen/" + uid, (cur) => (cur === id ? null : cur)); }
+  async function finish(uid, id, from, patch) { /* sang trạng thái kết thúc: nhả khoá "đang mở" + xoá ảnh QR (không còn cần) */
+    const h = await moveInv(uid, id, from, patch);
+    if (h) { try { await release(uid, id); await db.remove("nox_invfile/" + uid + "/" + id + "/qr"); } catch (_) {} }
+    return h;
+  }
+  const expiredInv = (v, t) => v && ((v.status === "creating" && t - (v.ts || 0) > CREATING_TTL) || (v.status === "ready" && t - (v.upd || v.ts || 0) > READY_TTL));
+  async function pruneOld(uid) { /* dọn hóa đơn đã kết thúc quá 30 ngày của chính người này */
+    const t = now(), all = (await db.get("nox_inv/" + uid)) || {};
+    for (const k of Object.keys(all)) { const v = all[k] || {}; if (!OPEN.includes(v.status) && t - (v.upd || v.ts || 0) > KEEP_TTL) { await db.remove(invPath(uid, k)); await db.remove("nox_invq/" + k); await db.remove("nox_invsec/" + k); await db.remove("nox_invfile/" + uid + "/" + k); } }
+  }
+  /* Hóa đơn đang mở của một người (nếu đã hết hạn thì đóng luôn) */
+  async function openOf(uid) {
+    const id = await db.get("nox_invopen/" + uid); if (!id) return null;
+    const v = await db.get(invPath(uid, id));
+    if (!v || !OPEN.includes(v.status)) { await release(uid, id); return null; }
+    if (expiredInv(v, now())) { await finish(uid, id, [v.status], { status: "expired" }); return null; }
+    return Object.assign({ id }, v);
+  }
+  const devInvoice = async (body) => { /* DEV chỉ chọn hóa đơn bằng id; mọi thứ còn lại lấy từ máy chủ */
+    const id = String(body.id || ""); if (!ID_RE.test(id)) return { err: fail(400, "bad_request", "Missing invoice.") };
+    const q = await db.get("nox_invq/" + id); if (!q || !ID_RE.test(String(q.uid || ""))) return { err: fail(404, "not_found", "That invoice doesn't exist.") };
+    const v = await db.get(invPath(q.uid, id)); if (!v) return { err: fail(404, "not_found", "That invoice doesn't exist.") };
+    return { id, uid: q.uid, v };
+  };
 
   const A = {
-    /* Số dư + mã nạp + thông tin ngân hàng (tạo ví lần đầu) */
+    /* Số dư + hóa đơn nạp đang mở (tạo ví lần đầu) */
     async "wallet-info"({ token }) {
       const { u, err } = await verifiedUser(token); if (err) return err;
-      const w = await ensureWallet(u.uid); await sweepTopups(u.uid);
-      return ok({ code: w.code, balance: Math.floor(w.balance || 0), bank: bankInfo(await getBank()), min: MIN_TOPUP, max: MAX_TOPUP, ttl: TOPUP_TTL });
+      const w = await ensureWallet(u.uid, u.email), o = await openOf(u.uid);
+      return ok({ balance: Math.floor(w.balance || 0), min: MIN_TOPUP, max: MAX_TOPUP, open: o ? o.id : null });
     },
-    /* Tạo yêu cầu nạp số tiền cố định → trả chuỗi VietQR kèm số tiền + nội dung (= mã của tài khoản) */
-    async "topup-create"({ token, body }) {
+    /* Khách tạo hóa đơn nạp: số tiền ≥ 2.000₫, bội của 1.000₫. Mỗi khách chỉ có một hóa đơn mở. */
+    async "inv-create"({ token, body }) {
       const { u, err } = await verifiedUser(token); if (err) return err;
       const amount = int(body.amount);
-      if (!(amount >= MIN_TOPUP && amount <= MAX_TOPUP) || amount % 1000 !== 0) return fail(400, "bad_amount", "Choose an amount between 10,000 and 50,000,000 VND, in steps of 1,000.");
-      if (!(await limit("topup:" + u.uid, 20, HOUR))) return fail(429, "rate_limited", "Too many requests. Try again in a while.");
-      const w = await ensureWallet(u.uid), id = newId("t"), t = now(), bk = await getBank();
-      const old = (await db.get("nox_topups/" + u.uid)) || {};
-      for (const k of Object.keys(old)) {
-        const o = old[k] || {};
-        if (t - (o.ts || 0) > 3 * DAY) await db.remove("nox_topups/" + u.uid + "/" + k);
-        else if (o.status === "pending") await db.update("nox_topups/" + u.uid + "/" + k, t > (o.expiresAt || (o.ts || 0) + TOPUP_TTL) ? { status: "failed", failedAt: t } : { status: "cancelled", cancelledAt: t });
-      }
-      const qr = vietqr({ bin: bk.bin, account: bk.account, amount, content: w.code, merchant: bk.short });
-      await db.set("nox_topups/" + u.uid + "/" + id, { amount, code: w.code, status: "pending", ts: t, expiresAt: t + TOPUP_TTL, qr, bank: bankInfo(bk) });
-      return ok({ id, amount, code: w.code, bank: bankInfo(bk), qr, ts: t, expiresAt: t + TOPUP_TTL });
+      if (!(amount >= MIN_TOPUP && amount <= MAX_TOPUP) || amount % 1000 !== 0) return fail(400, "bad_amount", "Choose an amount from 2,000 to 50,000,000 VND, in steps of 1,000.");
+      if (!(await limit("inv:" + u.uid, 12, HOUR))) return fail(429, "rate_limited", "Too many requests. Try again in a while.");
+      await ensureWallet(u.uid, u.email);
+      const o = await openOf(u.uid); if (o) return fail(409, "open_invoice", "You already have an open top-up invoice.", { id: o.id });
+      const id = newId("i"), t = now();
+      const claim = await db.tx("nox_invopen/" + u.uid, (cur) => (cur === null ? id : cur));
+      if (!claim.committed || claim.value !== id) { const o2 = await openOf(u.uid); return fail(409, "open_invoice", "You already have an open top-up invoice.", o2 ? { id: o2.id } : undefined); }
+      const code = randStr(ALNUM, 9, 12), sec = randStr(MIXED, 10, 14);
+      try {
+        await db.set("nox_invsec/" + id, { sec, tries: 0 });
+        await db.set("nox_invq/" + id, { uid: u.uid, amount, status: "creating", ts: t, upd: t });
+        await db.set(invPath(u.uid, id), { amount, code, status: "creating", ts: t, upd: t });
+      } catch (e) { try { await release(u.uid, id); } catch (_) {} throw e; }
+      try { await pruneOld(u.uid); } catch (_) {}
+      return ok({ id, amount, code, status: "creating" });
     },
-    /* Chốt các hóa đơn nạp quá 10 phút mà chưa thấy tiền → "Thất bại" (trình duyệt cũng tự hiển thị đúng, hàm này để lưu lại) */
-    async "topup-sweep"({ token }) {
+    /* Khách hủy khi chưa gửi bill */
+    async "inv-cancel"({ token, body }) {
       const { u, err } = await verifiedUser(token); if (err) return err;
-      return ok({ failed: await sweepTopups(u.uid) });
+      const id = String(body.id || ""); if (!ID_RE.test(id)) return fail(400, "bad_request", "Missing invoice.");
+      const v = await db.get(invPath(u.uid, id)); if (!v) return fail(404, "not_found", "That invoice doesn't exist.");
+      const h = await finish(u.uid, id, ["creating", "ready"], { status: "cancelled" });
+      if (!h) return fail(409, "wrong_state", v.status === "cancelled" ? "That invoice was already cancelled." : "This invoice can't be cancelled any more.");
+      return ok({ status: "cancelled" });
+    },
+    /* Khách gửi ảnh bill chuyển tiền (chỉ khi DEV đã gửi QR) */
+    async "inv-bill"({ token, body }) {
+      const { u, err } = await verifiedUser(token); if (err) return err;
+      const id = String(body.id || ""); if (!ID_RE.test(id)) return fail(400, "bad_request", "Missing invoice.");
+      if (!(await limit("invbill:" + u.uid, 10, HOUR))) return fail(429, "rate_limited", "Too many requests. Try again in a while.");
+      const v = await db.get(invPath(u.uid, id)); if (!v) return fail(404, "not_found", "That invoice doesn't exist.");
+      if (v.status !== "ready") return fail(409, "wrong_state", "This invoice isn't waiting for a receipt.");
+      const img = readImage(body.image); if (!img) return fail(400, "bad_file", "Send a PNG, JPG or WebP picture (up to 300 KB).");
+      await db.set("nox_invfile/" + u.uid + "/" + id + "/bill", img);
+      const h = await moveInv(u.uid, id, ["ready"], { status: "bill", billAt: now(), hasBill: true });
+      if (!h) return fail(409, "wrong_state", "This invoice isn't waiting for a receipt.");
+      return ok({ status: "bill" });
     },
 
     /* Mua hàng: trừ ví + giữ hàng + giao hàng trong một luồng; lỗi giữa chừng thì hoàn lại hàng và xoá đơn */
@@ -167,7 +228,7 @@ function createShop(deps) {
         total += price * qty;
       }
       if (total > MAX_ORDER) return fail(400, "bad_cart", "This order is too large.");
-      const w = await ensureWallet(u.uid);
+      const w = await ensureWallet(u.uid, u.email);
       if ((w.balance || 0) < total) return fail(402, "insufficient", "Not enough balance. Top up your wallet first.");
       const oid = newId("o"), t = now();
       await db.set("nox_orders/" + u.uid + "/" + oid, { status: "pending", total, ts: t, items: lines.map(l => ({ id: l.id, name: l.name, price: l.price, qty: l.qty })) });
@@ -220,55 +281,59 @@ function createShop(deps) {
     },
 
     /* ───── Chỉ DEV ───── */
-    /* Trạng thái cấu hình nhận tiền tự động (chỉ báo "đã đặt khoá hay chưa", KHÔNG lộ khoá) */
-    async "shop-status"({ token }) {
+    /* DEV nhận yêu cầu và gửi mã QR để khách chuyển tiền */
+    async "inv-accept"({ token, body }) {
       const { err } = await devOnly(token); if (err) return err;
-      const bk = await getBank();
-      return ok({ bank: Object.assign(bankInfo(bk), { short: bk.short }), linked: !!bk.linked, linkedBy: bk.by || "", linkedAt: bk.linkedAt || 0, hook: { sepayKey: !!env.SEPAY_API_KEY, sepaySecret: !!env.SEPAY_SECRET, casso: !!env.CASSO_SECURE_TOKEN }, adminDb: true });
+      const d = await devInvoice(body); if (d.err) return d.err;
+      const qr = readImage(body.qr); if (!qr) return fail(400, "bad_file", "Upload the QR as a PNG, JPG or WebP picture (up to 300 KB).");
+      const note = String(body.note || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 200);
+      await db.set("nox_invfile/" + d.uid + "/" + d.id + "/qr", qr);
+      const h = await moveInv(d.uid, d.id, ["creating", "ready"], { status: "ready", hasQr: true, note });
+      if (!h) { await db.remove("nox_invfile/" + d.uid + "/" + d.id + "/qr"); return fail(409, "wrong_state", "This invoice can't take a QR any more."); }
+      return ok({ status: "ready" });
     },
-    /* DEV liên kết ngân hàng nhận tiền: mã QR nạp tiền của mọi người dùng sẽ dùng tài khoản này */
-    async "bank-set"({ token, body }) {
-      const { u, err } = await devOnly(token); if (err) return err;
-      if (body.reset === true) { await db.remove("nox_shopcfg/bank"); return ok({ bank: bankInfo(await getBank()), linked: false }); }
-      const bin = String(body.bin || "").replace(/\s/g, ""), account = String(body.account || "").replace(/[\s.-]/g, ""), name = cleanTxt(body.name, 40).toUpperCase(), bankName = cleanTxt(body.bank, 40), short = cleanTxt(body.short || body.bank, 12).replace(/ /g, "") || "BANK";
-      if (!/^\d{6}$/.test(bin)) return fail(400, "bad_bank", "The bank code (BIN) must be 6 digits.");
-      if (!/^\d{6,19}$/.test(account)) return fail(400, "bad_bank", "The account number must be 6 to 19 digits.");
-      if (name.length < 3) return fail(400, "bad_bank", "Enter the account holder name (no accents).");
-      if (!bankName) return fail(400, "bad_bank", "Enter the bank name.");
-      const rec = { bin, account, name, bank: bankName, short, by: u.email.slice(0, 120), ts: now() };
-      await db.set("nox_shopcfg/bank", rec);
-      const bk = await getBank();
-      return ok({ bank: Object.assign(bankInfo(bk), { short: bk.short }), linked: true, qr: vietqr({ bin: bk.bin, account: bk.account, content: "TEST", merchant: bk.short }) });
-    },
-    /* DEV tạo mã QR bất kỳ bằng ngân hàng đã liên kết (số tiền tuỳ chọn + nội dung chuyển khoản) */
-    async "bank-qr"({ token, body }) {
+    async "inv-reject"({ token, body }) {
       const { err } = await devOnly(token); if (err) return err;
-      const amount = body.amount == null || body.amount === "" ? 0 : int(body.amount);
-      if (!(amount >= 0 && amount <= MAX_TOPUP * 20)) return fail(400, "bad_amount", "Enter a whole amount (or leave it empty).");
-      const content = cleanTxt(body.content, 25), bk = await getBank();
-      return ok({ qr: vietqr({ bin: bk.bin, account: bk.account, amount, content, merchant: bk.short }), amount, content, bank: bankInfo(bk) });
+      const d = await devInvoice(body); if (d.err) return d.err;
+      const reason = String(body.reason || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 200);
+      const h = await finish(d.uid, d.id, ["creating", "ready", "bill"], { status: "rejected", reason });
+      if (!h) return fail(409, "wrong_state", "This invoice can't be declined any more.");
+      return ok({ status: "rejected" });
     },
-    async "wallet-adjust"({ token, body }) { /* cộng/trừ tay (bù tiền, xử lý giao dịch khách ghi sai nội dung) */
+    /* "Nhập tiền": DEV nhập mã code + mã bảo mật; số tiền và id do hóa đơn quyết định, không sửa được */
+    async "inv-credit"({ token, body }) {
       const { u, err } = await devOnly(token); if (err) return err;
-      let uid = String(body.uid || ""); if (!ID_RE.test(uid)) return fail(400, "bad_request", "Missing user.");
-      const amount = int(body.amount); if (!(amount !== 0 && Math.abs(amount) <= MAX_ORDER)) return fail(400, "bad_amount", "Enter a non-zero whole amount.");
+      if (!(await limit("invcredit:" + u.uid, 60, HOUR))) return fail(429, "rate_limited", "Too many attempts. Try again in a while.");
+      const d = await devInvoice(body); if (d.err) return d.err;
+      const { id, uid } = d; let v = d.v;
+      if (v.status === "done") return ok({ already: true, status: "done" });
+      if (!["bill", "crediting"].includes(v.status)) return fail(409, "wrong_state", v.status === "creating" || v.status === "ready" ? "The customer hasn't sent the receipt yet." : "This invoice can't be paid any more.");
+      if (uid === u.uid) return fail(400, "self", "You can't top up your own wallet this way.");
+      const sec = (await db.get("nox_invsec/" + id)) || {}, t = now();
+      if (sec.lockUntil && sec.lockUntil > t) return fail(429, "locked", "Too many wrong entries. Try again in " + Math.ceil((sec.lockUntil - t) / 60000) + " minute(s).");
+      const amount = int(body.amount);
+      const good = amount === v.amount && same(normCode(body.code), normCode(v.code)) && typeof sec.sec === "string" && same(String(body.sec || "").trim(), sec.sec);
+      if (!good) {
+        const tries = (sec.tries || 0) + 1;
+        await db.update("nox_invsec/" + id, tries >= WRONG_MAX ? { tries: 0, lockUntil: t + LOCK_MS } : { tries });
+        return fail(400, "mismatch", amount !== v.amount ? "The amount must be exactly " + v.amount + " VND for this invoice." : "The code or security code doesn't match this invoice.");
+      }
+      if ((sec.tries || 0) > 0) await db.update("nox_invsec/" + id, { tries: 0 });
+      /* Từ đây mọi bước đều có khoá chống trùng nên gọi lại sau khi lỗi giữa chừng vẫn an toàn (không cộng/trừ hai lần) */
+      v = await moveInv(uid, id, ["bill"], { status: "crediting" }) || v;
+      const dw = await ensureWallet(u.uid, u.email); void dw;
+      const out = await walletApply(u.uid, -v.amount, { key: "invout_" + id });
+      if (!out.ok && !out.dup) {
+        await moveInv(uid, id, ["crediting"], { status: "bill" });
+        return out.reason === "insufficient" ? fail(402, "dev_insufficient", "Your wallet doesn't have enough balance (" + out.balance + " VND).") : fail(409, "conflict", "Please try again.");
+      }
+      if (out.ok) await logTx(u.uid, "invout_" + id, { type: "send", amount: -v.amount, balance: out.balance, ref: id, note: "Top-up " + v.code });
       await ensureWallet(uid);
-      const id = newId("a"), r = await walletApply(uid, amount, { key: id });
-      if (!r.ok) return r.reason === "insufficient" ? fail(400, "insufficient", "That would make the balance negative.") : fail(409, "conflict", "Please try again.");
-      await logTx(uid, id, { type: "adjust", amount, balance: r.balance, note: String(body.note || "Admin adjustment").slice(0, 200), by: u.email.slice(0, 120) });
-      return ok({ balance: r.balance });
-    },
-    async "bank-assign"({ token, body }) { /* gán giao dịch ngân hàng "chưa khớp" cho một tài khoản */
-      const { u, err } = await devOnly(token); if (err) return err;
-      const key = String(body.hook || ""), uid = String(body.uid || "");
-      if (!ID_RE.test(key) || !ID_RE.test(uid)) return fail(400, "bad_request", "Missing data.");
-      const h = await db.get("nox_bankhook/" + key); if (!h || h.status !== "unmatched") return fail(404, "not_found", "That transaction can't be assigned.");
-      await ensureWallet(uid);
-      const r = await walletApply(uid, h.amount, { key: "h_" + key });
-      if (!r.ok && !r.dup) return fail(409, "conflict", "Please try again.");
-      if (r.ok) await logTx(uid, "h_" + key, { type: "topup", amount: h.amount, balance: r.balance, note: "Bank transfer (assigned by admin)", ref: key, by: u.email.slice(0, 120) });
-      await db.update("nox_bankhook/" + key, { status: "credited", uid, assignedBy: u.email.slice(0, 120), ts: now() });
-      return ok({ balance: r.balance });
+      const inn = await walletApply(uid, v.amount, { key: "inv_" + id });
+      if (!inn.ok && !inn.dup) return fail(409, "conflict", "The money left your wallet but the customer isn't credited yet. Press the button again to finish.");
+      if (inn.ok) await logTx(uid, "inv_" + id, { type: "topup", amount: v.amount, balance: inn.balance, ref: id, note: "Top-up " + v.code });
+      await finish(uid, id, ["crediting", "bill"], { status: "done", doneAt: now() });
+      return ok({ status: "done", balance: out.ok ? out.balance : undefined });
     },
     async "seo-sync"({ token }) { /* dựng lại chỉ mục SEO của cửa hàng từ toàn bộ sản phẩm (DEV; tự gọi sau mỗi lần lưu/xóa/ẩn sản phẩm) */
       const { err } = await devOnly(token); if (err) return err;
@@ -320,63 +385,6 @@ function createShop(deps) {
     }
   };
 
-  /* ───── Webhook ngân hàng (SePay / Casso) ───── */
-  const sha = (s) => crypto.createHash("sha256").update(String(s)).digest();
-  const eq = (a, b) => crypto.timingSafeEqual(sha(a), sha(b));
-  function authenticate(h, raw) {
-    const g = (k) => String(h[k] || h[k.toLowerCase()] || "");
-    const apikey = env.SEPAY_API_KEY, secret = env.SEPAY_SECRET, casso = env.CASSO_SECURE_TOKEN;
-    if (!apikey && !secret && !casso) return "off";
-    const a = g("authorization");
-    if (apikey && /^apikey /i.test(a) && eq(a.slice(7).trim(), apikey)) return "sepay";
-    if (secret && g("x-sepay-signature") && g("x-sepay-timestamp")) {
-      const ts = Number(g("x-sepay-timestamp")); if (!Number.isFinite(ts) || Math.abs(now() / 1000 - ts) > 600) return "";
-      const want = "sha256=" + crypto.createHmac("sha256", secret).update(ts + "." + raw).digest("hex");
-      if (eq(g("x-sepay-signature"), want)) return "sepay";
-    }
-    if (casso && g("secure-token") && eq(g("secure-token"), casso)) return "casso";
-    return "";
-  }
-  const codeFrom = (text) => { const t = String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); const m = new RegExp(CODE_PREFIX + "(\\d{8})").exec(t); return m ? CODE_PREFIX + m[1] : ""; };
-  function normalize(provider, j) {
-    const out = [];
-    if (provider === "casso" || (j && Array.isArray(j.data))) {
-      for (const x of (j && j.data) || []) out.push({ key: "casso_" + x.id, amount: int(x.amount), text: (x.description || "") + " " + (x.tid || ""), content: String(x.description || "").slice(0, 300), dir: x.amount > 0 ? "in" : "out" });
-    } else if (j && j.id != null) {
-      out.push({ key: "sepay_" + j.id, amount: int(j.transferAmount), text: (j.content || "") + " " + (j.description || "") + " " + (j.code || ""), content: String(j.content || j.description || "").slice(0, 300), dir: j.transferType === "in" ? "in" : "out", account: j.accountNumber != null ? String(j.accountNumber) : "" });
-    }
-    return out.filter(x => /^[A-Za-z0-9_]{3,60}$/.test(x.key));
-  }
-  async function processOne(x) {
-    if (x.dir !== "in" || !(x.amount > 0)) return "ignored";
-    const bk = await getBank(); if (x.account && x.account !== bk.account) return "ignored";
-    const t = now(); let first = false;
-    await db.tx("nox_bankhook/" + x.key, (cur) => { first = false; if (cur === null) { first = true; return { status: "processing", amount: x.amount, content: x.content, ts: t }; } if (cur.status === "processing" && t - (cur.ts || 0) > 2 * MIN) { first = true; return Object.assign({}, cur, { ts: t }); } return cur; });
-    if (!first) return "duplicate";
-    const code = codeFrom(x.text), uid = code ? await db.get("nox_topcodes/" + code) : null;
-    if (!uid) { await db.update("nox_bankhook/" + x.key, { status: "unmatched", code: code || null }); return "unmatched"; }
-    const r = await walletApply(uid, x.amount, { key: "h_" + x.key });
-    if (r.ok) {
-      await logTx(uid, "h_" + x.key, { type: "topup", amount: x.amount, balance: r.balance, note: "Bank transfer", ref: x.key });
-      /* khớp hóa đơn nạp: ưu tiên hóa đơn còn hạn; tiền đến muộn (hóa đơn đã Thất bại/Đã hủy) vẫn được cộng và đánh dấu "đến muộn" */
-      const ps = (await db.get("nox_topups/" + uid)) || {}, ks = Object.keys(ps).filter(k => ps[k].amount === x.amount).sort((a, b) => ps[b].ts - ps[a].ts);
-      const live = ks.filter(k => ps[k].status === "pending" && t <= (ps[k].expiresAt || (ps[k].ts || 0) + TOPUP_TTL)), lateK = ks.filter(k => ps[k].status === "failed" || ps[k].status === "cancelled" || ps[k].status === "pending");
-      if (live.length) await db.update("nox_topups/" + uid + "/" + live[live.length - 1], { status: "done", doneAt: t });
-      else if (lateK.length) await db.update("nox_topups/" + uid + "/" + lateK[0], { status: "done", doneAt: t, late: true });
-    } else if (!r.dup) throw new Error("credit failed " + (r.reason || ""));
-    await db.update("nox_bankhook/" + x.key, { status: "credited", uid, code });
-    return "credited";
-  }
-  async function webhook({ headers, raw, ip }) {
-    const h = {}; Object.keys(headers || {}).forEach(k => { h[k.toLowerCase()] = headers[k]; });
-    const provider = authenticate(h, raw);
-    if (provider === "off") return { status: 503, body: { success: false, message: "not configured" } };
-    if (!provider) { if (ip && !(await limit("hookfail:" + sha(ip).toString("hex").slice(0, 16), 60, 10 * MIN))) return { status: 429, body: { success: false } }; return { status: 401, body: { success: false } }; }
-    let j; try { j = JSON.parse(raw); } catch (_) { return { status: 400, body: { success: false } }; }
-    const list = normalize(provider, j), res = [];
-    for (const x of list) res.push(await processOne(x));
-    return { status: 200, body: { success: true, results: res } };
-  }
-  return { actions: A, webhook, bank: async () => bankInfo(await getBank()), getBank, codeFrom, ensureWallet, sweepTopups };
+  return { actions: A, ensureWallet };
 }
-module.exports = { createShop, MIN_TOPUP, MAX_TOPUP, TOPUP_TTL, EXT, sniff };
+module.exports = { createShop, MIN_TOPUP, MAX_TOPUP, DEV_GRANT, EXT, sniff };

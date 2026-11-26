@@ -16,7 +16,7 @@ export async function mount(ctx) {
   const draw = () => {
     const arr = S.items(c.id);
     ctx.setPage({ title: "Dữ liệu: " + c.label, crumbs, noindex: true, count: arr ? arr.length + " mục" : null, actions: `<a class="btn primary" href="${base}/create">${ICO.plus}Thêm mới</a>` });
-    if (arr == null) { list.innerHTML = S.store.status[c.id] === "error" ? `<div class="statebox err">${ICO.warn}<p>Không tải được dữ liệu.</p></div>` : '<div class="statebox"><p>Đang tải…</p></div>'; return; }
+    if (arr == null) { list.innerHTML = S.store.status[c.id] === "error" ? `<div class="statebox err">${ICO.warn}<p>Không tải được dữ liệu.</p></div>` : '<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>'; return; }
     const f = vi(q.trim()), res = f ? arr.filter(it => vi(it.name).includes(f)) : arr;
     list.innerHTML = res.length ? res.map(it => `<div class="drow"><span class="ci">${icoOf(c)}</span><span class="nm" title="${esc(it.name)}">${esc(it.name)}</span><small>${esc(fmtTime(it.ts))}</small>
       <a class="ib" href="${S.itemHref(c.id, it.key)}" aria-label="Xem ${esc(it.name)}">${ICO.eye}</a><a class="ib" href="${S.itemHref(c.id, it.key)}/edit" aria-label="Sửa ${esc(it.name)}">${ICO.pencil}</a>

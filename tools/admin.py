@@ -11,8 +11,7 @@ Chuẩn bị: tải khoá dịch vụ (Firebase → Project settings → Service
 Dùng:
   python3 tools/admin.py --key serviceAccountKey.json wallet <uid>
   python3 tools/admin.py --key serviceAccountKey.json orders <uid>
-  python3 tools/admin.py --key serviceAccountKey.json topups <uid>
-  python3 tools/admin.py --key serviceAccountKey.json bank
+  python3 tools/admin.py --key serviceAccountKey.json invoices <uid>
   python3 tools/admin.py --key serviceAccountKey.json adjust <uid> <số_tiền_±> "lý do"   # cộng/trừ ví (ghi cả lịch sử)
 
 Lưu ý: script này ghi thẳng vào Realtime Database bằng quyền Admin (bỏ qua Rules). Cẩn thận khi dùng `adjust`.
@@ -62,16 +61,14 @@ def main():
     ap.add_argument("--key", required=True)
     ap.add_argument("--url", default=DEFAULT_URL)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for c in ("wallet", "orders", "topups"):
+    for c in ("wallet", "orders", "invoices"):
         sub.add_parser(c).add_argument("uid")
-    sub.add_parser("bank")
     a = sub.add_parser("adjust"); a.add_argument("uid"); a.add_argument("amount", type=int); a.add_argument("reason")
     args = ap.parse_args()
     init(args.key, args.url)
     if args.cmd == "wallet": show("nox_wallet/" + args.uid)
     elif args.cmd == "orders": show("nox_orders/" + args.uid)
-    elif args.cmd == "topups": show("nox_topups/" + args.uid)
-    elif args.cmd == "bank": show("nox_shopcfg/bank")
+    elif args.cmd == "invoices": show("nox_inv/" + args.uid)
     elif args.cmd == "adjust": adjust(args.uid, args.amount, args.reason)
 
 

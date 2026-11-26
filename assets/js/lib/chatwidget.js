@@ -43,7 +43,7 @@ function showConv() {
 function render() {
   if (!isOpen) return;
   if (!real()) { bodyEl.innerHTML = `<div class="statebox sm">${ICO.chat}<p>Hãy đăng nhập bằng tài khoản thật để nhắn tin với dev.</p><a class="btn primary" href="/login?next=${encodeURIComponent(location.pathname)}" data-cwlogin>Đăng nhập</a></div>`; const a = bodyEl.querySelector("[data-cwlogin]"); a.addEventListener("click", () => close()); return; }
-  if (hasChat === null) { bodyEl.innerHTML = `<div class="statebox sm"><p>Đang tải…</p></div>`; return; }
+  if (hasChat === null) { bodyEl.innerHTML = `<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>`; return; }
   hasChat ? showConv() : startForm();
 }
 function watch() {

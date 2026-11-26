@@ -9,6 +9,7 @@ import { clampText } from "../../lib/collapse.js";
 import { riskGate } from "../../lib/risk.js";
 import { pushRecent } from "../../lib/favs.js";
 import { likeBtnHTML, moreBtnHTML, saveBtnHTML, shareItem } from "../../lib/itemactions.js";
+import { mediaHTML, bindMedia } from "../../lib/mediaview.js";
 import { resolveCat, notFound, crumbsFor, settled, missingHTML } from "./shared.js";
 
 export async function mount(ctx) {
@@ -29,7 +30,7 @@ export async function mount(ctx) {
     ctx.el.innerHTML = `<article class="detail">
       <div class="meta"><span class="badge">${icoOf(cat).replace("<svg", "<svg aria-hidden=\"true\"")}${esc(cat.label)}</span>
         ${it.copies != null ? `<span>Đã sao chép ${it.copies} lần</span>` : ""}${times.map(t => `<span>${esc(t)}</span>`).join("")}</div>
-      ${it.img ? `<img class="detail-img" src="${esc(it.img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
+      ${mediaHTML(it)}
       ${it.desc ? `<p class="detail-desc">${esc(it.desc)}</p>` : ""}
       ${it.code ? `<div class="code"><pre tabindex="0">${esc(it.code)}</pre></div>` : ""}
       ${hasUrl ? `<div class="urlbox">${ICO.link}<code>${esc(it.url.trim())}</code></div>` : ""}
@@ -41,7 +42,7 @@ export async function mount(ctx) {
         <a class="btn ghost" href="${base}">${ICO.back}Quay lại</a>
         ${(session.isDev || session.isEditor) ? `<button class="btn danger" type="button" id="delBtn">${ICO.trash}Xóa</button>` : ""}
       </div></article>`;
-    pushRecent(cat.id, it.key);
+    bindMedia(ctx.el); pushRecent(cat.id, it.key);
     const sb = ctx.el.querySelector("#shareBtn"); if (sb) sb.addEventListener("click", () => shareItem(cat.id, it.key));
     const del = ctx.el.querySelector("#delBtn");
     clampText(ctx.el.querySelector(".detail-desc"), 8);

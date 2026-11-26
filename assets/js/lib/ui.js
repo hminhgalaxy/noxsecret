@@ -30,7 +30,7 @@ export function cardHTML(it, catId, i, showChip) {
   acts.push(`<a class="btn soft sm" href="${href}" data-stop>Chi tiết</a>`);
   return `<article class="card" style="--d:${Math.min(i, 10) * 45}ms" data-href="${href}" tabindex="0">
     <div class="card-top"><span class="ico">${icoOf(c)}</span>${showChip ? `<span class="badge">${esc(c.label)}</span>` : ""}<time>${it.ts ? esc(fmtTime(it.ts)) : ""}</time>${moreBtnHTML(catId, it.key)}</div>
-    ${it.img ? `<img class="card-thumb" src="${esc(it.img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
+    ${it.img ? `<div class="card-media"><img class="card-thumb" src="${esc(it.img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">${it.video ? `<span class="card-play" title="Có video">${ICO.video}</span>` : ""}${(it.img2 || it.img3) ? `<span class="card-more">+${(it.img2 ? 1 : 0) + (it.img3 ? 1 : 0)}</span>` : ""}</div>` : it.video ? `<div class="card-media vid"><span class="card-play big">${ICO.video}</span><b>Video</b></div>` : ""}
     <h3 class="card-title"><a href="${href}" data-stop>${esc(it.name)}</a></h3>
     ${it.desc ? `<p class="card-desc">${esc(it.desc)}</p>` : ""}
     ${it.code ? `<pre class="card-code">${esc(String(it.code).slice(0, 160))}</pre>` : ""}

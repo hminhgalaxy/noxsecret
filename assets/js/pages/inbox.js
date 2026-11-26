@@ -28,7 +28,7 @@ export function mount(ctx) {
       <div class="mbx-top"><h2>Hộp thư</h2>${dev ? "" : `<button class="btn primary sm" id="mbNew" type="button">${ICO.chat}Nhắn với dev</button>`}</div>
       <div class="mbx-search"><span aria-hidden="true">${ICO.search}</span><input id="mbQ" type="search" placeholder="Tìm cuộc trò chuyện" aria-label="Tìm cuộc trò chuyện" autocomplete="off"></div>
       <div class="chips" id="chips" role="tablist">${FIL.map(([v, l]) => `<button type="button" role="tab" data-f="${v}" class="${v === "all" ? "on" : ""}">${l}</button>`).join("")}</div>
-      <div class="mbx-list" id="tl"><div class="statebox sm"><p>Đang tải…</p></div></div></aside>
+      <div class="mbx-list" id="tl"><div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div></div></aside>
     <section class="mbx-main" id="cv" aria-live="polite"></section></div></div><div class="act-wrap" id="mbAct"${startTab === "act" ? "" : " hidden"}></div>`;
   const root = ctx.el.querySelector("#mbx"), tl = ctx.el.querySelector("#tl"), cv = ctx.el.querySelector("#cv");
   const who = uid => { const u = (S.store.users || []).find(x => x.uid === uid); return u ? (u.name || u.email || uid) : "Người dùng"; };
@@ -84,12 +84,12 @@ export function mount(ctx) {
     drawList();
   }
   /* ───── Tab "Hoạt động": đơn hàng, hóa đơn nạp, hoàn tiền; dev thêm "việc cần xử lý" ───── */
-  const actBox = ctx.el.querySelector("#mbAct"), msgBox = ctx.el.querySelector("#mbMsg"); let actF = "all", todo = { manual: 0, unmatched: 0, pending: 0 };
+  const actBox = ctx.el.querySelector("#mbAct"), msgBox = ctx.el.querySelector("#mbMsg"); let actF = "all", todo = { manual: 0, topup: 0, pending: 0 };
   const drawAct = () => {
     const L = buildActivity().filter(a => actF === "all" || a.k === actF);
-    actBox.innerHTML = `${dev ? `<div class="act-todo" aria-label="Việc cần xử lý"><a href="/dev/shop" class="todo${todo.manual ? " hot" : ""}"><b>${todo.manual}</b><span>Đơn cần giao tay</span></a><a href="/dev/shop" class="todo${todo.unmatched ? " hot" : ""}"><b>${todo.unmatched}</b><span>Giao dịch ngân hàng chưa khớp</span></a><a href="/dev/review" class="todo${todo.pending ? " hot" : ""}"><b>${todo.pending}</b><span>Bài chờ duyệt</span></a></div>` : ""}
+    actBox.innerHTML = `${dev ? `<div class="act-todo" aria-label="Việc cần xử lý"><a href="/dev/shop" class="todo${todo.manual ? " hot" : ""}"><b>${todo.manual}</b><span>Đơn cần giao tay</span></a><a href="/dev/topup" class="todo${todo.topup ? " hot" : ""}"><b>${todo.topup}</b><span>Yêu cầu nạp tiền</span></a><a href="/dev/review" class="todo${todo.pending ? " hot" : ""}"><b>${todo.pending}</b><span>Bài chờ duyệt</span></a></div>` : ""}
       <div class="chips" id="actChips" role="tablist">${ACT_F.map(([v, l]) => `<button type="button" role="tab" data-f="${v}" class="${v === actF ? "on" : ""}">${l}</button>`).join("")}</div>
-      ${shop.orders === null && shop.topups === null ? '<div class="statebox sm"><p>Đang tải…</p></div>' : activityHTML(L, "Chưa có hoạt động nào. Hãy nạp tiền hoặc mua hàng để bắt đầu.")}`;
+      ${shop.orders === null && shop.invs === null ? '<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>' : activityHTML(L, "Chưa có hoạt động nào. Hãy nạp tiền hoặc mua hàng để bắt đầu.")}`;
     actBox.querySelectorAll("#actChips [data-f]").forEach(b => b.addEventListener("click", () => { actF = b.dataset.f; drawAct(); }));
   };
   const showTab = v => { const a = v === "act"; msgBox.hidden = a; actBox.hidden = !a; ctx.el.querySelectorAll("#mbT [data-v]").forEach(b => { const on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on)); }); if (a) drawAct(); };
@@ -101,7 +101,7 @@ export function mount(ctx) {
   tl.addEventListener("click", e => { const b = e.target.closest("[data-k]"); if (b) select(b.dataset.k); });
   const route = () => { const k = ctx.params.tid ? (ctx.params.tid) : ""; if (k) select(k, false); else placeholder(); };
   const first = () => { if (!loaded) { loaded = true; drawList(); route(); } else drawList(); };
-  const offs = [subscribeShop(t => { if (!actBox.hidden && (t === "orders" || t === "topups" || t === "txs")) drawAct(); })].concat(dev ? [H.listenAllPending(v => { todo.pending = (v || []).filter(p => p.status === "pending").length; if (!actBox.hidden) drawAct(); }), (() => { const r1 = db.ref("nox_orders"), h1 = r1.on("value", sn => { const v = sn.val() || {}; todo.manual = Object.values(v).reduce((n, o) => n + Object.values(o || {}).filter(x => x.status === "paid" && x.manual && !x.delivered).length, 0); if (!actBox.hidden) drawAct(); }, () => {}); return () => r1.off("value", h1); })(), (() => { const r2 = db.ref("nox_bankhook"), h2 = r2.on("value", sn => { todo.unmatched = Object.values(sn.val() || {}).filter(x => x.status === "unmatched").length; if (!actBox.hidden) drawAct(); }, () => {}); return () => r2.off("value", h2); })()] : []).concat(dev ? [H.listenAllThreads(v => { all = v; first(); }), H.listenPerms(v => { perms = v; }), S.subscribe(t => { if (t === "users") drawList(); })]
+  const offs = [subscribeShop(t => { if (!actBox.hidden && (t === "orders" || t === "invs" || t === "txs")) drawAct(); })].concat(dev ? [H.listenAllPending(v => { todo.pending = (v || []).filter(p => p.status === "pending").length; if (!actBox.hidden) drawAct(); }), (() => { const r1 = db.ref("nox_orders"), h1 = r1.on("value", sn => { const v = sn.val() || {}; todo.manual = Object.values(v).reduce((n, o) => n + Object.values(o || {}).filter(x => x.status === "paid" && x.manual && !x.delivered).length, 0); if (!actBox.hidden) drawAct(); }, () => {}); return () => r1.off("value", h1); })(), (() => { const r2 = db.ref("nox_invq"), h2 = r2.on("value", sn => { todo.topup = Object.values(sn.val() || {}).filter(x => x && (x.status === "creating" || x.status === "bill")).length; if (!actBox.hidden) drawAct(); }, () => {}); return () => r2.off("value", h2); })()] : []).concat(dev ? [H.listenAllThreads(v => { all = v; first(); }), H.listenPerms(v => { perms = v; }), S.subscribe(t => { if (t === "users") drawList(); })]
     : [H.listenMyThreads(v => { all = v.map(t => ({ ...t, uid: me, tid: t.key })); first(); })]);
   return () => { offs.forEach(f => f()); if (offConv) offConv(); };
 }

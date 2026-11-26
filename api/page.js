@@ -52,13 +52,15 @@ function head(h, m) {
   return h;
 }
 const crumbs = list => ({ "@type": "BreadcrumbList", itemListElement: list.map(([name, url], i) => ({ "@type": "ListItem", position: i + 1, name, item: url })) });
-const nav = `<p><a href="/">Shop</a> · <a href="/library">Library</a> · <a href="/categories">Categories</a> · <a href="/guide">Guide</a> · <a href="/about">About</a></p>`;
+const nav = `<p><a href="/">Home</a> · <a href="/shop">Shop</a> · <a href="/library">Share</a> · <a href="/categories">Categories</a> · <a href="/guide">Guide</a> · <a href="/about">About</a></p>`;
 const listHtml = (seg, items) => items.length ? `<ul>${items.map(([k, it]) => `<li><a href="/${seg}/${encodeURIComponent(k)}">${esc(clip(it.name, 120))}</a>${it.desc ? " — " + esc(clip(it.desc, 140)) : ""}</li>`).join("")}</ul>` : "";
 async function items(node) {
   const v = await getJson("nox_data/" + encodeURIComponent(node) + '.json?orderBy="ts"&limitToLast=40');
   return v && typeof v === "object" ? Object.entries(v).map(([k, it]) => [k, norm(it)]).filter(([, it]) => it && typeof it === "object" && it.name).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0)) : [];
 }
 
+const LAND_T = "Skibidi Web — World, Chat, Group and Share";
+const LAND_D = "Skibidi Web: World, Chat and Group are coming soon. Share is open — browse the free content library, reviewed before publishing. The Skibidi shop lives at /shop.";
 const HOME_T = "Skibidi Web — Skibidi Shop: digital goods & instant delivery";
 const HOME_D = "Skibidi Web (skibidiscript) is a digital shop: top up your wallet by bank transfer, buy digital goods and receive them instantly. Browse the Skibidi shop.";
 const IDOK = /^[A-Za-z0-9_-]{1,40}$/;
@@ -79,11 +81,12 @@ const catNav = cats => cats.length ? `<p>${cats.map(c => `<a href="/shop/c/${enc
 const itemListLd = (list, id) => ({ "@type": "ItemList", "@id": id, itemListElement: list.slice(0, 30).map((x, i) => ({ "@type": "ListItem", position: i + 1, url: SITE + "/shop/" + encodeURIComponent(x.id), name: x.name })) });
 async function resolve(p) {
   const seg = p.split("/").filter(Boolean).map(s => { try { return decodeURIComponent(s); } catch (_) { return s; } });
-  if (p === "/") {
+  if (p === "/") return { ok: true, title: LAND_T, desc: LAND_D, url: SITE + "/", body: `<h1>Skibidi Web</h1><ul><li>World — Coming Soon</li><li>Chat — Coming Soon</li><li>Group — Coming Soon</li><li><a href="/library">Share</a></li></ul><p>${esc(LAND_D)}</p>${nav}`, ld: null };
+  if (p === "/shop") {
     const sx = await shopIndex(), list = sx ? sx.list : [], cats = sx ? sx.cats : [];
-    return { ok: true, title: HOME_T, desc: HOME_D, url: SITE + "/",
+    return { ok: true, title: HOME_T, desc: HOME_D, url: SITE + "/shop",
       body: `<h1>Skibidi Web — Skibidi Shop</h1><p>${esc(HOME_D)}</p>${catNav(cats)}${prodList(list)}${nav}`,
-      ld: list.length ? { "@context": "https://schema.org", "@graph": [itemListLd(list, SITE + "/#shop")] } : null };
+      ld: list.length ? { "@context": "https://schema.org", "@graph": [itemListLd(list, SITE + "/shop#shop")] } : null };
   }
   if (PAGES[p]) { const e = PAGES[p]; return { ok: true, title: e ? e[0] : null, desc: e ? e[1] : null, url: SITE + (p === "/" ? "/" : p), body: e ? `<h1>${esc(e[0].split(" — ")[0])}</h1><p>${esc(e[1])}</p>${nav}` : null, ld: e ? { "@context": "https://schema.org", "@graph": [{ "@type": "WebPage", "@id": SITE + p + "#page", url: SITE + p, name: e[0], description: e[1], isPartOf: { "@id": SITE + "/#site" }, publisher: { "@id": SITE + "/#org" } }, crumbs([["Home", SITE + "/"], [e[0].split(" — ")[0], SITE + p]])] } : null }; }
   if (PRIVATE.test(p)) return { ok: true, noindex: true, title: NAME, desc: "Skibidi Web — Skibidi Shop.", url: SITE + "/" };
@@ -94,7 +97,7 @@ async function resolve(p) {
     const from = list.length ? Math.min(...list.map(x => x.price)) : 0;
     const t = `${clip(c.name, 60)} — Skibidi Web`, d = clip(list.length ? `Buy ${c.name} on Skibidi Web: ${list.length} product${list.length === 1 ? "" : "s"} from ${vnd(from)}. Pay with your wallet balance and get instant delivery.` : `${c.name} on Skibidi Web — products coming soon.`, 160);
     return { ok: true, title: t, desc: d, url, image: list.find(x => x.img) ? imgUrl(list.find(x => x.img).id) : null,
-      body: `<h1>${esc(c.name)}</h1><p>${esc(d)}</p>${catNav(sx.cats)}${prodList(list)}<p><a href="/">Shop</a></p>${nav}`,
+      body: `<h1>${esc(c.name)}</h1><p>${esc(d)}</p>${catNav(sx.cats)}${prodList(list)}<p><a href="/shop">Shop</a></p>${nav}`,
       ld: { "@context": "https://schema.org", "@graph": [{ "@type": "CollectionPage", "@id": url + "#page", url, name: t, description: d, isPartOf: { "@id": SITE + "/#site" } }, ...(list.length ? [itemListLd(list, url + "#list")] : []), crumbs([["Home", SITE + "/"], [c.name, url]])] } };
   }
   if (seg[0] === "shop" && seg.length === 2 && IDOK.test(seg[1])) {

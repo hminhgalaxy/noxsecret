@@ -1,0 +1,65 @@
+/* ═══ NẠP TIỀN THỦ CÔNG: popup nhập số tiền, trang hóa đơn, màn dev ═══ */
+/* popup nhập số tiền */
+.tpf{display:flex;flex-direction:column;gap:14px}
+.tpf-lead{margin:0;color:var(--text-2);font-size:14px;line-height:1.55}.tpf-lead b{color:var(--text)}
+.tpf-in input{font-size:22px!important;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tpf-q{display:flex;flex-wrap:wrap;gap:8px}
+.tpf-q button{min-height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;transition:transform .25s var(--spring,ease),background .2s}
+.tpf-q button:hover{background:var(--surface-3)}.tpf-q button:active{transform:scale(.94)}
+/* trang hóa đơn */
+.tp-page{max-width:720px;margin:0 auto}
+.tp-card{display:flex;flex-direction:column;gap:18px;padding:clamp(16px,3vw,26px);border-radius:var(--r-xl,26px);border:1px solid var(--line);background:var(--surface)}
+.tp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tp-head small{display:block;color:var(--text-3);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.tp-amt{display:block;font-size:clamp(30px,7vw,44px);font-weight:900;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.tp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;counter-reset:s}
+.tp-steps li{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;color:var(--text-3)}
+.tp-steps li::before{content:"";position:absolute;top:13px;left:calc(-50% + 16px);right:calc(50% + 16px);height:2px;background:var(--surface-3)}
+.tp-steps li:first-child::before{display:none}
+.tp-steps li span{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:var(--surface-2);border:1px solid var(--line-strong)}
+.tp-steps li span svg{width:14px;height:14px}
+.tp-steps li b{font-size:11.5px;font-weight:700;line-height:1.25}
+.tp-steps li.done{color:var(--text-2)}.tp-steps li.done span{background:var(--text);color:var(--bg);border-color:var(--text)}.tp-steps li.done::before,.tp-steps li.now::before{background:var(--text)}
+.tp-steps li.now{color:var(--text)}.tp-steps li.now span{border-color:var(--text);box-shadow:0 0 0 4px color-mix(in srgb,var(--text) 12%,transparent)}
+.tp-steps.dead{opacity:.45}
+.tp-body{display:flex;flex-direction:column;gap:18px}
+.tp-msg{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:10px 4px}
+.tp-msg h3{margin:0;font-size:20px}.tp-msg p{margin:0;max-width:46ch;color:var(--text-2);font-size:14.5px;line-height:1.6}.tp-msg p b{color:var(--text)}
+.tp-spin{display:block;width:44px;height:44px;border-radius:50%;border:3.5px solid color-mix(in srgb,var(--text) 14%,transparent);border-top-color:var(--text);animation:ldSpin .85s linear infinite}
+.tp-done{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--ok,#2fbf71) 20%,transparent);color:var(--ok,#2fbf71);animation:tpPop .6s var(--spring,ease) backwards}
+.tp-done svg{width:30px;height:30px}.tp-done.bad{background:color-mix(in srgb,var(--bad,#ef4444) 18%,transparent);color:var(--bad,#ef4444)}
+@keyframes tpPop{from{transform:scale(.4);opacity:0}}
+.tp-acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.tp-pay{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:20px;align-items:center}
+.tp-qr{aspect-ratio:1;border-radius:20px;background:#fff;display:grid;place-items:center;padding:10px;border:1px solid var(--line-strong)}
+.tp-qr img{width:100%;height:100%;object-fit:contain;border-radius:10px}
+.tp-info h3{margin:0 0 6px;font-size:18px}.tp-info p{margin:0 0 12px;color:var(--text-2);font-size:14px;line-height:1.55}.tp-info p b{color:var(--text)}
+.tp-code{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:16px;background:var(--surface-2)}
+.tp-code small{display:block;color:var(--text-3);font-size:11.5px;font-weight:700}.tp-code code{font-size:clamp(17px,4.4vw,22px);font-weight:900;letter-spacing:.06em}
+.tp-note{margin:10px 0 0!important;padding:10px 12px;border-radius:14px;border:1px dashed var(--line-strong);font-size:13px!important}
+.tp-bill{padding:16px;border-radius:20px;border:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;gap:12px}
+.tp-bill h3{margin:0;font-size:18px}.tp-bill p{margin:0;color:var(--text-2);font-size:14px;line-height:1.55}.tp-bill p b{color:var(--text)}
+.tp-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:150px;padding:14px;border-radius:18px;border:2px dashed var(--line-strong);background:var(--surface);color:var(--text-2);text-align:center;cursor:pointer;overflow:hidden;transition:border-color .2s,background .2s}
+.tp-drop:hover{border-color:var(--text);background:var(--surface-3)}
+.tp-drop svg{width:28px;height:28px}.tp-drop span{font-weight:700;font-size:14px}.tp-drop small{font-size:12px;color:var(--text-3)}
+.tp-drop.has{padding:6px;border-style:solid}.tp-drop.has img{max-width:100%;max-height:300px;object-fit:contain;border-radius:12px}
+.tp-foot{color:var(--text-3);font-size:12px;text-align:right}
+@media(max-width:560px){.tp-pay{grid-template-columns:1fr;justify-items:center}.tp-qr{width:min(260px,100%)}.tp-info{width:100%}.tp-steps li b{font-size:10.5px}}
+/* ví: dòng chú thích + danh sách hóa đơn */
+.wl-min{grid-column:1/-1;margin:0;color:var(--text-2);font-size:13px;line-height:1.5}
+a.inv{text-decoration:none;color:inherit}a.inv:hover{border-color:var(--acc)}
+/* dev */
+.tpd-bal{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.tpd-bal small{display:block;color:var(--text-3);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.tpd-bal b{font-size:clamp(26px,6vw,38px);font-weight:900;letter-spacing:-.04em}
+.tpd-bal p{margin:0;max-width:44ch;color:var(--text-2);font-size:13px;line-height:1.5}
+.tpd-row{width:100%;text-align:left;cursor:pointer}
+.tpd-pop{display:flex;flex-direction:column;gap:14px}
+.tpd-bill img{width:100%;max-height:60vh;object-fit:contain;border-radius:14px;border:1px solid var(--line);background:var(--surface-2)}
+.tpd-have{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tpd-have>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--surface-2)}
+.tpd-have small{width:100%;color:var(--text-3);font-size:11.5px;font-weight:700}.tpd-have code{font-size:15px;font-weight:800;letter-spacing:.05em;overflow-wrap:anywhere}
+.tpd-form .lock{display:inline-flex;align-items:center;gap:3px;margin-left:6px;font-style:normal;font-size:11px;font-weight:700;color:var(--text-3)}.tpd-form .lock svg{width:12px;height:12px}
+.tpd-form input[readonly]{background:var(--surface-3);color:var(--text-2);cursor:not-allowed}
+.tpd-ok{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}.tpd-ok h3{margin:0}.tpd-ok p{margin:0;color:var(--text-2)}
+.dv-tabs .cnt{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:6px;padding:0 5px;border-radius:99px;background:var(--bad,#ef4444);color:#fff;font-size:11px;font-weight:800}
+@media(max-width:560px){.tpd-have{grid-template-columns:1fr}}

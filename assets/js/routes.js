@@ -10,16 +10,18 @@ const catNeeds = extra => p => extra.catId ? ["data:" + extra.catId] : ["cats", 
 
 /* Tải sẵn các trang hay dùng lúc trình duyệt rảnh, để bấm vào là mở ngay (không chờ tải mã) */
 export function prefetchPages(devToo = false) {
-  const go = () => ["auth/login", "auth/register", "settings", "inbox", "categories", "items/list", "items/detail", "search", "profile", "shop/home", "shop/product", "shop/wallet"].concat(devToo ? ["dev/index", "dev/updates", "dev/records", "dev/system", "dev/test"] : [])
+  const go = () => ["auth/login", "auth/register", "settings", "inbox", "categories", "items/list", "items/detail", "search", "profile", "landing", "shop/home", "shop/product", "shop/wallet", "shop/topup"].concat(devToo ? ["dev/index", "dev/updates", "dev/records", "dev/system", "dev/test"] : [])
     .forEach((p, i) => setTimeout(() => import("./pages/" + p + ".js").catch(() => {}), i * 120));
   "requestIdleCallback" in window ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 2000);
 }
 
 export function registerRoutes() {
-  define("/", { load: L("shop/home"), guard: "public", needs: [] });
+  define("/", { load: L("landing"), guard: "public", title: null, desc: "Skibidi Web — World, Chat, Group và Share. Sắp ra mắt.", needs: [] });
+  define("/shop", { load: L("shop/home"), guard: "public", needs: [] });
   define("/library", { load: L("home"), guard: "public", title: "Kho nội dung", desc: "Kho nội dung miễn phí trên Skibidi Web: các bài đã được kiểm duyệt trước khi đăng, chia theo danh mục.", needs: [...ALL, "updates"] });
   define("/shop/c/:cat", { load: L("shop/home"), guard: "public", needs: [] });
   define("/shop/:id", { load: L("shop/product"), guard: "public", needs: [] });
+  define("/topup", { load: L("shop/topup"), guard: "real", title: "Nạp tiền", noindex: true, needs: [] });
   define("/wallet", { load: L("shop/wallet"), guard: "real", title: "Ví của tôi", noindex: true, needs: [] });
   define("/orders", { load: L("shop/orders"), guard: "real", title: "Lịch sử mua hàng", noindex: true, needs: [] });
   define("/login", { load: L("auth/login"), guard: "guest", title: "Đăng nhập", desc: "Đăng nhập để dùng đầy đủ tính năng của Skibidi Web." });
@@ -59,6 +61,7 @@ export function registerRoutes() {
   define("/dev/data", { load: L("dev/data"), guard: "dev", title: "Quản lý dữ liệu", needs: ALL });
   BASE_PATHS.forEach(([seg, catId]) => define("/dev/data/" + seg, { load: L("dev/records"), guard: "dev", catId, needs: catNeeds({ catId }) }));
   define("/dev/data/c/:node", { load: L("dev/records"), guard: "dev", custom: true, needs: catNeeds({ custom: true }) });
+  define("/dev/topup", { load: L("dev/topup"), guard: "dev", title: "Nạp tiền", needs: ["users"] });
   define("/dev/shop", { load: L("dev/shop"), guard: "dev", title: "Quản lý cửa hàng", needs: ["users"] });
   define("/dev/categories", { load: L("dev/categories"), guard: "dev", title: "Danh mục", needs: ["cats"] });
   define("/dev/inbox", { load: L("redirect"), guard: "dev", to: "/inbox", title: "Hộp thư", needs: [] });

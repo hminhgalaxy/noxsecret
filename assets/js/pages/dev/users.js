@@ -20,7 +20,7 @@ export function mount(ctx) {
   ctx.setPage({ title: "Người dùng", crumbs: devCrumb, sub: "Tài khoản đã đăng nhập, cấp quyền, mute và ban.", noindex: true });
   const draw = () => { const u = S.store.users, A = S.store.admins || {};
     ctx.setPage({ count: u ? u.length + " người dùng" : null });
-    if (u == null) { ctx.el.innerHTML = '<div class="statebox"><p>Đang tải danh sách…</p></div>'; return; }
+    if (u == null) { ctx.el.innerHTML = '<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải danh sách…</span></div>'; return; }
     ctx.el.innerHTML = u.length ? `<div class="table-wrap"><table class="table users-t"><thead><tr><th>Người dùng</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Lần cuối</th><th><span class="sr-only">Thao tác</span></th></tr></thead><tbody>${u.map(x => {
       const nm = x.name || String(x.email || "?").split("@")[0], ini = esc(nm.charAt(0).toUpperCase()), a = A[x.uid] || {}, isDev = String(x.email || "").toLowerCase() === DEV_EMAIL.toLowerCase();
       const banned = act(a.banUntil), muted = act(a.muteUntil), editor = a.role === "editor";

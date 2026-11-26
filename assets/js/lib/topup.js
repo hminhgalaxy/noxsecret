@@ -1,102 +1,43 @@
-/* Popup "Nạp tiền": chọn số tiền cố định → tạo mã VietQR kèm số tiền + nội dung → chờ tiền vào ví (cộng tự động qua webhook). */
-import { openPopup } from "./popup.js";
-import { esc, toast, copyText, copyFx } from "./util.js";
+/* Nạp tiền thủ công: bấm "Nạp tiền" → nhập số tiền (tối thiểu 2.000 ₫) → hệ thống tạo hóa đơn rồi đưa bạn tới trang /topup.
+   Mỗi người chỉ có một hóa đơn nạp đang mở; nếu đang có thì đưa thẳng tới hóa đơn đó. */
+import { esc, toast } from "./util.js";
 import { ICO } from "./icons.js";
-import { qrSvg } from "./qr.js";
-import { session } from "./auth.js";
-import { shop, subscribeShop, balance, canUseWallet, loadWalletInfo, createTopup, money, topupStatus, topupLeft, startShop } from "./shop.js";
+import { openPopup } from "./popup.js";
 import { navigate } from "./router.js";
+import { shop, canUseWallet, openInvoice, createInvoice, loadWalletInfo, money, MIN_TOPUP, MAX_TOPUP } from "./shop.js";
 
-const PRESETS = [20000, 50000, 100000, 200000, 500000, 1000000];
-const copyBtn = (v, label = "Sao chép") => `<button class="btn soft sm tp-copy" type="button" data-copy="${esc(v)}">${ICO.copy}<span>${label}</span></button>`;
+const QUICK = [2000, 10000, 20000, 50000, 100000, 200000];
+const NF = new Intl.NumberFormat("vi-VN");
+export const topupUrl = id => "/topup" + (id ? "?i=" + encodeURIComponent(id) : "");
 
-export async function openTopup(opts = {}) {
-  if (!session.user || session.isGuest) { toast("Hãy đăng nhập để nạp tiền.", "err"); navigate("/login?next=" + encodeURIComponent(location.pathname)); return null; }
-  if (!canUseWallet()) { toast("Hãy xác minh email trước khi nạp tiền.", "err"); return null; }
-  startShop();
-  let off = () => {}, tick = 0, amount = Math.max(0, Math.floor(opts.amount || 0)), info = null, base = 0, stop = false;
-  const h = openPopup({ id: "topup", variant: "sheet", wide: true, title: "Nạp tiền vào ví", icon: "wallet", onClose: () => { stop = true; off(); clearInterval(tick); } });
-
-  const step1 = (err = "") => {
-    h.setBody(`<div class="tp">
-      <button class="tp-method on" type="button" aria-pressed="true"><span class="tp-m-ico">${ICO.bank}</span><span class="tp-m-txt"><b>Chuyển khoản ngân hàng</b><small>${esc(info ? info.bank.bank : "Techcombank")} · Quét mã QR · Tiền vào ví sau khoảng 30–60 giây</small></span><span class="tp-m-tick">${ICO.check}</span></button>
-      <p class="tp-lab">Chọn số tiền</p>
-      <div class="tp-amts" role="group" aria-label="Số tiền">${PRESETS.map(v => `<button class="tp-amt${v === amount ? " on" : ""}" type="button" data-v="${v}">${money(v)}</button>`).join("")}</div>
-      <label class="tp-inp"><span class="tp-lab">Hoặc nhập số tiền khác</span><span class="tp-box"><input id="tpA" inputmode="numeric" autocomplete="off" placeholder="Ví dụ 150.000" value="${amount && !PRESETS.includes(amount) ? new Intl.NumberFormat("vi-VN").format(amount) : ""}"><i>₫</i></span></label>
-      <p class="tp-hint">Từ ${money(info ? info.min : 10000)} đến ${money(info ? info.max : 50000000)}, làm tròn đến nghìn đồng.</p>
-      <p class="form-error tp-err" id="tpE" role="alert">${esc(err)}</p>
-      <div class="form-acts"><button class="btn primary" id="tpGo" type="button">${ICO.qr}Tạo mã QR</button></div>
-    </div>`);
-    const box = h.body, inp = box.querySelector("#tpA");
-    box.querySelectorAll(".tp-amt").forEach(b => b.addEventListener("click", () => { amount = +b.dataset.v; inp.value = ""; box.querySelectorAll(".tp-amt").forEach(x => x.classList.toggle("on", x === b)); box.querySelector("#tpE").textContent = ""; }));
-    inp.addEventListener("input", () => { const d = inp.value.replace(/\D/g, "").slice(0, 9); amount = +d || 0; inp.value = d ? new Intl.NumberFormat("vi-VN").format(+d) : ""; box.querySelectorAll(".tp-amt").forEach(x => x.classList.toggle("on", +x.dataset.v === amount)); box.querySelector("#tpE").textContent = ""; });
-    const go = box.querySelector("#tpGo");
-    go.addEventListener("click", async () => {
-      const lo = info ? info.min : 10000, hi = info ? info.max : 50000000;
-      if (!(amount >= lo && amount <= hi) || amount % 1000) { box.querySelector("#tpE").textContent = "Số tiền từ " + money(lo) + " đến " + money(hi) + ", làm tròn đến nghìn đồng."; return; }
-      go.disabled = true; go.classList.add("busy");
-      try { const r = await createTopup(amount); step2(r); } catch (e) { go.disabled = false; go.classList.remove("busy"); box.querySelector("#tpE").textContent = e.message; }
-    });
-  };
-
-  const mmss = ms => { const t = Math.ceil(ms / 1000); return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0"); };
-  const step2 = r => {
-    base = balance(); clearInterval(tick);
-    const exp = Number(r.expiresAt) || (Date.now() + 600000), total = Math.max(1, exp - (Number(r.ts) || exp - 600000));
-    h.setBody(`<div class="tp tp2">
-      <div class="tp-timer" role="timer" aria-live="off"><span>${ICO.clock || ICO.info}Hóa đơn hết hạn sau</span><b id="tpClock">${mmss(Math.max(0, exp - Date.now()))}</b><i class="tp-bar"><u id="tpBar"></u></i></div>
-      <div class="tp-qrwrap"><div class="tp-qr" aria-live="polite">${qrSvg(r.qr, { label: "Mã QR chuyển khoản " + money(r.amount) })}</div><p class="tp-scan">Mở app ngân hàng → Quét mã QR</p></div>
-      <div class="tp-info">
-        <div class="tp-amount"><small>Số tiền</small><b>${money(r.amount)}</b></div>
-        <dl class="tp-dl">
-          <div><dt>Ngân hàng</dt><dd>${esc(r.bank.bank)}</dd></div>
-          <div><dt>Chủ tài khoản</dt><dd translate="no">${esc(r.bank.name)}</dd></div>
-          <div><dt>Số tài khoản</dt><dd translate="no"><code>${esc(r.bank.account)}</code>${copyBtn(r.bank.account)}</dd></div>
-          <div class="hot"><dt>Nội dung chuyển khoản</dt><dd translate="no"><code>${esc(r.code)}</code>${copyBtn(r.code)}</dd></div>
-        </dl>
-      </div>
-      <p class="tp-wait" id="tpW" role="status"><i class="tp-spin" aria-hidden="true"></i><span>Đang chờ tiền vào ví… thường mất 30–60 giây sau khi chuyển.</span></p>
-      <p class="tp-note">${ICO.info}<span>Nội dung chuyển khoản đã được điền sẵn khi quét QR. Nếu chuyển tay, hãy nhập <b>đúng mã ở trên</b>, không thêm bớt ký tự — mã này là của riêng tài khoản bạn.</span></p>
-      <div class="form-acts"><button class="btn ghost" id="tpBack" type="button">Đổi số tiền</button><button class="btn soft" id="tpClose" type="button">Đóng</button></div>
-    </div>`);
-    const box = h.body;
-    box.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => copyText(b.dataset.copy).then(() => { copyFx(b); toast("Đã sao chép."); }).catch(() => toast("Không sao chép được.", "err"))));
-    box.querySelector("#tpBack").addEventListener("click", () => { off(); clearInterval(tick); step1(); });
-    box.querySelector("#tpClose").addEventListener("click", () => h.close());
-    const clock = box.querySelector("#tpClock"), bar = box.querySelector("#tpBar");
-    const paint = () => { const left = Math.max(0, exp - Date.now()); clock.textContent = mmss(left); bar.style.width = Math.max(0, Math.min(100, left / total * 100)) + "%"; box.querySelector(".tp-timer").classList.toggle("low", left < 60000); if (left <= 0) { clearInterval(tick); off(); failed(r); } };
-    paint(); tick = setInterval(paint, 1000);
-    off(); off = subscribeShop(t => {
-      if (stop) return;
-      if (t === "topups") { const rec = (shop.topups || []).find(x => x.id === r.id); if (rec && topupStatus(rec) === "done") { off(); clearInterval(tick); done(rec.amount); return; } }
-      if (t === "wallet" && shop.wallet) { const got = balance() - base; if (got > 0) { off(); clearInterval(tick); done(got); } }
-    });
-  };
-
-  const failed = r => {
-    h.setBody(`<div class="tp tp-fail"><span class="tp-failico">${ICO.warn}</span><h3>Hóa đơn thất bại</h3><p class="tp-got bad">${money(r.amount)}</p>
-      <p>Hóa đơn đã quá 10 phút mà hệ thống chưa nhận được tiền. Nếu bạn đã chuyển khoản, tiền vẫn sẽ được cộng vào ví khi ngân hàng báo về — bạn không bị mất tiền.</p>
-      <div class="form-acts"><button class="btn ghost" id="tpX" type="button">Đóng</button><button class="btn primary" id="tpNew" type="button">${ICO.qr}Tạo hóa đơn mới</button></div></div>`);
-    h.body.querySelector("#tpX").addEventListener("click", () => h.close());
-    h.body.querySelector("#tpNew").addEventListener("click", () => { amount = r.amount; step1(); });
-    off(); off = subscribeShop(t => { if (stop || t !== "topups") return; const rec = (shop.topups || []).find(x => x.id === r.id); if (rec && topupStatus(rec) === "done") { off(); done(rec.amount); } });
-  };
-
-  const done = got => {
-    h.setBody(`<div class="tp tp-ok"><span class="tp-okico">${ICO.check}</span><h3>Nạp tiền thành công</h3><p class="tp-got">+${money(got)}</p><p>Số dư hiện tại: <b>${money(balance())}</b></p>
-      <div class="form-acts"><a class="btn ghost" href="/wallet" data-link>Xem ví</a><button class="btn primary" id="tpOk" type="button">Xong</button></div></div>`);
-    h.body.querySelector("#tpOk").addEventListener("click", () => h.close());
-    h.body.querySelector("[data-link]").addEventListener("click", () => h.close(true));
-    toast("Đã cộng " + money(got) + " vào ví.");
-  };
-
-  h.setBody('<div class="tp"><p class="tp-wait"><i class="tp-spin" aria-hidden="true"></i><span>Đang tải…</span></p></div>');
-  try { info = await loadWalletInfo(); } catch (e) { h.setBody(`<div class="tp"><div class="statebox err">${ICO.warn}<p>${esc(e.message)}</p></div><div class="form-acts"><button class="btn soft" id="tpClose" type="button">Đóng</button></div></div>`); h.body.querySelector("#tpClose").addEventListener("click", () => h.close()); return h; }
-  /* chờ số dư tải xong để tính đúng "tiền vừa vào" */
-  for (let i = 0; i < 40 && !shop.wallet && !stop; i++) await new Promise(r => setTimeout(r, 100));
-  if (stop) return h;
-  const inv = opts.invoice;
-  if (inv && inv.qr && inv.bank) { const st = topupStatus(inv); if (st === "pending") { step2(inv); return h; } if (st === "failed") { failed(inv); return h; } if (st === "done") { done(inv.amount); return h; } }
-  step1();
-  return h;
+export async function openTopup(o = {}) {
+  if (!canUseWallet()) { toast("Hãy xác minh email để dùng ví.", "warn"); return; }
+  let cur = openInvoice();
+  if (!cur && shop.invs === null) { try { const i = await loadWalletInfo(true); if (i && i.open) { navigate(topupUrl(i.open)); return; } } catch (_) {} }
+  if (cur) { toast("Bạn đang có một hóa đơn nạp tiền chưa xong. Mở lại hóa đơn đó nhé.", "warn"); navigate(topupUrl(cur.id)); return; }
+  const h = openPopup({ id: "topup", variant: "sheet", title: "Nạp tiền vào ví", icon: "wallet" });
+  let amount = Math.min(MAX_TOPUP, Math.max(MIN_TOPUP, Math.floor(Number(o.amount) || 0))) || 0;
+  h.setBody(`<form class="tpf" id="tpF" novalidate>
+    <p class="tpf-lead">Nhập số tiền bạn muốn nạp. Số tiền nạp <b>tối thiểu ${money(MIN_TOPUP)}</b>, làm tròn đến nghìn đồng.</p>
+    <div class="field"><label for="tpA">Số tiền cần nạp</label><span class="sp-in tpf-in"><input id="tpA" inputmode="numeric" autocomplete="off" placeholder="${NF.format(MIN_TOPUP)}" value="${amount ? NF.format(amount) : ""}" maxlength="12"><i>₫</i></span></div>
+    <div class="tpf-q" role="group" aria-label="Chọn nhanh">${QUICK.map(v => `<button type="button" data-v="${v}">${NF.format(v)}</button>`).join("")}</div>
+    <p class="form-error" id="tpE" role="alert"></p>
+    <div class="form-acts"><button class="btn ghost" type="button" data-no>Để sau</button><button class="btn primary" type="submit" id="tpGo">Tiếp tục</button></div>
+  </form>`);
+  const $ = s => h.body.querySelector(s), inp = $("#tpA"), err = $("#tpE");
+  const val = () => Number(String(inp.value).replace(/\D/g, "")) || 0;
+  const fmt = () => { const v = val(); inp.value = v ? NF.format(v) : ""; err.textContent = ""; };
+  inp.addEventListener("input", fmt);
+  $(".tpf-q").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; inp.value = NF.format(Number(b.dataset.v)); err.textContent = ""; inp.focus(); });
+  $("[data-no]").addEventListener("click", () => h.close());
+  $("#tpF").addEventListener("submit", async e => {
+    e.preventDefault(); const v = val();
+    if (v < MIN_TOPUP) { err.textContent = "Số tiền nạp tối thiểu là " + money(MIN_TOPUP) + "."; inp.focus(); return; }
+    if (v > MAX_TOPUP) { err.textContent = "Mỗi lần nạp tối đa " + money(MAX_TOPUP) + "."; inp.focus(); return; }
+    if (v % 1000) { err.textContent = "Số tiền cần làm tròn đến nghìn đồng (ví dụ 2.000, 15.000)."; inp.focus(); return; }
+    const go = $("#tpGo"); go.disabled = true; go.textContent = "Đang tạo hóa đơn…";
+    try { const r = await createInvoice(v); h.close(true); navigate(topupUrl(r.id)); }
+    catch (x) { go.disabled = false; go.textContent = "Tiếp tục"; if (x.res && x.res.code === "open_invoice" && x.res.id) { h.close(true); navigate(topupUrl(x.res.id)); } else err.textContent = x.message; }
+  });
+  setTimeout(() => inp.focus({ preventScroll: true }), 60);
 }

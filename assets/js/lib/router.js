@@ -122,7 +122,7 @@ export async function render({ pop = false } = {}) {
   /* Giữ chiều cao khung nội dung trong lúc dựng trang mới để chân trang/thanh cuộn không nhảy (hết giật, hết chớp) */
   view.style.minHeight = Math.min(view.offsetHeight, 3000) + "px";
   view.classList.remove("leaving"); view.innerHTML = ""; hooks.setPage({ reset: true });
-  const el = document.createElement("div"); el.className = "page"; view.appendChild(el);
+  const el = document.createElement("div"); el.className = "page"; el.innerHTML = '<div class="ld-page" role="status" aria-live="polite"><span class="ld-spin" aria-hidden="true"></span></div>'; view.appendChild(el);
   cur = { def, params: m.params, path: url.pathname, pattern: m.path };
   const ctx = {
     el, params: m.params, query: url.searchParams, path: url.pathname, def, navigate, setPage: hooks.setPage,

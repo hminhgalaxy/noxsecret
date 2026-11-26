@@ -19,6 +19,15 @@
           "img": {
             ".validate": "newData.isString() && ((newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)) || (newData.val().length <= 36000 && newData.val().matches(/^data:image\\/(jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+$/)))"
           },
+          "img2": {
+            ".validate": "newData.isString() && ((newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)) || (newData.val().length <= 36000 && newData.val().matches(/^data:image\\/(jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+$/)))"
+          },
+          "img3": {
+            ".validate": "newData.isString() && ((newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)) || (newData.val().length <= 36000 && newData.val().matches(/^data:image\\/(jpeg|png|webp);base64,[A-Za-z0-9+\\/=]+$/)))"
+          },
+          "video": {
+            ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https?:\\/\\/.+/)"
+          },
           "code": {
             ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 200000"
           },
@@ -596,18 +605,29 @@
         ".read": "auth != null && auth.uid === $uid"
       }
     },
-    "nox_topups": {
+    "nox_inv": {
       ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
       ".write": false,
       "$uid": {
         ".read": "auth != null && auth.uid === $uid"
       }
     },
-    "nox_bankhook": {
+    "nox_invq": {
       ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
       ".write": false
     },
-    "nox_topcodes": {
+    "nox_invsec": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
+      ".write": false
+    },
+    "nox_invfile": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com'))"
+      }
+    },
+    "nox_invopen": {
       ".read": false,
       ".write": false
     },
@@ -640,10 +660,6 @@
           ".write": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com') && (root.child('nox_security').child(auth.uid).child('gate').val() !== true || auth.token.tf1 === auth.token.auth_time || auth.token.tf2 === auth.token.auth_time || auth.token.tf3 === auth.token.auth_time) && !newData.exists()"
         }
       }
-    },
-    "nox_shopcfg": {
-      ".read": "(auth != null && auth.token.email_verified === true && auth.token.email.toLowerCase() === 'hminhgalaxy@gmail.com')",
-      ".write": false
     }
   }
 }

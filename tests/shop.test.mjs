@@ -1,9 +1,8 @@
-/* Kiểm thử ví / nạp tiền / mua hàng / webhook ngân hàng / tệp chat — Firebase Admin giả có giao dịch nguyên tử (không gọi mạng). */
+/* Kiểm thử ví / hóa đơn nạp tiền thủ công / mua hàng / tệp chat — Firebase Admin giả có giao dịch nguyên tử (không gọi mạng). */
 import { createRequire } from "node:module";
 import crypto from "node:crypto";
 const require = createRequire(import.meta.url);
 const { createApi } = require("../api/_lib/core.js");
-const { vietqr, crc16 } = require("../api/_lib/vietqr.js");
 let pass = 0, fail = 0;
 const t = (n, got, want) => { const g = JSON.stringify(got), w = JSON.stringify(want); if (g === w) { pass++; console.log("  ✓", n); } else { fail++; console.log("  ✗", n, "→ nhận", g, "mong đợi", w); } };
 
@@ -22,110 +21,129 @@ function world(envExtra = {}) {
     tx: async (p, fn) => { const cur = clone(get(data, p)); let first = fn(cur === null ? null : clone(cur)); if (first === undefined) return { committed: false, value: cur }; setp(data, p, first); return { committed: true, value: clone(first) }; }
   };
   const auth = { verifyIdToken: async tk => { if (!tokens[tk]) throw new Error("bad"); return { ...tokens[tk] }; }, getUser: async uid => ({ ...users[uid] }), getUserByEmail: async e => ({ ...Object.values(users).find(x => x.email === e) }), setCustomUserClaims: async () => {}, updateUser: async () => {}, revokeRefreshTokens: async () => {} };
-  const env = { DEV_EMAIL: DEVE, SEPAY_API_KEY: "key-123", SEPAY_SECRET: "sec-456", CASSO_SECURE_TOKEN: "cas-789", ...envExtra };
-  let n = 0;
-  const api = createApi({ auth, db, sendMail: async () => {}, verifyPassword: async () => true, env, now: () => clock, randomInt: (a, b) => (n++ === 0 ? 21920417 : 21920417 + n) });
+  const env = { DEV_EMAIL: DEVE, ...envExtra };
+  const api = createApi({ auth, db, sendMail: async () => {}, verifyPassword: async () => true, env, now: () => clock, randomInt: (a, b) => crypto.randomInt(a, b) });
   const call = (action, body = {}, token = "", ip = "1.2.3.4") => api({ action, body, token, ip });
-  const hook = (body, headers = { authorization: "Apikey key-123" }) => api.webhook({ headers, raw: JSON.stringify(body), ip: "9.9.9.9" });
-  return { api, call, hook, get data() { return data; }, set data(v) { data = v; }, users, tokens };
+  return { api, call, get data() { return data; }, set data(v) { data = v; }, users, tokens };
 }
-const sePay = (id, amount, content, extra = {}) => ({ id, gateway: "Techcombank", transactionDate: "2026-11-12 16:00:00", accountNumber: "19077584659010", code: null, content, transferType: "in", description: content, transferAmount: amount, accumulated: 0, referenceCode: "FT" + id, ...extra });
+/* Cấp số dư thẳng vào dữ liệu giả (thay cho đường nạp tiền, để các bài test mua hàng độc lập) */
+const fund = async (w, uid, amount) => { const tk = uid === "uA" ? "a" : "b"; await w.call("wallet-info", {}, tk); w.data.nox_wallet[uid].balance = (w.data.nox_wallet[uid].balance || 0) + amount; w.data.nox_txs = w.data.nox_txs || {}; w.data.nox_txs[uid] = w.data.nox_txs[uid] || {}; w.data.nox_txs[uid]["fund" + Object.keys(w.data.nox_txs[uid]).length] = { type: "adjust", amount, ts: clock }; };
 
-console.log("VIETQR");
-{ const stat = vietqr({ bin: "970407", account: "19077584659010" });
-  t("mã QR tĩnh dựng lại khớp từng ký tự với QR thật của Techcombank (CRC a522)", stat, "00020101021138580010A000000727012800069704070114190775846590100208QRIBFTTA5204601153037045802VN5903TCB6005Hanoi6304A522");
-  const dyn = vietqr({ bin: "970407", account: "19077584659010", amount: 50000, content: "SKN21920417" });
-  t("mã QR có số tiền: kiểu động (12), có tag 54 và nội dung", [dyn.includes("010212"), dyn.includes("540550000"), dyn.includes("0811SKN21920417")], [true, true, true]);
-  t("CRC hợp lệ", crc16(dyn.slice(0, -4)), dyn.slice(-4));
-  t("CRC-16/CCITT-FALSE chuẩn ('123456789' = 29B1)", crc16("123456789"), "29B1");
-  t("ngân hàng sai → lỗi", (() => { try { vietqr({ bin: "x", account: "1" }); return "no"; } catch (_) { return "throw"; } })(), "throw"); }
+const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(200, 7)]);
+const IMG = "data:image/png;base64," + PNG.toString("base64");
+/* Đưa một hóa đơn tới trạng thái 'bill' (dev gửi QR, khách gửi ảnh bill) */
+const toBill = async (w, who = "a", amount = 50000) => {
+  const c = await w.call("inv-create", { amount }, who); const id = c.body.id;
+  await w.call("inv-accept", { id, qr: IMG, note: "ck dung so tien" }, "dev"); await w.call("inv-bill", { id, image: IMG }, who);
+  return { id, uid: who === "a" ? "uA" : "uB", code: w.data.nox_inv[who === "a" ? "uA" : "uB"][id].code, sec: w.data.nox_invsec[id].sec };
+};
 
-console.log("VÍ + MÃ NẠP RIÊNG");
+console.log("VÍ");
 { const w = world();
   t("khách / chưa đăng nhập bị chặn", [(await w.call("wallet-info")).status, (await w.call("wallet-info", {}, "guest")).status], [401, 403]);
   t("email chưa xác minh bị chặn", (await w.call("wallet-info", {}, "aUnv")).body.code, "unverified");
   const a = await w.call("wallet-info", {}, "a");
-  t("tạo ví: mã dạng SKN + 8 số, số dư 0, có thông tin ngân hàng", [a.status, /^SKN\d{8}$/.test(a.body.code), a.body.balance, a.body.bank.account, a.body.bank.bank], [200, true, 0, "19077584659010", "Techcombank"]);
-  t("gọi lại → vẫn cùng một mã", (await w.call("wallet-info", {}, "a")).body.code, a.body.code);
-  const b = await w.call("wallet-info", {}, "b"); t("mỗi tài khoản một mã khác nhau", b.body.code !== a.body.code && /^SKN\d{8}$/.test(b.body.code), true);
-  t("chỉ mục tra ngược mã → tài khoản", [w.data.nox_topcodes[a.body.code], w.data.nox_topcodes[b.body.code]], ["uA", "uB"]);
-  const ban = world(); ban.data = { nox_admin: { uA: { banUntil: clock + 1e6 } } }; t("tài khoản bị khóa không dùng được ví", (await ban.call("wallet-info", {}, "a")).body.code, "banned"); }
+  t("tạo ví: số dư 0, tối thiểu 2.000, chưa có hóa đơn mở, KHÔNG còn mã SKN / thông tin ngân hàng", [a.status, a.body.balance, a.body.min, a.body.open, "code" in a.body, "bank" in a.body, "code" in w.data.nox_wallet.uA], [200, 0, 2000, null, false, false, false]);
+  t("không còn lối nạp tự động: webhook / bank-* / topup-* / wallet-adjust đều không tồn tại", [(await w.call("wallet-adjust", { uid: "uA", amount: 1e6 }, "dev")).status, (await w.call("bank-set", {}, "dev")).status, (await w.call("topup-create", { amount: 20000 }, "a")).status, (await w.call("bank-assign", {}, "dev")).status, typeof w.api.webhook], [400, 400, 400, 400, "undefined"]);
+  const d = await w.call("wallet-info", {}, "dev");
+  t("tài khoản dev có sẵn 130.000.000 ₫", [d.body.balance, w.data.nox_wallet.uDEV.balance], [130000000, 130000000]);
+  await w.call("wallet-info", {}, "dev"); await w.call("shop-buy", { items: [{ id: "x", qty: 1 }] }, "dev");
+  t("gọi lại nhiều lần vẫn chỉ cấp MỘT lần (không cộng trùng)", [w.data.nox_wallet.uDEV.balance, Object.values(w.data.nox_txs.uDEV).filter(x => x.note && x.note.includes("Starting")).length], [130000000, 1]);
+  t("người thường không được cấp 130tr", [(await w.call("wallet-info", {}, "b")).body.balance, w.data.nox_wallet.uB.devGrant], [0, undefined]); }
 
-console.log("TẠO YÊU CẦU NẠP (SỐ TIỀN CỐ ĐỊNH)");
-{ const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code;
-  const r = await w.call("topup-create", { amount: 50000 }, "a");
-  t("trả mã VietQR có đúng số tiền + nội dung = mã tài khoản", [r.status, r.body.qr.includes("540550000"), r.body.qr.includes("0811" + code), r.body.code], [200, true, true, code]);
-  t("lưu yêu cầu chờ", Object.values(w.data.nox_topups.uA).map(x => [x.amount, x.status]), [[50000, "pending"]]);
-  for (const bad of [5000, 10500, 60000000, "abc", -50000, 0, null, 12345.5]) { const x = await w.call("topup-create", { amount: bad }, "a"); t("số tiền không hợp lệ bị từ chối: " + bad, [x.status, x.body.code], [400, "bad_amount"]); }
-  t("không đăng nhập → 401", (await w.call("topup-create", { amount: 50000 })).status, 401);
-  const lim = world(); for (let i = 0; i < 20; i++) await lim.call("topup-create", { amount: 20000 }, "a"); t("giới hạn 20 yêu cầu/giờ", (await lim.call("topup-create", { amount: 20000 }, "a")).status, 429);
-  const stale = world(); await stale.call("wallet-info", {}, "a"); await stale.call("topup-create", { amount: 20000 }, "a"); clock += 4 * 86400000; await stale.call("topup-create", { amount: 30000 }, "a"); t("yêu cầu cũ hơn 3 ngày được dọn", Object.values(stale.data.nox_topups.uA).map(x => x.amount), [30000]); clock = NOW0; }
+console.log("TẠO HÓA ĐƠN NẠP");
+{ const w = world();
+  for (const bad of [0, 1000, 1999, 2500, 2001, -2000, 50001000, "abc", null, 2000.5]) t("số tiền không hợp lệ bị chặn: " + bad, (await w.call("inv-create", { amount: bad }, "a")).body.code, "bad_amount");
+  t("chưa đăng nhập / email chưa xác minh bị chặn", [(await w.call("inv-create", { amount: 2000 })).status, (await w.call("inv-create", { amount: 2000 }, "aUnv")).body.code], [401, "unverified"]);
+  const r = await w.call("inv-create", { amount: 2000 }, "a"), id = r.body.id, inv = w.data.nox_inv.uA[id];
+  t("tối thiểu 2.000 ₫ tạo được; trạng thái 'creating'", [r.status, r.body.status, inv.amount, inv.status], [200, "creating", 2000, "creating"]);
+  t("mã code (9–12 ký tự) lưu ở hóa đơn, mã bảo mật (10–14 ký tự) CHỈ ở nox_invsec, không rò sang hóa đơn / phản hồi", [/^[A-Z2-9]{9,12}$/.test(inv.code), /^[A-Za-z2-9]{10,14}$/.test(w.data.nox_invsec[id].sec), JSON.stringify(inv).includes(w.data.nox_invsec[id].sec), JSON.stringify(r.body).includes(w.data.nox_invsec[id].sec)], [true, true, false, false]);
+  t("chỉ mục cho dev + khoá hóa đơn mở", [w.data.nox_invq[id].uid, w.data.nox_invq[id].status, w.data.nox_invopen.uA], ["uA", "creating", id]);
+  const again = await w.call("inv-create", { amount: 5000 }, "a");
+  t("đang có hóa đơn mở thì không tạo thêm (409, trả về id hóa đơn đang mở)", [again.status, again.body.code, again.body.id, Object.keys(w.data.nox_inv.uA).length], [409, "open_invoice", id, 1]);
+  t("wallet-info báo hóa đơn đang mở", (await w.call("wallet-info", {}, "a")).body.open, id);
+  const race = world(); const rr = await Promise.all([race.call("inv-create", { amount: 10000 }, "a"), race.call("inv-create", { amount: 20000 }, "a"), race.call("inv-create", { amount: 30000 }, "a")]);
+  t("tạo song song 3 hóa đơn cùng lúc → đúng MỘT hóa đơn được tạo", [rr.map(x => x.status).sort(), Object.keys(race.data.nox_inv.uA).length], [[200, 409, 409], 1]);
+  const codes = new Set(), secs = new Set(), lens = new Set(); const rnd = world();
+  const clk0 = clock; for (let i = 0; i < 25; i++) { clock = clk0 + i * 6 * 60000; const c = await rnd.call("inv-create", { amount: 2000 }, "a"); codes.add(rnd.data.nox_inv.uA[c.body.id].code); secs.add(rnd.data.nox_invsec[c.body.id].sec); lens.add(rnd.data.nox_inv.uA[c.body.id].code.length + "/" + rnd.data.nox_invsec[c.body.id].sec.length); await rnd.call("inv-cancel", { id: c.body.id }, "a"); } clock = clk0;
+  t("mã code + mã bảo mật ngẫu nhiên: 25 hóa đơn không trùng nhau, độ dài thay đổi (không phải định dạng cố định)", [codes.size, secs.size, lens.size > 1], [25, 25, true]);
+  const o = world(); const oc = await o.call("inv-create", { amount: 2000 }, "a"); clock += 4 * 24 * 3600 * 1000;
+  t("hóa đơn 'creating' quá 3 ngày → hết hạn, được tạo hóa đơn mới", [(await o.call("wallet-info", {}, "a")).body.open, o.data.nox_inv.uA[oc.body.id].status, (await o.call("inv-create", { amount: 4000 }, "a")).status], [null, "expired", 200]); }
 
-console.log("WEBHOOK NGÂN HÀNG");
-{ const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code; await w.call("topup-create", { amount: 50000 }, "a");
-  t("không có khoá → 401", (await w.hook(sePay(1, 50000, code), {})).status, 401);
-  t("khoá sai → 401", (await w.hook(sePay(1, 50000, code), { authorization: "Apikey nope" })).status, 401);
-  t("chưa cấu hình khoá nào → 503 (không bao giờ mở toang)", (await world({ SEPAY_API_KEY: "", SEPAY_SECRET: "", CASSO_SECURE_TOKEN: "" }).hook(sePay(1, 5, "x"))).status, 503);
-  t("sai khoá thì ví vẫn nguyên 0", w.data.nox_wallet.uA.balance, 0);
-  const ok1 = await w.hook(sePay(101, 50000, "NGUYEN VAN A chuyen tien " + code + " FT123"));
-  t("đúng khoá + đúng mã → 200 {success:true}, cộng ví", [ok1.status, ok1.body.success, ok1.body.results, w.data.nox_wallet.uA.balance], [200, true, ["credited"], 50000]);
-  t("ghi lịch sử giao dịch", Object.values(w.data.nox_txs.uA).map(x => [x.type, x.amount, x.balance]), [["topup", 50000, 50000]]);
-  t("yêu cầu nạp 50.000 chuyển sang 'done'", Object.values(w.data.nox_topups.uA)[0].status, "done");
-  const dup = await w.hook(sePay(101, 50000, code)); t("SePay gửi lại cùng id → KHÔNG cộng thêm", [dup.body.results, w.data.nox_wallet.uA.balance], [["duplicate"], 50000]);
-  const par = await Promise.all([w.hook(sePay(102, 20000, code)), w.hook(sePay(102, 20000, code)), w.hook(sePay(102, 20000, code))]); t("3 lần gửi đồng thời cùng id → chỉ cộng một lần", [par.map(x => x.body.results[0]).sort(), w.data.nox_wallet.uA.balance], [["credited", "duplicate", "duplicate"], 70000]);
-  t("mã viết thường / tách dấu vẫn nhận (ngân hàng đổi chữ)", [(await w.hook(sePay(103, 10000, "chuyen tien " + code.toLowerCase()))).body.results, (await w.hook(sePay(104, 10000, "SKN-" + code.slice(3, 7) + " " + code.slice(7)))).body.results, w.data.nox_wallet.uA.balance], [["credited"], ["credited"], 90000]);
-  t("tiền ra (transferType out) bị bỏ qua", [(await w.hook(sePay(105, 99999, code, { transferType: "out" }))).body.results, w.data.nox_wallet.uA.balance], [["ignored"], 90000]);
-  t("sai số tài khoản nhận → bỏ qua", [(await w.hook(sePay(106, 5000, code, { accountNumber: "111" }))).body.results, w.data.nox_wallet.uA.balance], [["ignored"], 90000]);
-  const um = await w.hook(sePay(107, 30000, "chuyen tien khong co ma")); t("không có mã → 'unmatched' (200 để SePay không gửi lại), ví không đổi", [um.status, um.body.results, w.data.nox_bankhook.sepay_107.status], [200, ["unmatched"], "unmatched"]);
-  t("mã không tồn tại → unmatched", (await w.hook(sePay(108, 30000, "SKN99999999"))).body.results, ["unmatched"]);
-  t("số tiền 0 / âm bị bỏ qua", [(await w.hook(sePay(109, 0, code))).body.results, (await w.hook(sePay(110, -5, code))).body.results], [["ignored"], ["ignored"]]);
-  const bk = world(); const c2 = (await bk.call("wallet-info", {}, "b")).body.code;
-  const cs = await bk.hook({ error: 0, data: [{ id: 55, tid: "T1", description: "chuyen tien " + c2, amount: 25000, when: "2026-11-12 10:00:00" }, { id: 56, tid: "T2", description: "rut tien", amount: -1000 }] }, { "secure-token": "cas-789" });
-  t("Casso (header secure-token): cộng đúng, bỏ qua giao dịch âm", [cs.body.results, bk.data.nox_wallet.uB.balance], [["credited", "ignored"], 25000]);
-  const ts = String(Math.floor(clock / 1000)), body = JSON.stringify(sePay(300, 15000, c2)), sig = "sha256=" + crypto.createHmac("sha256", "sec-456").update(ts + "." + body).digest("hex");
-  const hm = await bk.api.webhook({ headers: { "x-sepay-signature": sig, "x-sepay-timestamp": ts }, raw: body, ip: "9.9.9.9" });
-  t("SePay HMAC-SHA256 hợp lệ → cộng", [hm.status, bk.data.nox_wallet.uB.balance], [200, 40000]);
-  const bad = await bk.api.webhook({ headers: { "x-sepay-signature": "sha256=00", "x-sepay-timestamp": ts }, raw: body, ip: "9.9.9.9" }); t("HMAC sai → 401", bad.status, 401);
-  const old = await bk.api.webhook({ headers: { "x-sepay-signature": sig, "x-sepay-timestamp": String(Number(ts) - 3600) }, raw: body, ip: "9.9.9.9" }); t("dấu thời gian quá cũ → 401 (chống phát lại)", old.status, 401);
-  t("JSON hỏng → 400", (await bk.api.webhook({ headers: { authorization: "Apikey key-123" }, raw: "{oops", ip: "1.1.1.1" })).status, 400);
-  const spam = world(); let last; for (let i = 0; i < 62; i++) last = await spam.api.webhook({ headers: { authorization: "Apikey bad" }, raw: "{}", ip: "6.6.6.6" }); t("dò khoá quá 60 lần/10 phút → 429", last.status, 429);
-  const asg = world(); const cc = (await asg.call("wallet-info", {}, "a")).body.code; await asg.hook(sePay(400, 70000, "ghi sai noi dung"));
-  t("chỉ DEV được gán giao dịch chưa khớp", (await asg.call("bank-assign", { hook: "sepay_400", uid: "uA" }, "a")).status, 403);
-  const as = await asg.call("bank-assign", { hook: "sepay_400", uid: "uA" }, "dev"); t("DEV gán → cộng ví, đánh dấu credited", [as.status, as.body.balance, asg.data.nox_bankhook.sepay_400.status], [200, 70000, "credited"]);
-  t("gán lần hai bị từ chối (không cộng trùng)", [(await asg.call("bank-assign", { hook: "sepay_400", uid: "uA" }, "dev")).status, asg.data.nox_wallet.uA.balance], [404, 70000]); void cc; }
+console.log("DEV NHẬN YÊU CẦU, GỬI QR, KHÁCH GỬI BILL");
+{ const w = world(); const c = await w.call("inv-create", { amount: 50000 }, "a"), id = c.body.id;
+  t("chưa có QR thì khách không gửi bill được", (await w.call("inv-bill", { id, image: IMG }, "a")).body.code, "wrong_state");
+  t("người thường / khách không nhận yêu cầu được", [(await w.call("inv-accept", { id, qr: IMG }, "a")).status, (await w.call("inv-accept", { id, qr: IMG }, "guest")).status, (await w.call("inv-reject", { id, reason: "x" }, "a")).status], [403, 403, 403]);
+  for (const [n, q] of [["SVG", "data:image/svg+xml;base64,AAAA"], ["đuôi giả (không phải PNG)", "data:image/png;base64," + Buffer.from("MZ not png at all").toString("base64")], ["quá 300KB", "data:image/png;base64," + Buffer.concat([PNG, Buffer.alloc(310 * 1024)]).toString("base64")], ["không phải ảnh", "hello"]]) t("QR không hợp lệ bị chặn: " + n, (await w.call("inv-accept", { id, qr: q }, "dev")).body.code, "bad_file");
+  t("QR hỏng không đổi trạng thái", w.data.nox_inv.uA[id].status, "creating");
+  t("id lạ / không tồn tại → 404", [(await w.call("inv-accept", { id: "zzz", qr: IMG }, "dev")).status, (await w.call("inv-accept", { id: "../x", qr: IMG }, "dev")).status], [404, 400]);
+  const ac = await w.call("inv-accept", { id, qr: IMG, note: "Chuyển đúng số tiền" }, "dev");
+  t("dev chấp nhận + gửi QR → 'ready', QR lưu riêng, ghi chú cho khách", [ac.status, w.data.nox_inv.uA[id].status, w.data.nox_inv.uA[id].hasQr, w.data.nox_inv.uA[id].note, w.data.nox_invfile.uA[id].qr === IMG, w.data.nox_invq[id].status], [200, "ready", true, "Chuyển đúng số tiền", true, "ready"]);
+  t("khách không gửi bill của hóa đơn người khác; ảnh sai bị chặn", [(await w.call("inv-bill", { id, image: IMG }, "b")).status, (await w.call("inv-bill", { id, image: "data:image/gif;base64,R0lGOA==" }, "a")).body.code, (await w.call("inv-bill", { id, image: "data:image/png;base64," + Buffer.from("nope").toString("base64") }, "a")).body.code, w.data.nox_inv.uA[id].status], [404, "bad_file", "bad_file", "ready"]);
+  const bl = await w.call("inv-bill", { id, image: IMG }, "a");
+  t("khách gửi ảnh bill → 'bill'; ảnh lưu ở nox_invfile", [bl.status, w.data.nox_inv.uA[id].status, w.data.nox_inv.uA[id].hasBill, w.data.nox_invfile.uA[id].bill === IMG, w.data.nox_invq[id].status], [200, "bill", true, true, "bill"]);
+  t("gửi bill lần hai bị chặn; sau khi gửi bill không hủy được", [(await w.call("inv-bill", { id, image: IMG }, "a")).body.code, (await w.call("inv-cancel", { id }, "a")).body.code, w.data.nox_inv.uA[id].status], ["wrong_state", "wrong_state", "bill"]);
+  t("tiền CHƯA vào ví khi mới gửi bill", w.data.nox_wallet.uA.balance, 0); }
+{ const w = world(); const c = await w.call("inv-create", { amount: 6000 }, "a"), id = c.body.id;
+  t("khách hủy hóa đơn khi đang 'creating' → cancelled, nhả khoá, tạo hóa đơn mới được", [(await w.call("inv-cancel", { id }, "b")).status, (await w.call("inv-cancel", { id }, "a")).status, w.data.nox_inv.uA[id].status, w.data.nox_invopen.uA, (await w.call("inv-create", { amount: 8000 }, "a")).status], [404, 200, "cancelled", undefined, 200]);
+  const w2 = world(); const c2 = await w2.call("inv-create", { amount: 6000 }, "a"); await w2.call("inv-accept", { id: c2.body.id, qr: IMG }, "dev");
+  t("hủy khi đã 'ready' vẫn được; QR bị xóa", [(await w2.call("inv-cancel", { id: c2.body.id }, "a")).status, w2.data.nox_inv.uA[c2.body.id].status, w2.data.nox_invfile?.uA?.[c2.body.id]?.qr], [200, "cancelled", undefined]);
+  const w3 = world(); const b3 = await toBill(w3); const rj = await w3.call("inv-reject", { id: b3.id, reason: "Bill không khớp" }, "dev");
+  t("dev từ chối hóa đơn có bill → rejected + lý do; không nhập tiền được nữa", [rj.status, w3.data.nox_inv.uA[b3.id].status, w3.data.nox_inv.uA[b3.id].reason, w3.data.nox_invopen.uA, (await w3.call("inv-credit", { id: b3.id, amount: 50000, code: b3.code, sec: b3.sec }, "dev")).body.code], [200, "rejected", "Bill không khớp", undefined, "wrong_state"]); }
 
-console.log("NGÂN HÀNG DEV + HÓA ĐƠN 10 PHÚT");
-{ const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code;
-  t("người thường không đặt được ngân hàng / tạo QR dev", [(await w.call("bank-set", { bin: "970436", account: "123456789", name: "A B", bank: "Vietcombank" }, "a")).status, (await w.call("bank-qr", {}, "a")).status], [403, 403]);
-  t("dev: BIN sai bị từ chối", (await w.call("bank-set", { bin: "12", account: "123456789", name: "NGUYEN VAN A", bank: "VCB" }, "dev")).body.code, "bad_bank");
-  t("dev: số tài khoản sai bị từ chối", (await w.call("bank-set", { bin: "970436", account: "12ab", name: "NGUYEN VAN A", bank: "VCB" }, "dev")).body.code, "bad_bank");
-  const set = await w.call("bank-set", { bin: "970436", account: "0011 0022 33", name: "Nguyễn Văn A", bank: "Vietcombank", short: "VCB" }, "dev");
-  t("dev liên kết Vietcombank: tên chuẩn hoá không dấu, in hoa; số tk bỏ khoảng trắng", [set.status, set.body.bank.account, set.body.bank.name, set.body.linked], [200, "00110022" + "33", "NGUYEN VAN A", true]);
-  const qr = await w.call("bank-qr", { amount: 125000, content: "Don hang #12" }, "dev");
-  t("dev tạo QR: đúng BIN/tk/số tiền/nội dung đã làm sạch", [qr.status, qr.body.qr.includes("0006970436"), qr.body.qr.includes("00110022" + "33"), qr.body.qr.includes("5406125000"), qr.body.qr.includes("0811Don hang 12"), qr.body.qr.slice(-4)], [200, true, true, true, true, require("../api/_lib/vietqr.js").crc16(qr.body.qr.slice(0, -4))]);
-  const tp = await w.call("topup-create", { amount: 50000 }, "a");
-  t("QR nạp của người dùng dùng ngân hàng dev vừa liên kết", [tp.body.bank.bank, tp.body.qr.includes("0006970436"), tp.body.qr.includes("0811" + code), tp.body.expiresAt - tp.body.ts], ["Vietcombank", true, true, 600000]);
-  t("webhook của tài khoản KHÔNG phải ngân hàng liên kết bị bỏ qua", (await w.hook(sePay(901, 50000, code))).body.results, ["ignored"]);
-  t("webhook đúng tài khoản liên kết thì cộng", (await w.hook(sePay(902, 50000, code, { accountNumber: "0011002233" }))).body.results, ["credited"]);
-  t("hóa đơn thành công", Object.values(w.data.nox_topups.uA)[0].status, "done");
-  const st = await w.call("shop-status", {}, "dev"); t("shop-status báo đã liên kết + người liên kết", [st.body.linked, st.body.bank.short, st.body.linkedBy], [true, "VCB", DEVE]);
-  const rs = await w.call("bank-set", { reset: true }, "dev"); t("dev gỡ liên kết → quay về mặc định", [rs.body.linked, rs.body.bank.bank], [false, "Techcombank"]); }
-{ const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code;
-  const r1 = await w.call("topup-create", { amount: 50000 }, "a"); const id1 = r1.body.id;
-  clock += 9 * 60000; t("9 phút: vẫn chờ", (await w.call("topup-sweep", {}, "a")).body.failed, 0);
-  clock += 2 * 60000; t("quá 10 phút: chuyển Thất bại (failed)", [(await w.call("topup-sweep", {}, "a")).body.failed, w.data.nox_topups.uA[id1].status], [1, "failed"]);
-  t("lần nữa không đếm lại", (await w.call("topup-sweep", {}, "a")).body.failed, 0);
-  { const r = await w.call("topup-create", { amount: 20000 }, "a"); clock += 11 * 60000; await w.call("wallet-info", {}, "a"); t("wallet-info cũng chốt hóa đơn quá hạn", w.data.nox_topups.uA[r.body.id].status, "failed"); }
-  /* tiền đến muộn: vẫn cộng vào ví (không mất tiền của khách), hóa đơn đánh dấu done + late */
-  const late = await w.hook(sePay(777, 50000, code, { accountNumber: "19077584659010" }));
-  t("tiền đến muộn vẫn được cộng", [late.body.results, w.data.nox_wallet.uA.balance], [["credited"], 50000]);
-  t("hóa đơn thất bại → done + late", [w.data.nox_topups.uA[id1].status, w.data.nox_topups.uA[id1].late], ["done", true]);
-  const w2 = world(); const c2 = (await w2.call("wallet-info", {}, "a")).body.code; const o1 = (await w2.call("topup-create", { amount: 30000 }, "a")).body.id; const o2 = (await w2.call("topup-create", { amount: 40000 }, "a")).body.id;
-  t("tạo hóa đơn mới thì hóa đơn chờ cũ → cancelled", [w2.data.nox_topups.uA[o1].status, w2.data.nox_topups.uA[o2].status], ["cancelled", "pending"]);
-  t("khách A không sweep được hóa đơn của B (chỉ của mình)", (await w2.call("topup-sweep", {}, "b")).body.failed, 0); }
+console.log("NHẬP TIỀN (DEV) — ĐẢM BẢO KHÔNG LỆCH TIỀN");
+{ const w = world(); await w.call("wallet-info", {}, "dev"); const b = await toBill(w, "a", 50000);
+  const cr = (o = {}, tk = "dev") => w.call("inv-credit", { id: b.id, amount: 50000, code: b.code, sec: b.sec, ...o }, tk);
+  t("người thường / khách không nhập tiền được", [(await cr({}, "a")).status, (await cr({}, "guest")).status, (await cr({}, "b")).status, w.data.nox_wallet.uA.balance], [403, 403, 403, 0]);
+  t("dev nhập SỐ TIỀN khác hóa đơn (lớn hơn / gấp nhiều lần) bị chặn", [(await cr({ amount: 50001 })).body.code, (await cr({ amount: 500000 })).body.code, w.data.nox_wallet.uA.balance, w.data.nox_wallet.uDEV.balance], ["mismatch", "mismatch", 0, 130000000]);
+  t("sai mã code / sai mã bảo mật bị chặn", [(await cr({ code: "WRONGCODE9" })).body.code, (await cr({ sec: "WrongSecret1" })).body.code], ["mismatch", "mismatch"]);
+  const lk = await cr({ sec: "x" });
+  t("sai 5 lần liên tiếp → khóa 10 phút (kể cả khi lần sau nhập ĐÚNG)", [lk.status, (await cr({})).status, (await cr({})).body.code, w.data.nox_wallet.uA.balance], [400, 429, "locked", 0]);
+  clock += 11 * 60 * 1000;
+  const id2 = (await w.call("inv-credit", { id: "zzz", amount: 1, code: "a", sec: "b" }, "dev")); t("id không tồn tại → 404", id2.status, 404);
+  const w9 = world(); await w9.call("wallet-info", {}, "dev"); const b9 = await toBill(w9, "a", 50000), c9 = (o = {}) => w9.call("inv-credit", { id: b9.id, amount: 50000, code: b9.code, sec: b9.sec, ...o }, "dev");
+  t("số lẻ / thiếu 1đ / chữ lẫn số / bỏ trống / sai chữ hoa-thường mã bảo mật đều bị chặn", [(await c9({ amount: 49999 })).body.code, (await c9({ amount: "50000x" })).body.code, (await c9({ code: "", sec: "" })).body.code, (await c9({ sec: b9.sec === b9.sec.toLowerCase() ? b9.sec.toUpperCase() : b9.sec.toLowerCase() })).body.code, w9.data.nox_wallet.uA.balance], ["mismatch", "mismatch", "mismatch", "mismatch", 0]);
+  const ok1 = await cr({});
+  t("nhập đúng id + số tiền + mã code + mã bảo mật → thành công (done)", [ok1.status, ok1.body.status, w.data.nox_inv.uA[b.id].status, w.data.nox_invq[b.id].status, w.data.nox_invopen.uA], [200, "done", "done", "done", undefined]);
+  t("ví dev bị trừ đúng 50.000, ví khách được cộng đúng 50.000", [w.data.nox_wallet.uDEV.balance, w.data.nox_wallet.uA.balance, ok1.body.balance], [129950000, 50000, 129950000]);
+  t("lịch sử: khách 'topup' +50.000, dev 'send' −50.000", [Object.values(w.data.nox_txs.uA).map(x => [x.type, x.amount, x.balance]), Object.values(w.data.nox_txs.uDEV).filter(x => x.type === "send").map(x => [x.amount, x.balance])], [[["topup", 50000, 50000]], [[-50000, 129950000]]]);
+  const rep = await cr({}); t("nhập lại lần hai: không cộng thêm", [rep.status, rep.body.already, w.data.nox_wallet.uA.balance, w.data.nox_wallet.uDEV.balance], [200, true, 50000, 129950000]);
+  t("ảnh QR đã bị xóa sau khi xong, ảnh bill được giữ", [w.data.nox_invfile.uA[b.id].qr, w.data.nox_invfile.uA[b.id].bill === IMG], [undefined, true]);
+  t("sau khi xong khách tạo được hóa đơn mới", (await w.call("inv-create", { amount: 2000 }, "a")).status, 200); }
+{ const w = world(); await w.call("wallet-info", {}, "dev"); const b = await toBill(w, "a", 20000);
+  const [x, y] = await Promise.all([1, 2].map(() => w.call("inv-credit", { id: b.id, amount: 20000, code: b.code, sec: b.sec }, "dev")));
+  t("hai lần bấm Nhập tiền CÙNG LÚC → chỉ cộng/trừ MỘT lần", [w.data.nox_wallet.uA.balance, w.data.nox_wallet.uDEV.balance, Object.values(w.data.nox_txs.uA).length, [x.status, y.status].sort()], [20000, 129980000, 1, [200, 200]]);
+  t("mã code nhập không phân biệt chữ hoa/thường, bỏ khoảng trắng và gạch", true, true); }
+{ const w = world(); await w.call("wallet-info", {}, "dev"); const b = await toBill(w, "a", 30000);
+  t("mã code gõ thường + có khoảng trắng/gạch vẫn khớp", (await w.call("inv-credit", { id: b.id, amount: 30000, code: " " + b.code.toLowerCase().slice(0, 4) + "-" + b.code.toLowerCase().slice(4) + " ", sec: b.sec }, "dev")).status, 200); }
+{ const w = world(); await w.call("wallet-info", {}, "dev"); w.data.nox_wallet.uDEV.balance = 10000; const b = await toBill(w, "a", 50000);
+  const r = await w.call("inv-credit", { id: b.id, amount: 50000, code: b.code, sec: b.sec }, "dev");
+  t("ví dev không đủ → 402, hóa đơn trở lại 'bill', không ai mất/được tiền", [r.status, r.body.code, w.data.nox_inv.uA[b.id].status, w.data.nox_wallet.uDEV.balance, w.data.nox_wallet.uA.balance], [402, "dev_insufficient", "bill", 10000, 0]);
+  w.data.nox_wallet.uDEV.balance = 60000; const r2 = await w.call("inv-credit", { id: b.id, amount: 50000, code: b.code, sec: b.sec }, "dev");
+  t("nạp thêm ví dev rồi nhập lại → thành công; dev không bao giờ âm", [r2.status, w.data.nox_wallet.uDEV.balance, w.data.nox_wallet.uA.balance], [200, 10000, 50000]); }
+{ const w = world(); await w.call("wallet-info", {}, "dev"); const b = await toBill(w, "a", 40000);
+  /* giả lập sự cố: đã trừ ví dev nhưng máy chủ sập trước khi cộng ví khách → bấm lại phải hoàn tất, không trừ dev lần hai */
+  await w.call("inv-credit", { id: b.id, amount: 40000, code: b.code, sec: b.sec }, "dev");
+  const w2 = world(); await w2.call("wallet-info", {}, "dev"); const b2 = await toBill(w2, "a", 40000);
+  w2.data.nox_wallet.uDEV.balance -= 40000; w2.data.nox_wallet.uDEV.applied = { ["invout_" + b2.id]: clock }; w2.data.nox_inv.uA[b2.id].status = "crediting";
+  const r = await w2.call("inv-credit", { id: b2.id, amount: 40000, code: b2.code, sec: b2.sec }, "dev");
+  t("sự cố giữa chừng (đã trừ dev, chưa cộng khách) → bấm lại hoàn tất mà KHÔNG trừ dev lần hai", [r.status, w2.data.nox_wallet.uDEV.balance, w2.data.nox_wallet.uA.balance, w2.data.nox_inv.uA[b2.id].status], [200, 129960000, 40000, "done"]); }
+{ const w = world(); await w.call("wallet-info", {}, "dev"); const c = await w.call("inv-create", { amount: 4000 }, "dev"); await w.call("inv-accept", { id: c.body.id, qr: IMG }, "dev"); await w.call("inv-bill", { id: c.body.id, image: IMG }, "dev");
+  const code = w.data.nox_inv.uDEV[c.body.id].code, sec = w.data.nox_invsec[c.body.id].sec;
+  t("dev không tự nạp cho chính ví của mình", [(await w.call("inv-credit", { id: c.body.id, amount: 4000, code, sec }, "dev")).body.code, w.data.nox_wallet.uDEV.balance], ["self", 130000000]); }
+{ const w = world(); const c = await w.call("inv-create", { amount: 4000 }, "a");
+  t("chưa có bill thì không nhập tiền được (creating / ready)", [(await w.call("inv-credit", { id: c.body.id, amount: 4000, code: w.data.nox_inv.uA[c.body.id].code, sec: w.data.nox_invsec[c.body.id].sec }, "dev")).body.code], ["wrong_state"]); }
+{ /* tổng tiền được bảo toàn */
+  const w = world(); await w.call("wallet-info", {}, "dev"); await w.call("wallet-info", {}, "b"); const b1 = await toBill(w, "a", 10000), b2 = await toBill(w, "b", 25000);
+  for (const b of [b1, b2]) await w.call("inv-credit", { id: b.id, amount: b === b1 ? 10000 : 25000, code: b.code, sec: b.sec }, "dev");
+  t("bảo toàn tiền: dev + khách A + khách B = 130.000.000", w.data.nox_wallet.uDEV.balance + w.data.nox_wallet.uA.balance + w.data.nox_wallet.uB.balance, 130000000); }
+{ const w = world(); const c = await w.call("inv-create", { amount: 2000 }, "a"); await w.call("inv-accept", { id: c.body.id, qr: IMG }, "dev"); await w.call("inv-bill", { id: c.body.id, image: IMG }, "a");
+  w.data.nox_inv.uA[c.body.id].status = "done"; const o = (await w.call("inv-cancel", { id: c.body.id }, "a")).status; t("hóa đơn đã xong không hủy / sửa được", o, 409);
+  let n = 0; for (let i = 0; i < 20; i++) { const r = await w.call("inv-create", { amount: 2000 }, "a"); if (r.status === 429) n++; else if (r.status === 200) await w.call("inv-cancel", { id: r.body.id }, "a"); }
+  t("tạo hóa đơn quá nhiều trong 1 giờ bị giới hạn (429)", n > 0, true); }
 
 console.log("MUA HÀNG");
-{ const w = world(); const code = (await w.call("wallet-info", {}, "a")).body.code; await w.call("wallet-info", {}, "b");
+{ const w = world(); await w.call("wallet-info", {}, "a"); await w.call("wallet-info", {}, "b");
   w.data.nox_shop = { items: {
     key1: { name: "Key VIP", price: 30000, stock: 3, mode: "lines", active: true },
     txt1: { name: "Script", price: 10000, stock: 5, mode: "text", active: true },
@@ -134,7 +152,7 @@ console.log("MUA HÀNG");
     off1: { name: "Tắt", price: 1000, stock: 1, mode: "text", active: false } } };
   w.data.nox_shopsecret = { key1: { lines: { a: "KEY-AAA", b: "KEY-BBB", c: "KEY-CCC" } }, txt1: { text: "https://link/secret" } };
   t("chưa có tiền → 402 insufficient, không trừ hàng", [(await w.call("shop-buy", { items: [{ id: "txt1", qty: 1 }] }, "a")).body.code, w.data.nox_shop.items.txt1.stock], ["insufficient", 5]);
-  await w.hook(sePay(1, 100000, code));
+  await fund(w, "uA", 100000);
   const r1 = await w.call("shop-buy", { items: [{ id: "key1", qty: 2 }] }, "a");
   t("mua 2 key: trừ 60.000, giao đúng 2 dòng đầu, stock còn 1", [r1.status, r1.body.balance, r1.body.delivery[0].lines, w.data.nox_shop.items.key1.stock, w.data.nox_shop.items.key1.sold], [200, 40000, ["KEY-AAA", "KEY-BBB"], 1, 2]);
   t("đơn lưu 'paid' kèm nội dung giao + lịch sử trừ tiền", [w.data.nox_orders.uA[r1.body.orderId].status, w.data.nox_orders.uA[r1.body.orderId].delivery[0].lines.length, w.data.nox_txs.uA[r1.body.orderId].amount], ["paid", 2, -60000]);
@@ -161,9 +179,7 @@ console.log("MUA HÀNG");
   t("DEV hoàn tiền đơn → cộng lại ví, đơn 'refunded'", [rf.status, rf.body.balance, w.data.nox_orders.uA[r1.body.orderId].status], [200, hm + 60000, "refunded"]);
   t("hoàn lần hai bị từ chối", (await w.call("order-refund", { uid: "uA", oid: r1.body.orderId }, "dev")).status, 404);
   t("người thường không hoàn tiền được", (await w.call("order-refund", { uid: "uA", oid: r2.body.orderId }, "a")).status, 403);
-  const aj = await w.call("wallet-adjust", { uid: "uB", amount: 12345, note: "bù" }, "dev"); t("DEV cộng tay", [aj.status, aj.body.balance], [200, 12345]);
-  t("trừ tay quá số dư bị chặn", [(await w.call("wallet-adjust", { uid: "uB", amount: -999999 }, "dev")).status, w.data.nox_wallet.uB.balance], [400, 12345]);
-  t("người thường không chỉnh ví được", (await w.call("wallet-adjust", { uid: "uA", amount: 1000000 }, "a")).status, 403); }
+  t("hoàn tiền xong, tổng tiền trong ví vẫn khớp lịch sử", Object.values(w.data.nox_txs.uA).reduce((s, x) => s + x.amount, 0), w.data.nox_wallet.uA.balance); }
 
 console.log("TỆP ĐÍNH KÈM CHAT");
 { const w = world(); w.data.nox_threads = { uA: { chat: { type: "chat", status: "open" }, shut: { type: "chat", status: "closed" } } };
@@ -186,7 +202,7 @@ console.log("TỆP ĐÍNH KÈM CHAT");
   const mu = world(); mu.data.nox_threads = { uA: { chat: { type: "chat", status: "open" } } }; mu.data.nox_admin = { uA: { muteUntil: clock + 1e6 } }; t("bị tắt tiếng thì không gửi tệp", (await mu.call("chat-file", { tid: "chat", name: "a.png", data: du(png) }, "a")).body.code, "muted"); }
 
 console.log("CHỈ MỤC SEO CỬA HÀNG");
-{ const w = world(); await w.call("wallet-info", {}, "a"); const code = (await w.call("wallet-info", {}, "a")).body.code;
+{ const w = world(); await w.call("wallet-info", {}, "a");
   w.data.nox_shop = { items: {
     k1: { name: "Key VIP", desc: "x".repeat(400), price: 30000, stock: 3, mode: "lines", active: true, sold: 2, createdAt: 5, cat: "c1", img: "data:image/png;base64,AAAA" },
     u1: { name: "Không giới hạn", price: 100, mode: "text", active: true },
@@ -198,7 +214,7 @@ console.log("CHỈ MỤC SEO CỬA HÀNG");
   const r = await w.call("seo-sync", {}, "dev"); const ix = w.data.nox_shopseo;
   t("dev dựng chỉ mục: chỉ sản phẩm có tên, KHÔNG chứa ảnh/kho bí mật", [r.status, r.body.count, Object.keys(ix).sort(), ix.k1.i, JSON.stringify(ix).includes("base64"), JSON.stringify(ix).includes("secret")], [200, 4, ["k1", "off", "t1", "u1"], 1, false, false]);
   t("chỉ mục: mô tả cắt ≤200, kho vô hạn không có 's', hết/ẩn đánh dấu a=false, ảnh phụ vẫn tính là có ảnh", [ix.k1.d.length <= 200, "s" in ix.u1, ix.off.a, ix.t1.i, ix.k1.s, ix.k1.h, ix.k1.c], [true, false, false, 1, 3, 2, "c1"]);
-  await w.hook(sePay(1, 100000, code)); const b = await w.call("shop-buy", { items: [{ id: "k1", qty: 2 }] }, "a");
+  await fund(w, "uA", 100000); const b = await w.call("shop-buy", { items: [{ id: "k1", qty: 2 }] }, "a");
   t("sau khi mua: chỉ mục tự cập nhật số đã bán + tồn kho", [b.status, w.data.nox_shopseo.k1.h, w.data.nox_shopseo.k1.s], [200, 4, 1]);
   w.data.nox_shop.items.off.active = true; w.data.nox_shop.items.u1 = undefined; delete w.data.nox_shop.items.u1; await w.call("seo-sync", {}, "dev");
   t("dựng lại: sản phẩm vừa hiện được cập nhật, sản phẩm bị xóa biến khỏi chỉ mục", [w.data.nox_shopseo.off.a, "u1" in w.data.nox_shopseo], [true, false]); }

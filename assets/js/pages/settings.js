@@ -1,6 +1,6 @@
 /* Cài đặt: giao diện, kính mờ, ngôn ngữ, nhạc nền và tài khoản. */
 import { ACCENTS, getAccent, setAccent } from "../lib/accent.js";
-import { listCookies, clearSiteCookies, cookiesEnabled } from "../lib/cookie.js";
+import { listCookies, cookiesEnabled } from "../lib/cookie.js";
 import { esc, toast } from "../lib/util.js";
 import { ICO } from "../lib/icons.js";
 import * as S from "../lib/store.js";
@@ -59,12 +59,10 @@ export function mount(ctx) {
         <div class="acts"><a class="btn primary" href="/profile">Xem hồ sơ</a>${!u.emailVerified ? `<button class="btn ghost" id="verify" type="button">Gửi lại email xác minh</button>` : ""}<button class="btn ghost" data-act="signout" type="button">${ICO.out}Đăng xuất</button></div>`
         : `<p class="muted">Bạn chưa đăng nhập.</p><div class="acts"><a class="btn primary" href="/login?next=/settings">Đăng nhập</a><a class="btn ghost" href="/register">Tạo tài khoản</a></div>`}</section>
       <section class="set-card wide"><h3>${ICO.shield}Cookie</h3><p class="muted">${cookiesEnabled() ? "Website dùng cookie của chính nó để nhớ cài đặt, ngôn ngữ, chủ đề, giỏ hàng và trạng thái menu trên thiết bị này. Không có cookie quảng cáo hay theo dõi." : "Trình duyệt của bạn đang tắt cookie nên cài đặt chỉ được nhớ tạm."}</p>
-        ${session.isDev ? `<ul class="cookie-list" translate="no">${listCookies().map(c => `<li>${esc(c.name)}</li>`).join("") || "<li>(chưa có)</li>"}</ul>` : ""}
-        <div class="acts"><button class="btn ghost" id="ckClear" type="button">Xóa cookie của website</button></div></section>
+        ${session.isDev ? `<ul class="cookie-list" translate="no">${listCookies().map(c => `<li>${esc(c.name)}</li>`).join("") || "<li>(chưa có)</li>"}</ul>` : ""}</section>
       <section class="set-card wide"><h3>${ICO.refresh || ICO.out}Đặt lại</h3><p class="muted">Đưa giao diện, kính mờ, hình nền, âm thanh và trợ năng về mặc định. Ngôn ngữ và tài khoản không đổi.</p>
         <div class="acts"><button class="btn danger" id="resetAll" type="button">Đặt lại cài đặt hiển thị</button></div></section></div>`;
     ctx.el.querySelectorAll("[data-skin]").forEach(b => b.addEventListener("click", () => { setSkin(b.dataset.skin); draw(); const e = ctx.el.querySelector(`[data-skin="${b.dataset.skin}"]`); if (e) e.focus(); }));
-    const ck = ctx.el.querySelector("#ckClear"); if (ck) ck.addEventListener("click", () => { clearSiteCookies(); resetPrefs(); setAccent(""); draw(); toast("Đã xóa cookie và đặt lại cài đặt."); });
     ctx.el.querySelectorAll("[data-theme]").forEach(b => b.addEventListener("click", () => { setThemePref(b.dataset.theme); draw(); }));
     ctx.el.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", async () => { await setLang(b.dataset.lang); ctx.el.querySelectorAll("[data-lang]").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-checked", on); }); }));
     const $q = x => ctx.el.querySelector(x), redraw = id => { draw(); const e = $q("#" + id); if (e) e.focus(); };

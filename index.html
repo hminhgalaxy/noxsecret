@@ -76,6 +76,9 @@
 <link rel="stylesheet" href="/assets/css/shop.css">
 <link rel="stylesheet" href="/assets/css/shop2.css">
 <link rel="stylesheet" href="/assets/css/skias.css">
+<link rel="stylesheet" href="/assets/css/landing.css">
+<link rel="stylesheet" href="/assets/css/rows.css">
+<link rel="stylesheet" href="/assets/css/topup.css">
 <link rel="stylesheet" href="/assets/css/glass-liquid.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://skibidiscript.vercel.app/#site","name":"Skibidi Web","alternateName":["Skibidi Shop","Skibidi","skibidiscript","Skibidi Script","SkibidiScript Web","skibidiscript.vercel.app"],"url":"https://skibidiscript.vercel.app/","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":"https://skibidiscript.vercel.app/search?q={search_term_string}","query-input":"required name=search_term_string"}},{"@type":"Organization","@id":"https://skibidiscript.vercel.app/#org","name":"Skibidi Web","alternateName":["Skibidi Shop","skibidiscript","Skibidi Script"],"url":"https://skibidiscript.vercel.app/","logo":{"@type":"ImageObject","@id":"https://skibidiscript.vercel.app/#logo","url":"https://skibidiscript.vercel.app/icons/icon-512.png","contentUrl":"https://skibidiscript.vercel.app/icons/icon-512.png","width":512,"height":512,"caption":"Skibidi Web"},"image":{"@id":"https://skibidiscript.vercel.app/#logo"}}]}</script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -156,7 +159,7 @@
 
 <main id="main">
   <div id="pagehead" hidden></div>
-  <div id="view" tabindex="-1"><noscript><div class="statebox"><h1>Skibidi Web</h1><p>Skibidi Web (also known as Skibidi Shop and skibidiscript) is a digital shop: top up your wallet by bank transfer, buy and receive instantly. Please enable JavaScript to use this website.</p><p><a href="/skibidiscript">What is Skibidi Web?</a> · <a href="/about">About</a> · <a href="/guide">Guide</a> · <a href="/security">Security</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p><div class="acts"><a class="btn ghost" href="/about">About</a><a class="btn ghost" href="/guide">Guide</a><a class="btn ghost" href="/security">Security</a></div></div></noscript></div>
+  <div id="view" tabindex="-1"><noscript><div class="statebox"><h1>Skibidi Web</h1><p>Skibidi Web (also known as Skibidi Shop and skibidiscript) is a digital shop: top up your wallet by bank transfer, buy and receive instantly. Please enable JavaScript to use this website.</p><p><a href="/skibidiscript">What is Skibidi Web?</a> · <a href="/about">About</a> · <a href="/guide">Guide</a> · <a href="/security">Security</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p><div class="acts"><a class="btn ghost" href="/about">About</a><a class="btn ghost" href="/guide">Guide</a><a class="btn ghost" href="/security">Security</a></div></div></noscript><div class="ld-page" role="status" aria-live="polite"><span class="ld-spin" aria-hidden="true"></span></div></div>
   <footer id="footer">
     <div class="foot-main">
       <div class="foot-about"><a class="brand" href="/" aria-label="Trang chủ"><svg class="mark" aria-hidden="true"><use href="#logo"/></svg><span class="word"><b>SKIBIDI</b><span>WEB</span></span></a>
@@ -170,7 +173,8 @@
 </main>
 
 <nav id="tabbar" aria-label="Điều hướng nhanh">
-  <a class="tab" href="/" data-tab="home"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>Cửa hàng</a>
+  <a class="tab" href="/" data-tab="home"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20Z"/><path d="M9.5 21.5V14h5v7.5"/></svg></span>Trang chủ</a>
+  <a class="tab" href="/shop" data-tab="shop"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span>Cửa hàng</a>
   <button class="tab" type="button" id="tabCats" data-tab="cats"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg></span>Danh mục</button>
   <button class="tab" type="button" id="tabCart" aria-label="Giỏ hàng"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h3l2.3 11.2a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6"/></svg><i class="tab-badge" id="tabCartBadge" hidden></i></span>Giỏ</button>
   <a class="tab" href="/wallet" data-tab="wallet"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M16.5 15h1.5"/><path d="M6 6l9.5-3L17 6"/></svg></span><span id="tabWalletL">Ví</span></a>

@@ -10,7 +10,7 @@ const T = require("./templates");
 const PERM = T.PERM, MIN = 60 * 1000, HOUR = 60 * MIN;
 const EMAIL_RE = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,255}\.[^\s@<>"']{2,}$/;
 const ok = (o) => ({ status: 200, body: Object.assign({ ok: true }, o || {}) });
-const fail = (status, code, message) => ({ status, body: { ok: false, code, message } });
+const fail = (status, code, message, extra) => ({ status, body: Object.assign({ ok: false, code, message }, extra || {}) });
 const lc = s => String(s || "").trim().toLowerCase();
 const key = s => String(s).replace(/[.#$\[\]\/]/g, "_");
 const sha = s => crypto.createHash("sha256").update(String(s)).digest("hex").slice(0, 24);
@@ -86,7 +86,7 @@ function createApi(deps) {
 
   const A = {
     /* Công khai, KHÔNG lộ giá trị bí mật: chỉ nói phần nào đã bật + tên biến thiếu/sai. Trang Dev → Kết nối máy chủ dùng cái này. */
-    async status() { return ok({ mail: configured(), twofa: configured(), admin: !!(auth && db), shop: !!shop, hook: !!(env.SEPAY_API_KEY || env.SEPAY_SECRET || env.CASSO_SECURE_TOKEN), siteUrl: !!env.SITE_URL, problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] }); },
+    async status() { return ok({ mail: configured(), twofa: configured(), admin: !!(auth && db), shop: !!shop, siteUrl: !!env.SITE_URL, problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] }); },
     async "mail-check"({ token }) {
       const { err } = await devOnly(token); if (err) return err;
       return ok({ checks: deps.liveCheck ? await deps.liveCheck() : [], problems: deps.diagnose ? deps.diagnose().map(x => x.msg) : [] });
@@ -317,7 +317,7 @@ function createApi(deps) {
     return r;
   }
 
-  /* Cửa hàng / ví / nạp tiền / tệp chat: xem api/_lib/shop.js (cần Firebase Admin, KHÔNG cần Brevo) */
+  /* Cửa hàng / ví / hóa đơn nạp tiền / tệp chat: xem api/_lib/shop.js (cần Firebase Admin, KHÔNG cần Brevo) */
   const shop = db && auth && db.tx ? require("./shop").createShop({ db, env, now, rnd, who, limit, devOnly, ok, fail }) : null;
   if (shop) Object.assign(A, shop.actions);
 
@@ -332,7 +332,6 @@ function createApi(deps) {
     try { return await A[action]({ token: req.token, body: req.body || {}, ip: req.ip, geo: req.geo || {} }); }
     catch (e) { console.error("account:" + action, e && e.code, e && e.message); if (e && e.code === "mail_failed") return fail(502, "mail_failed", "We couldn't send the email right now. The site owner has been notified in the server log."); return fail(500, "server_error", "Something went wrong. Please try again."); }
   }
-  handle.webhook = shop ? shop.webhook : async () => ({ status: 503, body: { success: false, message: "not configured" } });
   handle.shop = shop;
   return handle;
 }

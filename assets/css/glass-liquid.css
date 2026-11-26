@@ -29,7 +29,7 @@
 :root[data-glass="on"] .hero-search input{border-radius:999px}
 
 /* Menu, popup, bảng ghi chú: kính mờ đục để chữ phía sau không lộ ra */
-:root[data-glass="on"] :is(.pop-root>.pop,.cf,.pop-menu,#cw .cw-panel,.ck,.toast,.att-lb>img,.mp,.pal,.palette,.cmdk){
+:root[data-glass="on"] :is(.pop-root>.pop,.cf,.pop-menu,#cw .cw-panel,.ck,.att-lb>img,.mp,.pal,.palette,.cmdk){
   background:
     radial-gradient(120% 70% at 0% 0%,var(--lq-sheen),transparent 55%),
     color-mix(in srgb,var(--bg) var(--lq-menu),transparent)!important;
@@ -37,6 +37,21 @@
   border:1px solid color-mix(in srgb,var(--lq-rim-a) 34%,transparent);
   box-shadow:inset 1px 1px 0 var(--lq-rim-a),inset -1px -1px 0 var(--lq-lo),0 28px 60px -22px var(--lq-drop)!important}
 :root[data-glass="on"] .pop-head{background:transparent!important}
+
+/* Thông báo (toast): khung kính đục + mờ mạnh hơn hẳn, để chữ của trang không xuyên qua và không bị đè lên chữ thông báo */
+:root[data-glass="on"] .toast{
+  background:radial-gradient(120% 90% at 0% 0%,var(--lq-sheen),transparent 60%),color-mix(in srgb,var(--bg) 94%,transparent)!important;color:var(--text)!important;
+  -webkit-backdrop-filter:blur(44px) saturate(1.8)!important;backdrop-filter:blur(44px) saturate(1.8)!important;
+  border:1px solid color-mix(in srgb,var(--lq-rim-a) 38%,transparent);text-shadow:none;
+  box-shadow:inset 1px 1px 0 var(--lq-rim-a),inset -1px -1px 0 var(--lq-lo),0 22px 50px -18px var(--lq-drop),0 0 0 6px color-mix(in srgb,var(--bg) 40%,transparent)!important}
+:root[data-glass="on"] .toast.err{border-color:color-mix(in srgb,var(--bad) 60%,transparent)}
+:root[data-glass="on"] #toasts{z-index:420}
+
+/* Khi mở menu / popup / ngăn kéo: phần phía sau MỜ đi (làm mờ nền + tối nhẹ) */
+:root[data-glass="on"] .pop-bg{background:color-mix(in srgb,#000 34%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15)}
+:root[data-glass="on"] .pop-root[data-variant="menu"] .pop-bg{background:color-mix(in srgb,#000 8%,transparent);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+@media(min-width:720px){:root[data-glass="on"] .pop-root[data-variant="menu"] .pop-bg{background:transparent;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}}
+:root[data-glass="on"] #ov{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 
 /* Thanh trên và thanh bên: khung NỔI bo góc, đục ~92% + làm mờ mạnh để chữ cuộn qua phía sau không lộ ra */
 :root[data-glass="on"] :is(#hdr,#side){
@@ -64,5 +79,5 @@
 :root[data-glass="on"] :is(#side a:not(.brand),#side button,.pop-menu button,.pop-menu a):hover{background:var(--lq-sheen)}
 :root[data-glass="on"] #side a.on,:root[data-glass="on"] #side a[aria-current=page]{background:linear-gradient(180deg,color-mix(in srgb,var(--lq-hi) 40%,var(--surface-2)),var(--surface-2));box-shadow:inset 1px 1px 0 var(--lq-rim-a),inset -1px -1px 0 var(--lq-lo)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  :root[data-glass="on"] :is(#side,.pop-root>.pop,.cf,.pop-menu,#cw .cw-panel,#hdr,#tabbar){background:var(--bg)!important}
+  :root[data-glass="on"] :is(#side,.pop-root>.pop,.cf,.pop-menu,#cw .cw-panel,#hdr,#tabbar,.toast){background:var(--bg)!important}
 }

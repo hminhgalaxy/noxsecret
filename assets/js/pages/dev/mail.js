@@ -11,7 +11,7 @@ const SYS = { resetCode: "Mã đặt lại mật khẩu", recoverCode: "Mã khô
 export async function mount(ctx) {
   if (locked(ctx)) return;
   ctx.setPage({ title: "Gửi thư", crumbs: devCrumb, sub: "Trả lời người dùng bằng văn mẫu và xem trước các thư tự động.", noindex: true });
-  ctx.el.innerHTML = `<div class="statebox"><p>Đang tải…</p></div>`;
+  ctx.el.innerHTML = `<div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div>`;
   const renderDiag = (pr, live) => `<div class="formcard" id="diag"><span class="dsec">Kiểm tra gửi thư</span>${pr.length ? `<ul class="diag-l">${pr.map(m => `<li class="bad" translate="no">✗ ${esc(m)}</li>`).join("")}</ul>` : ""}${live ? `<ul class="diag-l">${live.map(c => `<li class="${c.ok ? "good" : "bad"}" translate="no">${c.ok ? "✓" : "✗"} ${esc(c.msg)}</li>`).join("")}</ul>` : ""}<p class="sub-note">Sau khi thêm hoặc sửa biến môi trường trên Vercel, bạn phải Redeploy lại (Deployments → ⋯ → Redeploy) thì thay đổi mới có hiệu lực.</p><div class="form-acts"><button class="btn ghost" id="diagGo" type="button">Kiểm tra với Brevo</button></div></div>`;
   if (!(await serverReady())) {
     const sp = await serverProblems(); if (!ctx.isCurrent()) return;

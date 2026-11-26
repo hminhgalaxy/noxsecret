@@ -7,8 +7,8 @@ import { openOrder, openLive, downloadItem, shareReceipt, orderCode, canOpen, OR
 const FIL = [["all", "Tất cả"], ["paid", "Thành công"], ["pending", "Đang xử lý"], ["refunded", "Đã hoàn tiền"]];
 export function mount(ctx) {
   startShop();
-  ctx.setPage({ title: "Lịch sử mua hàng", sub: "Các đơn bạn đã mua: xem trực tiếp, tải file về hoặc chia sẻ.", noindex: true, crumbs: [{ label: "Cửa hàng", href: "/" }] });
-  ctx.el.innerHTML = `<div class="chips" id="odF" role="tablist">${FIL.map(([v, l], i) => `<button type="button" role="tab" data-f="${v}" class="${i ? "" : "on"}">${l}</button>`).join("")}</div><div id="odL" class="od-list"><div class="statebox sm"><p>Đang tải…</p></div></div>`;
+  ctx.setPage({ title: "Lịch sử mua hàng", sub: "Các đơn bạn đã mua: xem trực tiếp, tải file về hoặc chia sẻ.", noindex: true, crumbs: [{ label: "Cửa hàng", href: "/shop" }] });
+  ctx.el.innerHTML = `<div class="chips" id="odF" role="tablist">${FIL.map(([v, l], i) => `<button type="button" role="tab" data-f="${v}" class="${i ? "" : "on"}">${l}</button>`).join("")}</div><div id="odL" class="od-list"><div class="ld-row"><span class="ld-spin" aria-hidden="true"></span><span>Đang tải…</span></div></div>`;
   const list = ctx.el.querySelector("#odL"); let f = "all", shown = false;
   const find = id => (shop.orders || []).find(o => o.id === id);
   const draw = () => {
@@ -20,7 +20,7 @@ export function mount(ctx) {
           return `<li data-i="${esc(i.id)}"><div class="od-it"><span translate="no">${esc(i.name)}</span><em>× ${i.qty}</em><span>${money(i.price * i.qty)}</span></div>
             <div class="od-acts">${ok ? `<button class="btn primary sm" type="button" data-live>${ICO.eye}Xem trực tiếp</button><button class="btn soft sm" type="button" data-dl>${ICO.download2}Tải file về</button>` : manual ? `<span class="oi-wait">${ICO.info}Chờ dev giao tay qua Hộp thư</span>` : ""}<button class="btn ghost sm" type="button" data-share>${ICO.share}Chia sẻ</button></div></li>`; }).join("")}</ul>
         <footer class="od-f"><button class="btn ghost sm" type="button" data-detail>${ICO.receipt}Chi tiết đơn</button></footer></article>`; }).join("")
-      : `<div class="statebox">${ICO.receipt}<p>${all.length ? "Không có đơn nào ở trạng thái này." : "Bạn chưa mua gì. Hãy xem cửa hàng nhé!"}</p>${all.length ? "" : '<a class="btn primary" href="/">Đến cửa hàng</a>'}</div>`;
+      : `<div class="statebox">${ICO.receipt}<p>${all.length ? "Không có đơn nào ở trạng thái này." : "Bạn chưa mua gì. Hãy xem cửa hàng nhé!"}</p>${all.length ? "" : '<a class="btn primary" href="/shop">Đến cửa hàng</a>'}</div>`;
     if (!shown) { shown = true; const id = ctx.query.get("o"), o = id && find(id); if (o) openOrder(o); }
   };
   list.addEventListener("click", e => {

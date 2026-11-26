@@ -128,14 +128,13 @@ function loadPuter() {
   puterP = new Promise((res, rej) => {
     const s = document.createElement("script"); s.src = "https://js.puter.com/v2/"; s.async = true;
     const fail = e => { puterP = null; s.remove(); rej(e); };
-    const t = setTimeout(() => fail(new Error("timeout")), 15000);
-    s.onload = () => { clearTimeout(t); window.puter && window.puter.ai ? res(window.puter) : fail(new Error("puter")); };
-    s.onerror = () => { clearTimeout(t); fail(new Error("load")); };
+    s.onload = () => { window.puter && window.puter.ai ? res(window.puter) : fail(new Error("puter")); };
+    s.onerror = () => { fail(new Error("load")); };
     document.head.appendChild(s);
   });
   return puterP;
 }
-const SYS = "You are Skias, the friendly assistant of the website Skibidi Web (also called Skibidi Shop): a digital shop where users top up a wallet by bank transfer (VietQR) and buy products delivered instantly in their order, plus a free content library. Answer briefly and kindly in the same language as the user (Vietnamese or English). You may use simple Markdown (bold, short lists). Speak plainly: do not use technical jargon (no talk of databases, servers, APIs, tokens, code or developer tools). Never ask for passwords or one-time codes, and never reveal or guess other people's information.";
+const SYS = "You are Skias, the friendly assistant of the website Skibidi Web (also called Skibidi Shop): a digital shop where users top up a wallet by bank transfer (the admin sends a QR code for each top-up invoice, minimum 2,000 VND, processed manually) and buy products delivered instantly in their order, plus a free content library. Answer briefly and kindly in the same language as the user (Vietnamese or English). You may use simple Markdown (bold, short lists). Speak plainly: do not use technical jargon (no talk of databases, servers, APIs, tokens, code or developer tools). Never ask for passwords or one-time codes, and never reveal or guess other people's information.";
 const textOf = r => { if (r == null) return ""; if (typeof r === "string") return r; const c = r.message ? r.message.content : r.content != null ? r.content : r.text; if (typeof c === "string") return c; if (Array.isArray(c)) return c.map(x => (typeof x === "string" ? x : x && x.text) || "").join(""); return typeof r.toString === "function" && r.toString !== Object.prototype.toString ? String(r) : ""; };
 async function askAI(text) {
   const j = begin(L("Skias AI đang nghĩ…", "Skias AI is thinking…")), ty = typing(); j.onStop = () => ty.remove(); setState("think");
@@ -143,8 +142,8 @@ async function askAI(text) {
   try {
     const p = await loadPuter();
     if (!alive(j)) return;
-    const msgs = [{ role: "system", content: SYS }].concat(hist.slice(-8), [{ role: "user", content: text }]);
-    out = textOf(await Promise.race([p.ai.chat(msgs), new Promise((_, rj) => setTimeout(() => rj(new Error("timeout")), 60000))])).trim();
+    const msgs = [{ role: "system", content: SYS }].concat(hist, [{ role: "user", content: text }]); /* không giới hạn thời gian trả lời và không cắt lịch sử: chờ bao lâu cũng được, nút Dừng luôn ở đó */
+    out = textOf(await p.ai.chat(msgs)).trim();
     if (!out) throw new Error("empty");
   } catch (e) {
     if (!alive(j)) return;
@@ -280,7 +279,7 @@ export function initSkias() {
       <div class="sk-modes" role="group" data-m="auto"><i class="sk-pill" aria-hidden="true"></i><button type="button" class="sk-mode sk-auto on"></button><button type="button" class="sk-mode sk-ai locked"></button></div>
       <div class="sk-logwrap"><div class="sk-log" role="log" aria-live="polite"></div><button class="sk-down" type="button" hidden>${ICON.down}</button></div>
       <div class="sk-chips" hidden></div>
-      <form class="sk-form" novalidate><input class="sk-in" type="text" maxlength="300" autocomplete="off" enterkeyhint="send"><button class="sk-send" type="button"></button></form>
+      <form class="sk-form" novalidate><input class="sk-in" type="text" maxlength="20000" autocomplete="off" enterkeyhint="send"><button class="sk-send" type="button"></button></form>
     </section>
     <div class="sk-bubble" role="status" hidden></div>
     <button class="sk-fig" type="button" aria-haspopup="dialog" aria-expanded="false">${FIG}${CLOUD}</button>`;

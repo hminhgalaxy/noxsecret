@@ -150,52 +150,11 @@
 .dv-wait svg{width:17px;height:17px;flex:none;margin-top:2px;color:var(--acc)}
 
 /* ── Popup Nạp tiền ── */
-.tp{display:flex;flex-direction:column;gap:14px}
-.tp-method{display:grid;grid-template-columns:44px minmax(0,1fr) 26px;gap:12px;align-items:center;text-align:left;padding:12px 14px;border-radius:var(--r-md);border:1.5px solid var(--acc);background:color-mix(in srgb,var(--acc) 9%,var(--surface))}
-.tp-m-ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--acc-grad);color:#0a0a0a}
-.tp-m-ico svg{width:22px;height:22px}
-.tp-m-txt{display:flex;flex-direction:column;min-width:0}.tp-m-txt small{color:var(--text-2);font-size:12.5px}
-.tp-m-tick{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#0a0a0a}.tp-m-tick svg{width:14px;height:14px}
-.tp-lab{margin:0;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
-.tp-amts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.tp-amt{height:46px;border-radius:var(--r-md);border:1px solid var(--line-strong);background:var(--surface);font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;transition:transform .3s var(--spring),background .2s,border-color .2s}
-.tp-amt:hover{border-color:var(--text-3)}.tp-amt:active{transform:scale(.96)}
-.tp-amt.on{background:var(--strong);color:var(--on-strong);border-color:var(--strong)}
-.tp-inp{display:flex;flex-direction:column;gap:6px}
-.tp-box{position:relative;display:flex;align-items:center}
-.tp-box input{width:100%;height:48px;padding:0 40px 0 16px;border-radius:var(--r-md);border:1px solid var(--line-strong);background:var(--surface);color:var(--text);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;outline:0;transition:border-color .2s,box-shadow .2s}
-.tp-box input:focus{border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 16%,transparent)}
-.tp-box i{position:absolute;right:16px;font-style:normal;color:var(--text-3);font-weight:700;pointer-events:none}
-.tp-hint{margin:0;color:var(--text-3);font-size:12.5px}
-.tp-err{margin:0;min-height:0}
-.tp2{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:18px;align-items:start}
-.tp-qrwrap{display:flex;flex-direction:column;align-items:center;gap:8px}
-.tp-qr{width:min(260px,100%);aspect-ratio:1;border-radius:var(--r-lg);overflow:hidden;background:#fff;padding:6px;border:1px solid var(--line-strong)}
-.tp-qr svg{display:block;width:100%;height:100%}
-.tp-scan{margin:0;color:var(--text-2);font-size:13px;text-align:center}
-.tp-info{display:flex;flex-direction:column;gap:12px;min-width:0}
-.tp-amount{display:flex;flex-direction:column;padding:12px 14px;border-radius:var(--r-md);background:var(--surface-2)}
-.tp-amount small{color:var(--text-3);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.tp-amount b{font-size:26px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.tp-dl{margin:0;display:flex;flex-direction:column;gap:2px}
-.tp-dl>div{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px solid var(--line);min-width:0}
-.tp-dl>div:last-child{border-bottom:0}
-.tp-dl dt{font-size:12px;color:var(--text-3);font-weight:700}
-.tp-dl dd{margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;overflow-wrap:anywhere}
-.tp-dl code{font-size:15px;letter-spacing:.02em}
-.tp-dl .hot{padding:10px 12px;margin-top:4px;border:1.5px dashed var(--acc);border-radius:var(--r-md);background:color-mix(in srgb,var(--acc) 8%,transparent)}
-.tp-dl .hot code{font-size:18px;color:var(--acc);font-weight:900}
-.tp-wait{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:0;padding:12px 14px;border-radius:var(--r-md);background:var(--surface-2);color:var(--text-2);font-size:13.5px}
-.tp-spin{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--line-strong);border-top-color:var(--acc);flex:none;animation:spin .8s linear infinite}
-.tp-note{grid-column:1/-1;display:flex;gap:8px;margin:0;color:var(--text-3);font-size:12.5px;line-height:1.5}
-.tp-note svg{width:16px;height:16px;flex:none;margin-top:1px}
-.tp2 .form-acts{grid-column:1/-1}
 .tp-ok{align-items:center;text-align:center;padding:10px 0}
 .tp-ok h3{margin:0;font-size:20px}.tp-ok p{margin:0;color:var(--text-2)}
 .tp-okico{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:var(--ok);color:#0a0a0a;animation:pop .6s var(--spring)}
 .tp-okico svg{width:30px;height:30px}
 .tp-got{font-size:30px!important;font-weight:900;letter-spacing:-.04em;color:var(--ok)!important}
-@media(max-width:560px){.tp2{grid-template-columns:minmax(0,1fr)}.tp-qr{width:min(240px,72vw)}.tp-amts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* ── Trang Ví ── */
 .wl-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 20px;align-items:center;padding:clamp(16px,3.4vw,26px);border-radius:var(--r-xl);border:1px solid color-mix(in srgb,var(--acc) 28%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 12%,var(--surface)),color-mix(in srgb,var(--acc-2) 8%,var(--surface)))}
